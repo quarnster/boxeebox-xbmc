@@ -1,0 +1,269 @@
+set -x
+
+export HOST=x86_64-apple-darwin12.3.0
+export TOOLCHAINROOT=/Volumes/skivavbild/x-tools
+export DESTINATION=/Volumes/media/xbmc/
+export BOXEE_WORKING_DIR=/Users/quarnster/code/3rdparty/boxee/build
+
+export PYTHON_VERSION=2.7.5
+export TARGET=i686-nptl-linux-gnu
+export TOOLCHAIN=$TOOLCHAINROOT/$TARGET
+export SYSROOT=$TOOLCHAIN/$TARGET/sysroot
+export PREFIX=$SYSROOT/usr
+export PATH=$TOOLCHAIN/bin:$PATH
+export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
+export PKG_CONFIG_SYSROOT_DIR=$TOOLCHAIN/$TARGET
+
+function basic_dl {
+  F=`basename ${1/%\/download/}`
+	D=`echo $F | sed s/.tar.bz2// | sed s/.tar.gz//`
+	cd $BOXEE_WORKING_DIR
+	curl -o $F -L $1
+	tar xfj $F
+	mkdir -p build/$D
+	cd build/$D
+	$BOXEE_WORKING_DIR/$D/configure --host=$TARGET --prefix=$PREFIX --enable-shared --disable-static
+	make -j8 install
+}
+
+echo "
+#!/bin/bash
+
+set -e
+export PKG_CONFIG_DIR=
+export PKG_CONFIG_LIBDIR=${SYSROOT}/usr/lib/pkgconfig:${SYSROOT}/usr/share/pkgconfig
+export PKG_CONFIG_SYSROOT_DIR=${SYSROOT}
+
+exec pkg-config \"\$@\" | python -c \"import sys; print sys.stdin.read().replace('${SYSROOT}${SYSROOT}', '${SYSROOT}'),\" && test \${PIPESTATUS[0]} -eq 0
+" > $TOOLCHAIN/bin/$TARGET-pkg-config
+chmod +x $TOOLCHAIN/bin/$TARGET-pkg-config
+$TARGET-pkg-config --exists freetype && ls
+$TARGET-pkg-config --exists freetype2 && ls
+
+mkdir -p $BOXEE_WORKING_DIR
+
+cd $BOXEE_WORKING_DIR
+curl -O http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
+tar xfz bzip2-1.0.6.tar.gz
+cd bzip2-1.0.6
+cat Makefile | sed s/CC=gcc/CC=$TARGET-gcc/ | sed s/RANLIB=ranlib/RANLIB=$TARGET-ranlib/ | sed s/PREFIX=/OLDPREFIX=/ > tmp
+mv tmp Makefile
+make install
+
+basic_dl http://www.oberhumer.com/opensource/lzo/download/lzo-2.06.tar.gz
+
+cd $BOXEE_WORKING_DIR
+curl -O http://zlib.net/zlib-1.2.8.tar.gz
+tar xfz zlib-1.2.8.tar.gz
+cd zlib-1.2.8
+CROSS_PREFIX=$TARGET AR=$TARGET-ar CC=$TARGET-gcc ./configure --uname=Linux --prefix=$PREFIX
+make install
+
+
+cd $BOXEE_WORKING_DIR
+curl -O http://www.openssl.org/source/openssl-1.0.1e.tar.gz
+tar xfz openssl-1.0.1e.tar.gz
+cd openssl-1.0.1e
+CC=$TARGET-gcc RANLIB=$TARGET-ranlib AR=$TARGET-ar INSTALL_PREFIX=$PREFIX ./Configure linux-elf --openssldir=/ 
+make install
+
+basic_dl http://download.osgeo.org/libtiff/tiff-4.0.3.tar.gz
+
+cd $BOXEE_WORKING_DIR
+curl -O http://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.bz2
+tar xfj Python-$PYTHON_VERSION.tar.bz2
+mkdir -p build/python
+cd build/python
+$BOXEE_WORKING_DIR/Python-$PYTHON_VERSION/configure
+make Parser/pgen python.exe
+mv python.exe python2.7
+mv Parser/pgen Parser/hostpgen
+make distclean
+echo "ac_cv_file__dev_ptmx=no
+ac_cv_file__dev_ptc=no" > config.site
+CONFIG_SITE=config.site $BOXEE_WORKING_DIR/Python-$PYTHON_VERSION/configure --build=x86_64-apple-darwin12.3.0 --host=$TARGET --prefix=$PREFIX --disable-ipv6 --enable-shared
+rm -f Include/graminit.h
+rm -f Python/graminit.c
+Parser/hostpgen $BOXEE_WORKING_DIR/Python-$PYTHON_VERSION/Grammar/Grammar Include/graminit.h Python/graminit.c
+PATH=.:$PATH make -j8 install
+
+
+basic_dl http://sourceforge.net/projects/expat/files/expat/2.1.0/expat-2.1.0.tar.gz/download
+
+cd $BOXEE_WORKING_DIR
+curl -o yayl.tar.gz -L http://github.com/lloyd/yajl/tarball/2.0.1
+tar xfz yayl.tar.gz
+mkdir -p build/yayl
+cd build/yayl
+CC=$TARGET-gcc RANLIB=$TARGET-ranlib cmake -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_INSTALL_PREFIX=$PREFIX $BOXEE_WORKING_DIR/lloyd-yajl-f4b2b1a/
+make -j8 install
+
+cd $BOXEE_WORKING_DIR
+curl -o tinyxml.tar.gz -L http://sourceforge.net/projects/tinyxml/files/tinyxml/2.6.2/tinyxml_2_6_2.tar.gz/download
+tar xfz tinyxml.tar.gz
+cd tinyxml
+make CXX=$TARGET-g++ LD=$TARGET-g++ CXXFLAGS=-DTIXML_USE_STL
+$TARGET-ar r libtinyxml.a *.o
+cp libtinyxml.a $PREFIX/lib/
+cp tinyxml.h $PREFIX/include
+cp tinystr.h $PREFIX/include
+
+
+
+basic_dl http://www.sqlite.org/2013/sqlite-autoconf-3071700.tar.gz
+basic_dl http://ftp.gnu.org/gnu/libcdio/libcdio-0.90.tar.gz
+
+cd $BOXEE_WORKING_DIR
+curl -O http://taglib.github.io/releases/taglib-1.8.tar.gz
+tar xfz taglib-1.8.tar.gz
+mkdir -p build/taglib
+cd build/taglib
+CC=$TARGET-gcc RANLIB=$TARGET-ranlib cmake -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_INSTALL_PREFIX=$PREFIX -DZLIB_ROOT=$PREFIX $BOXEE_WORKING_DIR/taglib-1.8
+make -j8 install
+
+basic_dl http://sourceforge.net/projects/libpng/files/libpng16/1.6.3/libpng-1.6.3.tar.gz/download
+basic_dl http://sourceforge.net/projects/pcre/files/pcre/8.33/pcre-8.33.tar.bz2/download
+
+cd $BOXEE_WORKING_DIR
+curl -O http://www.ece.uvic.ca/~frodo/jasper/software/jasper-1.900.1.zip
+unzip jasper-1.900.1.zip
+mkdir -p build/jasper
+cd build/jasper
+$BOXEE_WORKING_DIR/jasper-1.900.1/configure --host=$TARGET --prefix=$PREFIX --enable-shared --disable-static
+make -j8 install
+
+basic_dl ftp://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.28.tar.gz
+
+cd $BOXEE_WORKING_DIR
+curl -o freetype2.tar.bz2 -L http://sourceforge.net/projects/freetype/files/freetype2/2.5.0/freetype-2.5.0.1.tar.bz2/download
+tar xfj freetype2.tar.bz2
+mkdir -p build/freetype2
+cd build/freetype2/
+$BOXEE_WORKING_DIR/freetype-2.5.0.1/configure --host=$TARGET --prefix=$PREFIX --enable-shared --disable-static
+make -j8
+make install
+
+basic_dl http://fribidi.org/download/fribidi-0.19.5.tar.bz2
+FREETYPE_LIBS=`$TARGET-pkg-config --libs freetype2 libpng` basic_dl http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.10.93.tar.bz2
+
+cd $BOXEE_WORKING_DIR
+curl -o libmad.tar.gz -L http://sourceforge.net/projects/mad/files/libmad/0.15.1b/libmad-0.15.1b.tar.gz/download
+tar xfz libmad.tar.gz
+mkdir -p build/libmad
+cd build/libmad
+cat $BOXEE_WORKING_DIR/libmad-0.15.1b/configure | sed s/-fforce-mem//g > tmp
+chmod +x tmp
+mv tmp $BOXEE_WORKING_DIR/libmad-0.15.1b/configure
+$BOXEE_WORKING_DIR/libmad-0.15.1b/configure --host=$TARGET --prefix=$PREFIX --enable-shared
+make -j8 install
+
+cd $BOXEE_WORKING_DIR
+curl -o libjpeg.tar.gz -L http://sourceforge.net/projects/libjpeg/files/libjpeg/6b/jpegsrc.v6b.tar.gz/download
+tar xfz libjpeg.tar.gz
+mkdir -p build/libjpeg
+cd build/libjpeg
+ac_cv_c_const=yes RANLIB=$TARGET-ranlib CC=$TARGET-g++ $BOXEE_WORKING_DIR/jpeg-6b/configure --host=$TARGET --prefix=$PREFIX
+mkdir -p $PREFIX/man/man1/
+make -j8 install-lib
+
+basic_dl http://www.fftw.org/fftw-3.3.3.tar.gz
+basic_dl http://www.mega-nerd.com/SRC/libsamplerate-0.1.8.tar.gz
+basic_dl http://downloads.xiph.org/releases/ogg/libogg-1.3.1.tar.gz
+basic_dl http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.3.tar.gz
+
+cd $BOXEE_WORKING_DIR
+curl -O http://downloads.xiph.org/releases/flac/flac-1.2.1.tar.gz
+tar xfz flac-1.2.1.tar.gz
+mkdir -p build/flac
+cd build/flac
+$BOXEE_WORKING_DIR/flac-1.2.1/configure --host=$TARGET --prefix=$PREFIX --disable-oggtest --disable-xmms-plugin --enable-shared --disable-static
+make -C src install -j8
+make -C include install -j8
+
+basic_dl http://curl.haxx.se/download/curl-7.31.0.tar.bz2
+basic_dl http://downloads.xiph.org/releases/ao/libao-1.1.0.tar.gz
+basic_dl http://downloads.xiph.org/releases/vorbis/vorbis-tools-1.4.0.tar.gz
+basic_dl https://libass.googlecode.com/files/libass-0.10.1.tar.gz
+basic_dl http://libmpeg2.sourceforge.net/files/libmpeg2-0.5.1.tar.gz
+basic_dl http://sourceforge.net/projects/modplug-xmms/files/libmodplug/0.8.8.4/libmodplug-0.8.8.4.tar.gz/download
+basic_dl ftp://ftp.gnupg.org/gcrypt/libgpg-error/libgpg-error-1.12.tar.bz2
+
+cd $BOXEE_WORKING_DIR
+curl -O ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.5.3.tar.bz2
+tar xfz libgcrypt-1.5.3.tar.bz2
+mkdir -p build/libgcrypt
+cd build/libgcrypt
+GPG_ERROR_CONFIG=$PREFIX/bin/gpg-error-config $BOXEE_WORKING_DIR/libgcrypt-1.5.3/configure --host=$TARGET --prefix=$PREFIX  --disable-asm --enable-shared --disable-static
+make -j8 install
+
+cd $BOXEE_WORKING_DIR
+curl -O http://www.libssh.org/files/0.5/libssh-0.5.3.tar.gz
+tar xfz libssh-0.5.3.tar.gz
+mkdir -p build/libssh
+cd build/libssh
+CC=$TARGET-gcc RANLIB=$TARGET-ranlib cmake -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_INSTALL_PREFIX=$PREFIX -DZLIB_LIBRARIES=$PREFIX/lib/libz.so -DZLIB_INCLUDE_DIRS=$PREFIX/include -DWITH_STATIC_LIB=ON -DCMAKE_SHARED_LINKER_FLAGS=-ldl $BOXEE_WORKING_DIR/libssh-0.5.3 -DPKG_CONFIG_EXECUTABLE=$TARGET-pkg-config
+make -j8 install
+
+
+cd $BOXEE_WORKING_DIR
+curl -o ffmpeg.tar.bz2 -L http://ffmpeg.org/releases/ffmpeg-1.2.2.tar.bz2
+tar xfj ffmpeg.tar.bz2
+mkdir -p build/ffmpeg
+cd build/ffmpeg
+$BOXEE_WORKING_DIR/ffmpeg-1.2.2/configure --cross-prefix=$TARGET- --enable-cross-compile --sysroot=$TOOLCHAIN/$TARGET/sysroot --target-os=linux --arch=i686 --prefix=$PREFIX --enable-shared --disable-static --disable-programs --enable-gpl
+make -j8 install
+
+cd $BOXEE_WORKING_DIR
+mkdir -p $PREFIX/include/EGL/
+curl -o $PREFIX/include/EGL/egl.h -L http://www.khronos.org/registry/egl/api/EGL/egl.h
+curl -o $PREFIX/include/EGL/eglext.h -L http://www.khronos.org/registry/egl/api/EGL/eglext.h
+echo "
+#pragma once
+#define EGLAPI
+#define EGLAPIENTRY
+typedef int NativeDisplayType;
+typedef void *NativeWindowType;
+typedef void *NativePixmapType;
+
+typedef NativeDisplayType EGLNativeDisplayType;
+typedef NativePixmapType  EGLNativePixmapType;
+typedef NativeWindowType  EGLNativeWindowType;
+typedef int EGLint;
+" > $PREFIX/include/EGL/eglplatform.h
+
+mkdir -p $PREFIX/include/GLES2
+curl -o $PREFIX/include/GLES2/gl2.h -L http://www.khronos.org/registry/gles/api/2.0/gl2.h
+curl -o $PREFIX/include/GLES2/gl2ext.h -L http://www.khronos.org/registry/gles/api/2.0/gl2ext.h
+curl -o $PREFIX/include/GLES2/gl2platform.h -L http://www.khronos.org/registry/gles/api/2.0/gl2platform.h
+
+
+cat $PREFIX/include/EGL/egl.h | python -c "import sys, re; print '#include <EGL/egl.h>\n%s' % '\n'.join(['%s {}' %x for x in re.compile(r'^(EGLAPI\s[^;]+);', re.M).findall(sys.stdin.read())])" > libEGL.c
+$TARGET-gcc -DWL_EGL_PLATFORM -shared -o $PREFIX/lib/libEGL.so libEGL.c
+cat $PREFIX/include/GLES2/gl2.h | python -c "import sys, re; print '#include <GLES2/gl2.h>\n%s' % '\n'.join(['%s {}' %x for x in re.compile(r'^(GL_APICALL\s[^;]+);', re.M).findall(sys.stdin.read())])" > libGLESv2.c
+$TARGET-gcc -DWL_EGL_PLATFORM -shared -o $PREFIX/lib/libGLESv2.so libGLESv2.c
+
+
+cd $BOXEE_WORKING_DIR
+curl -L -o boost.tar.bz2 http://sourceforge.net/projects/boost/files/boost/1.54.0/boost_1_54_0.tar.bz2/download
+tar xfj boost.tar.bz2
+cd boost_1_54_0
+echo "using gcc : i686 : $TARGET-g++ ;" > ./tools/build/v2/user-config.jam
+./bootstrap.sh --prefix=$PREFIX
+./b2 toolset=gcc-i686 target-os=linux link=static install
+
+cd $BOXEE_WORKING_DIR
+curl -o xbmc-12.2.tar.gz -L http://mirrors.xbmc.org/releases/source/xbmc-12.2.tar.gz
+tar xfj xbmc-12.2.tar.gz
+cd xbmc-12.2
+CFLAGS="-DTARGET_BOXEE=1 -DTIXML_USE_STL" CXXFLAGS="-DTARGET_BOXEE=1 -DTIXML_USE_STL" FREETYPE2_CFLAGS="-I$PREFIX/include/freetype2" PYTHON_NOVERSIONCHECK=y PYTHON=$PREFIX/bin/python PYTHON_CPPFLAGS="-I$PREFIX/include/python2.7" PYTHON_LDFLAGS="`i686-nptl-linux-gnu-pkg-config --libs python`" ./configure --prefix=$PREFIX --host=$TARGET --disable-gl --disable-sdl --disable-mysql --disable-x11 --disable-samba  --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick
+make -j8 -k
+make 
+
+
+# mkdir -p $DESTINATION
+# pv -p xbmc.bin > $DESTINATION/xbmc.bin
+# python -c "import os,re;  os.system('\n'.join(filter(lambda a: re.match(r'.*\.so(\.\d+)*\$', a), ['pv $PREFIX/lib/%s > $DESTINATION/%s' % (a, os.path.basename(a)) for a in os.listdir('$PREFIX/lib')])))"
+# python -c "import os,re;  os.system('\n'.join(filter(lambda a: re.match(r'.*\.so(\.\d+)*\$', a), ['pv $TOOLCHAIN/$TARGET/lib/%s > $DESTINATION/%s' % (a, os.path.basename(a)) for a in os.listdir('$TOOLCHAIN/$TARGET/lib')])))"
+
+
+# LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD ./xbmc.bin
