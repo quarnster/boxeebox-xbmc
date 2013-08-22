@@ -71,3 +71,15 @@ ExternalProject_Add(
 	BUILD_COMMAND 		make ${PARALLEL}
 	DEPENDS 			glibc
 )
+
+file(WRITE "${SYSROOT}/usr/bin/${TARGET}-pkg-config" "
+#!/bin/bash
+
+set -e
+export PKG_CONFIG_DIR=
+export PKG_CONFIG_LIBDIR=${SYSROOT}/usr/lib/pkgconfig:${SYSROOT}/usr/share/pkgconfig:${SYSROOT}/usr/local/lib/pkgconfig:${SYSROOT}/usr/local/share/pkgconfig
+export PKG_CONFIG_SYSROOT_DIR=${SYSROOT}
+
+exec pkg-config \"\$@\" | python -c \"import sys; print sys.stdin.read().replace('${SYSROOT}${SYSROOT}', '${SYSROOT}'),\" && test \${PIPESTATUS[0]} -eq 0
+")
+execute_process(COMMAND chmod +x ${SYSROOT}/usr/bin/${TARGET}-pkg-config)
