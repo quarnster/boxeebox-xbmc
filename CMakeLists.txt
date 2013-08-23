@@ -37,3 +37,12 @@ ExternalProject_Add(
 	DEPENDS				toolchain
 )
 
+ExternalProject_Add(
+	xbmc
+	URL 				${CMAKE_SOURCE_DIR}/xbmc
+	CMAKE_COMMAND 		PATH=$ENV{PATH}:${SYSROOT}/usr/bin cmake
+	CMAKE_ARGS			-DSYSROOT=${SYSROOT} -DPARALLEL=${PARALLEL}
+	BUILD_COMMAND 		PATH=$ENV{PATH}:${SYSROOT}/usr/bin make
+	INSTALL_COMMAND		""
+	DEPENDS				libs
+)
