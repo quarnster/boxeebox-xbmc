@@ -6,12 +6,19 @@ set(TARGET_DIR ${SYSROOT}/usr/local)
 set(BASIC_CONF <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-static --disable-nls)
 set(BASIC_CMAKE CFLAGS=-I${TARGET_DIR}/include CC=${TARGET}-gcc CXX=${TARGET}-g++ RANLIB=${TARGET}-ranlib cmake -DPKG_CONFIG_EXECUTABLE=${TARGET}-pkg-config -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_INSTALL_PREFIX=${TARGET_DIR} -DZLIB_ROOT=${SYSROOT}/usr -DZLIB_LIBRARIES=${SYSROOT}/usr/lib/libz.so -DZLIB_INCLUDE_DIRS=${SYSROOT}/usr/include <SOURCE_DIR>)
 set(PARALLEL -j8)
+
+set(PYTHON_VERSION 2.7.2)
+
 string(REGEX MATCH ${SYSROOT}/usr/bin SRPATH $ENV{PATH})
+
 if(NOT SRPATH)
 	message(FATAL_ERROR "${SYSROOT}/usr/bin must be in your path")
 endif()
 
 set(PARALLEL -j8)
+
+execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpmachine OUTPUT_VARIABLE HOSTMACHINE)
+string(REPLACE "\n" "" HOSTMACHINE ${HOSTMACHINE})
 
 include(ExternalProject)
 
@@ -19,8 +26,7 @@ ExternalProject_Add(
 	bzip2
 	URL					http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
 	URL_MD5				00b516f4704d4a7cb50a1d97e6e8e15b
-	PATCH_COMMAND		cat Makefile | sed s,CC=gcc,CC=${TARGET}-gcc, | sed s,RANLIB=ranlib,RANLIB=${TARGET}-ranlib, | sed s,PREFIX=/usr/local,PREFIX=${TARGET_DIR},g > tmp
-		COMMAND 		${CMAKE_COMMAND} -E copy tmp Makefile
+	PATCH_COMMAND		sed -e "s,CC=gcc,CC=${TARGET}-gcc," -e "s,RANLIB=ranlib,RANLIB=${TARGET}-ranlib," -e "s,PREFIX=/usr/local,PREFIX=${TARGET_DIR},g" -i Makefile
 	CONFIGURE_COMMAND	""
 	BUILD_COMMAND		""
 	INSTALL_COMMAND		make install
@@ -46,7 +52,7 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	openssl
-	URL 				http://www.openssl.org/source/openssl-1.0.1e.tar.gz
+	URL 				ftp://ftp.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.0.1e.tar.gz
 	URL_MD5 			66bf6f10f060d561929de96f9dfe5b8c
 	CONFIGURE_COMMAND 	CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib AR=${TARGET}-ar INSTALL_PREFIX=${TARGET_DIR} <SOURCE_DIR>/Configure linux-elf --openssldir=/ 
 	DEPENDS zlib
@@ -60,28 +66,13 @@ ExternalProject_Add(
 	CONFIGURE_COMMAND	${BASIC_CONF}
 )	
 
-# ExternalProject_Add(
-# 	python
-# 	URL 				http://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.bz2
-# 	URL_MD5 			0 
-# 	CONFIGURE_COMMAND 	$BOXEE_WORKING_DIR/Python-$PYTHON_VERSION/configure
-# 		COMMAND make Parser/pgen python.exe
-# 		COMMAND mv python.exe python2.7
-# 		COMMAND mv Parser/pgen Parser/hostpgen
-# 		COMMAND make distclean
-# 		COMMAND ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no ${BASIC_CONF}
-# 		COMMAND rm -f Include/graminit.h
-# 		COMMAND rm -f Python/graminit.c
-# 		COMMAND Parser/hostpgen $BOXEE_WORKING_DIR/Python-$PYTHON_VERSION/Grammar/Grammar Include/graminit.h Python/graminit.c
-# )
 
 
 ExternalProject_Add(
 	flex
 	URL 				http://sourceforge.net/projects/flex/files/flex-2.5.37.tar.bz2/download
 	URL_MD5 			c75940e1fc25108f2a7b3ef42abdae06
-	PATCH_COMMAND 		cat Makefile.in | sed s/AR\ =\ ar/AR\ =\ ${TARGET}-ar/g > Makefile.new
-		COMMAND ${CMAKE_COMMAND} -E copy Makefile.new Makefile.in 
+	PATCH_COMMAND 		sed -e "s/AR\ =\ ar/AR\ =\ ${TARGET}-ar/g" -i Makefile.in
 	CONFIGURE_COMMAND	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 )
@@ -178,11 +169,8 @@ ExternalProject_Add(
 	gdbm
 	URL 				ftp://ftp.gnu.org/gnu/gdbm/gdbm-1.8.3.tar.gz
 	URL_MD5 			1d1b1d5c0245b1c00aff92da751e9aa1
-	PATCH_COMMAND		cat configure | sed s,finish_cmds=.*,,g > configure.new
-		COMMAND 		${CMAKE_COMMAND} -E copy configure.new configure
-		COMMAND 		chmod +x configure
-		COMMAND 		cat Makefile.in | sed "s,-o .(BINOWN) -g .(BINGRP),,g" > Makefile.in.new
-		COMMAND 		${CMAKE_COMMAND} -E copy Makefile.in.new Makefile.in
+	PATCH_COMMAND		sed -e "s,finish_cmds=.*,,g" -i configure
+		COMMAND 		sed -e "s,-o .(BINOWN) -g .(BINGRP),,g" -i Makefile.in
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 )
 
@@ -206,9 +194,7 @@ ExternalProject_Add(
 	libmad
 	URL 				http://sourceforge.net/projects/mad/files/libmad/0.15.1b/libmad-0.15.1b.tar.gz/download
 	URL_MD5 			1be543bc30c56fb6bea1d7bf6a64e66c
-	PATCH_COMMAND 		cat configure | sed s/-fforce-mem//g > tmp
-		COMMAND 		chmod +x tmp
-		COMMAND 		${CMAKE_COMMAND} -E rename tmp configure
+	PATCH_COMMAND 		sed -e "s/-fforce-mem//g" -i configure
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 )
 
@@ -216,9 +202,7 @@ ExternalProject_Add(
 	libjpeg
 	URL 				http://sourceforge.net/projects/libjpeg/files/libjpeg/6b/jpegsrc.v6b.tar.gz/download
 	URL_MD5 			dbd5f3b47ed13132f04c685d608a7547
-	PATCH_COMMAND 		cat configure | sed s/-fforce-mem//g > tmp
-		COMMAND 		chmod +x tmp
-		COMMAND 		${CMAKE_COMMAND} -E rename tmp configure
+	PATCH_COMMAND 		sed -e "s/-fforce-mem//g" -i configure
 	CONFIGURE_COMMAND 	ac_cv_c_const=yes RANLIB=${TARGET}-ranlib CC=${TARGET}-g++ <SOURCE_DIR>/configure --host=${TARGET} --prefix=${TARGET_DIR}
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND		mkdir -p ${TARGET_DIR}/man/man1/
@@ -276,6 +260,7 @@ ExternalProject_Add(
 	URL_MD5 			b7bea20579ac2f696338ae03f2c19ba5
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
+	DEPENDS openssl zlib bzip2
 )
 
 ExternalProject_Add(
@@ -332,12 +317,34 @@ ExternalProject_Add(
 	libssh
 	URL 				http://www.libssh.org/files/0.5/libssh-0.5.3.tar.gz
 	URL_MD5 			9ad01838d3b89d98e900e0f6260a88cc
-	PATCH_COMMAND 		cat CMakeLists.txt | sed s,add_subdirectory\(examples\),,g > CMakeLists.new
-		COMMAND 		${CMAKE_COMMAND} -E copy CMakeLists.new CMakeLists.txt
+	PATCH_COMMAND 		sed -e "s,add_subdirectory\(examples\),,g" -i CMakeLists.txt
 	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DWITH_STATIC_LIB=ON -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND 	make install
 	DEPENDS libgcrypt openssl
+)
+
+ExternalProject_Add(
+	python
+	URL 				http://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.bz2
+	URL_MD5 			ba7b2f11ffdbf195ee0d111b9455a5bd
+	PATCH_COMMAND 	<SOURCE_DIR>/configure
+		COMMAND make -j8 Parser/pgen python
+		COMMAND mv python hostpython
+		COMMAND mv Parser/pgen Parser/hostpgen
+		COMMAND make distclean
+		COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/Python-2.7.2-xcompile.patch
+		COMMAND sed -e "13735,13738d" -i configure
+		COMMAND sed -e "185d" -i Makefile.pre.in
+		COMMAND sed -e "954,959d" -i Makefile.pre.in
+	CONFIGURE_COMMAND   CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib MACHDEP=Linux ac_sys_system=Linux ac_cv_prog_AR=${TARGET}-ar ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no enable_toolbox_glue=no ${BASIC_CONF} --disable-ipv6  --build=${HOSTMACHINE} 
+		COMMAND rm -f Include/graminit.h
+		COMMAND rm -f Python/graminit.c
+		COMMAND Parser/hostpgen <SOURCE_DIR>/Grammar/Grammar Include/graminit.h Python/graminit.c
+	BUILD_COMMAND 		HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make ${PARALLEL}
+	INSTALL_COMMAND 	HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make install
+	BUILD_IN_SOURCE 	1
+	DEPENDS zlib expat bzip2 gdbm openssl sqlite
 )
 
 # ExternalProject_Add(
