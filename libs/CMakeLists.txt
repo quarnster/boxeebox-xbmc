@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 
 set(TARGET "i686-pc-linux-gnu")
-get_filename_component(SYSROOT "${CMAKE_SOURCE_DIR}/../toolchain/build/sysroot" REALPATH)
 set(TARGET_DIR ${SYSROOT}/usr/local)
 set(BASIC_CONF <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-static --disable-nls)
 set(BASIC_CMAKE CFLAGS=-I${TARGET_DIR}/include CC=${TARGET}-gcc CXX=${TARGET}-g++ RANLIB=${TARGET}-ranlib cmake -DPKG_CONFIG_EXECUTABLE=${TARGET}-pkg-config -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_INSTALL_PREFIX=${TARGET_DIR} -DZLIB_ROOT=${SYSROOT}/usr -DZLIB_LIBRARIES=${SYSROOT}/usr/lib/libz.so -DZLIB_INCLUDE_DIRS=${SYSROOT}/usr/include <SOURCE_DIR>)
-set(PARALLEL -j8)
 
 set(PYTHON_VERSION 2.7.2)
 
@@ -14,8 +12,6 @@ string(REGEX MATCH ${SYSROOT}/usr/bin SRPATH $ENV{PATH})
 if(NOT SRPATH)
 	message(FATAL_ERROR "${SYSROOT}/usr/bin must be in your path")
 endif()
-
-set(PARALLEL -j8)
 
 execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpmachine OUTPUT_VARIABLE HOSTMACHINE)
 string(REPLACE "\n" "" HOSTMACHINE ${HOSTMACHINE})

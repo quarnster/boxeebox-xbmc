@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
 set(TARGET "i686-pc-linux-gnu")
-set(SYSROOT "${CMAKE_BINARY_DIR}/sysroot")
 set(TARGET_DIR "${SYSROOT}/usr")
 
 set(BINUTILS_VERSION "2.18" CACHE "Version of binutils to build" STRING)
 set(GCC_VERSION "4.2.1" CACHE "Version of GCC to build" STRING)
-
-set(PARALLEL -j8)
 
 include(ExternalProject)
 
