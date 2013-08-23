@@ -96,7 +96,7 @@ ExternalProject_Add(
 	URL_MD5 			c1b864c96804a10526540c664ade67f0
 	CONFIGURE_COMMAND 	""
 	BUILD_COMMAND 		make CXX=${TARGET}-g++ LD=${TARGET}-g++ CXXFLAGS=-DTIXML_USE_STL
-		COMMAND ${TARGET}-ar r libtinyxml.a tinyxml.o tinystr.o tinyxmlerror.o
+		COMMAND ${TARGET}-ar r libtinyxml.a tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o
 	INSTALL_COMMAND ${CMAKE_COMMAND} -E copy libtinyxml.a ${TARGET_DIR}/lib/
 		COMMAND ${CMAKE_COMMAND} -E copy tinyxml.h ${TARGET_DIR}/include
 		COMMAND ${CMAKE_COMMAND} -E copy tinystr.h ${TARGET_DIR}/include
