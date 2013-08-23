@@ -343,6 +343,18 @@ ExternalProject_Add(
 	DEPENDS zlib expat bzip2 gdbm openssl sqlite
 )
 
+ExternalProject_Add(
+	boost
+	URL 				http://sourceforge.net/projects/boost/files/boost/1.54.0/boost_1_54_0.tar.bz2/download
+	URL_MD5 			15cb8c0803064faef0c4ddf5bc5ca279
+	PATCH_COMMAND 		${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/boost.user-config.jam ./tools/build/v2/user-config.jam  
+	CONFIGURE_COMMAND 	./bootstrap.sh --prefix=${TARGET_DIR}
+	BUILD_COMMAND 		""
+	INSTALL_COMMAND 	./b2 include=${TARGET_DIR}/include linkflags="-L${TARGET_DIR}/lib" toolset=gcc-i686 link=static target-os=linux --without-mpi --without-context --without-log --without-python --without-coroutine ${PARALLEL} install 
+	BUILD_IN_SOURCE 	1
+	DEPENDS 			zlib bzip2
+)
+
 # ExternalProject_Add(
 # 	ffmpeg
 # 	URL 				http://ffmpeg.org/releases/ffmpeg-1.2.2.tar.bz2
