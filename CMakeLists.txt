@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
 
-message("\n\t${CMAKE_BINARY_DIR}\n\t${CMAKE_SOURCE_DIR}")
 if(CMAKE_BINARY_DIR STREQUAL CMAKE_SOURCE_DIR)
 	message(FATAL_ERROR "You shouldn't run this from within the source dir. Instead\n\tmkdir build && cd build && cmake ..")
 endif()
@@ -22,7 +21,9 @@ endif()
 ExternalProject_Add(
 	toolchain
 	URL 				${CMAKE_SOURCE_DIR}/toolchain
+	CMAKE_COMMAND 		PATH=$ENV{PATH}:${SYSROOT}/usr/bin cmake
 	CMAKE_ARGS			-DSYSROOT=${SYSROOT} -DPARALLEL=${PARALLEL}
+	BUILD_COMMAND 		PATH=$ENV{PATH}:${SYSROOT}/usr/bin make
 	INSTALL_COMMAND		""
 )
 
