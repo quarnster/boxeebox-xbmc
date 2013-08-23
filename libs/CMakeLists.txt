@@ -7,6 +7,8 @@ set(BASIC_CMAKE CFLAGS=-I${TARGET_DIR}/include CC=${TARGET}-gcc CXX=${TARGET}-g+
 
 set(PYTHON_VERSION 2.7.2)
 
+find_package(PythonInterp)
+
 string(REGEX MATCH ${SYSROOT}/usr/bin SRPATH $ENV{PATH})
 
 if(NOT SRPATH)
@@ -119,6 +121,7 @@ ExternalProject_Add(
 	taglib
 	URL 				http://taglib.github.io/releases/taglib-1.8.tar.gz
 	URL_MD5 			dcb8bd1b756f2843e18b1fdf3aaeee15
+	PATCH_COMMAND 		sed -e "54,61d" -i taglib/toolkit/taglib.h
 	CONFIGURE_COMMAND	${BASIC_CMAKE}
 )
 ExternalProject_Add(
@@ -145,13 +148,14 @@ ExternalProject_Add(
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
-# ExternalProject_Add(
-# 	libmicrohttpd
-# 	URL 				ftp://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.28.tar.gz
-# 	URL_MD5 			16c3cb66c839c6f929677471401a5b53
-# 	CONFIGURE_COMMAND 	${BASIC_CONF}
-#	DEPENDS 			openssl
-# )
+ExternalProject_Add(
+	libmicrohttpd
+	URL 				ftp://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.28.tar.gz
+	URL_MD5 			16c3cb66c839c6f929677471401a5b53
+	PATCH_COMMAND 		sed -e "s,#ifdef LINUX,#ifdef LINUX\\n#define SOCK_NONBLOCK	O_NONBLOCK\\n#define EPOLL_CLOEXEC O_CLOEXEC," -e "s,epoll_create1,epoll_create,g" -i src/microhttpd/daemon.c
+	CONFIGURE_COMMAND 	CFLAGS=-I{TARGET_DIR}/include LDFLAGS=-lc ${BASIC_CONF}
+	DEPENDS 			openssl
+)
 
 ExternalProject_Add(
 	freetype2
@@ -282,12 +286,13 @@ ExternalProject_Add(
 	DEPENDS libpng
 )
 # TODO:Fails due to libSDL
-# ExternalProject_Add(
-# 	libmpeg2
-# 	URL 				http://libmpeg2.sourceforge.net/files/libmpeg2-0.5.1.tar.gz
-# 	URL_MD5 			0f92c7454e58379b4a5a378485bbd8ef
-# 	CONFIGURE_COMMAND 	${BASIC_CONF}
-# )
+ExternalProject_Add(
+	libmpeg2
+	URL 				http://libmpeg2.sourceforge.net/files/libmpeg2-0.5.1.tar.gz
+	URL_MD5 			0f92c7454e58379b4a5a378485bbd8ef
+	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-sdl
+)
+
 ExternalProject_Add(
 	libmodplug
 	URL 				http://sourceforge.net/projects/modplug-xmms/files/libmodplug/0.8.8.4/libmodplug-0.8.8.4.tar.gz/download
@@ -355,10 +360,51 @@ ExternalProject_Add(
 	DEPENDS 			zlib bzip2
 )
 
-# ExternalProject_Add(
-# 	ffmpeg
-# 	URL 				http://ffmpeg.org/releases/ffmpeg-1.2.2.tar.bz2
-# 	URL_MD5 			99
-# 	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --enable-shared --disable-static --disable-programs --enable-gpl
-# )
+if(NOT EXISTS "${TARGET_DIR}/include/EGL/egl.h")
+	message("Downloading egl headers")
+	file(DOWNLOAD http://www.khronos.org/registry/egl/api/EGL/egl.h ${TARGET_DIR}/include/EGL/egl.h)
+	file(DOWNLOAD http://www.khronos.org/registry/egl/api/EGL/eglext.h ${TARGET_DIR}/include/EGL/eglext.h)
+	file(WRITE ${TARGET_DIR}/include/EGL/eglplatform.h "
+#pragma once
+#define EGLAPI
+#define EGLAPIENTRY
+typedef int NativeDisplayType;
+typedef void *NativeWindowType;
+typedef void *NativePixmapType;
+typedef NativeDisplayType EGLNativeDisplayType;
+typedef NativePixmapType  EGLNativePixmapType;
+typedef NativeWindowType  EGLNativeWindowType;
+typedef int EGLint;
+")
+	file(DOWNLOAD http://www.khronos.org/registry/egl/api/KHR/khrplatform.h ${TARGET_DIR}/include/KHR/khrplatform.h)
+endif()
+
+if(NOT EXISTS "${TARGET_DIR}/include/GLES2/gl2.h")
+	message("Downloading gles2 headers")
+	file(DOWNLOAD "http://www.khronos.org/registry/gles/api/2.0/gl2.h" ${TARGET_DIR}/include/GLES2/gl2.h)
+	file(DOWNLOAD "http://www.khronos.org/registry/gles/api/2.0/gl2ext.h" ${TARGET_DIR}/include/GLES2/gl2ext.h)
+	file(DOWNLOAD "http://www.khronos.org/registry/gles/api/2.0/gl2platform.h" ${TARGET_DIR}/include/GLES2/gl2platform.h)
+endif()
+
+add_custom_command(OUTPUT ${TARGET_DIR}/lib/libEGL.so
+	COMMAND cat ${TARGET_DIR}/include/EGL/egl.h | ${PYTHON_EXECUTABLE} -c \"import sys, re\; print '\#include <EGL/egl.h>\\n%s' % '\\n'.join(['%s {}' %x for x in re.compile(r'^\(EGLAPI\\s[^\;]+\)\;', re.M).findall(sys.stdin.read())])\" > ${CMAKE_BINARY_DIR}/libEGL.c
+	COMMAND "${SYSROOT}/usr/bin/${TARGET}-gcc" ${CMAKE_C_FLAGS} -I${TARGET_DIR}/include -shared -o ${TARGET_DIR}/lib/libEGL.so ${CMAKE_BINARY_DIR}/libEGL.c
+	DEPENDS "${TARGET_DIR}/include/EGL/egl.h"
+)
+
+add_custom_command(OUTPUT ${TARGET_DIR}/lib/libGLESv2.so
+	COMMAND cat ${TARGET_DIR}/include/GLES2/gl2.h | ${PYTHON_EXECUTABLE} -c \"import sys, re\; print '\#include <GLES2/gl2.h>\\n%s' % '\\n'.join(['%s {}' %x for x in re.compile(r'^\(GL_APICALL\\s[^\;]+\)\;', re.M).findall(sys.stdin.read())])\" > ${CMAKE_BINARY_DIR}/libGLESv2.c
+	COMMAND "${SYSROOT}/usr/bin/${TARGET}-gcc" ${CMAKE_C_FLAGS} -I${TARGET_DIR}/include -shared -o ${TARGET_DIR}/lib/libGLESv2.so ${CMAKE_BINARY_DIR}/libGLESv2.c
+	DEPENDS "${TARGET_DIR}/include/GLES2/gl2.h"
+)
+
+add_custom_target(dummylibs ALL DEPENDS DEPENDS ${TARGET_DIR}/lib/libEGL.so ${TARGET_DIR}/lib/libGLESv2.so)
+
+ExternalProject_Add(
+	ffmpeg
+	URL 				http://ffmpeg.org/releases/ffmpeg-1.2.2.tar.bz2
+	URL_MD5 			4997660dfc077922e37d0583f9322f6b
+	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --enable-shared --disable-static --disable-programs --enable-gpl
+	BUILD_COMMAND 		make ${PARALLEL}
+)
 
