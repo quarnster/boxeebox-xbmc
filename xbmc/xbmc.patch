@@ -1,6 +1,6 @@
 diff -x generated -r -u xbmc-12.2/Makefile.in xbmc/Makefile.in
 --- xbmc-12.2/Makefile.in	2013-05-03 07:57:40.000000000 +0200
-+++ xbmc/Makefile.in	2013-08-24 16:34:12.000000000 +0200
++++ xbmc/Makefile.in	2013-08-24 17:43:35.000000000 +0200
 @@ -476,7 +476,7 @@
  	$(MAKE) -C pvr-addons install
  endif
@@ -39,7 +39,7 @@ diff -x generated -r -u xbmc-12.2/Makefile.in xbmc/Makefile.in
  		-and \
 diff -x generated -r -u xbmc-12.2/configure xbmc/configure
 --- xbmc-12.2/configure	2013-05-03 07:57:46.000000000 +0200
-+++ xbmc/configure	2013-08-24 16:34:12.000000000 +0200
++++ xbmc/configure	2013-08-24 17:43:35.000000000 +0200
 @@ -18135,7 +18135,7 @@
  }
  _ACEOF
@@ -69,7 +69,7 @@ diff -x generated -r -u xbmc-12.2/configure xbmc/configure
  fi
 diff -x generated -r -u xbmc-12.2/xbmc/cores/Makefile.in xbmc/xbmc/cores/Makefile.in
 --- xbmc-12.2/xbmc/cores/Makefile.in	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/Makefile.in	2013-08-24 16:34:12.000000000 +0200
++++ xbmc/xbmc/cores/Makefile.in	2013-08-24 17:43:35.000000000 +0200
 @@ -1,4 +1,5 @@
  SRCS = DummyVideoPlayer.cpp
 +SRCS += IntelSMDGlobals.cpp
@@ -78,7 +78,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/Makefile.in xbmc/xbmc/cores/Makefil
  
 diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/Makefile.in xbmc/xbmc/cores/VideoRenderers/Makefile.in
 --- xbmc-12.2/xbmc/cores/VideoRenderers/Makefile.in	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/VideoRenderers/Makefile.in	2013-08-24 16:34:12.000000000 +0200
++++ xbmc/xbmc/cores/VideoRenderers/Makefile.in	2013-08-24 17:43:35.000000000 +0200
 @@ -1,8 +1,9 @@
 -SRCS  = BaseRenderer.cpp
 +SRCS = BaseRenderer.cpp
@@ -92,7 +92,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/Makefile.in xbmc/xbm
  SRCS += yuv2rgb.neon.S
 diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h xbmc/xbmc/cores/VideoRenderers/RenderFlags.h
 --- xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/VideoRenderers/RenderFlags.h	2013-08-24 16:34:12.000000000 +0200
++++ xbmc/xbmc/cores/VideoRenderers/RenderFlags.h	2013-08-24 17:43:35.000000000 +0200
 @@ -73,4 +73,6 @@
  #define CONF_FLAGS_FORMAT_SBS     0x001000
  #define CONF_FLAGS_FORMAT_TB      0x002000
@@ -100,9 +100,317 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h xbmc/x
 +#define CONF_FLAGS_SMD_DECODING   0x004000
 +
  #endif
+diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp xbmc/xbmc/cores/dvdplayer/DVDPlayer.cpp
+--- xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDPlayer.cpp	2013-08-24 19:15:37.000000000 +0200
+@@ -86,6 +86,10 @@
+ #include "LangInfo.h"
+ #include "ApplicationMessenger.h"
+ 
++#ifdef HAS_INTEL_SMD
++#include "cores/IntelSMDGlobals.h"
++#endif
++
+ using namespace std;
+ using namespace PVR;
+ 
+@@ -1044,6 +1048,11 @@
+   if (!CachePVRStream())
+     SetCaching(CACHESTATE_FLUSH);
+ 
++#ifdef HAS_INTEL_SMD 
++  g_IntelSMDGlobals.SetBaseTime(g_IntelSMDGlobals.GetCurrentTime());
++  g_IntelSMDGlobals.SetFlushFlag(true);
++#endif
++
+   while (!m_bAbortRequest)
+   {
+     // handle messages send to this thread, like seek or demuxer reset requests
+@@ -1614,6 +1623,13 @@
+       SetCaching(CACHESTATE_FULL);
+     else
+       SetCaching(CACHESTATE_INIT);
++
++#ifdef HAS_INTEL_SMD
++    // TODO(q)
++    if(m_dvdPlayerAudio.IsPassthrough() /*|| m_dvdPlayerAudio.IsHWDecode()) && m_dvdPlayerAudio.GetLevel() > 0*/)
++       return false;
++#endif
++
+     return true;
+   }
+   return false;
+@@ -1916,6 +1932,15 @@
+ {
+   g_dvdPerformanceCounter.DisableMainPerformance();
+ 
++#ifdef HAS_INTEL_SMD
++  if(m_bAbortRequest)
++  {
++    g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_STOP);
++    g_IntelSMDGlobals.SetVideoDecoderState(ISMD_DEV_STATE_STOP);
++    g_IntelSMDGlobals.SetAudioDeviceState(ISMD_DEV_STATE_STOP, g_IntelSMDGlobals.GetPrimaryAudioDevice());
++  }
++#endif
++
+   try
+   {
+     CLog::Log(LOGNOTICE, "CDVDPlayer::OnExit()");
+@@ -2097,12 +2122,18 @@
+             {
+               m_dvd.iSelectedAudioStream = -1;
+               CloseAudioStream(false);
++#ifdef HAS_INTEL_SMD
++              FlushBuffers(false);
++#endif
+               m_messenger.Put(new CDVDMsgPlayerSeek(GetTime(), true, true, true, true, true));
+             }
+           }
+           else
+           {
+             CloseAudioStream(false);
++#ifdef HAS_INTEL_SMD
++              FlushBuffers(false);
++#endif
+             OpenAudioStream(st.id, st.source);
+             m_messenger.Put(new CDVDMsgPlayerSeek(GetTime(), true, true, true, true, true));
+           }
+@@ -2243,6 +2274,10 @@
+         {
+           bool bSwitchSuccessful(false);
+           bool bShowPreview(g_guiSettings.GetInt("pvrplayback.channelentrytimeout") > 0);
++#ifdef HAS_INTEL_SMD
++          // TODO(q)
++//          m_pDemuxer->Stop();
++#endif
+ 
+           if (!bShowPreview)
+           {
+@@ -2265,8 +2300,12 @@
+             else
+             {
+               m_iChannelEntryTimeOut = 0;
++#ifndef HAS_INTEL_SMD
+               SAFE_DELETE(m_pDemuxer);
+-
++#else
++              // TODO(q)
++//              m_pDemuxer->Start();
++#endif
+               g_infoManager.SetDisplayAfterSeek();
+             }
+           }
+@@ -2342,8 +2381,13 @@
+ void CDVDPlayer::SetPlaySpeed(int speed)
+ {
+   m_messenger.Put(new CDVDMsgInt(CDVDMsg::PLAYER_SETSPEED, speed));
+-  m_dvdPlayerAudio.SetSpeed(speed);
+-  m_dvdPlayerVideo.SetSpeed(speed);
++#ifdef HAS_INTEL_SMD
++  if(speed == DVD_PLAYSPEED_PAUSE)
++#endif
++  {
++    m_dvdPlayerAudio.SetSpeed(speed);
++    m_dvdPlayerVideo.SetSpeed(speed);
++  }
+   SynchronizeDemuxer(100);
+ }
+ 
+@@ -3166,6 +3210,11 @@
+   m_CurrentTeletext.dts      = DVD_NOPTS_VALUE;
+   m_CurrentTeletext.startpts = startpts;
+ 
++#ifdef HAS_INTEL_SMD
++  g_IntelSMDGlobals.ResetClock();
++  g_IntelSMDGlobals.SetFlushFlag(true);
++#endif
++
+   if(queued)
+   {
+     m_dvdPlayerAudio.SendMessage(new CDVDMsg(CDVDMsg::GENERAL_RESET));
+@@ -3670,6 +3719,14 @@
+   if (m_pInputStream && m_pInputStream->IsStreamType(DVDSTREAM_TYPE_DVD))
+     return false;
+ 
++#ifdef HAS_INTEL_SMD
++  // all video rendering is done with SMD clock, so we need to match it here
++  if(IsPaused())
++    pts = g_IntelSMDGlobals.IsmdToDvdPts(g_IntelSMDGlobals.GetAudioPauseCurrentTime());
++  else
++    pts = g_IntelSMDGlobals.IsmdToDvdPts(g_IntelSMDGlobals.GetAudioCurrentTime());
++#endif
++
+   m_dvdPlayerSubtitle.GetCurrentSubtitle(strSubtitle, pts - m_dvdPlayerVideo.GetSubtitleDelay());
+ 
+   // In case we stalled, don't output any subs
+diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp
+--- xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp	2013-08-24 19:22:55.000000000 +0200
+@@ -45,6 +45,11 @@
+ #include <iterator>
+ #include "utils/log.h"
+ 
++#ifdef HAS_INTEL_SMD
++#include "cores/IntelSMDGlobals.h"
++#endif
++
++
+ using namespace std;
+ 
+ class CPulldownCorrection
+@@ -305,6 +310,15 @@
+   m_iCurrentPts = DVD_NOPTS_VALUE;
+   m_FlipTimeStamp = m_pClock->GetAbsoluteClock();
+ 
++#ifdef HAS_VIDEO_PLAYBACK
++  // TODO(q)
++  // if(!m_output.inited)
++  // {
++  //   g_renderManager.PreInit();
++  //   m_output.inited = true;
++  // }
++#endif
++
+   g_dvdPerformanceCounter.EnableVideoDecodePerformance(this);
+ }
+ 
+@@ -411,6 +425,7 @@
+     }
+     else if (pMsg->IsType(CDVDMsg::GENERAL_DELAY))
+     {
++#ifndef HAS_INTEL_SMD
+       if (m_speed != DVD_PLAYSPEED_PAUSE)
+       {
+         double timeout = static_cast<CDVDMsgDouble*>(pMsg)->m_value;
+@@ -423,6 +438,7 @@
+         while(!m_bStop && CDVDClock::GetAbsoluteClock() < timeout)
+           Sleep(1);
+       }
++#endif
+     }
+     else if (pMsg->IsType(CDVDMsg::VIDEO_SET_ASPECT))
+     {
+@@ -444,6 +460,12 @@
+       picture.iFlags &= ~DVP_FLAG_ALLOCATED;
+       m_packets.clear();
+ 
++#ifdef HAS_INTEL_SMD
++      // TODO(q)
++      // if(!m_pVideoCodec->IsDirectRendering())
++      //   g_renderManager.Flush();
++#endif
++
+       m_pullupCorrection.Flush();
+       //we need to recalculate the framerate
+       //TODO: this needs to be set on a streamchange instead
+@@ -839,6 +861,12 @@
+ 
+ void CDVDPlayerVideo::SetSpeed(int speed)
+ {
++#ifdef HAS_INTEL_SMD
++  // TODO(q)
++  // if(m_pVideoCodec && speed == DVD_PLAYSPEED_PAUSE)
++  //   m_pVideoCodec->SetSpeed(speed);
++#endif
++
+   if(m_messageQueue.IsInited())
+     m_messageQueue.Put( new CDVDMsgInt(CDVDMsg::PLAYER_SETSPEED, speed), 1 );
+   else
+@@ -890,6 +918,14 @@
+ #ifdef HAS_VIDEO_PLAYBACK
+ void CDVDPlayerVideo::ProcessOverlays(DVDVideoPicture* pSource, double pts)
+ {
++#ifdef HAS_INTEL_SMD
++  // all video rendering is done with SMD clock, so we need to match it here
++  if(m_speed == DVD_PLAYSPEED_PAUSE)
++    pts = g_IntelSMDGlobals.IsmdToDvdPts(g_IntelSMDGlobals.GetAudioPauseCurrentTime());
++  else
++    pts = g_IntelSMDGlobals.IsmdToDvdPts(g_IntelSMDGlobals.GetAudioCurrentTime());
++#endif
++
+   // remove any overlays that are out of time
+   if (m_started)
+     m_pOverlayContainer->CleanUp(pts - m_iSubtitleDelay);
+@@ -961,6 +997,11 @@
+       if(pOverlay->iGroupId != pSource->iGroupId)
+         continue;
+ 
++#ifdef HAS_INTEL_SMD
++    if(pts == DVD_NOPTS_VALUE)
++      pts = 0;
++#endif
++
+       double pts2 = pOverlay->bForced ? pts : pts - m_iSubtitleDelay;
+ 
+       if((pOverlay->iPTSStartTime <= pts2 && (pOverlay->iPTSStopTime > pts2 || pOverlay->iPTSStopTime == 0LL)) || pts == 0)
+@@ -1138,6 +1179,14 @@
+       m_bAllowFullscreen = false; // only allow on first configure
+     }
+ 
++#ifdef HAS_INTEL_SMD
++    // TODO(q)
++    // if(pPicture->format == DVDVideoPicture::FMT_NV12)
++    // {
++    //   flags |= CONF_FLAGS_SMD_DECODING;
++    // }
++#endif
++
+     CLog::Log(LOGDEBUG,"%s - change configuration. %dx%d. framerate: %4.2f. format: %s",__FUNCTION__,pPicture->iWidth, pPicture->iHeight, config_framerate, formatstr.c_str());
+     if(!g_renderManager.Configure(pPicture->iWidth, pPicture->iHeight, pPicture->iDisplayWidth, pPicture->iDisplayHeight, config_framerate, flags, pPicture->format, pPicture->extended_format, m_hints.orientation))
+     {
+@@ -1520,11 +1569,18 @@
+ 
+ std::string CDVDPlayerVideo::GetPlayerInfo()
+ {
++  float fps = m_fFrameRate;
++
++#ifdef HAS_INTEL_SMD
++  fps = g_IntelSMDGlobals.GetRenderFPS();
++#endif
++
+   std::ostringstream s;
+-  s << "fr:"     << fixed << setprecision(3) << m_fFrameRate;
++  s << "fr:"     << fixed << setprecision(3) << fps;
+   s << ", vq:"   << setw(2) << min(99,GetLevel()) << "%";
+   s << ", dc:"   << m_codecname;
+   s << ", Mb/s:" << fixed << setprecision(2) << (double)GetVideoBitrate() / (1024.0*1024.0);
++#ifndef HAS_INTEL_SMD
+   s << ", drop:" << m_iDroppedFrames;
+ 
+   int pc = m_pullupCorrection.GetPatternLength();
+@@ -1532,7 +1588,17 @@
+     s << ", pc:" << pc;
+   else
+     s << ", pc:none";
+-
++#else
++  // TODO(q)
++  // CStdString timeStr = "N/A";
++  // double pts = m_messageQueue.GetFirstPTS();
++  // if(pts != DVD_NOPTS_VALUE)
++  // {
++  //   pts /= 1000;
++  //   StringUtils::MilisecondsToTimeString((int)pts, timeStr);
++  // }
++  // s << ", pts: " << timeStr;
++#endif
+   return s.str();
+ }
+ 
+@@ -1575,6 +1641,10 @@
+   //and is able to calculate the correct frame duration from it
+   double frameduration = m_pullupCorrection.GetFrameDuration();
+ 
++#ifdef HAS_INTEL_SMD
++  frameduration = g_IntelSMDGlobals.GetFrameDuration();
++#endif
++
+   if (frameduration == DVD_NOPTS_VALUE ||
+       (g_advancedSettings.m_videoFpsDetect == 1 && m_pullupCorrection.GetPatternLength() > 1))
+   {
 diff -x generated -r -u xbmc-12.2/xbmc/guilib/JpegIO.h xbmc/xbmc/guilib/JpegIO.h
 --- xbmc-12.2/xbmc/guilib/JpegIO.h	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/guilib/JpegIO.h	2013-08-24 16:34:12.000000000 +0200
++++ xbmc/xbmc/guilib/JpegIO.h	2013-08-24 17:43:35.000000000 +0200
 @@ -26,7 +26,9 @@
  #pragma comment(lib, "turbojpeg-static.lib")
  #endif
@@ -115,7 +423,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/guilib/JpegIO.h xbmc/xbmc/guilib/JpegIO.h
  class CJpegIO
 diff -x generated -r -u xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp xbmc/xbmc/windowing/egl/EGLWrapper.cpp
 --- xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/windowing/egl/EGLWrapper.cpp	2013-08-24 16:34:12.000000000 +0200
++++ xbmc/xbmc/windowing/egl/EGLWrapper.cpp	2013-08-24 17:43:35.000000000 +0200
 @@ -26,6 +26,7 @@
  #include "EGLNativeTypeAndroid.h"
  #include "EGLNativeTypeAmlogic.h"
@@ -142,7 +450,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp xbmc/xbmc/wi
      m_nativeTypes->Initialize();
 diff -x generated -r -u xbmc-12.2/xbmc/windowing/egl/Makefile xbmc/xbmc/windowing/egl/Makefile
 --- xbmc-12.2/xbmc/windowing/egl/Makefile	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/windowing/egl/Makefile	2013-08-24 16:34:12.000000000 +0200
++++ xbmc/xbmc/windowing/egl/Makefile	2013-08-24 17:43:35.000000000 +0200
 @@ -2,6 +2,7 @@
  
  SRCS = WinSystemEGL.cpp
