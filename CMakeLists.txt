@@ -8,6 +8,7 @@ get_filename_component(SR "${CMAKE_SOURCE_DIR}/sysroot" REALPATH)
 
 set(SYSROOT ${SR} CACHE PATH "The sysroot directory where everything will be installed")
 set(PARALLEL "-j8" CACHE STRING "Arguments for make for parallel builds")
+set(TARGET_DIR ${CMAKE_SOURCE_DIR}/dist CACHE PATH "Directory to install everything to")
 message("Using Sysroot: ${SYSROOT}")
 
 
@@ -45,4 +46,67 @@ ExternalProject_Add(
 	BUILD_COMMAND 		PATH=$ENV{PATH}:${SYSROOT}/usr/bin make
 	INSTALL_COMMAND		""
 	DEPENDS				libs
+)
+
+set(libs
+	libjasper.so.1
+	libpostproc.so.52
+	libpng16.so.16
+	libswresample.so.0
+	libyajl.so.2
+	libssh.so.4
+	libmicrohttpd.so.10
+	liblzo2.so.2
+	libtiff.so.5
+	libpython2.7.so.1.0
+	libpcre.so.1
+	libcdio.so.14
+	libtag.so.1
+	libavcodec.so.54
+	libavfilter.so.3
+	libavformat.so.54
+	libavutil.so.52
+	libswscale.so.2
+)
+foreach(lib ${libs})
+	add_custom_target(
+		${lib}
+		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${SYSROOT}/usr/local/lib/${lib} ${TARGET_DIR}/${lib}
+		DEPENDS			xbmc
+	)
+endforeach()
+
+add_custom_target(
+	libstdc++
+	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${SYSROOT}/usr/i686-pc-linux-gnu/lib/libstdc++.so.6 ${TARGET_DIR}/libstdc++.so.6
+)
+
+set(shares
+	addons
+	language
+	media
+	portable_data
+	sounds
+	system
+	userdata
+)
+
+foreach(share ${shares})
+	add_custom_target(
+		${share}
+		COMMAND 		${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/share/xbmc/${share} ${TARGET_DIR}/${share}
+		DEPENDS			xbmc
+	)
+endforeach()
+
+add_custom_target(
+	shares
+	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/share/xbmc/addons ${TARGET_DIR}/addons
+	DEPENDS 			${shares}
+)
+
+add_custom_target(
+	dist
+	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${SYSROOT}/usr/local/lib/xbmc/xbmc.bin ${TARGET_DIR}/xbmc.bin
+	DEPENDS 			xbmc ${libs} libstdc++
 )

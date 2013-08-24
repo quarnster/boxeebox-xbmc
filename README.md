@@ -30,8 +30,44 @@ git clone https://github.com/quarnster/boxeebox-xbmc.git
 cd boxeebox-xbmc
 mdkir build
 cd build
-cmake ..
+cmake -DTARGET_DIR=<WHERE_YOU_WANT_TO_INSTALL_XBMC> ..
 make
+```
+
+Please do submit a pull request with any tweaks needed to make it build alright this far.
+
+## Making changes to libs/*, toolchain/* or xbmc/*
+
+Changes to these files are unfortunately not picked up automatically, so you'll have to
+manually copy any modified files and make the build system respect your changes via
+for example:
+
+```
+cp ../toolchain/* toolchain-prefix/src/toolchain/ && touch toolchain-prefix/src/toolchain-stamp/toolchain-download
+cp ../libs/* libs-prefix/src/libs/ && touch libs-prefix/src/libs-stamp/libs-download
+cp ../xbmc/* xbmc-prefix/src/xbmc/ && touch xbmc-prefix/src/xbmc-stamp/xbmc-download
+```
+
+## Installing
+
+Once everything has been built, the final target distribution can be created with:
+
+```bash
+make -j8 shares # only needed once unless you tweak any of the share files
+make dist
+```
+
+## Running
+
+Telnet into your boxeebox and run:
+```
+/etc/rc3.d/U99boxee stop
+killall run_boxee.sh
+killall Boxee
+/etc/rc3.d/U94boxeehal stop
+killall BoxeeHal
+cd <WHATEVER_YOUR_TARGET_DIR_WAS>
+./xbmc.bin --debug -fs --standalone
 ```
 
 # Cross compilation reference material

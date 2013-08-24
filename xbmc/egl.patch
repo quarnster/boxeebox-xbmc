@@ -1,0 +1,40 @@
+Only in xbmc-12.2/xbmc/windowing/egl/: EGLNativeTypeBoxee.cpp
+Only in xbmc-12.2/xbmc/windowing/egl/: EGLNativeTypeBoxee.h
+diff -u xbmc-12.2.old/xbmc/windowing/egl/EGLWrapper.cpp xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp
+--- xbmc-12.2.old/xbmc/windowing/egl/EGLWrapper.cpp	2013-08-24 09:02:28.000000000 +0200
++++ xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp	2013-08-24 09:06:23.000000000 +0200
+@@ -26,6 +26,7 @@
+ #include "EGLNativeTypeAndroid.h"
+ #include "EGLNativeTypeAmlogic.h"
+ #include "EGLNativeTypeRaspberryPI.h"
++#include "EGLNativeTypeBoxee.h"
+ #include "EGLWrapper.h"
+ 
+ #define CheckError() m_result = eglGetError(); if(m_result != EGL_SUCCESS) CLog::Log(LOGERROR, "EGL error in %s: %x",__FUNCTION__, m_result);
+@@ -83,6 +84,15 @@
+       }
+     }
+   }
++  nativeGuess = new CEGLNativeTypeBoxee;
++  if (nativeGuess->CheckCompatibility())
++  {
++    if(implementation == nativeGuess->GetNativeName() || implementation == "auto")
++    {
++      m_nativeTypes = nativeGuess;
++      ret = true;
++    }
++  }
+ 
+   if (ret && m_nativeTypes)
+     m_nativeTypes->Initialize();
+diff -u xbmc-12.2.old/xbmc/windowing/egl/Makefile xbmc-12.2/xbmc/windowing/egl/Makefile
+--- xbmc-12.2.old/xbmc/windowing/egl/Makefile	2013-08-24 09:02:28.000000000 +0200
++++ xbmc-12.2/xbmc/windowing/egl/Makefile	2013-08-24 09:03:06.000000000 +0200
+@@ -2,6 +2,7 @@
+ 
+ SRCS = WinSystemEGL.cpp
+ SRCS+= EGLNativeTypeAmlogic.cpp
++SRCS+= EGLNativeTypeBoxee.cpp
+ SRCS+= EGLNativeTypeAndroid.cpp
+ SRCS+= EGLNativeTypeRaspberryPI.cpp
+ SRCS+= EGLWrapper.cpp
