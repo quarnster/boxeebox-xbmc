@@ -68,6 +68,7 @@ set(libs
 	libavutil.so.52
 	libswscale.so.2
 	libjpeg.so.62
+	libasound.so.2
 )
 foreach(lib ${libs})
 	add_custom_target(
@@ -86,7 +87,6 @@ add_custom_target(
 	libz
 	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${SYSROOT}/usr/lib/libz.so.1 ${TARGET_DIR}/libz.so.1
 )
-
 
 set(shares
 	addons

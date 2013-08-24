@@ -401,10 +401,18 @@ add_custom_command(OUTPUT ${TARGET_DIR}/lib/libGLESv2.so
 add_custom_target(dummylibs ALL DEPENDS DEPENDS ${TARGET_DIR}/lib/libEGL.so ${TARGET_DIR}/lib/libGLESv2.so)
 
 ExternalProject_Add(
+	alsa
+	URL 				ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.27.2.tar.bz2
+	URL_MD5 			69129a7c37697f81ac092335e9fa452b
+	CONFIGURE_COMMAND 	LDFLAGS=-L${TARGET_DIR}/lib ${BASIC_CONF}
+	BUILD_COMMAND 		make ${PARALLEL}
+)
+
+ExternalProject_Add(
 	ffmpeg
 	URL 				http://ffmpeg.org/releases/ffmpeg-1.2.2.tar.bz2
 	URL_MD5 			4997660dfc077922e37d0583f9322f6b
 	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --enable-shared --disable-static --disable-programs --enable-gpl
 	BUILD_COMMAND 		make ${PARALLEL}
+	DEPENDS				alsa
 )
-
