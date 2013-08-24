@@ -67,6 +67,7 @@ set(libs
 	libavformat.so.54
 	libavutil.so.52
 	libswscale.so.2
+	libjpeg.so.62
 )
 foreach(lib ${libs})
 	add_custom_target(
@@ -80,6 +81,12 @@ add_custom_target(
 	libstdc++
 	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${SYSROOT}/usr/i686-pc-linux-gnu/lib/libstdc++.so.6 ${TARGET_DIR}/libstdc++.so.6
 )
+
+add_custom_target(
+	libz
+	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${SYSROOT}/usr/lib/libz.so.1 ${TARGET_DIR}/libz.so.1
+)
+
 
 set(shares
 	addons
@@ -108,5 +115,5 @@ add_custom_target(
 add_custom_target(
 	dist
 	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${SYSROOT}/usr/local/lib/xbmc/xbmc.bin ${TARGET_DIR}/xbmc.bin
-	DEPENDS 			xbmc ${libs} libstdc++
+	DEPENDS 			xbmc ${libs} libstdc++ libz
 )

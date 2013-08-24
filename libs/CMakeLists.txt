@@ -202,8 +202,8 @@ ExternalProject_Add(
 	libjpeg
 	URL 				http://sourceforge.net/projects/libjpeg/files/libjpeg/6b/jpegsrc.v6b.tar.gz/download
 	URL_MD5 			dbd5f3b47ed13132f04c685d608a7547
-	PATCH_COMMAND 		sed -e "s/-fforce-mem//g" -i configure
-	CONFIGURE_COMMAND 	ac_cv_c_const=yes RANLIB=${TARGET}-ranlib CC=${TARGET}-g++ <SOURCE_DIR>/configure --host=${TARGET} --prefix=${TARGET_DIR}
+	PATCH_COMMAND 		sed -e "s/-fforce-mem//g" -e "s,ltmain.sh$,ltmain.sh ${TARGET},g" -i configure
+	CONFIGURE_COMMAND 	ac_cv_c_const=yes RANLIB=${TARGET}-ranlib CC=${TARGET}-gcc <SOURCE_DIR>/configure -host=${TARGET} --prefix=${TARGET_DIR} --enable-shared --disable-static
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND		mkdir -p ${TARGET_DIR}/man/man1/
 		COMMAND 		make ${PARALLEL} install-lib

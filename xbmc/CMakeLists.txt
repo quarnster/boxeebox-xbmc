@@ -34,6 +34,7 @@ ExternalProject_Add(
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/EGLNativeTypeBoxee.cpp xbmc/windowing/egl/EGLNativeTypeBoxee.cpp
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/EGLNativeTypeBoxee.h xbmc/windowing/egl/EGLNativeTypeBoxee.h
 		COMMAND 		patch -p1 < ${CMAKE_SOURCE_DIR}/egl.patch
+		COMMAND 		sed -e "s,^#include <jpeglib.h>,extern \"C\" {\\n\\t#include <jpeglib.h>\\n}," -i xbmc/guilib/JpegIO.h
 	CONFIGURE_COMMAND	${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh 
 	BUILD_COMMAND 		make ${PARALLEL}
 	BUILD_IN_SOURCE 	1
