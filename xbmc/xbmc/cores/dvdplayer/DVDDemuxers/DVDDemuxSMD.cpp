@@ -997,7 +997,7 @@ void CDVDDemuxSMD::SetUpAudio(CodecID codecID)
   case CODEC_ID_AC3:
     mediaFormat = AUDIO_MEDIA_FMT_DD;
     if(g_guiSettings.GetBool("audiooutput.ac3passthrough") &&
-                (AUDIO_DIGITAL_HDMI == audioOutputMode || AUDIO_DIGITAL_SPDIF == audioOutputMode))
+                (AUDIO_HDMI == audioOutputMode || AUDIO_IEC958 == audioOutputMode))
       bPassthrough = true;
     break;
   case CODEC_ID_AAC_LATM:

@@ -21,6 +21,7 @@
 #include <EGL/egl.h>
 #include "EGLNativeTypeBoxee.h"
 #include "guilib/gui3d.h"
+#include "cores/IntelSMDGlobals.h"
 #include "utils/log.h"
 
 CEGLNativeTypeBoxee::CEGLNativeTypeBoxee()
@@ -41,10 +42,12 @@ bool CEGLNativeTypeBoxee::CheckCompatibility()
 
 void CEGLNativeTypeBoxee::Initialize()
 {
+  gdl_init();
   return;
 }
 void CEGLNativeTypeBoxee::Destroy()
 {
+  gdl_close();
   return;
 }
 
@@ -57,7 +60,7 @@ bool CEGLNativeTypeBoxee::CreateNativeDisplay()
 bool CEGLNativeTypeBoxee::CreateNativeWindow()
 {
 #if defined(TARGET_BOXEE)
-  m_nativeWindow = (void*)0x6;
+  m_nativeWindow = (void*)GDL_GRAPHICS_PLANE;
   return true;
 #else
   return false;

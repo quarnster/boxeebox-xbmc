@@ -25,19 +25,21 @@
 #ifdef HAS_INTEL_SMD
 
 #include "IntelSMDRenderer.h"
-#include "IntelSMDGlobals.h"
-#include "Settings.h"
-#include "log.h"
-#include "SingleLock.h"
+#include "xbmc/cores/IntelSMDGlobals.h"
+#include "settings/Settings.h"
+#include "utils/log.h"
+#include "xbmc/threads/SingleLock.h"
 #include "../dvdplayer/DVDClock.h"
-#include "GUITexture.h"
-#include "TransformMatrix.h"
-#include "GUISettings.h"
+#include "guilib/GUITexture.h"
+#include "guilib/TransformMatrix.h"
+#include "xbmc/settings/GUISettings.h"
 #include "Application.h"
 
 #include <ismd_core_protected.h>
 #include <ismd_vidrend.h>
+namespace ismd {
 #include <ismd_vidpproc.h>
+}
 #include <libgdl.h>
 
 
@@ -449,10 +451,10 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
   m_iFlags = flags;
   m_fps = fps;
 
-  if (flags & CONF_FLAGS_EXTERN_IMAGE)
-    m_bNullRendering = true;
-  else
-    m_bNullRendering = false;
+  // if (flags & CONF_FLAGS_EXTERN_IMAGE)
+  //   m_bNullRendering = true;
+  // else
+  //   m_bNullRendering = false;
 
   if (flags & CONF_FLAGS_SMD_DECODING)
     m_bUsingSMDecoder = true;
@@ -474,16 +476,16 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
 
   bool keep43ar = g_guiSettings.GetBool("ota.keep43ar");
 
-  if (g_application.IsPlayingLiveTV() && !keep43ar)
-  {
-    g_stSettings.m_currentVideoSettings.m_ViewMode = VIEW_MODE_STRETCH_16x9;
-  }
+  // if (g_application.IsPlayingLiveTV() && !keep43ar)
+  // {
+  //   g_stSettings.m_currentVideoSettings.m_ViewMode = VIEW_MODE_STRETCH_16x9;
+  // }
 
   // Calculate the input frame aspect ratio.
   CalculateFrameAspectRatio(d_width, d_height);
   if(!m_bNullRendering && (flags & CONF_FLAGS_FULLSCREEN))
     ChooseBestResolution(fps);
-  SetViewMode(g_stSettings.m_currentVideoSettings.m_ViewMode);
+  SetViewMode(g_settings.m_currentVideoSettings.m_ViewMode);
   ManageDisplay();
 
   if (!m_bNullRendering && !m_bConfigured)
@@ -739,8 +741,8 @@ void CIntelSMDRenderer::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
 {
   if (!m_bConfigured)
   {
-    if(g_application.GetCurrentPlayer() == EPC_FLASHPLAYER)
-        g_graphicsContext.Clear();
+    // if(g_application.GetCurrentPlayer() == EPC_FLASHPLAYER)
+    //     g_graphicsContext.Clear();
 
     return;
   }
@@ -754,16 +756,16 @@ void CIntelSMDRenderer::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
 
   if(clear)
     g_graphicsContext.Clear();
-  else if (g_application.GetCurrentPlayer() == EPC_FLASHPLAYER)
-    g_graphicsContext.Clear();
+  // else if (g_application.GetCurrentPlayer() == EPC_FLASHPLAYER)
+  //   g_graphicsContext.Clear();
 
   ManageDisplay();
 
   if(!clear)
   {
-    g_graphicsContext.PushTransform(TransformMatrix(), true);
+    g_graphicsContext.AddTransform(TransformMatrix());
     CGUITextureGLES::DrawQuad(m_destRect, alpha);
-    g_graphicsContext.PopTransform();
+    g_graphicsContext.RemoveTransform();
   }
 
   ConfigureVideoProc();
@@ -852,9 +854,9 @@ int CIntelSMDRenderer::ConfigureVideoFilters()
   bool gaussian_filter = g_guiSettings.GetBool("videoplayback.gaussian");
 
   if (deringing_filter)
-    res = ismd_vidpproc_deringing_enable(video_proc);
+    res = ismd::ismd_vidpproc_deringing_enable(video_proc);
   else
-    res = ismd_vidpproc_deringing_disable(video_proc);
+    res = ismd::ismd_vidpproc_deringing_disable(video_proc);
 
   if (res != ISMD_SUCCESS)
   {
@@ -863,9 +865,9 @@ int CIntelSMDRenderer::ConfigureVideoFilters()
   }
 
   if (gaussian_filter)
-    res = ismd_vidpproc_gaussian_enable(video_proc);
+    res = ismd::ismd_vidpproc_gaussian_enable(video_proc);
   else
-    res = ismd_vidpproc_gaussian_disable(video_proc);
+    res = ismd::ismd_vidpproc_gaussian_disable(video_proc);
 
   if (res != ISMD_SUCCESS)
   {
@@ -887,47 +889,47 @@ int CIntelSMDRenderer::ConfigureDeinterlace()
   ismd_dev_t video_proc = g_IntelSMDGlobals.GetVidProc();
   int deinterlace_policy = g_guiSettings.GetInt("videoplayback.interlacemode");
   bool interlace_display = g_settings.m_ResInfo[iResolution].dwFlags & D3DPRESENTFLAG_INTERLACED;
-  ismd_vidpproc_deinterlace_policy_t smd_policy = NONE;
+  ismd::ismd_vidpproc_deinterlace_policy_t smd_policy = ismd::NONE;
 
   switch(deinterlace_policy)
   {
   case INTERLACE_MODE_AUTO:
-    smd_policy = AUTO;
+    smd_policy = ismd::AUTO;
     break;
   case INTERLACE_MODE_VIDEO:
-    smd_policy = VIDEO;
+    smd_policy = ismd::VIDEO;
     break;
   case INTERLACE_MODE_FILM:
-    smd_policy = FILM;
+    smd_policy = ismd::FILM;
     break;
   case INTERLACE_MODE_SPATIAL_ONLY:
-    smd_policy = SPATIAL_ONLY;
+    smd_policy = ismd::SPATIAL_ONLY;
     break;
   case INTERLACE_MODE_TOP_FIELD_ONLY:
-    smd_policy = TOP_FIELD_ONLY;
+    smd_policy = ismd::TOP_FIELD_ONLY;
     break;
   case INTERLACE_MODE_SCALE_ONLY:
-    smd_policy = NONE;
+    smd_policy = ismd::NONE;
     break;
   case INTERLACE_MODE_NEVER:
-    smd_policy = NEVER;
+    smd_policy = ismd::NEVER;
     break;
   }
 
-  if(g_application.IsPlayingLiveTV())
-  {
-    smd_policy = VIDEO;
-  }
+  // if(g_application.IsPlayingLiveTV())
+  // {
+  //   smd_policy = ismd::VIDEO;
+  // }
 
   if(interlace_display)
   {
     if(deinterlace_policy == INTERLACE_MODE_AUTO)
-      smd_policy = NONE;
+      smd_policy = ismd::NONE;
   }
 
   CLog::Log(LOGINFO, "Setting Interlace mode: screen %d user %d smd %d", interlace_display, deinterlace_policy, smd_policy);
 
-  ret = ismd_vidpproc_set_deinterlace_policy(video_proc, smd_policy);
+  ret = ismd::ismd_vidpproc_set_deinterlace_policy(video_proc, smd_policy);
 
   if (ret != ISMD_SUCCESS)
   {
@@ -1012,7 +1014,7 @@ int CIntelSMDRenderer::ConfigureVideoProc()
     if( croppedY1 + croppedHeight > m_sourceRect.Height() )
       croppedHeight = (int)m_sourceRect.Height() - croppedY1;
     
-    ret = ismd_vidpproc_set_crop_input(video_proc,
+    ret = ismd::ismd_vidpproc_set_crop_input(video_proc,
                   (unsigned int)croppedX1,
                   (unsigned int)croppedY1,
                   (unsigned int)croppedWidth,
@@ -1027,7 +1029,7 @@ int CIntelSMDRenderer::ConfigureVideoProc()
   }
   else if (m_bCropping)
   {
-    ismd_vidpproc_disable_crop_input( video_proc );
+    ismd::ismd_vidpproc_disable_crop_input( video_proc );
     m_bCropping = false;
   }
   
@@ -1053,7 +1055,7 @@ int CIntelSMDRenderer::ConfigureVideoProc()
       m_destRect.x1, m_destRect.y1, m_destRect.x2, m_destRect.y2);
       */
 
-  ret = ismd_vidpproc_set_dest_params2(video_proc,
+  ret = ismd::ismd_vidpproc_set_dest_params2(video_proc,
             width,
             height,
             aspect_ratio_num,

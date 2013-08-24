@@ -1,0 +1,153 @@
+diff -x generated -r -u xbmc-12.2/Makefile.in xbmc/Makefile.in
+--- xbmc-12.2/Makefile.in	2013-05-03 07:57:40.000000000 +0200
++++ xbmc/Makefile.in	2013-08-24 16:34:12.000000000 +0200
+@@ -476,7 +476,7 @@
+ 	$(MAKE) -C pvr-addons install
+ endif
+ ifeq ($(findstring freebsd,@ARCH@), freebsd)
+-	@find -E system addons -type f -not -iregex ".*svn.*" \
++	@find system addons -type f -not -iregex ".*svn.*" \
+ 		-iregex ".*@ARCH@.*|.*\.vis|.*\.xbs" \
+ 		-exec sh -c "install -d \"$(DESTDIR)$(libdir)/xbmc/\`dirname '{}'\`\"" \; \
+ 		-and \
+@@ -484,7 +484,7 @@
+ 		-exec printf " -- %-75.75s\r" "{}" \;
+ else
+ ifeq ($(findstring Darwin,$(shell uname -s)),Darwin)
+-	@find -E system addons -type f -not -iregex ".*svn.*" \
++	@find system addons -type f -not -iregex ".*svn.*" \
+ 		-iregex ".*@ARCH@.*|.*\.vis|.*\.xbs" \
+ 		-exec sh -c "install -d \"$(DESTDIR)$(libdir)/xbmc/\`dirname '{}'\`\"" \; \
+ 		-and \
+@@ -515,7 +515,7 @@
+ 	@install -d $(DESTDIR)$(datarootdir)/xbmc
+ 	@# Arch independent files
+ ifeq ($(findstring bsd,@ARCH@), bsd)
+-	@find -E addons language media sounds userdata system -type f \
++	@find addons language media sounds userdata system -type f \
+ 		-not -iregex ".*@ARCH@.*|.*\.vis|.*\.xbs|.*svn.*|.*\.so|.*\.dll" \
+ 		-exec sh -c "install -d \"$(DESTDIR)$(datarootdir)/xbmc/\`dirname '{}'\`\"" \; \
+ 		-and \
+@@ -523,7 +523,7 @@
+ 		-exec printf " -- %-75.75s\r" "{}" \;
+ else
+ ifeq ($(findstring Darwin,$(shell uname -s)),Darwin)
+-	@find -E addons language media sounds userdata system -type f \
++	@find addons language media sounds userdata system -type f \
+ 		-not -iregex ".*@ARCH@.*|.*\.vis|.*\.xbs|.*svn.*|.*\.so|.*\.dll" \
+ 		-exec sh -c "install -d \"$(DESTDIR)$(datarootdir)/xbmc/\`dirname '{}'\`\"" \; \
+ 		-and \
+diff -x generated -r -u xbmc-12.2/configure xbmc/configure
+--- xbmc-12.2/configure	2013-05-03 07:57:46.000000000 +0200
++++ xbmc/configure	2013-08-24 16:34:12.000000000 +0200
+@@ -18135,7 +18135,7 @@
+ }
+ _ACEOF
+ if ac_fn_c_try_compile "$LINENO"; then :
+-  have_builtin_sync_add_and_fetch=yes
++  have_builtin_sync_add_and_fetch=no
+ else
+   have_builtin_sync_add_and_fetch=no
+ fi
+@@ -18162,7 +18162,7 @@
+ }
+ _ACEOF
+ if ac_fn_c_try_compile "$LINENO"; then :
+-  have_builtin_sync_sub_and_fetch=yes
++  have_builtin_sync_sub_and_fetch=no
+ else
+   have_builtin_sync_sub_and_fetch=no
+ fi
+@@ -18189,7 +18189,7 @@
+ }
+ _ACEOF
+ if ac_fn_c_try_compile "$LINENO"; then :
+-  have_builtin_sync_val_compare_and_swap=yes
++  have_builtin_sync_val_compare_and_swap=no
+ else
+   have_builtin_sync_val_compare_and_swap=no
+ fi
+diff -x generated -r -u xbmc-12.2/xbmc/cores/Makefile.in xbmc/xbmc/cores/Makefile.in
+--- xbmc-12.2/xbmc/cores/Makefile.in	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/cores/Makefile.in	2013-08-24 16:34:12.000000000 +0200
+@@ -1,4 +1,5 @@
+ SRCS = DummyVideoPlayer.cpp
++SRCS += IntelSMDGlobals.cpp
+ 
+ LIB = cores.a
+ 
+diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/Makefile.in xbmc/xbmc/cores/VideoRenderers/Makefile.in
+--- xbmc-12.2/xbmc/cores/VideoRenderers/Makefile.in	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/cores/VideoRenderers/Makefile.in	2013-08-24 16:34:12.000000000 +0200
+@@ -1,8 +1,9 @@
+-SRCS  = BaseRenderer.cpp
++SRCS = BaseRenderer.cpp
+ SRCS += OverlayRenderer.cpp
+ SRCS += OverlayRendererUtil.cpp
+ SRCS += RenderCapture.cpp
+ SRCS += RenderManager.cpp
++SRCS += IntelSMDRenderer.cpp
+ 
+ ifeq ($(findstring arm,@ARCH@),arm)
+ SRCS += yuv2rgb.neon.S
+diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h xbmc/xbmc/cores/VideoRenderers/RenderFlags.h
+--- xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/cores/VideoRenderers/RenderFlags.h	2013-08-24 16:34:12.000000000 +0200
+@@ -73,4 +73,6 @@
+ #define CONF_FLAGS_FORMAT_SBS     0x001000
+ #define CONF_FLAGS_FORMAT_TB      0x002000
+ 
++#define CONF_FLAGS_SMD_DECODING   0x004000
++
+ #endif
+diff -x generated -r -u xbmc-12.2/xbmc/guilib/JpegIO.h xbmc/xbmc/guilib/JpegIO.h
+--- xbmc-12.2/xbmc/guilib/JpegIO.h	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/guilib/JpegIO.h	2013-08-24 16:34:12.000000000 +0200
+@@ -26,7 +26,9 @@
+ #pragma comment(lib, "turbojpeg-static.lib")
+ #endif
+ 
++extern "C" {
+ #include <jpeglib.h>
++}
+ #include "utils/StdString.h"
+ 
+ class CJpegIO
+diff -x generated -r -u xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp xbmc/xbmc/windowing/egl/EGLWrapper.cpp
+--- xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/windowing/egl/EGLWrapper.cpp	2013-08-24 16:34:12.000000000 +0200
+@@ -26,6 +26,7 @@
+ #include "EGLNativeTypeAndroid.h"
+ #include "EGLNativeTypeAmlogic.h"
+ #include "EGLNativeTypeRaspberryPI.h"
++#include "EGLNativeTypeBoxee.h"
+ #include "EGLWrapper.h"
+ 
+ #define CheckError() m_result = eglGetError(); if(m_result != EGL_SUCCESS) CLog::Log(LOGERROR, "EGL error in %s: %x",__FUNCTION__, m_result);
+@@ -83,6 +84,15 @@
+       }
+     }
+   }
++  nativeGuess = new CEGLNativeTypeBoxee;
++  if (nativeGuess->CheckCompatibility())
++  {
++    if(implementation == nativeGuess->GetNativeName() || implementation == "auto")
++    {
++      m_nativeTypes = nativeGuess;
++      ret = true;
++    }
++  }
+ 
+   if (ret && m_nativeTypes)
+     m_nativeTypes->Initialize();
+diff -x generated -r -u xbmc-12.2/xbmc/windowing/egl/Makefile xbmc/xbmc/windowing/egl/Makefile
+--- xbmc-12.2/xbmc/windowing/egl/Makefile	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/windowing/egl/Makefile	2013-08-24 16:34:12.000000000 +0200
+@@ -2,6 +2,7 @@
+ 
+ SRCS = WinSystemEGL.cpp
+ SRCS+= EGLNativeTypeAmlogic.cpp
++SRCS+= EGLNativeTypeBoxee.cpp
+ SRCS+= EGLNativeTypeAndroid.cpp
+ SRCS+= EGLNativeTypeRaspberryPI.cpp
+ SRCS+= EGLWrapper.cpp

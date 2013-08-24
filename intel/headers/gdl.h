@@ -226,10 +226,10 @@ gdl_closed_caption_source(
     data passed via vbd_flip() calls will be ignored.
     */
 
-GDL_API gdl_ret_t
-gdl_set_blending_model(
-    gdl_blending_model_t blending_model
-    );
+// GDL_API gdl_ret_t
+// gdl_set_blending_model(
+//     gdl_blending_model_t blending_model
+//     );
     /**< @ingroup general
 
     This function sets a new blending model. Blending model controls the
@@ -250,10 +250,10 @@ gdl_set_blending_model(
     - Set a UPP z-order to the default one.
     */
 
-GDL_API gdl_ret_t
-gdl_get_blending_model(
-    gdl_blending_model_t * blending_model
-    );
+// GDL_API gdl_ret_t
+// gdl_get_blending_model(
+//     gdl_blending_model_t * blending_model
+//     );
     /**< @ingroup general
      This function gets the current blending model.
 
@@ -1286,10 +1286,10 @@ gdl_dbg_string_plane_id(
     The plane ID for which the string should be returned.
     */
     
-GDL_API char *
-gdl_dbg_string_stereo(
-    gdl_stereo_t stereo
-    );
+// GDL_API char *
+// gdl_dbg_string_stereo(
+//     gdl_stereo_t stereo
+//     );
     /**< @ingroup debug
     
     This function returns a pointer to a 0-terminated string representation of a
@@ -1652,12 +1652,12 @@ gdl_ret_t gdl_set_upp_zorder(
         @endverbatim
     */
 
-GDL_API gdl_ret_t
-gdl_post_blend_set_attr(
-    gdl_display_id_t      disp_id,
-    gdl_post_blend_attr_t attr_id,
-    void *                value
-    );
+// GDL_API gdl_ret_t
+// gdl_post_blend_set_attr(
+//     gdl_display_id_t      disp_id,
+//     gdl_post_blend_attr_t attr_id,
+//     void *                value
+//     );
     /**< @ingroup post_blend
 
     Set the current value of the post-blender attribute. 
@@ -1677,12 +1677,12 @@ gdl_post_blend_set_attr(
 
 
 
-GDL_API gdl_ret_t 
-gdl_post_blend_get_attr(
-    gdl_display_id_t      disp_id,
-    gdl_post_blend_attr_t attr_id,
-    void *                value
-    );
+// GDL_API gdl_ret_t 
+// gdl_post_blend_get_attr(
+//     gdl_display_id_t      disp_id,
+//     gdl_post_blend_attr_t attr_id,
+//     void *                value
+//     );
     /**< @ingroup post_blend
     
     Retrieve the current value of a post blender attribute.
@@ -1714,11 +1714,11 @@ gdl_post_blend_reset(
     Post blender hardware unit is only available starting from CE5300 SOC
     */
 
-GDL_API
-gdl_ret_t gdl_get_custom_gamma_curve(
-    gdl_gamma_t        id,
-    gdl_gamma_curve_t *curve
-    );
+// GDL_API
+// gdl_ret_t gdl_get_custom_gamma_curve(
+//     gdl_gamma_t        id,
+//     gdl_gamma_curve_t *curve
+//     );
     /**< @ingroup general
      * Get the current values of a gamma curve. <tt>id</tt> must be one of the 
      * GDL_GAMMA_CUSTOM_* values. This will include any changes which have been
@@ -1731,11 +1731,11 @@ gdl_ret_t gdl_get_custom_gamma_curve(
      *    The #gdl_gamma_curve_t which corresponds to the identifier. 
      */
 
-GDL_API
-gdl_ret_t gdl_set_custom_gamma_curve(
-    gdl_gamma_t        id,
-    gdl_gamma_curve_t *curve
-    );
+// GDL_API
+// gdl_ret_t gdl_set_custom_gamma_curve(
+//     gdl_gamma_t        id,
+//     gdl_gamma_curve_t *curve
+//     );
     /**< @ingroup general
      * Set a custom gamma curve, which may be used instead of the standard 
      * curves. <tt>id</tt> must be one of the GDL_GAMMA_CUSTOM_* values. Any

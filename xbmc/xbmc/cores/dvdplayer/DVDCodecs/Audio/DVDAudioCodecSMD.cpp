@@ -63,13 +63,13 @@ bool CDVDAudioCodecSMD::IsPassthroughAudioCodec( int Codec )
   bool bSupportsDTSHDOut = false;
   bool bSupportsTrueHDOut = false;
 
-  if( g_guiSettings.GetInt("audiooutput.mode") == AUDIO_DIGITAL_HDMI ||
-      g_guiSettings.GetInt("audiooutput.mode") == AUDIO_DIGITAL_SPDIF)
+  if( g_guiSettings.GetInt("audiooutput.mode") == AUDIO_HDMI ||
+      g_guiSettings.GetInt("audiooutput.mode") == AUDIO_IEC958)
   {
     bSupportsAC3Out = g_guiSettings.GetBool("audiooutput.ac3passthrough");
     bSupportsDTSOut = g_guiSettings.GetBool("audiooutput.dtspassthrough");
   }
-  if( g_guiSettings.GetInt("audiooutput.mode") == AUDIO_DIGITAL_HDMI )
+  if( g_guiSettings.GetInt("audiooutput.mode") == AUDIO_HDMI )
   {
     bSupportsEAC3Out = g_guiSettings.GetBool("audiooutput.eac3passthrough");
     bSupportsTrueHDOut = g_guiSettings.GetBool("audiooutput.truehdpassthrough");
@@ -102,7 +102,7 @@ bool CDVDAudioCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
   bool bSupportsPassthrough = IsPassthroughAudioCodec( hints.codec );
 
   // Detect DTS-HD streams; allow up to 3 regular DTS frames before we give up and treat as DTS only
-  if( hints.codec == CODEC_ID_DTS && g_guiSettings.GetInt("audiooutput.mode") == AUDIO_DIGITAL_HDMI)
+  if( hints.codec == CODEC_ID_DTS && g_guiSettings.GetInt("audiooutput.mode") == AUDIO_HDMI)
   {
     m_DTSHDDetection = 3;
     m_bBitstreamDTSHD = g_guiSettings.GetBool("audiooutput.dtshdpassthrough");

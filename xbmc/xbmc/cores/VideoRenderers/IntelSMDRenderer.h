@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../../settings/VideoSettings.h"
+#include "xbmc/settings/VideoSettings.h"
 #include "RenderFlags.h"
-#include "GraphicContext.h"
+#include "guilib/GraphicContext.h"
 #include "BaseRenderer.h"
-#include "utils/Thread.h"
+#include "threads/Thread.h"
 
 #include <ismd_core.h>
 #include "gdl_types.h"
@@ -13,6 +13,8 @@
 
 #define MAX_PLANES 3
 #define MAX_FIELDS 3
+
+#define AUTOSOURCE -1
 
 #undef ALIGN
 #define ALIGN(value, alignment) (((value)+((alignment)-1))&~((alignment)-1))
@@ -25,12 +27,6 @@
 #define IMAGE_FLAG_READY     0x16 /* image is ready to be uploaded to texture memory */
 #define IMAGE_FLAG_INUSE (IMAGE_FLAG_WRITING | IMAGE_FLAG_READING | IMAGE_FLAG_RESERVED)
 
-enum EFIELDSYNC
-{
-  FS_NONE,
-  FS_TOP,
-  FS_BOT
-};
 
 struct DRAWRECT
 {

@@ -31,8 +31,12 @@ extern "C"
 #include <pal_soc_info.h>
 }
 
-#include "xbmc/utils/SingleLock.h"
+#include "xbmc/threads/SingleLock.h"
 #include "dvdplayer/DVDClock.h"
+
+#define GDL_VIDEO_PLANE           GDL_PLANE_ID_UPP_B  // bottom
+#define GDL_GRAPHICS_PLANE        GDL_PLANE_ID_UPP_D  // on top for overlays
+#define GDL_FLASH_GRAPHICS_PLANE  GDL_PLANE_ID_UPP_C  // middle for pages with embedded video
 
 #define SMD_CLOCK_FREQ 90000
 #define SMD_TO_DVD(time) (double)(((double)(time) / SMD_CLOCK_FREQ) * DVD_TIME_BASE)

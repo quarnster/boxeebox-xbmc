@@ -147,8 +147,8 @@ bool CIntelSMDAudioRenderer::Initialize(IAudioCallback* pCallback,
   bool bCanDDEncode = false;
   int inputChannelConfig = AUDIO_CHAN_CONFIG_INVALID;
 
-  m_bIsHDMI = (AUDIO_DIGITAL_HDMI == audioOutputMode);
-  m_bIsSPDIF = (AUDIO_DIGITAL_SPDIF == audioOutputMode);
+  m_bIsHDMI = (AUDIO_HDMI == audioOutputMode);
+  m_bIsSPDIF = (AUDIO_IEC958 == audioOutputMode);
   m_bIsAnalog = (AUDIO_ANALOG == audioOutputMode);
   m_bIsAllOutputs = (audioOutputMode == AUDIO_ALL_OUTPUTS);
   m_bAC3Encode = false;
@@ -400,7 +400,7 @@ bool CIntelSMDAudioRenderer::Initialize(IAudioCallback* pCallback,
       bitsPerSec = 16;
     }
 
-    ConfigureAudioOutputParams(spdif_output_config, AUDIO_DIGITAL_SPDIF, bitsPerSec,
+    ConfigureAudioOutputParams(spdif_output_config, AUDIO_IEC958, bitsPerSec,
         samplesPerSec, iChannels, ismdAudioInputFormat, bSPDIFPassthrough);
     if(!g_IntelSMDGlobals.ConfigureAudioOutput(OutputSPDIF, spdif_output_config))
     {
@@ -415,7 +415,7 @@ bool CIntelSMDAudioRenderer::Initialize(IAudioCallback* pCallback,
   {
     ismd_audio_output_t OutputHDMI = g_IntelSMDGlobals.GetHDMIOutput();
     ismd_audio_output_config_t hdmi_output_config;
-    ConfigureAudioOutputParams(hdmi_output_config, AUDIO_DIGITAL_HDMI, uiBitsPerSample,
+    ConfigureAudioOutputParams(hdmi_output_config, AUDIO_HDMI, uiBitsPerSample,
       uiSamplesPerSec, iChannels, ismdAudioInputFormat, bHDMIPassthrough);
     if(!g_IntelSMDGlobals.ConfigureAudioOutput(OutputHDMI, hdmi_output_config))
     {
@@ -1741,7 +1741,7 @@ void CIntelSMDAudioRenderer::ConfigureAudioOutputParams(ismd_audio_output_config
   bool bLPCMMode = g_guiSettings.GetBool("audiooutput.lpcm71passthrough");
 
   CLog::Log(LOGINFO, "CIntelSMDAudioRenderer::ConfigureAudioOutputParams %s sample size %d sample rate %d channels %d format %d",
-      output == AUDIO_DIGITAL_HDMI ? "HDMI" : "SPDIF", sampleSize, sampleRate, channels, format);
+      output == AUDIO_HDMI ? "HDMI" : "SPDIF", sampleSize, sampleRate, channels, format);
 
   SetDefaultOutputConfig(output_config);
 
@@ -1757,7 +1757,7 @@ void CIntelSMDAudioRenderer::ConfigureAudioOutputParams(ismd_audio_output_config
     output_config.out_mode = ISMD_AUDIO_OUTPUT_ENCODED_DOLBY_DIGITAL;
   }
 
-  if(output == AUDIO_DIGITAL_HDMI)
+  if(output == AUDIO_HDMI)
   {
     // We need to match input to output freq on HDMI
     // We only do this if we have edid info
@@ -1798,7 +1798,7 @@ void CIntelSMDAudioRenderer::ConfigureAudioOutputParams(ismd_audio_output_config
   } // HDMI
 
 
-  if(output == AUDIO_DIGITAL_SPDIF)
+  if(output == AUDIO_IEC958)
   {
     if(sampleRate == 48000 || sampleRate == 96000 || sampleRate == 32000 || sampleRate == 44100 || sampleRate == 88200)
       output_config.sample_rate = sampleRate;

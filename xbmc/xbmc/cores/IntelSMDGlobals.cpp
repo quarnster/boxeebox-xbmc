@@ -21,13 +21,14 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "Settings.h"
-#include "GUISettings.h" // for AUDIO_*
+#include "xbmc/settings/Settings.h"
+#include "xbmc/settings/GUISettings.h" // for AUDIO_*
 #include "IntelSMDGlobals.h"
 #include <ismd_vidpproc.h>
 #include "utils/log.h"
-#include "HalServices.h"
-#include "lib/libBoxee/bxoemconfiguration.h"
+#include "../threads/SingleLock.h"
+//#include "HalServices.h"
+//#include "lib/libBoxee/bxoemconfiguration.h"
 
 #ifndef UINT64_C
 #define UINT64_C(x) (const unsigned long long)(x)
@@ -299,26 +300,26 @@ bool CIntelSMDGlobals::InitAudio()
   CLog::Log(LOGINFO, "CIntelSMDGlobals::InitAudio");
 
   if(!CreateAudioProcessor())
-    return false;
-
+//    return false;
+//
   // Configure audio outputs according to settings
-  BuildAudioOutputs();
+//  BuildAudioOutputs();
+//
+//  return true;
+//}
 
-  return true;
-}
-
-bool  CIntelSMDGlobals::BuildAudioOutputs()
-{
+//bool  CIntelSMDGlobals::BuildAudioOutputs()
+//{
   ismd_result_t result;
 
   int audioOutputMode = g_guiSettings.GetInt("audiooutput.mode");
 
-  bool bIsHDMI = (AUDIO_DIGITAL_HDMI == audioOutputMode);
-  bool bIsSPDIF = (AUDIO_DIGITAL_SPDIF == audioOutputMode);
+  bool bIsHDMI = (AUDIO_HDMI == audioOutputMode);
+  bool bIsSPDIF = (AUDIO_IEC958 == audioOutputMode);
   bool bIsAnalog = (AUDIO_ANALOG == audioOutputMode);
-  bool bIsAllOutputs = (audioOutputMode == AUDIO_ALL_OUTPUTS);
-  if (bIsAllOutputs)
-    bIsHDMI = bIsSPDIF = bIsAnalog = true;
+  // bool bIsAllOutputs = (audioOutputMode == AUDIO_ALL_OUTPUTS);
+  // if (bIsAllOutputs)
+  //   bIsHDMI = bIsSPDIF = bIsAnalog = true;
 
   CLog::Log(LOGINFO, "CIntelSMDGlobals::BuildAudioOutputs: HDMI %d SPDIF %d Analog %d", bIsHDMI, bIsSPDIF, bIsAnalog);
 
@@ -326,12 +327,12 @@ bool  CIntelSMDGlobals::BuildAudioOutputs()
 
   if (bIsHDMI)
   {
-    m_audioOutputHDMI = AddAudioOutput(AUDIO_DIGITAL_HDMI);
+    m_audioOutputHDMI = AddAudioOutput(AUDIO_HDMI);
     EnableAudioOutput(m_audioOutputHDMI);
   }
   if (bIsSPDIF)
   {
-    m_audioOutputSPDIF = AddAudioOutput(AUDIO_DIGITAL_SPDIF);
+    m_audioOutputSPDIF = AddAudioOutput(AUDIO_IEC958);
     EnableAudioOutput(m_audioOutputSPDIF);
   }
   if (bIsAnalog)
@@ -360,11 +361,11 @@ ismd_audio_output_t CIntelSMDGlobals::AddAudioOutput(int output)
 
   switch(output)
   {
-  case AUDIO_DIGITAL_HDMI:
+  case AUDIO_HDMI:
       hwId = GEN3_HW_OUTPUT_HDMI;
       name = "HDMI";
       break;
-  case AUDIO_DIGITAL_SPDIF:
+  case AUDIO_IEC958:
     hwId = GEN3_HW_OUTPUT_SPDIF;
     name = "SPDIF";
     break;
@@ -1572,13 +1573,13 @@ bool CIntelSMDGlobals::DeleteAudioProcessor()
   if (m_audioProcessor == -1)
     return true;
 
-  CHalServicesFactory::GetInstance().SetAudioDACState(false);
+//  CHalServicesFactory::GetInstance().SetAudioDACState(false);
 
   result = ismd_audio_close_processor(m_audioProcessor);
   if (result != ISMD_SUCCESS)
   {
     CLog::Log(LOGERROR, "CIntelSMDGlobals::DestroyAudioProcessor - error closing device: %d", result);
-    CHalServicesFactory::GetInstance().SetAudioDACState(true);
+//    CHalServicesFactory::GetInstance().SetAudioDACState(true);
     return false;
   }
 
@@ -1587,7 +1588,7 @@ bool CIntelSMDGlobals::DeleteAudioProcessor()
   // This should invalidate all devices
   m_bDemuxToAudio = false;
 
-  CHalServicesFactory::GetInstance().SetAudioDACState(true);
+//  CHalServicesFactory::GetInstance().SetAudioDACState(true);
 
   return true;
 }
@@ -2170,8 +2171,8 @@ ismd_dev_state_t CIntelSMDGlobals::DVDSpeedToSMD(int dvdSpeed)
     return ISMD_DEV_STATE_PAUSE;
   case DVD_PLAYSPEED_NORMAL:
     return ISMD_DEV_STATE_PLAY;
-  case DVD_PLAYSPEED_STOP:
-    return ISMD_DEV_STATE_STOP;
+  // case DVD_PLAYSPEED_STOP:
+  //   return ISMD_DEV_STATE_STOP;
   default:
     return ISMD_DEV_STATE_PLAY;
   }
