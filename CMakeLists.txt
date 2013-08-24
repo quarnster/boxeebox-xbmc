@@ -89,9 +89,15 @@ foreach(lib ${libs})
 	)
 endforeach()
 
+if(EXISTS ${SYSROOT}/usr/i686-pc-linux-gnu/lib/libstdc++.so.6)
+	set(stdsrc ${SYSROOT}/usr/i686-pc-linux-gnu/lib/libstdc++.so.6)
+else()
+	set(stdsrc ${SYSROOT}/usr/lib/libstdc++.so.6)
+endif()
+
 add_custom_target(
 	libstdc++
-	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${SYSROOT}/usr/i686-pc-linux-gnu/lib/libstdc++.so.6 ${TARGET_DIR}/libstdc++.so.6
+	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${stdsrc} ${TARGET_DIR}/libstdc++.so.6
 )
 
 add_custom_target(
