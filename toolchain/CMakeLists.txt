@@ -8,6 +8,8 @@ set(GCC_VERSION "4.2.1" CACHE "Version of GCC to build" STRING)
 
 include(ExternalProject)
 
+execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpmachine OUTPUT_VARIABLE HOSTMACHINE)
+string(REPLACE "\n" "" HOSTMACHINE ${HOSTMACHINE})
 
 ExternalProject_Add(
 	kernel
@@ -55,7 +57,7 @@ ExternalProject_Add(
 		COMMAND 		${CMAKE_COMMAND} -E copy configure.new configure
 		COMMAND 		chmod +x configure
 	BUILD_COMMAND		make ${PARALLEL}
-	CONFIGURE_COMMAND	CC=${TARGET_DIR}/bin/${TARGET}-gcc <SOURCE_DIR>/configure --target=${TARGET} --host=${TARGET} --disable-nls --enable-kernel=2.6.28 --prefix=/usr --with-headers=${TARGET_DIR}/include libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ctors_header=yes CFLAGS=-O2\ -march=i686 --program-prefix=${TARGET}-
+	CONFIGURE_COMMAND	CC=${TARGET}-gcc <SOURCE_DIR>/configure --build=${HOSTMACHINE} --target=${TARGET} --host=${TARGET} --disable-nls --enable-kernel=2.6.28 --prefix=/usr --with-headers=${TARGET_DIR}/include libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes libc_cv_ctors_header=yes CFLAGS=-O2\ -march=i686 --program-prefix=${TARGET}-
 	INSTALL_COMMAND		make ${PARALLEL} install_root=${SYSROOT} install
 	DEPENDS boot-gcc
 )
