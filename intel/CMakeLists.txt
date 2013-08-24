@@ -20,29 +20,33 @@ foreach(header ${headers})
 endforeach()
 
 
-add_custom_command(OUTPUT ${SYSROOT}/usr/local/lib/libgdl.so
+add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/libgdl.so
 	COMMAND cat ${CMAKE_SOURCE_DIR}/headers/gdl.h | ${PYTHON_EXECUTABLE} -c \"import sys, re\; print '\#include <gdl.h>\\n%s' % '\\n'.join(filter(lambda a: not '\\ngdl_init' in a, ['%s {}' %x for x in re.compile(r'^\(GDL_API\\s[^\;]+\)\;', re.M).findall(sys.stdin.read())]))\" > ${CMAKE_BINARY_DIR}/libgdl.c
-	COMMAND i686-pc-linux-gnu-gcc -I${CMAKE_SOURCE_DIR}/headers -shared -o ${SYSROOT}/usr/local/lib/libgdl.so ${CMAKE_BINARY_DIR}/libgdl.c
+	COMMAND i686-pc-linux-gnu-gcc -I${CMAKE_SOURCE_DIR}/headers -shared -o ${CMAKE_BINARY_DIR}/libgdl.so ${CMAKE_BINARY_DIR}/libgdl.c
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/libgdl.so ${SYSROOT}/usr/local/lib/libgdl.so
 )
 
-add_custom_command(OUTPUT ${SYSROOT}/usr/local/lib/libismd_core.so
+add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/libismd_core.so
 	COMMAND cat "${CMAKE_SOURCE_DIR}/headers/ismd*.h" | ${PYTHON_EXECUTABLE} -c \"import sys, re\; print '\#include <ismd_core.h>\\n\#include <ismd_audio.h>\\n\#include <ismd_viddec.h>\\n\#include <ismd_vidpproc.h>\\n\#include <ismd_demux.h>\\n\#include <ismd_vidrend.h>\\n\#include <ismd_tsout.h>\\n%s' % '\\n'.join(filter(lambda a: not '  result  ' in a, ['%s {}' %x for x in re.compile(r'^\(\\s*ismd_result_t\\s[^\;]+\)\;', re.M).findall(sys.stdin.read())]))\" > ${CMAKE_BINARY_DIR}/libismd_core.c
-	COMMAND i686-pc-linux-gnu-gcc -I${CMAKE_SOURCE_DIR}/headers -shared -o ${SYSROOT}/usr/local/lib/libismd_core.so ${CMAKE_BINARY_DIR}/libismd_core.c
+	COMMAND i686-pc-linux-gnu-gcc -I${CMAKE_SOURCE_DIR}/headers -shared -o ${CMAKE_BINARY_DIR}/libismd_core.so ${CMAKE_BINARY_DIR}/libismd_core.c
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/libismd_core.so ${SYSROOT}/usr/local/lib/libismd_core.so
 )
 
 
-add_custom_command(OUTPUT OUTPUT ${SYSROOT}/usr/local/lib/libosal.so
-	COMMAND i686-pc-linux-gnu-gcc -I${CMAKE_SOURCE_DIR}/headers -shared -o ${SYSROOT}/usr/local/lib/libosal.so ${CMAKE_SOURCE_DIR}/libosal.c
+add_custom_command(OUTPUT OUTPUT ${CMAKE_BINARY_DIR}/libosal.so
+	COMMAND i686-pc-linux-gnu-gcc -I${CMAKE_SOURCE_DIR}/headers -shared -o ${CMAKE_BINARY_DIR}/libosal.so ${CMAKE_SOURCE_DIR}/libosal.c
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/libosal.so ${SYSROOT}/usr/local/lib/libosal.so
 )
 
-add_custom_command(OUTPUT OUTPUT ${SYSROOT}/usr/local/lib/libplatform_config.so
-	COMMAND i686-pc-linux-gnu-gcc -I${CMAKE_SOURCE_DIR}/headers -shared -o ${SYSROOT}/usr/local/lib/libplatform_config.so ${CMAKE_SOURCE_DIR}/libplatform_config.c
+add_custom_command(OUTPUT OUTPUT ${CMAKE_BINARY_DIR}/libplatform_config.so
+	COMMAND i686-pc-linux-gnu-gcc -I${CMAKE_SOURCE_DIR}/headers -shared -o ${CMAKE_BINARY_DIR}/libplatform_config.so ${CMAKE_SOURCE_DIR}/libplatform_config.c
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/libplatform_config.so ${SYSROOT}/usr/local/lib/libplatform_config.so
 )
 
 add_custom_target(install ALL
 	DEPENDS ${headers}
-			${SYSROOT}/usr/local/lib/libgdl.so
-			${SYSROOT}/usr/local/lib/libismd_core.so
-			${SYSROOT}/usr/local/lib/libosal.so
-			${SYSROOT}/usr/local/lib/libplatform_config.so
+			libgdl.so
+			libismd_core.so
+			libosal.so
+			libplatform_config.so
 )
