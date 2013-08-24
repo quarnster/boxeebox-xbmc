@@ -86,7 +86,6 @@ ExternalProject_Add(
 	yayl
 	GIT_REPOSITORY  	https://github.com/lloyd/yajl.git
 	GIT_TAG				2.0.1
-	URL_MD5 			99
 	CONFIGURE_COMMAND 	${BASIC_CMAKE} 
 )
 
@@ -113,7 +112,7 @@ ExternalProject_Add(
 ExternalProject_Add(
 	libcdio
 	URL 				http://ftp.gnu.org/gnu/libcdio/libcdio-0.90.tar.gz
-	URL_MD5				0
+	URL_MD5				1b245b023fb03a58d030fd2800db3247
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 )
 
