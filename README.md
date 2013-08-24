@@ -15,7 +15,7 @@ Pull requests (if needed) enabling this to work on other systems are welcome.
 
 Ubuntu seemed to require:
 ```
-sudo apt-get install cmake make gcc texinfo gawk bison flex
+sudo apt-get install cmake make gcc texinfo gawk bison flex swig default-jre gperf
 ```
 
 I'm pretty sure my OSX brew line was similar.
