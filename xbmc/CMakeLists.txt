@@ -11,7 +11,7 @@ file(WRITE ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh
 "
 #!/bin/sh
 PF=`${SYSROOT}/usr/bin/${TARGET}-pkg-config --libs python`
-export LDFLAGS=\"-L${TARGET_DIR}/lib -lgcc -lm -ltinyxml -lgdl -lismd_core -losal -lplatform_config\"
+export LDFLAGS=\"-L${TARGET_DIR}/lib -lgcc -lm -ltinyxml -lgdl -lismd_core -lismd_viddec -lismd_vidpproc -lismd_audio -lismd_vidrend -lismd_demux -losal -lplatform_config\"
 export CFLAGS=\"-DTARGET_BOXEE=1 -DTIXML_USE_STL -I${TARGET_DIR}/include -DHAS_INTEL_SMD\"
 export CXXFLAGS=\"$CFLAGS\"
 export FREETYPE2_CFLAGS=\"-I${TARGET_DIR}/include/freetype2\"
@@ -45,6 +45,8 @@ ExternalProject_Add(
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.h xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.h
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.cpp xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.cpp
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.h xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.h
+		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxSMD.cpp xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxSMD.cpp
+		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxSMD.h xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxSMD.h
 	CONFIGURE_COMMAND	${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh 
 	BUILD_COMMAND 		make ${PARALLEL}
 	BUILD_IN_SOURCE 	1

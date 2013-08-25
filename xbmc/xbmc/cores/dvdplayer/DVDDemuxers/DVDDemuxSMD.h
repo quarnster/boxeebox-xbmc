@@ -22,15 +22,15 @@
  */
 
 #include "DVDDemux.h"
-#include "Thread.h"
+#include "threads/Thread.h"
 
-#ifdef HAS_INTEL_SMD
+#ifdef HAS_INTEL_SMD2
 
-#include "../../../dvb/dvbepgloader.h"
-#include "IntelSMDGlobals.h"
-#include "cores/AudioRenderers/IntelSMDAudioRenderer.h"
-#include "BitstreamStats.h"
-#include "Stopwatch.h"
+//TODO(q) #include "../../../dvb/dvbepgloader.h"
+#include "../IntelSMDGlobals.h"
+//#include "cores/AudioRenderers/IntelSMDAudioRenderer.h"
+#include "utils/BitstreamStats.h"
+#include "utils/Stopwatch.h"
 
 struct dvbpsi_decoder_s;
 

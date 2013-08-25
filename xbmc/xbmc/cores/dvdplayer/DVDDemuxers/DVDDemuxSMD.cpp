@@ -21,26 +21,26 @@
 
 #include "DVDDemuxSMD.h"
 
-#ifdef HAS_INTEL_SMD
+#ifdef HAS_INTEL_SMD2
 
 #include "system.h"
-#include "IntelSMDGlobals.h"
+#include "../IntelSMDGlobals.h"
 #include "DVDInputStreams/DVDInputStream.h"
-#include "xbmc/cores/dvb/dvbmanager.h"
+// TODO(q) #include "xbmc/cores/dvb/dvbmanager.h"
 #include "DVDDemuxUtils.h"
 #include "utils/log.h"
 #include "cores/IntelSMDGlobals.h"
-#include "cores/AudioRenderers/IntelSMDAudioRenderer.h"
+//#include "cores/AudioRenderers/IntelSMDAudioRenderer.h"
 #include "cores/VideoRenderers/RenderManager.h"
-#include "WindowingFactory.h"
-#include "GUISettings.h"
+//#include "WindowingFactory.h"
+#include "settings/GUISettings.h"
 
 #include <ismd_vidpproc.h>
-#include <dvbpsi.h>
-#include <psi.h>
-#include <descriptor.h>
-#include <tables/pat.h>
-#include <tables/pmt.h>
+//#include <dvbpsi.h>
+//#include <psi.h>
+//#include <descriptor.h>
+//#include <tables/pat.h>
+//#include <tables/pmt.h>
 
 #define PAT_PID 0
 #define EIT_PID 0x12
