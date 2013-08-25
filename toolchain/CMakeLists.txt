@@ -72,6 +72,37 @@ ExternalProject_Add(
 	DEPENDS 			glibc
 )
 
+ExternalProject_Add(
+	gdb
+	PREFIX 				${CMAKE_BINARY_DIR}/gdb
+	URL 				http://ftp.gnu.org/gnu/gdb/gdb-6.8a.tar.bz2
+	URL_MD5				da20d043e6729f74b909bd507bcae5c9
+	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --with-sysroot=${SYSROOT} --target=${TARGET} --prefix=${TARGET_DIR} --program-prefix=${TARGET}-
+	BUILD_COMMAND 		make ${PARALLEL}
+	DEPENDS 			gcc2
+)
+
+ExternalProject_Add(
+	termcap
+	URL 				ftp://ftp.gnu.org/gnu/termcap/termcap-1.3.1.tar.gz
+	URL_MD5 			ffe6f86e63a3a29fa53ac645faaabdfa
+	CONFIGURE_COMMAND 	CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib <SOURCE_DIR>/configure --target=${TARGET} --prefix=${SYSROOT}/usr/local/
+	BUILD_COMMAND 		make ${PARALLEL}
+	DEPENDS 			gcc2
+)
+
+
+ExternalProject_Add(
+	targetgdb
+	PREFIX 				${CMAKE_BINARY_DIR}/gdb
+	URL 				http://ftp.gnu.org/gnu/gdb/gdb-6.8a.tar.bz2
+	URL_MD5				da20d043e6729f74b909bd507bcae5c9
+	CONFIGURE_COMMAND 	LDFLAGS=-L${SYSROOT}/usr/local/lib <SOURCE_DIR>/configure --host=${TARGET} --prefix=${SYSROOT}/usr/local/
+	BUILD_COMMAND 		make ${PARALLEL}
+	DEPENDS 			gcc2 termcap
+)
+
+
 file(WRITE "${SYSROOT}/usr/bin/${TARGET}-pkg-config" "
 #!/bin/bash
 
