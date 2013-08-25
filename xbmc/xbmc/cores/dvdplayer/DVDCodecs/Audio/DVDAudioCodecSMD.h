@@ -41,7 +41,7 @@ public:
   virtual int GetChannels();
   virtual CAEChannelInfo GetChannelMap();
   virtual int GetSampleRate();
-  virtual int GetBitsPerSample();
+  virtual AEDataFormat GetDataFormat();
   virtual unsigned char GetFlags();
   virtual const char* GetName()  { return "smd"; }
   

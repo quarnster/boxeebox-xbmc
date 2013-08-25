@@ -97,6 +97,97 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h xbmc/x
 +#define CONF_FLAGS_SMD_DECODING   0x004000
 +
  #endif
+diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDAudio.cpp xbmc/xbmc/cores/dvdplayer/DVDAudio.cpp
+--- xbmc-12.2/xbmc/cores/dvdplayer/DVDAudio.cpp	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDAudio.cpp	2013-08-25 07:18:55.000000000 +0200
+@@ -321,7 +321,9 @@
+ 
+ void CDVDAudio::SetVolume(float volume)
+ {
++#ifndef HAS_INTEL_SMD
+   CSingleLock lock (m_critSection);
++#endif
+   if (m_pAudioStream) m_pAudioStream->SetVolume(volume);
+ }
+ 
+@@ -343,14 +345,18 @@
+ 
+ void CDVDAudio::Pause()
+ {
++#ifndef HAS_INTEL_SMD
+   CSingleLock lock (m_critSection);
++#endif
+   if (m_pAudioStream) m_pAudioStream->Pause();
+   m_time.Flush();
+ }
+ 
+ void CDVDAudio::Resume()
+ {
++#ifndef HAS_INTEL_SMD
+   CSingleLock lock (m_critSection);
++#endif
+   if (m_pAudioStream) m_pAudioStream->Resume();
+ }
+ 
+@@ -386,12 +392,12 @@
+ 
+   if(audioframe.passthrough != m_bPassthrough)
+     return false;
+-
++#ifndef HAS_INTEL_SMD
+   if(m_iBitrate       != audioframe.sample_rate
+   || m_iBitsPerSample != audioframe.bits_per_sample
+   || m_channelLayout  != audioframe.channel_layout)
+     return false;
+-
++#endif
+   return true;
+ }
+ 
+diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDClock.cpp xbmc/xbmc/cores/dvdplayer/DVDClock.cpp
+--- xbmc-12.2/xbmc/cores/dvdplayer/DVDClock.cpp	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDClock.cpp	2013-08-25 07:20:36.000000000 +0200
+@@ -25,6 +25,10 @@
+ #include "threads/SingleLock.h"
+ #include "utils/log.h"
+ 
++#ifdef HAS_INTEL_SMD
++#include "../IntelSMDGlobals.h"
++#endif
++
+ int64_t CDVDClock::m_systemOffset;
+ int64_t CDVDClock::m_systemFrequency;
+ CCriticalSection CDVDClock::m_systemsection;
+@@ -45,6 +49,9 @@
+ 
+   m_ismasterclock = true;
+   m_startClock = 0;
++#ifdef HAS_INTEL_SMD
++  g_IntelSMDGlobals.ResetClock();
++#endif
+ }
+ 
+ CDVDClock::~CDVDClock()
+@@ -118,12 +125,19 @@
+   {
+     if(!m_pauseClock)
+       m_pauseClock = g_VideoReferenceClock.GetTime();
++#ifdef HAS_INTEL_SMD
++    g_IntelSMDGlobals.PauseClock();
++#endif
+     return;
+   }
+ 
+   int64_t current;
+   int64_t newfreq = m_systemFrequency * DVD_PLAYSPEED_NORMAL / iSpeed;
+ 
++#ifdef HAS_INTEL_SMD
++  g_IntelSMDGlobals.ResumeClock();
++#endif
++
+   current = g_VideoReferenceClock.GetTime();
+   if( m_pauseClock )
+   {
 diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodec.h xbmc/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodec.h
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodec.h	2013-05-03 07:57:41.000000000 +0200
 +++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodec.h	2013-08-25 06:45:16.000000000 +0200
@@ -124,6 +215,59 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Audio/Makefile.
  
  ifeq ($(findstring osx,@ARCH@),osx)
  SRCS += DVDAudioCodecPassthroughFFmpeg.cpp
+diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp xbmc/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
+--- xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2013-08-25 07:28:06.000000000 +0200
+@@ -48,7 +48,10 @@
+ #include "Overlay/DVDOverlayCodecText.h"
+ #include "Overlay/DVDOverlayCodecTX3G.h"
+ #include "Overlay/DVDOverlayCodecFFmpeg.h"
+-
++#if defined HAS_INTEL_SMD
++#include "Audio/DVDAudioCodecSMD.h"
++#include "Video/DVDVideoCodecSMD.h"
++#endif
+ 
+ #include "DVDStreamInfo.h"
+ #include "settings/GUISettings.h"
+@@ -172,6 +175,16 @@
+ 
+   CLog::Log(LOGDEBUG, "CDVDFactoryCodec: compiled in hardware support: %s", hwSupport.c_str());
+ 
++#ifdef HAS_INTEL_SMD
++    // for DVD use libmpeg2
++//    if(hint.width == 720 && (hint.height == 480 || hint.height == 576))
++//      if( hint.codec == CODEC_ID_MPEG2VIDEO && (pCodec = OpenCodec(new CDVDVideoCodecLibMpeg2(), hint, dvdOptions)) )
++//        return pCodec;
++
++    if( !hint.software && (pCodec = OpenCodec(new CDVDVideoCodecSMD(), hint, options)) )
++      return pCodec;
++#endif
++
+   // dvd's have weird still-frames in it, which is not fully supported in ffmpeg
+   if(hint.stills && (hint.codec == CODEC_ID_MPEG2VIDEO || hint.codec == CODEC_ID_MPEG1VIDEO))
+   {
+@@ -266,6 +279,12 @@
+   CDVDAudioCodec* pCodec = NULL;
+   CDVDCodecOptions options;
+ 
++#if defined(HAS_INTEL_SMD)
++  if( !hint.software )
++    pCodec = OpenCodec( new CDVDAudioCodecSMD(), hint, options );
++  if( pCodec ) return pCodec;
++#endif
++
+   if (passthrough)
+   {
+ #if defined(TARGET_DARWIN_OSX) || defined(TARGET_DARWIN_IOS)
+@@ -283,7 +302,6 @@
+     pCodec = OpenCodec( new CDVDAudioCodecPassthrough(), hint, options );
+     if( pCodec ) return pCodec;
+   }
+-
+   switch (hint.codec)
+   {
+   case CODEC_ID_MP2:
 diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in xbmc/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in	2013-05-03 07:57:41.000000000 +0200
 +++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in	2013-08-25 06:28:11.000000000 +0200

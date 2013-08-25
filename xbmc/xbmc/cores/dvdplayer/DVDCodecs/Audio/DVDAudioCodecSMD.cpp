@@ -254,9 +254,12 @@ int CDVDAudioCodecSMD::GetSampleRate()
   return m_sample_rate;
 }
 
-int CDVDAudioCodecSMD::GetBitsPerSample()
+AEDataFormat CDVDAudioCodecSMD::GetDataFormat()
 {
-  return m_sample_size;
+  switch (m_sample_size) {
+  default: return AE_FMT_S8;
+  case 16: return AE_FMT_S16LE;
+  }
 }
 
 // See DVDPlayerAudio.h
