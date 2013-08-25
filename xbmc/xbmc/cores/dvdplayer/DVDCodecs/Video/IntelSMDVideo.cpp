@@ -36,6 +36,12 @@
 
 #define __MODULE_NAME__ "IntelSMD"
 
+#if 0
+#define VERBOSE() CLog::Log(LOGDEBUG, "%s::%s", __MODULE_NAME__, __FUNCTION__)
+#else
+#define VERBOSE()
+#endif
+
 union pts_union
 {
   double  pts_d;
@@ -69,17 +75,19 @@ CIntelSMDVideo* CIntelSMDVideo::m_pInstance = NULL;
 
 CIntelSMDVideo::CIntelSMDVideo()
 {
+  VERBOSE();
   SetDefaults();
 }
 
 
 CIntelSMDVideo::~CIntelSMDVideo()
 {
-  CLog::Log(LOGDEBUG, "CIntelSMDVideo::~CIntelSMDVideo called\n");
+  VERBOSE();
 }
 
 void CIntelSMDVideo::SetDefaults()
 {
+  VERBOSE();
   m_IsConfigured = false;
   m_drop_state = false;
   m_bRunning = false;
@@ -100,6 +108,7 @@ void CIntelSMDVideo::SetDefaults()
 
 void CIntelSMDVideo::RemoveInstance(void)
 {
+  VERBOSE();
   if (m_pInstance)
   {
     delete m_pInstance;
@@ -109,6 +118,7 @@ void CIntelSMDVideo::RemoveInstance(void)
 
 CIntelSMDVideo* CIntelSMDVideo::GetInstance(void)
 {
+  VERBOSE();
   if (!m_pInstance)
   {
     m_pInstance = new CIntelSMDVideo();
@@ -118,6 +128,7 @@ CIntelSMDVideo* CIntelSMDVideo::GetInstance(void)
 
 bool CIntelSMDVideo::vc1_viddec_init (Vc1Viddec *viddec)
 {
+  VERBOSE();
 
   viddec->vCodec = ISMD_CODEC_TYPE_VC1;
   memset ( &viddec->SPMP_PESpacket_PayloadFormatHeader[0], 0, MAX_SIZE_PES_SEQUENCE_HEADER );
@@ -140,6 +151,7 @@ bool CIntelSMDVideo::vc1_viddec_init (Vc1Viddec *viddec)
 
 void h264_viddec_init(H264Viddec *viddec)
 {
+  VERBOSE();
   viddec->vCodec = ISMD_CODEC_TYPE_H264;
   viddec->first = true;
   viddec->h264_codec_priv_pushed_data_ptr = NULL;
@@ -151,6 +163,7 @@ void h264_viddec_init(H264Viddec *viddec)
 
 bool h264_viddec_parse_codec_priv_data(H264Viddec *viddec, unsigned char *buf, int size)
 {
+  VERBOSE();
   unsigned int offset = 0;
   unsigned char *pdata = NULL;
   unsigned char sync_header[4];
@@ -688,6 +701,7 @@ unsigned char *H264_viddec_convert(H264Viddec *viddec, unsigned char *buf,
 void
 CIntelSMDVideo::vc1_viddec_SPMP_PESpacket_PayloadFormatHeader (Vc1Viddec *viddec, unsigned char *pCodecData, int width, int height)
 {
+  VERBOSE();
   if ( viddec->size_SPMP_PESpacket_PayloadFormatHeader > 0 )
   {
     viddec->size_SPMP_PESpacket_PayloadFormatHeader = 0;
@@ -725,6 +739,7 @@ unsigned char *
 CIntelSMDVideo::Vc1_viddec_convert_SPMP (Vc1Viddec *viddec, unsigned char *buf, int size,
     bool need_seq_hdr, unsigned int *outbuf_size)
 {
+  VERBOSE();
 
   unsigned char *outbuf = NULL;
   unsigned char* pCurrent; // points to next writing position of the new buffer
@@ -783,6 +798,7 @@ CIntelSMDVideo::Vc1_viddec_convert_SPMP (Vc1Viddec *viddec, unsigned char *buf, 
 
 int CIntelSMDVideo::vc1_viddec_encapsulate_and_write_ebdu ( unsigned char* pDes, unsigned int SizeDes, unsigned char* pRbdu, unsigned int SizeRBDU )
 {
+  VERBOSE();
   int    ZeroRun = 0;
   int i;
   unsigned int j = 0;
@@ -835,6 +851,7 @@ unsigned char *
 CIntelSMDVideo::Vc1_viddec_convert_AP (Vc1Viddec *viddec, unsigned char *buf,int size,
     bool need_seq_hdr,unsigned int *outbuf_size)
 {
+  VERBOSE();
 
   unsigned char *outbuf = NULL;
   unsigned char* pCurrent; // points to next writing position of the new buffer
@@ -928,7 +945,7 @@ CIntelSMDVideo::Vc1_viddec_convert_AP (Vc1Viddec *viddec, unsigned char *buf,int
 
 void CIntelSMDVideo::Pause()
 {
-  CLog::Log(LOGDEBUG, "CIntelSMDVideo::Pause\n");
+  VERBOSE();
 
   g_IntelSMDGlobals.SetVideoDecoderState(ISMD_DEV_STATE_PAUSE);
   g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PAUSE);
@@ -936,7 +953,7 @@ void CIntelSMDVideo::Pause()
 
 void CIntelSMDVideo::Resume()
 {
-  CLog::Log(LOGDEBUG, "CIntelSMDVideo::Resume\n");
+  VERBOSE();
 
   g_IntelSMDGlobals.SetVideoRenderBaseTime(g_IntelSMDGlobals.GetBaseTime());
 
@@ -951,7 +968,7 @@ void CIntelSMDVideo::Resume()
 
 void CIntelSMDVideo::Reset()
 {
-  CLog::Log(LOGDEBUG, "CIntelSMDVideo::Reset\n");
+  VERBOSE();
 
   m_bRunning = false;
 
@@ -965,6 +982,7 @@ void CIntelSMDVideo::Reset()
 
 bool CIntelSMDVideo::CheckStartRunning()
 {
+  VERBOSE();
   /*
   printf("m_bRunning %d m_bFlushFlag %d has audio %d in menu %d playing %d\n",
       m_bRunning, m_bFlushFlag, g_application.m_pPlayer->HasAudio(), g_application.m_pPlayer->IsInMenu(),
@@ -996,6 +1014,7 @@ bool CIntelSMDVideo::CheckStartRunning()
 
 int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, double pts, int bufSize)
 {
+  VERBOSE();
   ismd_es_buf_attr_t *buf_attrs;
   ismd_result_t ismd_ret;
   uint8_t *ptr;
@@ -1145,6 +1164,7 @@ int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, d
 
 int CIntelSMDVideo::WriteToRenderer()
 {
+  VERBOSE();
   ismd_result_t result;
   ismd_buffer_handle_t buffer_out_handle = ISMD_BUFFER_HANDLE_INVALID;
   ismd_port_handle_t outputPort = g_IntelSMDGlobals.GetVidDecOutput();
@@ -1176,6 +1196,7 @@ int CIntelSMDVideo::WriteToRenderer()
 
 bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_type, int extradata_size, void *extradata)
 {
+  VERBOSE();
   bool bOK;
 
   ismd_result_t result;
@@ -1194,13 +1215,13 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
 
   if(!g_IntelSMDGlobals.CreateVideoRender(GDL_VIDEO_PLANE))
   {
-    printf("CIntelSMDVideo::OpenDecoder CreateVideoRender failed\n");
+    CLog::Log(LOGERROR, "CIntelSMDVideo::OpenDecoder CreateVideoRender failed");
     return false;
   }
 
   if(!g_IntelSMDGlobals.ConnectDecoderToRenderer())
   {
-    printf("CIntelSMDRenderer::Configure ConnectDecoderToRenderer failed\n");
+    CLog::Log(LOGERROR, "CIntelSMDRenderer::Configure ConnectDecoderToRenderer failed");
     return false;
   }
 
@@ -1256,7 +1277,7 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
 
 void CIntelSMDVideo::CloseDecoder(void)
 {
-  printf("%s\n", __FUNCTION__);
+  VERBOSE();
 
   m_bRunning = false;
 
@@ -1282,6 +1303,7 @@ void CIntelSMDVideo::CloseDecoder(void)
 
 bool CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, double pts)
 {
+  VERBOSE();
   bool filtered = false;
   unsigned int demuxer_bytes = size;
   double demuxer_pts = pts;
@@ -1346,6 +1368,7 @@ bool CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, dou
 
 bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
 {
+  VERBOSE();
   pDvdVideoPicture->dts = DVD_NOPTS_VALUE;
   pDvdVideoPicture->pts = DVD_NOPTS_VALUE;
 
@@ -1362,7 +1385,7 @@ bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
   pDvdVideoPicture->color_matrix = 0;
   pDvdVideoPicture->iFlags = DVP_FLAG_ALLOCATED;
   //pDvdVideoPicture->iFlags = 0;
-//TODO(q)  pDvdVideoPicture->format = DVDVideoPicture::FMT_NV12;
+  pDvdVideoPicture->format = RENDER_FMT_NV12;
 
   ismd_viddec_stream_properties_t prop;
 
@@ -1412,6 +1435,7 @@ bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
 
 void CIntelSMDVideo::SetDropState(bool bDrop)
 {
+  VERBOSE();
   if (m_drop_state != bDrop)
   {
     m_drop_state = bDrop;
@@ -1422,6 +1446,7 @@ void CIntelSMDVideo::SetDropState(bool bDrop)
 
 bool CIntelSMDVideo::GetInputPortStatus(unsigned int& curDepth, unsigned int& maxDepth)
 {
+  VERBOSE();
   ismd_port_handle_t inputPort = g_IntelSMDGlobals.GetVidDecInput();
 
   g_IntelSMDGlobals.GetPortStatus(g_IntelSMDGlobals.GetVidDecInput(), curDepth, maxDepth);

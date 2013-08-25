@@ -245,7 +245,7 @@ int CDVDAudioCodecSMD::GetChannels()
 CAEChannelInfo CDVDAudioCodecSMD::GetChannelMap()
 {
   // We always present stereo ch mapping
-  static enum AEChannel map[2] = {AE_CH_FL, AE_CH_FR };
+  static enum AEChannel map[3] = {AE_CH_FL, AE_CH_FR , AE_CH_NULL};
   return CAEChannelInfo(map);
 }
 

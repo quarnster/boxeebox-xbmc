@@ -20,7 +20,7 @@ export PYTHON_NOVERSIONCHECK=\"y\"
 export PYTHON=\"${TARGET_DIR}/bin/python\"
 export PYTHON_CPPFLAGS=\"-I${TARGET_DIR}/include/python2.7\"
 export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
-../xbmc/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-gl --disable-sdl --disable-mysql --disable-x11 --disable-samba  --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick --disable-debug --disable-texturepacker
+../xbmc/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-gl --disable-sdl --disable-alsa --disable-mysql --disable-x11 --disable-samba  --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick --enable-debug --disable-texturepacker
 "
 )
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh)

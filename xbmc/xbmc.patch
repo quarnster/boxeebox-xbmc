@@ -1,6 +1,6 @@
 diff -x generated -r -u xbmc-12.2/Makefile.in xbmc/Makefile.in
 --- xbmc-12.2/Makefile.in	2013-05-03 07:57:40.000000000 +0200
-+++ xbmc/Makefile.in	2013-08-25 06:28:11.000000000 +0200
++++ xbmc/Makefile.in	2013-08-25 13:17:42.000000000 +0200
 @@ -476,7 +476,7 @@
  	$(MAKE) -C pvr-addons install
  endif
@@ -39,7 +39,7 @@ diff -x generated -r -u xbmc-12.2/Makefile.in xbmc/Makefile.in
  		-and \
 diff -x generated -r -u xbmc-12.2/configure xbmc/configure
 --- xbmc-12.2/configure	2013-05-03 07:57:46.000000000 +0200
-+++ xbmc/configure	2013-08-25 06:28:11.000000000 +0200
++++ xbmc/configure	2013-08-25 13:17:42.000000000 +0200
 @@ -18135,7 +18135,7 @@
  }
  _ACEOF
@@ -69,7 +69,7 @@ diff -x generated -r -u xbmc-12.2/configure xbmc/configure
  fi
 diff -x generated -r -u xbmc-12.2/xbmc/cores/Makefile.in xbmc/xbmc/cores/Makefile.in
 --- xbmc-12.2/xbmc/cores/Makefile.in	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/Makefile.in	2013-08-25 06:28:11.000000000 +0200
++++ xbmc/xbmc/cores/Makefile.in	2013-08-25 13:17:42.000000000 +0200
 @@ -1,4 +1,5 @@
  SRCS = DummyVideoPlayer.cpp
 +SRCS += IntelSMDGlobals.cpp
@@ -78,7 +78,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/Makefile.in xbmc/xbmc/cores/Makefil
  
 diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/Makefile.in xbmc/xbmc/cores/VideoRenderers/Makefile.in
 --- xbmc-12.2/xbmc/cores/VideoRenderers/Makefile.in	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/VideoRenderers/Makefile.in	2013-08-25 06:28:11.000000000 +0200
++++ xbmc/xbmc/cores/VideoRenderers/Makefile.in	2013-08-25 13:17:42.000000000 +0200
 @@ -3,6 +3,7 @@
  SRCS += OverlayRendererUtil.cpp
  SRCS += RenderCapture.cpp
@@ -89,7 +89,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/Makefile.in xbmc/xbm
  SRCS += yuv2rgb.neon.S
 diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h xbmc/xbmc/cores/VideoRenderers/RenderFlags.h
 --- xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/VideoRenderers/RenderFlags.h	2013-08-25 06:28:11.000000000 +0200
++++ xbmc/xbmc/cores/VideoRenderers/RenderFlags.h	2013-08-25 13:17:42.000000000 +0200
 @@ -73,4 +73,6 @@
  #define CONF_FLAGS_FORMAT_SBS     0x001000
  #define CONF_FLAGS_FORMAT_TB      0x002000
@@ -97,9 +97,56 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h xbmc/x
 +#define CONF_FLAGS_SMD_DECODING   0x004000
 +
  #endif
+diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderManager.cpp xbmc/xbmc/cores/VideoRenderers/RenderManager.cpp
+--- xbmc-12.2/xbmc/cores/VideoRenderers/RenderManager.cpp	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/cores/VideoRenderers/RenderManager.cpp	2013-08-25 13:17:42.000000000 +0200
+@@ -35,7 +35,9 @@
+ #include "settings/GUISettings.h"
+ #include "settings/AdvancedSettings.h"
+ 
+-#if defined(HAS_GL)
++#if defined(HAS_INTEL_SMD)
++  #include "IntelSMDRenderer.h"
++#elif defined(HAS_GL)
+   #include "LinuxRendererGL.h"
+ #elif HAS_GLES == 2
+   #include "LinuxRendererGLES.h"
+@@ -325,7 +327,9 @@
+   m_bPauseDrawing = false;
+   if (!m_pRenderer)
+   {
+-#if defined(HAS_GL)
++#if defined(HAS_INTEL_SMD)
++    m_pRenderer = new CIntelSMDRenderer();
++#elif defined(HAS_GL)
+     m_pRenderer = new CLinuxRendererGL();
+ #elif HAS_GLES == 2
+     m_pRenderer = new CLinuxRendererGLES();
+diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderManager.h xbmc/xbmc/cores/VideoRenderers/RenderManager.h
+--- xbmc-12.2/xbmc/cores/VideoRenderers/RenderManager.h	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/cores/VideoRenderers/RenderManager.h	2013-08-25 13:17:42.000000000 +0200
+@@ -43,6 +43,7 @@
+ class CLinuxRenderer;
+ class CLinuxRendererGL;
+ class CLinuxRendererGLES;
++class CIntelSMDRenderer;
+ 
+ class CXBMCRenderManager
+ {
+@@ -110,7 +111,9 @@
+ 
+   void UpdateResolution();
+ 
+-#ifdef HAS_GL
++#if defined(HAS_INTEL_SMD)
++  CIntelSMDRenderer   *m_pRenderer;
++#elif defined(HAS_GL)
+   CLinuxRendererGL    *m_pRenderer;
+ #elif HAS_GLES == 2
+   CLinuxRendererGLES  *m_pRenderer;
 diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDAudio.cpp xbmc/xbmc/cores/dvdplayer/DVDAudio.cpp
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDAudio.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/dvdplayer/DVDAudio.cpp	2013-08-25 07:18:55.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDAudio.cpp	2013-08-25 13:17:42.000000000 +0200
 @@ -321,7 +321,9 @@
  
  void CDVDAudio::SetVolume(float volume)
@@ -146,7 +193,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDAudio.cpp xbmc/xbmc/co
  
 diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDClock.cpp xbmc/xbmc/cores/dvdplayer/DVDClock.cpp
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDClock.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/dvdplayer/DVDClock.cpp	2013-08-25 07:20:36.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDClock.cpp	2013-08-25 13:17:42.000000000 +0200
 @@ -25,6 +25,10 @@
  #include "threads/SingleLock.h"
  #include "utils/log.h"
@@ -190,7 +237,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDClock.cpp xbmc/xbmc/co
    {
 diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodec.h xbmc/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodec.h
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodec.h	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodec.h	2013-08-25 06:45:16.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodec.h	2013-08-25 13:17:42.000000000 +0200
 @@ -35,6 +35,12 @@
  class CDVDCodecOption;
  class CDVDCodecOptions;
@@ -206,7 +253,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioC
  public:
 diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Audio/Makefile.in xbmc/xbmc/cores/dvdplayer/DVDCodecs/Audio/Makefile.in
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Audio/Makefile.in	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/Audio/Makefile.in	2013-08-25 06:28:11.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/Audio/Makefile.in	2013-08-25 13:17:42.000000000 +0200
 @@ -7,6 +7,7 @@
  SRCS += DVDAudioCodecLPcm.cpp
  SRCS += DVDAudioCodecPassthrough.cpp
@@ -217,7 +264,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Audio/Makefile.
  SRCS += DVDAudioCodecPassthroughFFmpeg.cpp
 diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp xbmc/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2013-08-25 07:28:06.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2013-08-25 13:17:42.000000000 +0200
 @@ -48,7 +48,10 @@
  #include "Overlay/DVDOverlayCodecText.h"
  #include "Overlay/DVDOverlayCodecTX3G.h"
@@ -270,7 +317,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec
    case CODEC_ID_MP2:
 diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in xbmc/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in	2013-08-25 06:28:11.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in	2013-08-25 13:17:42.000000000 +0200
 @@ -3,6 +3,8 @@
  SRCS  = DVDVideoCodecFFmpeg.cpp
  SRCS += DVDVideoCodecLibMpeg2.cpp
@@ -282,7 +329,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.
  SRCS += VDPAU.cpp
 diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp xbmc/xbmc/cores/dvdplayer/DVDPlayer.cpp
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/dvdplayer/DVDPlayer.cpp	2013-08-25 06:28:11.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDPlayer.cpp	2013-08-25 13:17:42.000000000 +0200
 @@ -86,6 +86,10 @@
  #include "LangInfo.h"
  #include "ApplicationMessenger.h"
@@ -423,7 +470,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp xbmc/xbmc/c
    // In case we stalled, don't output any subs
 diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp	2013-08-25 06:28:11.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp	2013-08-25 13:33:14.000000000 +0200
 @@ -45,6 +45,11 @@
  #include <iterator>
  #include "utils/log.h"
@@ -436,23 +483,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/x
  using namespace std;
  
  class CPulldownCorrection
-@@ -305,6 +310,15 @@
-   m_iCurrentPts = DVD_NOPTS_VALUE;
-   m_FlipTimeStamp = m_pClock->GetAbsoluteClock();
- 
-+#ifdef HAS_VIDEO_PLAYBACK
-+  // TODO(q)
-+  // if(!m_output.inited)
-+  // {
-+  //   g_renderManager.PreInit();
-+  //   m_output.inited = true;
-+  // }
-+#endif
-+
-   g_dvdPerformanceCounter.EnableVideoDecodePerformance(this);
- }
- 
-@@ -411,6 +425,7 @@
+@@ -411,6 +416,7 @@
      }
      else if (pMsg->IsType(CDVDMsg::GENERAL_DELAY))
      {
@@ -460,7 +491,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/x
        if (m_speed != DVD_PLAYSPEED_PAUSE)
        {
          double timeout = static_cast<CDVDMsgDouble*>(pMsg)->m_value;
-@@ -423,6 +438,7 @@
+@@ -423,6 +429,7 @@
          while(!m_bStop && CDVDClock::GetAbsoluteClock() < timeout)
            Sleep(1);
        }
@@ -468,7 +499,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/x
      }
      else if (pMsg->IsType(CDVDMsg::VIDEO_SET_ASPECT))
      {
-@@ -444,6 +460,12 @@
+@@ -444,6 +451,12 @@
        picture.iFlags &= ~DVP_FLAG_ALLOCATED;
        m_packets.clear();
  
@@ -481,7 +512,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/x
        m_pullupCorrection.Flush();
        //we need to recalculate the framerate
        //TODO: this needs to be set on a streamchange instead
-@@ -839,6 +861,12 @@
+@@ -839,6 +852,12 @@
  
  void CDVDPlayerVideo::SetSpeed(int speed)
  {
@@ -494,7 +525,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/x
    if(m_messageQueue.IsInited())
      m_messageQueue.Put( new CDVDMsgInt(CDVDMsg::PLAYER_SETSPEED, speed), 1 );
    else
-@@ -890,6 +918,14 @@
+@@ -890,6 +909,14 @@
  #ifdef HAS_VIDEO_PLAYBACK
  void CDVDPlayerVideo::ProcessOverlays(DVDVideoPicture* pSource, double pts)
  {
@@ -509,7 +540,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/x
    // remove any overlays that are out of time
    if (m_started)
      m_pOverlayContainer->CleanUp(pts - m_iSubtitleDelay);
-@@ -961,6 +997,11 @@
+@@ -961,6 +988,11 @@
        if(pOverlay->iGroupId != pSource->iGroupId)
          continue;
  
@@ -521,22 +552,21 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/x
        double pts2 = pOverlay->bForced ? pts : pts - m_iSubtitleDelay;
  
        if((pOverlay->iPTSStartTime <= pts2 && (pOverlay->iPTSStopTime > pts2 || pOverlay->iPTSStopTime == 0LL)) || pts == 0)
-@@ -1138,6 +1179,14 @@
+@@ -1138,6 +1170,13 @@
        m_bAllowFullscreen = false; // only allow on first configure
      }
  
 +#ifdef HAS_INTEL_SMD
-+    // TODO(q)
-+    // if(pPicture->format == DVDVideoPicture::FMT_NV12)
-+    // {
-+    //   flags |= CONF_FLAGS_SMD_DECODING;
-+    // }
++    if(pPicture->format == RENDER_FMT_NV12)
++    {
++      flags |= CONF_FLAGS_SMD_DECODING;
++    }
 +#endif
 +
      CLog::Log(LOGDEBUG,"%s - change configuration. %dx%d. framerate: %4.2f. format: %s",__FUNCTION__,pPicture->iWidth, pPicture->iHeight, config_framerate, formatstr.c_str());
      if(!g_renderManager.Configure(pPicture->iWidth, pPicture->iHeight, pPicture->iDisplayWidth, pPicture->iDisplayHeight, config_framerate, flags, pPicture->format, pPicture->extended_format, m_hints.orientation))
      {
-@@ -1520,11 +1569,18 @@
+@@ -1520,11 +1559,18 @@
  
  std::string CDVDPlayerVideo::GetPlayerInfo()
  {
@@ -556,7 +586,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/x
    s << ", drop:" << m_iDroppedFrames;
  
    int pc = m_pullupCorrection.GetPatternLength();
-@@ -1532,7 +1588,17 @@
+@@ -1532,7 +1578,17 @@
      s << ", pc:" << pc;
    else
      s << ", pc:none";
@@ -575,7 +605,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/x
    return s.str();
  }
  
-@@ -1575,6 +1641,10 @@
+@@ -1575,6 +1631,10 @@
    //and is able to calculate the correct frame duration from it
    double frameduration = m_pullupCorrection.GetFrameDuration();
  
@@ -588,7 +618,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/x
    {
 diff -x generated -r -u xbmc-12.2/xbmc/guilib/JpegIO.h xbmc/xbmc/guilib/JpegIO.h
 --- xbmc-12.2/xbmc/guilib/JpegIO.h	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/guilib/JpegIO.h	2013-08-25 06:28:11.000000000 +0200
++++ xbmc/xbmc/guilib/JpegIO.h	2013-08-25 13:17:42.000000000 +0200
 @@ -26,7 +26,9 @@
  #pragma comment(lib, "turbojpeg-static.lib")
  #endif
@@ -601,7 +631,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/guilib/JpegIO.h xbmc/xbmc/guilib/JpegIO.h
  class CJpegIO
 diff -x generated -r -u xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp xbmc/xbmc/windowing/egl/EGLWrapper.cpp
 --- xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/windowing/egl/EGLWrapper.cpp	2013-08-25 06:28:11.000000000 +0200
++++ xbmc/xbmc/windowing/egl/EGLWrapper.cpp	2013-08-25 13:17:42.000000000 +0200
 @@ -26,6 +26,7 @@
  #include "EGLNativeTypeAndroid.h"
  #include "EGLNativeTypeAmlogic.h"
@@ -628,7 +658,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp xbmc/xbmc/wi
      m_nativeTypes->Initialize();
 diff -x generated -r -u xbmc-12.2/xbmc/windowing/egl/Makefile xbmc/xbmc/windowing/egl/Makefile
 --- xbmc-12.2/xbmc/windowing/egl/Makefile	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/windowing/egl/Makefile	2013-08-25 06:28:11.000000000 +0200
++++ xbmc/xbmc/windowing/egl/Makefile	2013-08-25 13:17:42.000000000 +0200
 @@ -2,6 +2,7 @@
  
  SRCS = WinSystemEGL.cpp

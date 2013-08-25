@@ -70,7 +70,16 @@ cd <WHATEVER_YOUR_TARGET_DIR_WAS>
 ./xbmc.bin --debug -fs --standalone
 ```
 
-# Cross compilation reference material
+# References
+### Cross compilation reference material
 
 * LFS: http://www.linuxfromscratch.org/lfs/view/stable/
 * Python cross compilation: http://randomsplat.com/id5-cross-compiling-python-for-embedded-linux.html
+* + my own 12 years or so of cross compilation experience...
+
+### Boxeebox reference material
+
+* Intel SDK originally downloaded from http://bbx.boxee.tv/download/?ver=source&early=0. Bits of it is available as a newer version at https://code.google.com/p/googletv-mirrored-source/source/checkout?repo=intel-sdk.
+* Boxeebox source code https://code.google.com/p/bawx/
+* http://www.boxeeboxwiki.org
+* http://gtvhacker.com/index.php/Boxee

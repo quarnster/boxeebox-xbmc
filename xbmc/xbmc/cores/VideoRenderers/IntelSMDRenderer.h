@@ -66,10 +66,12 @@ public:
   virtual void Update(bool bPauseDrawing);
   virtual void SetupScreenshot() {};
 
+  virtual EINTERLACEMETHOD AutoInterlaceMethod();
+
   // Player functions
-  virtual bool         Configure(unsigned int width, unsigned int height, unsigned int d_width, unsigned int d_height, float fps, unsigned flags, CRect &rect);
+  virtual bool         Configure(unsigned int width, unsigned int height, unsigned int d_width, unsigned int d_height, float fps, unsigned flags, ERenderFormat format, unsigned extended_format,  unsigned int orientation);
   virtual bool         IsConfigured() { return m_bConfigured; }
-  virtual int          GetImage(YV12Image *image, double pts, int source = AUTOSOURCE, bool readonly = false);
+  virtual int          GetImage(YV12Image *image, /*TODO(q) double pts,*/ int source = AUTOSOURCE, bool readonly = false);
   virtual void         ReleaseImage(int source, bool preserve = false);
   virtual unsigned int DrawSlice(unsigned char *src[], int stride[], int w, int h, int x, int y);
   virtual void         FlipPage(int source) { }
@@ -79,6 +81,7 @@ public:
   virtual void         SetSpeed(int speed);
   virtual void         Flush();
 
+  virtual bool AddVideoPicture(DVDVideoPicture* picture);
   virtual void RenderUpdate(bool clear, DWORD flags = 0, DWORD alpha = 255);
 
   // Feature support
@@ -91,6 +94,7 @@ public:
   virtual bool Supports(ERENDERFEATURE feature) { return false; }
   virtual bool Supports(EINTERLACEMETHOD method) { return false; }
   virtual bool Supports(ESCALINGMETHOD method) { return false; }
+  virtual bool Supports(EDEINTERLACEMODE mode) {return false;}
   bool RenderCapture(CRenderCapture* capture) { return false; }
   bool IsTimed() { return true; }
 

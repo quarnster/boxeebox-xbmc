@@ -46,6 +46,14 @@ extern "C" {
 #endif
 }
 
+#define __MODULE_NAME__ "IntelSMDGlobals"
+
+#if 0
+#define VERBOSE() CLog::Log(LOGDEBUG, "%s::%s", __MODULE_NAME__, __FUNCTION__)
+#else
+#define VERBOSE()
+#endif
+
 #ifndef DVD_TIME_BASE
 #define DVD_TIME_BASE 1000000
 #endif
@@ -59,7 +67,7 @@ CIntelSMDGlobals g_IntelSMDGlobals;
 
 CIntelSMDGlobals::CIntelSMDGlobals()
 {
-  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::CIntelSMDGlobals");
+  VERBOSE();
 
   m_main_clock = -1;
   m_demux = -1;
@@ -100,18 +108,19 @@ CIntelSMDGlobals::CIntelSMDGlobals()
   m_primaryAudioInput = -1;
 
   ResetClock();
+  CreateMainClock();
 }
 
 CIntelSMDGlobals::~CIntelSMDGlobals()
 {
-  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::~CIntelSMDGlobals");
+  VERBOSE();
 
   DestroyMainClock();
 }
 
 bool CIntelSMDGlobals::CreateMainClock()
 {
-  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::CreateMainClock");
+  VERBOSE();
 
   ismd_result_t ret;
 
@@ -124,7 +133,7 @@ bool CIntelSMDGlobals::CreateMainClock()
   if (ret != ISMD_SUCCESS)
   {
     CLog::Log(LOGERROR,
-        "ERROR: CIntelSMDGlobals::CreateMainClock CLOCK ALLOC FAIL .....");
+        "ERROR: CIntelSMDGlobals::CreateMainClock CLOCK ALLOC FAIL: %d", ret);
     return false;
   }
 
@@ -140,7 +149,7 @@ bool CIntelSMDGlobals::CreateMainClock()
 
 void CIntelSMDGlobals::DestroyMainClock()
 {
-  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::DestroyMainClock");
+  VERBOSE();
 
   CSingleLock lock(m_Lock);
 
@@ -152,7 +161,7 @@ void CIntelSMDGlobals::DestroyMainClock()
 
 bool CIntelSMDGlobals::SetClockPrimary()
 {
-  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::SetClockPrimary");
+  VERBOSE();
 
   ismd_result_t ret;
 
@@ -208,11 +217,11 @@ void CIntelSMDGlobals::SetBaseTime(ismd_time_t time)
 
 bool CIntelSMDGlobals::SetCurrentTime(ismd_time_t time)
 {
+  VERBOSE();
   ismd_result_t ret;
 
   CSingleLock lock(m_Lock);
 
-  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::SetCurrentTime");
 
   if (m_main_clock == -1)
   {
@@ -233,6 +242,7 @@ bool CIntelSMDGlobals::SetCurrentTime(ismd_time_t time)
 
 void CIntelSMDGlobals::PauseClock()
 {
+  VERBOSE();
   CSingleLock lock(m_Lock);
 
   m_pause_base_time = GetBaseTime();
@@ -241,6 +251,7 @@ void CIntelSMDGlobals::PauseClock()
 
 void CIntelSMDGlobals::ResumeClock()
 {
+  VERBOSE();
   CSingleLock lock(m_Lock);
 
   if (m_pause_base_time == 0)
@@ -262,7 +273,7 @@ void CIntelSMDGlobals::ResumeClock()
 
 void CIntelSMDGlobals::ResetClock()
 {
-  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::ResetClock");
+  VERBOSE();
 
   m_base_time = 0;
   m_pause_base_time = 0;
@@ -295,9 +306,9 @@ double CIntelSMDGlobals::IsmdToDvdPts(ismd_pts_t pts)
 
 bool CIntelSMDGlobals::InitAudio()
 {
+  VERBOSE();
   ismd_result_t result;
 
-  CLog::Log(LOGINFO, "CIntelSMDGlobals::InitAudio");
 
   if(!CreateAudioProcessor())
 //    return false;
@@ -344,6 +355,7 @@ bool CIntelSMDGlobals::InitAudio()
 
 ismd_audio_output_t CIntelSMDGlobals::AddAudioOutput(int output)
 {
+  VERBOSE();
   ismd_result_t result;
   int hwId = 0;
   CStdString name;
@@ -403,7 +415,7 @@ ismd_audio_output_t CIntelSMDGlobals::AddAudioOutput(int output)
 
 bool CIntelSMDGlobals::RemoveAllAudioOutput()
 {
-  CLog::Log(LOGINFO, "CIntelSMDGlobals::RemoveAllAudioOutput");
+  VERBOSE();
 
   if (m_audioOutputHDMI != -1)
   {
@@ -431,6 +443,7 @@ bool CIntelSMDGlobals::RemoveAllAudioOutput()
 
 bool CIntelSMDGlobals::RemoveAudioOutput(ismd_audio_output_t output)
 {
+  VERBOSE();
   ismd_result_t result;
   CStdString name;
 
@@ -460,7 +473,7 @@ bool CIntelSMDGlobals::RemoveAudioOutput(ismd_audio_output_t output)
 
 bool CIntelSMDGlobals::DeInitAudio()
 {
-  CLog::Log(LOGINFO, "CIntelSMDGlobals::DeInitAudio");
+  VERBOSE();
 
   RemoveAllAudioOutput();
 
@@ -471,6 +484,7 @@ bool CIntelSMDGlobals::DeInitAudio()
 
 ismd_port_handle_t CIntelSMDGlobals::GetAudioDevicePort(ismd_dev_t device)
 {
+  VERBOSE();
   ismd_result_t result;
   ismd_port_handle_t  input_port;
 
@@ -486,6 +500,7 @@ ismd_port_handle_t CIntelSMDGlobals::GetAudioDevicePort(ismd_dev_t device)
 
 ismd_dev_t CIntelSMDGlobals::CreateAudioInput(bool timed)
 {
+  VERBOSE();
   ismd_dev_t          device;
   ismd_port_handle_t  input_port;
   ismd_result_t result;
@@ -512,6 +527,7 @@ ismd_dev_t CIntelSMDGlobals::CreateAudioInput(bool timed)
 
 bool CIntelSMDGlobals::RemoveAudioInput(ismd_dev_t device)
 {
+  VERBOSE();
   ismd_result_t result;
 
   SetAudioDeviceState(ISMD_DEV_STATE_STOP, device);
@@ -529,6 +545,7 @@ bool CIntelSMDGlobals::RemoveAudioInput(ismd_dev_t device)
 
 bool CIntelSMDGlobals::SetAudioStartPts(ismd_pts_t pts)
 {
+  VERBOSE();
   CSingleLock lock(m_Lock);
 
   if (pts == ISMD_NO_PTS)
@@ -550,6 +567,7 @@ bool CIntelSMDGlobals::SetAudioStartPts(ismd_pts_t pts)
 
 bool CIntelSMDGlobals::SetVideoStartPts(ismd_pts_t pts)
 {
+  VERBOSE();
   CSingleLock lock(m_Lock);
 
   if (pts == ISMD_NO_PTS)
@@ -571,6 +589,7 @@ bool CIntelSMDGlobals::SetVideoStartPts(ismd_pts_t pts)
 
 ismd_pts_t CIntelSMDGlobals::GetAudioCurrentTime()
 {
+  VERBOSE();
   ismd_pts_t start = GetAudioStartPts();
 
   if (start == ISMD_NO_PTS || (GetCurrentTime() < GetBaseTime()))
@@ -581,6 +600,7 @@ ismd_pts_t CIntelSMDGlobals::GetAudioCurrentTime()
 
 ismd_pts_t CIntelSMDGlobals::GetVideoCurrentTime()
 {
+  VERBOSE();
   ismd_pts_t start = GetVideoStartPts();
 
   if (start == ISMD_NO_PTS || (GetCurrentTime() < GetBaseTime()))
@@ -591,6 +611,7 @@ ismd_pts_t CIntelSMDGlobals::GetVideoCurrentTime()
 
 ismd_pts_t CIntelSMDGlobals::GetAudioPauseCurrentTime()
 {
+  VERBOSE();
   ismd_pts_t start = GetAudioStartPts();
 
   if (start == ISMD_NO_PTS || (GetCurrentTime() < GetBaseTime()))
@@ -601,6 +622,7 @@ ismd_pts_t CIntelSMDGlobals::GetAudioPauseCurrentTime()
 
 ismd_pts_t CIntelSMDGlobals::GetVideoPauseCurrentTime()
 {
+  VERBOSE();
   ismd_pts_t start = GetVideoStartPts();
 
   if (start == ISMD_NO_PTS || (GetCurrentTime() < GetBaseTime()))
@@ -611,6 +633,7 @@ ismd_pts_t CIntelSMDGlobals::GetVideoPauseCurrentTime()
 
 ismd_pts_t CIntelSMDGlobals::Resync(bool bDisablePtsCorrection)
 {
+  VERBOSE();
   ismd_pts_t audioStart;
   ismd_pts_t videoStart;
   ismd_pts_t deltaPTS;
@@ -652,6 +675,7 @@ ismd_pts_t CIntelSMDGlobals::Resync(bool bDisablePtsCorrection)
 void CIntelSMDGlobals::CreateStartPacket(ismd_pts_t start_pts,
     ismd_buffer_handle_t buffer_handle)
 {
+  VERBOSE();
   CSingleLock lock(m_Lock);
 
   ismd_newsegment_tag_t newsegment_data;
@@ -685,6 +709,7 @@ void CIntelSMDGlobals::CreateStartPacket(ismd_pts_t start_pts,
 void CIntelSMDGlobals::SendStartPacket(ismd_pts_t start_pts,
     ismd_port_handle_t port, ismd_buffer_handle_t buffer)
 {
+  VERBOSE();
   CSingleLock lock(m_Lock);
 
   ismd_newsegment_tag_t newsegment_data;
@@ -742,6 +767,7 @@ void CIntelSMDGlobals::SendStartPacket(ismd_pts_t start_pts,
 
 bool CIntelSMDGlobals::CreateDemuxer()
 {
+  VERBOSE();
   ismd_result_t ismd_ret;
   unsigned output_buf_size = 0;
 
@@ -817,6 +843,7 @@ bool CIntelSMDGlobals::CreateDemuxer()
 
 bool CIntelSMDGlobals::DeleteDemuxer()
 {
+  VERBOSE();
   ismd_result_t res = ISMD_ERROR_UNSPECIFIED;
 
   if (m_demux == -1)
@@ -849,6 +876,7 @@ bool CIntelSMDGlobals::DeleteDemuxer()
 
 bool CIntelSMDGlobals::FlushDemuxer()
 {
+  VERBOSE();
   CSingleLock lock(m_Lock);
   ismd_result_t ret = ISMD_ERROR_UNSPECIFIED;
 
@@ -868,6 +896,7 @@ bool CIntelSMDGlobals::FlushDemuxer()
 
 bool CIntelSMDGlobals::SetDemuxDeviceState(ismd_dev_state_t state)
 {
+  VERBOSE();
   ismd_result_t ret;
 
   if (state == ISMD_DEV_STATE_INVALID)
@@ -899,11 +928,11 @@ bool CIntelSMDGlobals::SetDemuxDeviceState(ismd_dev_state_t state)
 
 bool CIntelSMDGlobals::ConnectDemuxerToAudio(ismd_dev_t audio_device)
 {
+  VERBOSE();
   ismd_result_t ismd_ret;
   ismd_port_handle_t demux_output_port;
   ismd_port_handle_t audio_input;
 
-  CLog::Log(LOGDEBUG, "ConnectDemuxerToAudio");
 
   ismd_ret = ismd_demux_filter_get_output_port(m_demux, m_demux_aes_filter_handle, &demux_output_port);
   if (ismd_ret != ISMD_SUCCESS)
@@ -933,10 +962,10 @@ bool CIntelSMDGlobals::ConnectDemuxerToAudio(ismd_dev_t audio_device)
 
 bool CIntelSMDGlobals::ConnectDemuxerToVideo()
 {
+  VERBOSE();
   ismd_result_t ismd_ret;
   ismd_port_handle_t demux_output_port;
 
-  CLog::Log(LOGDEBUG, "ConnectDemuxerToVideo");
 
   if(GetVidDecInput() == -1)
   {
@@ -966,7 +995,7 @@ bool CIntelSMDGlobals::ConnectDemuxerToVideo()
 bool CIntelSMDGlobals::SetDemuxDeviceBaseTime(ismd_time_t time)
 {
   //printf("%s", __FUNCTION__);
-  CLog::Log(LOGDEBUG, "SetDemuxDeviceBaseTime base time %.2f",
+  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::SetDemuxDeviceBaseTime base time %.2f",
       IsmdToDvdPts(time) / 1000000);
 
   ismd_result_t ret;
@@ -997,7 +1026,7 @@ bool CIntelSMDGlobals::SetDemuxDeviceBaseTime(ismd_time_t time)
 
 bool CIntelSMDGlobals::CreateVideoDecoder(ismd_codec_type_t codec_type)
 {
-  CLog::Log(LOGDEBUG, "%s", __FUNCTION__);
+  VERBOSE();
 
   ismd_result_t res;
 
@@ -1072,6 +1101,7 @@ bool CIntelSMDGlobals::CreateVideoDecoder(ismd_codec_type_t codec_type)
 
 bool CIntelSMDGlobals::CreateVidDecUserDataPort()
 {
+  VERBOSE();
   ismd_result_t res;
 
   res = ismd_viddec_get_user_data_port(m_viddec, &m_viddec_user_data_port);
@@ -1110,7 +1140,7 @@ bool CIntelSMDGlobals::CreateVidDecUserDataPort()
 
 bool CIntelSMDGlobals::DeleteVideoDecoder()
 {
-  CLog::Log(LOGDEBUG, "%s", __FUNCTION__);
+  VERBOSE();
 
   ismd_result_t res;
 
@@ -1134,6 +1164,7 @@ bool CIntelSMDGlobals::DeleteVideoDecoder()
 
 bool CIntelSMDGlobals::PrintVideoStreamStats()
 {
+  VERBOSE();
   ismd_result_t result;
   ismd_viddec_stream_statistics_t stat;
 
@@ -1165,6 +1196,7 @@ bool CIntelSMDGlobals::PrintVideoStreamStats()
 
 bool CIntelSMDGlobals::PrintVideoStreaProp()
 {
+  VERBOSE();
   ismd_result_t result;
 
   ismd_viddec_stream_properties_t prop;
@@ -1197,7 +1229,7 @@ bool CIntelSMDGlobals::PrintVideoStreaProp()
 
 bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
 {
-  CLog::Log(LOGDEBUG, "%s", __FUNCTION__);
+  VERBOSE();
 
   ismd_result_t res;
 
@@ -1335,7 +1367,7 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
     if (res != ISMD_SUCCESS)
     {
       CLog::Log(LOGERROR,
-          "IntelSMDGlobals::CreateVideoRender ismd_port_connect failed");
+          "IntelSMDGlobals::CreateVideoRender ismd_port_connect failed: %d", res);
       return false;
     }
   }
@@ -1353,6 +1385,7 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
 
 bool CIntelSMDGlobals::MuteVideoRender(bool mute)
 {
+  VERBOSE();
   ismd_result_t res;
 
   if (m_video_render == -1)
@@ -1370,6 +1403,7 @@ bool CIntelSMDGlobals::MuteVideoRender(bool mute)
 
 float CIntelSMDGlobals::GetRenderFPS()
 {
+  VERBOSE();
   ismd_result_t res;
   float fps = 0;
   ismd_vidrend_status_t status;
@@ -1417,6 +1451,7 @@ float CIntelSMDGlobals::GetDecoderFPS()
 ismd_result_t CIntelSMDGlobals::GetPortStatus(ismd_port_handle_t port,
     unsigned int& curDepth, unsigned int& maxDepth)
 {
+  VERBOSE();
   ismd_result_t ret;
   ismd_port_status_t portStatus;
 
@@ -1459,7 +1494,7 @@ double CIntelSMDGlobals::GetFrameDuration()
 
 bool CIntelSMDGlobals::DeleteVideoRender()
 {
-  CLog::Log(LOGDEBUG, "%s", __FUNCTION__);
+  VERBOSE();
 
   SetVideoRenderState(ISMD_DEV_STATE_STOP);
   FlushVideoRender();
@@ -1482,7 +1517,7 @@ bool CIntelSMDGlobals::DeleteVideoRender()
 
 bool CIntelSMDGlobals::ConnectDecoderToRenderer()
 {
-  CLog::Log(LOGDEBUG, "%s", __FUNCTION__);
+  VERBOSE();
 
   ismd_result_t ret;
 
@@ -1507,6 +1542,7 @@ bool CIntelSMDGlobals::ConnectDecoderToRenderer()
 
 bool CIntelSMDGlobals::PrintRenderStats()
 {
+  VERBOSE();
   ismd_result_t result;
   ismd_vidrend_stats_t stat;
 
@@ -1544,7 +1580,7 @@ bool CIntelSMDGlobals::PrintRenderStats()
 
 bool CIntelSMDGlobals::CreateAudioProcessor()
 {
-  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::CreateAudioProcessor");
+  VERBOSE();
 
   ismd_result_t result;
 
@@ -1566,7 +1602,7 @@ bool CIntelSMDGlobals::CreateAudioProcessor()
 
 bool CIntelSMDGlobals::DeleteAudioProcessor()
 {
-  CLog::Log(LOGDEBUG, "%s", __FUNCTION__);
+  VERBOSE();
 
   ismd_result_t result;
 
@@ -1595,6 +1631,7 @@ bool CIntelSMDGlobals::DeleteAudioProcessor()
 
 bool CIntelSMDGlobals::ConfigureMasterClock(unsigned int frequency)
 {
+  VERBOSE();
   ismd_result_t result;
 
   // Set clock source (EXTERNAL for CE4100)
@@ -1638,6 +1675,7 @@ bool CIntelSMDGlobals::ConfigureMasterClock(unsigned int frequency)
 
 bool CIntelSMDGlobals::EnableAudioInput(ismd_dev_t audioDev)
 {
+  VERBOSE();
   ismd_result_t result;
 
   if (audioDev == -1 || m_audioProcessor == -1)
@@ -1655,6 +1693,7 @@ bool CIntelSMDGlobals::EnableAudioInput(ismd_dev_t audioDev)
 
 bool CIntelSMDGlobals::DisableAudioInput(ismd_dev_t audioDev)
 {
+  VERBOSE();
   ismd_result_t result;
 
   if (audioDev == -1 || m_audioProcessor == -1)
@@ -1673,6 +1712,7 @@ bool CIntelSMDGlobals::DisableAudioInput(ismd_dev_t audioDev)
 
 bool CIntelSMDGlobals::EnableAudioOutput(ismd_audio_output_t audio_output)
 {
+  VERBOSE();
   ismd_result_t result;
 
   if (m_audioProcessor == -1)
@@ -1691,6 +1731,7 @@ bool CIntelSMDGlobals::EnableAudioOutput(ismd_audio_output_t audio_output)
 
 bool CIntelSMDGlobals::DisableAudioOutput(ismd_audio_output_t audio_output)
 {
+  VERBOSE();
   ismd_result_t result;
 
   if (m_audioProcessor == -1)
@@ -1709,6 +1750,7 @@ bool CIntelSMDGlobals::DisableAudioOutput(ismd_audio_output_t audio_output)
 
 bool CIntelSMDGlobals::ConfigureAudioOutput(ismd_audio_output_t output, ismd_audio_output_config_t output_config)
 {
+  VERBOSE();
   ismd_result_t result;
 
   result = ismd_audio_output_set_delay(m_audioProcessor, output, output_config.stream_delay);
@@ -1751,6 +1793,7 @@ bool CIntelSMDGlobals::ConfigureAudioOutput(ismd_audio_output_t output, ismd_aud
 
 bool CIntelSMDGlobals::SetAudioDeviceState(ismd_dev_state_t state, ismd_dev_t device)
 {
+  VERBOSE();
   ismd_result_t ret;
 
   if (state == ISMD_DEV_STATE_INVALID)
@@ -1780,6 +1823,7 @@ bool CIntelSMDGlobals::SetAudioDeviceState(ismd_dev_state_t state, ismd_dev_t de
 
 ismd_dev_state_t CIntelSMDGlobals::GetAudioDeviceState(ismd_dev_t audioDev)
 {
+  VERBOSE();
   //printf("CIntelSMDGlobals::GetAudioDeviceState");
 
   CSingleLock lock(m_Lock);
@@ -1807,6 +1851,7 @@ ismd_dev_state_t CIntelSMDGlobals::GetAudioDeviceState(ismd_dev_t audioDev)
 
 bool CIntelSMDGlobals::SetVideoDecoderState(ismd_dev_state_t state)
 {
+  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::%s %d", __FUNCTION__, state);
   //printf("%s Video Decoder State: %d", __FUNCTION__, state);
   CSingleLock lock(m_Lock);
 
@@ -1839,6 +1884,7 @@ bool CIntelSMDGlobals::SetVideoDecoderState(ismd_dev_state_t state)
 
 bool CIntelSMDGlobals::SetVideoRenderState(ismd_dev_state_t state)
 {
+  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::%s %d", __FUNCTION__, state);
   //printf("%s Video Render State: %d", __FUNCTION__, state);
 
   CSingleLock lock(m_Lock);
@@ -1908,6 +1954,7 @@ bool CIntelSMDGlobals::SetVideoRenderState(ismd_dev_state_t state)
 
 bool CIntelSMDGlobals::FlushAudioDevice(ismd_dev_t audioDev)
 {
+  VERBOSE();
   //printf("CIntelSMDGlobals::FlushAudioDevice", __FUNCTION__);
 
   CSingleLock lock(m_Lock);
@@ -1930,6 +1977,7 @@ bool CIntelSMDGlobals::FlushAudioDevice(ismd_dev_t audioDev)
 
 bool CIntelSMDGlobals::FlushVideoDecoder()
 {
+  VERBOSE();
   CSingleLock lock(m_Lock);
   ismd_result_t ret = ISMD_ERROR_UNSPECIFIED;
 
@@ -1954,6 +2002,7 @@ bool CIntelSMDGlobals::FlushVideoDecoder()
 
 bool CIntelSMDGlobals::FlushVideoRender()
 {
+  VERBOSE();
   //printf("CIntelSMDGlobals::FlushVideoRender");
 
   CSingleLock lock(m_Lock);
@@ -2082,6 +2131,7 @@ bool CIntelSMDGlobals::SetAudioDeviceBaseTime(ismd_time_t time, ismd_dev_t devic
 
 void CIntelSMDGlobals::Mute(bool bMute)
 {
+  VERBOSE();
   ismd_audio_processor_t audioProcessor = g_IntelSMDGlobals.GetAudioProcessor();
   if (audioProcessor == -1)
   {
@@ -2094,6 +2144,7 @@ void CIntelSMDGlobals::Mute(bool bMute)
 
 bool CIntelSMDGlobals::SetMasterVolume(int nVolume)
 {
+  VERBOSE();
   ismd_audio_processor_t audioProcessor = g_IntelSMDGlobals.GetAudioProcessor();
   if (audioProcessor == -1)
   {
@@ -2144,6 +2195,7 @@ bool CIntelSMDGlobals::SetMasterVolume(int nVolume)
 
 bool CIntelSMDGlobals::CheckCodecHWDecode(int Codec)
 {
+  VERBOSE();
   switch(Codec)
   {
   case CODEC_ID_AC3:

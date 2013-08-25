@@ -413,7 +413,7 @@ void CIntelSMDRenderer::ReleaseYUVBuffers()
     }
 }
 
-bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsigned int d_width, unsigned int d_height, float fps, unsigned flags, CRect &rect)
+bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsigned int d_width, unsigned int d_height, float fps, unsigned flags, ERenderFormat format, unsigned extended_format,  unsigned int orientation)
 {
   CLog::Log(LOGINFO, "CIntelSMDRenderer::Configure width %d height %d d_width %d d_height %d fps %f flags %d\n",
       width, height, d_width, d_height, fps, flags);
@@ -501,7 +501,11 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
   return true;
 }
 
-int CIntelSMDRenderer::GetImage(YV12Image *image, double pts, int source, bool readonly)
+bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture* picture) {
+  return m_bUsingSMDecoder;
+}
+
+int CIntelSMDRenderer::GetImage(YV12Image *image, /*double pts,*/ int source, bool readonly)
 {
   if (!image)
     return -1;
@@ -516,7 +520,7 @@ int CIntelSMDRenderer::GetImage(YV12Image *image, double pts, int source, bool r
     return 0;
   }
 
-  m_PTS = pts;
+//TODO(q)  m_PTS = pts;
 
   /* take next available buffer */
   if( source == AUTOSOURCE )
@@ -1070,6 +1074,13 @@ int CIntelSMDRenderer::ConfigureVideoProc()
 
   return 1;
 }
+
+EINTERLACEMETHOD CIntelSMDRenderer::AutoInterlaceMethod()
+{
+    return VS_INTERLACEMETHOD_NONE;
+}
+
+
 
 #endif
 

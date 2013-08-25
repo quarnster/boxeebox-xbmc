@@ -9,6 +9,7 @@ get_filename_component(SR "${CMAKE_SOURCE_DIR}/sysroot" REALPATH)
 set(SYSROOT ${SR} CACHE PATH "The sysroot directory where everything will be installed")
 set(PARALLEL "-j8" CACHE STRING "Arguments for make for parallel builds")
 set(TARGET_DIR ${CMAKE_SOURCE_DIR}/dist CACHE PATH "Directory to install everything to")
+set(BOXEEBOX_IP "boxeebox" CACHE STRING "ipaddress or hostname of your boxeebox (only used for remote debugging)")
 message("Using Sysroot: ${SYSROOT}")
 
 
@@ -131,6 +132,28 @@ add_custom_target(
 
 add_custom_target(
 	dist
-	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${SYSROOT}/usr/local/lib/xbmc/xbmc.bin ${TARGET_DIR}/xbmc.bin
+	COMMAND 			${CMAKE_COMMAND} -E copy ${SYSROOT}/usr/local/lib/xbmc/xbmc.bin ${CMAKE_BINARY_DIR}/xbmc.bin
+	COMMAND 			${SYSROOT}/usr/bin/i686-pc-linux-gnu-strip ${CMAKE_BINARY_DIR}/xbmc.bin
+	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/xbmc.bin ${TARGET_DIR}/xbmc.bin
 	DEPENDS 			xbmc ${libs} libstdc++ libz
+)
+
+add_custom_command(
+	OUTPUT boxeelibs
+	COMMAND 			${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/boxeelibs
+	COMMAND 			${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/boxeelibs wget ftp://${BOXEEBOX_IP}/lib/*
+)
+
+file(WRITE ${CMAKE_BINARY_DIR}/gdb.txt
+"
+set solib-search-path ${CMAKE_BINARY_DIR}/boxeelibs
+file ${SYSROOT}/usr/local/lib/xbmc/xbmc.bin
+target remote ${BOXEEBOX_IP}:12345
+"
+)
+
+add_custom_target(
+	debug
+	COMMAND 			${SYSROOT}/usr/bin/i686-pc-linux-gnu-gdb -x ${CMAKE_BINARY_DIR}/gdb.txt
+	DEPENDS 			xbmc boxeelibs
 )

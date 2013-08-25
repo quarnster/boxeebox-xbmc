@@ -34,12 +34,19 @@
 
 #define __MODULE_NAME__ "DVDVideoCodecSMD"
 
+#if 0
+#define VERBOSE() CLog::Log(LOGDEBUG, "%s::%s", __MODULE_NAME__, __FUNCTION__)
+#else
+#define VERBOSE()
+#endif
+
+
 CDVDVideoCodecSMD::CDVDVideoCodecSMD() :
 m_Device(NULL),
 m_DecodeStarted(false),
 m_DropPictures(false),
 m_Duration(0.0),
-m_pFormatName("")
+m_pFormatName("smd: none")
 {
 }
 
@@ -50,6 +57,7 @@ CDVDVideoCodecSMD::~CDVDVideoCodecSMD()
 
 bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
+  VERBOSE();
   ismd_codec_type_t codec_type;
 
   // found out if video hardware decoding is enforced
@@ -127,6 +135,7 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 
 void CDVDVideoCodecSMD::Dispose(void)
 {
+  VERBOSE();
   if (m_Device)
   {
     m_Device->CloseDecoder();
@@ -136,6 +145,7 @@ void CDVDVideoCodecSMD::Dispose(void)
 
 void CDVDVideoCodecSMD::SetSpeed(int speed)
 {
+  VERBOSE();
   if(speed == DVD_PLAYSPEED_PAUSE)
     m_Device->Pause();
   else
@@ -144,6 +154,7 @@ void CDVDVideoCodecSMD::SetSpeed(int speed)
 
 int CDVDVideoCodecSMD::Decode(BYTE *pData, int iSize, double pts, double dts)
 {
+  VERBOSE();
   int ret = 0;
 
   if(!pData)
@@ -182,6 +193,7 @@ int CDVDVideoCodecSMD::Decode(BYTE *pData, int iSize, double pts, double dts)
 
 void CDVDVideoCodecSMD::Reset(void)
 {
+  VERBOSE();
   // Decoder flush, reset started flag and dump all input and output.
   if(m_Device)
   {
@@ -192,6 +204,7 @@ void CDVDVideoCodecSMD::Reset(void)
 
 void CDVDVideoCodecSMD::Resync(double pts)
 {
+  VERBOSE();
   if(m_Device)
   {
     m_Device->Resync(pts);
@@ -200,6 +213,7 @@ void CDVDVideoCodecSMD::Resync(double pts)
 
 bool CDVDVideoCodecSMD::GetPicture(DVDVideoPicture* pDvdVideoPicture)
 {
+  VERBOSE();
   bool  ret;
 
   ret = m_Device->GetPicture(pDvdVideoPicture);
@@ -211,6 +225,7 @@ bool CDVDVideoCodecSMD::GetPicture(DVDVideoPicture* pDvdVideoPicture)
 
 bool CDVDVideoCodecSMD::GetUserData(DVDVideoUserData* pDvdVideoUserData)
 {
+  VERBOSE();
   ismd_result_t ismd_ret;
   ismd_port_handle_t user_data_port;
   ismd_event_t user_data_event;
@@ -277,12 +292,14 @@ bool CDVDVideoCodecSMD::GetUserData(DVDVideoUserData* pDvdVideoUserData)
 
 void CDVDVideoCodecSMD::SetDropState(bool bDrop)
 {
+  VERBOSE();
   m_DropPictures = bDrop;
   m_Device->SetDropState(m_DropPictures);
 }
 
 void CDVDVideoCodecSMD::DisablePtsCorrection(bool bDisable)
 {
+  VERBOSE();
   if(m_Device)
     m_Device->DisablePtsCorrection(bDisable);
 }

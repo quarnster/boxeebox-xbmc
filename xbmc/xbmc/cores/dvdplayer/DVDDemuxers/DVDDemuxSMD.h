@@ -70,20 +70,24 @@ public:
   CDVDDemuxSMD();
   virtual ~CDVDDemuxSMD();
 
-  bool Open(CDVDInputStream* pInput);
-  void Dispose();
+  // bool Open(CDVDInputStream* pInput);
+  // void Dispose();
   void Reset() {}
-  void Flush();
   void Abort();
-  void SetSpeed(int iSpeed);
-  virtual std::string GetFileName();
+  void Flush();
 
   DemuxPacket* Read();
 
   virtual bool SeekTime(int time, bool backwords = false, double* startpts = NULL) { return true; }
+
+  void SetSpeed(int iSpeed);
   virtual int GetStreamLength() { return 0; }
+
   virtual CDemuxStream* GetStream(int iStreamId);
   virtual int GetNrOfStreams();
+  virtual std::string GetFileName();
+
+/*
 
   virtual void SetUpAudio(CodecID codec);
   virtual void SetUpVideo(CodecID codec);
@@ -115,7 +119,7 @@ public:
 
   struct dvbpsi_decoder_s* dvbpsiPAT;
   struct dvbpsi_decoder_s* dvbpsiPMT;
-
+*/
 protected:
   void AddStreams();
   void WaitForBufferEvent();
