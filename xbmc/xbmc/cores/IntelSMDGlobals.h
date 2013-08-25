@@ -190,7 +190,7 @@ public:
 
   bool CheckCodecHWDecode( int Codec );
 
-  static bool SetMasterVolume(int nVolume);
+  static bool SetMasterVolume(float nVolume);
   static void Mute(bool bMute);
 
   ismd_dev_state_t DVDSpeedToSMD(int dvdSpeed);

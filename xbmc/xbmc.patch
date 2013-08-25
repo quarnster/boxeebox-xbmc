@@ -67,6 +67,58 @@ diff -x generated -r -u xbmc-12.2/configure xbmc/configure
  else
    have_builtin_sync_val_compare_and_swap=no
  fi
+diff -x generated -r -u xbmc-12.2/xbmc/cores/AudioEngine/AESinkFactory.cpp xbmc/xbmc/cores/AudioEngine/AESinkFactory.cpp
+--- xbmc-12.2/xbmc/cores/AudioEngine/AESinkFactory.cpp	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/cores/AudioEngine/AESinkFactory.cpp	2013-08-25 16:06:48.000000000 +0200
+@@ -25,6 +25,8 @@
+   #include "Sinks/AESinkDirectSound.h"
+ #elif defined(TARGET_ANDROID)
+   #include "Sinks/AESinkAUDIOTRACK.h"
++#elif defined(TARGET_BOXEE)
++  #include "Sinks/AESinkIntelSMD.h"
+ #elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
+   #if defined(HAS_ALSA)
+     #include "Sinks/AESinkALSA.h"
+@@ -55,6 +57,8 @@
+         driver == "DIRECTSOUND" ||
+ #elif defined(TARGET_ANDROID)
+         driver == "AUDIOTRACK"  ||
++#elif defined(TARGET_BOXEE)
++        driver == "IntelSMD"    ||
+ #elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
+   #if defined(HAS_ALSA)
+         driver == "ALSA"        ||
+@@ -110,7 +114,9 @@
+ #elif defined(TARGET_ANDROID)
+   if (driver.empty() || driver == "AUDIOTRACK")
+     TRY_SINK(AUDIOTRACK)
+-
++#elif defined(TARGET_BOXEE)
++  if (driver.empty() || driver == "IntelSMD")
++    TRY_SINK(IntelSMD)
+ #elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
+   #if defined(HAS_ALSA)
+   if (driver.empty() || driver == "ALSA")
+@@ -145,6 +151,8 @@
+     ENUMERATE_SINK(WASAPI, force);
+ #elif defined(TARGET_ANDROID)
+     ENUMERATE_SINK(AUDIOTRACK, force);
++#elif defined(TARGET_BOXEE)
++    ENUMERATE_SINK(IntelSMD, force);
+ #elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
+   #if defined(HAS_ALSA)
+     ENUMERATE_SINK(ALSA, force);
+diff -x generated -r -u xbmc-12.2/xbmc/cores/AudioEngine/Makefile.in xbmc/xbmc/cores/AudioEngine/Makefile.in
+--- xbmc-12.2/xbmc/cores/AudioEngine/Makefile.in	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/cores/AudioEngine/Makefile.in	2013-08-25 15:03:03.000000000 +0200
+@@ -38,6 +38,7 @@
+ SRCS += AESinkFactory.cpp
+ SRCS += Sinks/AESinkNULL.cpp
+ SRCS += Sinks/AESinkProfiler.cpp
++SRCS += Sinks/AESinkIntelSMD.cpp
+ 
+ SRCS += Engines/SoftAE/SoftAE.cpp
+ SRCS += Engines/SoftAE/SoftAEStream.cpp
 diff -x generated -r -u xbmc-12.2/xbmc/cores/Makefile.in xbmc/xbmc/cores/Makefile.in
 --- xbmc-12.2/xbmc/cores/Makefile.in	2013-05-03 07:57:41.000000000 +0200
 +++ xbmc/xbmc/cores/Makefile.in	2013-08-25 13:17:42.000000000 +0200
@@ -329,7 +381,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.
  SRCS += VDPAU.cpp
 diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp xbmc/xbmc/cores/dvdplayer/DVDPlayer.cpp
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/dvdplayer/DVDPlayer.cpp	2013-08-25 13:17:42.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDPlayer.cpp	2013-08-25 13:49:49.000000000 +0200
 @@ -86,6 +86,10 @@
  #include "LangInfo.h"
  #include "ApplicationMessenger.h"
@@ -406,28 +458,29 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp xbmc/xbmc/c
          {
            bool bSwitchSuccessful(false);
            bool bShowPreview(g_guiSettings.GetInt("pvrplayback.channelentrytimeout") > 0);
-+#ifdef HAS_INTEL_SMD
-+          // TODO(q)
++// TODO(q)
++//#ifdef HAS_INTEL_SMD
 +//          m_pDemuxer->Stop();
-+#endif
++//#endif
  
            if (!bShowPreview)
            {
-@@ -2265,8 +2300,12 @@
+@@ -2265,8 +2300,13 @@
              else
              {
                m_iChannelEntryTimeOut = 0;
-+#ifndef HAS_INTEL_SMD
++//TODO(q)
++//#ifndef HAS_INTEL_SMD
                SAFE_DELETE(m_pDemuxer);
 -
-+#else
++//#else
 +              // TODO(q)
 +//              m_pDemuxer->Start();
-+#endif
++//#endif
                g_infoManager.SetDisplayAfterSeek();
              }
            }
-@@ -2342,8 +2381,13 @@
+@@ -2342,8 +2382,13 @@
  void CDVDPlayer::SetPlaySpeed(int speed)
  {
    m_messenger.Put(new CDVDMsgInt(CDVDMsg::PLAYER_SETSPEED, speed));
@@ -441,7 +494,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp xbmc/xbmc/c
    SynchronizeDemuxer(100);
  }
  
-@@ -3166,6 +3210,11 @@
+@@ -3166,6 +3211,11 @@
    m_CurrentTeletext.dts      = DVD_NOPTS_VALUE;
    m_CurrentTeletext.startpts = startpts;
  
@@ -453,7 +506,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp xbmc/xbmc/c
    if(queued)
    {
      m_dvdPlayerAudio.SendMessage(new CDVDMsg(CDVDMsg::GENERAL_RESET));
-@@ -3670,6 +3719,14 @@
+@@ -3670,6 +3720,14 @@
    if (m_pInputStream && m_pInputStream->IsStreamType(DVDSTREAM_TYPE_DVD))
      return false;
  

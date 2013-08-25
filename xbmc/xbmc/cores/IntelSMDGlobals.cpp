@@ -48,7 +48,7 @@ extern "C" {
 
 #define __MODULE_NAME__ "IntelSMDGlobals"
 
-#if 0
+#if 1
 #define VERBOSE() CLog::Log(LOGDEBUG, "%s::%s", __MODULE_NAME__, __FUNCTION__)
 #else
 #define VERBOSE()
@@ -2142,7 +2142,7 @@ void CIntelSMDGlobals::Mute(bool bMute)
   ismd_audio_mute(audioProcessor, bMute);
 }
 
-bool CIntelSMDGlobals::SetMasterVolume(int nVolume)
+bool CIntelSMDGlobals::SetMasterVolume(float nVolume)
 {
   VERBOSE();
   ismd_audio_processor_t audioProcessor = g_IntelSMDGlobals.GetAudioProcessor();
@@ -2195,7 +2195,11 @@ bool CIntelSMDGlobals::SetMasterVolume(int nVolume)
 
 bool CIntelSMDGlobals::CheckCodecHWDecode(int Codec)
 {
+
   VERBOSE();
+  CLog::Log(LOGERROR,
+        "CIntelSMDAudioRenderer::Resume - ismd_audio_set_master_volume: %d",
+        result);
   switch(Codec)
   {
   case CODEC_ID_AC3:
