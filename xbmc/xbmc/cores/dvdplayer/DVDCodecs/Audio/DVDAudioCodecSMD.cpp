@@ -26,11 +26,11 @@
 #include "DVDCodecs/DVDCodecs.h"
 #include "DVDStreamInfo.h"
 #include "DVDPlayerAudio.h"
-#include "GUISettings.h"
-#include "AdvancedSettings.h"
-#include "Settings.h"
+#include "settings/GUISettings.h"
+#include "settings/AdvancedSettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
-#include "IntelSMDGlobals.h"
+#include "../../../IntelSMDGlobals.h"
 
 CDVDAudioCodecSMD::CDVDAudioCodecSMD(void)
 {
@@ -40,8 +40,9 @@ CDVDAudioCodecSMD::CDVDAudioCodecSMD(void)
   m_DTSHDDetection = 0;
   m_bIsDTSHD = false;
   m_bBitstreamDTSHD = false;
+#ifdef HAS_DVD_LIBDTS_CODEC
   m_pStateDTS = NULL;
-  
+#endif  
   m_frameBytes = 0;
   m_iOutputSize = 0;
 
@@ -107,19 +108,22 @@ bool CDVDAudioCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
     m_DTSHDDetection = 3;
     m_bBitstreamDTSHD = g_guiSettings.GetBool("audiooutput.dtshdpassthrough");
 
+#ifdef HAS_DVD_LIBDTS_CODEC
     if (!m_dllDTS.Load())
       return false;
     m_pStateDTS = m_dllDTS.dts_init(0);
     if(m_pStateDTS == NULL)
       return false;
+#endif
   }
 
   // Caller has requested bitstream only; if we don't support bitstream for this format
   // exit now, otherwise we'll end up hardware decoding
-  if( hints.bitstream && !bSupportsPassthrough )
-  {
-    return false;
-  }
+  // TODO(q)
+  // if( hints.bitstream && !bSupportsPassthrough )
+  // {
+  //   return false;
+  // }
   
   // Format isn't supported
   if( !bSupportsPassthrough && !bSupportsHWDecode )
@@ -153,11 +157,13 @@ bool CDVDAudioCodecSMD::DetectDTSHD(BYTE* pData, int iSize)
 
 void CDVDAudioCodecSMD::Dispose()
 {
+#ifdef HAS_DVD_LIBDTS_CODEC
   if( m_pStateDTS )
   {
     m_dllDTS.dts_free(m_pStateDTS);
     m_pStateDTS = NULL;
   }
+#endif
 }
 
 int CDVDAudioCodecSMD::Decode(BYTE* pData, int iSize)
@@ -173,8 +179,12 @@ int CDVDAudioCodecSMD::Decode(BYTE* pData, int iSize)
   if( CODEC_ID_DTS == m_Codec && !m_bIsDTSHD && m_DTSHDDetection > 0 && m_bBitstreamDTSHD)
   {
     int ignore1=0, ignore2=0, ignore3=0, flags=0;
+    // TODO(q)
+#ifdef HAS_DVD_LIBDTS_CODEC
     int iFrameSize = m_dllDTS.dts_syncinfo(m_pStateDTS, pData, &flags, &ignore1, &ignore2, &ignore3);
-
+#else
+    int iFrameSize = 0;
+#endif
     if( iFrameSize < iSize )
       m_bIsDTSHD = DetectDTSHD( pData + iFrameSize, iSize-iFrameSize );
     m_DTSHDDetection--;
@@ -232,11 +242,11 @@ int CDVDAudioCodecSMD::GetChannels()
   return m_channel_count;
 }
 
-enum PCMChannels* CDVDAudioCodecSMD::GetChannelMap()
+CAEChannelInfo CDVDAudioCodecSMD::GetChannelMap()
 {
   // We always present stereo ch mapping
-  static enum PCMChannels map[2] = {PCM_FRONT_LEFT, PCM_FRONT_RIGHT };
-  return map;
+  static enum AEChannel map[2] = {AE_CH_FL, AE_CH_FR };
+  return CAEChannelInfo(map);
 }
 
 int CDVDAudioCodecSMD::GetSampleRate()

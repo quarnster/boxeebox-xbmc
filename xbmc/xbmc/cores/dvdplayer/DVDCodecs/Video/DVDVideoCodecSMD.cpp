@@ -53,13 +53,13 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
   ismd_codec_type_t codec_type;
 
   // found out if video hardware decoding is enforced
-//  printf("CDVDVideoCodecSMD::Open force hardware %d\n", g_advancedSettings.m_bForceVideoHardwareDecoding);
+  printf("CDVDVideoCodecSMD::Open force hardware %d\n", !hints.software);
   printf("CDVDVideoCodecSMD::Open width %d  height %d type %d\n", hints.width, hints.height, hints.codec);
 
   // Run some SD content in software mode
   // since hardware is not always compatible
   if(hints.width * hints.height <= 720 * 576 && hints.width * hints.height > 0 &&
-      /* TODO(q) !g_advancedSettings.m_bForceVideoHardwareDecoding && */ 
+      hints.software &&
       (hints.codec == CODEC_ID_MPEG4))
   {
     return false;

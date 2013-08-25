@@ -39,7 +39,7 @@ public:
   virtual int GetData(BYTE** dst);
   virtual void Reset();
   virtual int GetChannels();
-  virtual enum PCMChannels* GetChannelMap();
+  virtual CAEChannelInfo GetChannelMap();
   virtual int GetSampleRate();
   virtual int GetBitsPerSample();
   virtual unsigned char GetFlags();
@@ -62,8 +62,10 @@ void GetStreamInfo();
   bool m_bIsDTSHD;
   bool m_bBitstreamDTSHD;
   
+#ifdef HAS_DVD_LIBDTS_CODEC
   DllLibDts m_dllDTS;
   dts_state_t* m_pStateDTS;
+#endif
   
   BYTE m_frameCache[65536];
   int m_frameBytes;
