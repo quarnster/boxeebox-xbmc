@@ -1,6 +1,6 @@
-diff -x generated -r -u xbmc-12.2/Makefile.in xbmc/Makefile.in
+diff -x generated -w -r -u xbmc-12.2/Makefile.in xbmc/Makefile.in
 --- xbmc-12.2/Makefile.in	2013-05-03 07:57:40.000000000 +0200
-+++ xbmc/Makefile.in	2013-08-24 17:43:35.000000000 +0200
++++ xbmc/Makefile.in	2013-08-25 06:12:47.000000000 +0200
 @@ -476,7 +476,7 @@
  	$(MAKE) -C pvr-addons install
  endif
@@ -37,9 +37,9 @@ diff -x generated -r -u xbmc-12.2/Makefile.in xbmc/Makefile.in
  		-not -iregex ".*@ARCH@.*|.*\.vis|.*\.xbs|.*svn.*|.*\.so|.*\.dll" \
  		-exec sh -c "install -d \"$(DESTDIR)$(datarootdir)/xbmc/\`dirname '{}'\`\"" \; \
  		-and \
-diff -x generated -r -u xbmc-12.2/configure xbmc/configure
+diff -x generated -w -r -u xbmc-12.2/configure xbmc/configure
 --- xbmc-12.2/configure	2013-05-03 07:57:46.000000000 +0200
-+++ xbmc/configure	2013-08-24 17:43:35.000000000 +0200
++++ xbmc/configure	2013-08-25 06:12:47.000000000 +0200
 @@ -18135,7 +18135,7 @@
  }
  _ACEOF
@@ -67,22 +67,19 @@ diff -x generated -r -u xbmc-12.2/configure xbmc/configure
  else
    have_builtin_sync_val_compare_and_swap=no
  fi
-diff -x generated -r -u xbmc-12.2/xbmc/cores/Makefile.in xbmc/xbmc/cores/Makefile.in
+diff -x generated -w -r -u xbmc-12.2/xbmc/cores/Makefile.in xbmc/xbmc/cores/Makefile.in
 --- xbmc-12.2/xbmc/cores/Makefile.in	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/Makefile.in	2013-08-24 17:43:35.000000000 +0200
++++ xbmc/xbmc/cores/Makefile.in	2013-08-25 06:12:47.000000000 +0200
 @@ -1,4 +1,5 @@
  SRCS = DummyVideoPlayer.cpp
 +SRCS += IntelSMDGlobals.cpp
  
  LIB = cores.a
  
-diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/Makefile.in xbmc/xbmc/cores/VideoRenderers/Makefile.in
+diff -x generated -w -r -u xbmc-12.2/xbmc/cores/VideoRenderers/Makefile.in xbmc/xbmc/cores/VideoRenderers/Makefile.in
 --- xbmc-12.2/xbmc/cores/VideoRenderers/Makefile.in	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/VideoRenderers/Makefile.in	2013-08-24 17:43:35.000000000 +0200
-@@ -1,8 +1,9 @@
--SRCS  = BaseRenderer.cpp
-+SRCS = BaseRenderer.cpp
- SRCS += OverlayRenderer.cpp
++++ xbmc/xbmc/cores/VideoRenderers/Makefile.in	2013-08-25 06:12:47.000000000 +0200
+@@ -3,6 +3,7 @@
  SRCS += OverlayRendererUtil.cpp
  SRCS += RenderCapture.cpp
  SRCS += RenderManager.cpp
@@ -90,9 +87,9 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/Makefile.in xbmc/xbm
  
  ifeq ($(findstring arm,@ARCH@),arm)
  SRCS += yuv2rgb.neon.S
-diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h xbmc/xbmc/cores/VideoRenderers/RenderFlags.h
+diff -x generated -w -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h xbmc/xbmc/cores/VideoRenderers/RenderFlags.h
 --- xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/VideoRenderers/RenderFlags.h	2013-08-24 17:43:35.000000000 +0200
++++ xbmc/xbmc/cores/VideoRenderers/RenderFlags.h	2013-08-25 06:12:47.000000000 +0200
 @@ -73,4 +73,6 @@
  #define CONF_FLAGS_FORMAT_SBS     0x001000
  #define CONF_FLAGS_FORMAT_TB      0x002000
@@ -100,9 +97,21 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h xbmc/x
 +#define CONF_FLAGS_SMD_DECODING   0x004000
 +
  #endif
-diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp xbmc/xbmc/cores/dvdplayer/DVDPlayer.cpp
+diff -x generated -w -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in xbmc/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
+--- xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in	2013-05-03 07:57:41.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in	2013-08-25 06:11:36.000000000 +0200
+@@ -3,6 +3,8 @@
+ SRCS  = DVDVideoCodecFFmpeg.cpp
+ SRCS += DVDVideoCodecLibMpeg2.cpp
+ SRCS += DVDVideoPPFFmpeg.cpp
++SRCS += DVDVideoCodecSMD.cpp
++SRCS += IntelSMDVideo.cpp
+ 
+ ifeq (@USE_VDPAU@,1)
+ SRCS += VDPAU.cpp
+diff -x generated -w -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp xbmc/xbmc/cores/dvdplayer/DVDPlayer.cpp
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/dvdplayer/DVDPlayer.cpp	2013-08-24 19:15:37.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDPlayer.cpp	2013-08-25 06:12:47.000000000 +0200
 @@ -86,6 +86,10 @@
  #include "LangInfo.h"
  #include "ApplicationMessenger.h"
@@ -204,14 +213,12 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp xbmc/xbmc/c
  void CDVDPlayer::SetPlaySpeed(int speed)
  {
    m_messenger.Put(new CDVDMsgInt(CDVDMsg::PLAYER_SETSPEED, speed));
--  m_dvdPlayerAudio.SetSpeed(speed);
--  m_dvdPlayerVideo.SetSpeed(speed);
 +#ifdef HAS_INTEL_SMD
 +  if(speed == DVD_PLAYSPEED_PAUSE)
 +#endif
 +  {
-+    m_dvdPlayerAudio.SetSpeed(speed);
-+    m_dvdPlayerVideo.SetSpeed(speed);
+   m_dvdPlayerAudio.SetSpeed(speed);
+   m_dvdPlayerVideo.SetSpeed(speed);
 +  }
    SynchronizeDemuxer(100);
  }
@@ -243,9 +250,9 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp xbmc/xbmc/c
    m_dvdPlayerSubtitle.GetCurrentSubtitle(strSubtitle, pts - m_dvdPlayerVideo.GetSubtitleDelay());
  
    // In case we stalled, don't output any subs
-diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp
+diff -x generated -w -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp	2013-08-24 19:22:55.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp	2013-08-25 06:12:47.000000000 +0200
 @@ -45,6 +45,11 @@
  #include <iterator>
  #include "utils/log.h"
@@ -408,9 +415,9 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerVideo.cpp xbmc/x
    if (frameduration == DVD_NOPTS_VALUE ||
        (g_advancedSettings.m_videoFpsDetect == 1 && m_pullupCorrection.GetPatternLength() > 1))
    {
-diff -x generated -r -u xbmc-12.2/xbmc/guilib/JpegIO.h xbmc/xbmc/guilib/JpegIO.h
+diff -x generated -w -r -u xbmc-12.2/xbmc/guilib/JpegIO.h xbmc/xbmc/guilib/JpegIO.h
 --- xbmc-12.2/xbmc/guilib/JpegIO.h	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/guilib/JpegIO.h	2013-08-24 17:43:35.000000000 +0200
++++ xbmc/xbmc/guilib/JpegIO.h	2013-08-25 06:12:47.000000000 +0200
 @@ -26,7 +26,9 @@
  #pragma comment(lib, "turbojpeg-static.lib")
  #endif
@@ -421,9 +428,9 @@ diff -x generated -r -u xbmc-12.2/xbmc/guilib/JpegIO.h xbmc/xbmc/guilib/JpegIO.h
  #include "utils/StdString.h"
  
  class CJpegIO
-diff -x generated -r -u xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp xbmc/xbmc/windowing/egl/EGLWrapper.cpp
+diff -x generated -w -r -u xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp xbmc/xbmc/windowing/egl/EGLWrapper.cpp
 --- xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/windowing/egl/EGLWrapper.cpp	2013-08-24 17:43:35.000000000 +0200
++++ xbmc/xbmc/windowing/egl/EGLWrapper.cpp	2013-08-25 06:12:47.000000000 +0200
 @@ -26,6 +26,7 @@
  #include "EGLNativeTypeAndroid.h"
  #include "EGLNativeTypeAmlogic.h"
@@ -448,9 +455,9 @@ diff -x generated -r -u xbmc-12.2/xbmc/windowing/egl/EGLWrapper.cpp xbmc/xbmc/wi
  
    if (ret && m_nativeTypes)
      m_nativeTypes->Initialize();
-diff -x generated -r -u xbmc-12.2/xbmc/windowing/egl/Makefile xbmc/xbmc/windowing/egl/Makefile
+diff -x generated -w -r -u xbmc-12.2/xbmc/windowing/egl/Makefile xbmc/xbmc/windowing/egl/Makefile
 --- xbmc-12.2/xbmc/windowing/egl/Makefile	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/windowing/egl/Makefile	2013-08-24 17:43:35.000000000 +0200
++++ xbmc/xbmc/windowing/egl/Makefile	2013-08-25 06:12:47.000000000 +0200
 @@ -2,6 +2,7 @@
  
  SRCS = WinSystemEGL.cpp

@@ -39,6 +39,10 @@ ExternalProject_Add(
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/IntelSMDGlobals.h xbmc/cores/IntelSMDGlobals.h
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/VideoRenderers/IntelSMDRenderer.cpp xbmc/cores/VideoRenderers/IntelSMDRenderer.cpp
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/VideoRenderers/IntelSMDRenderer.h xbmc/cores/VideoRenderers/IntelSMDRenderer.h
+		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/IntelSMDVideo.cpp xbmc/cores/dvdplayer/DVDCodecs/Video/IntelSMDVideo.cpp
+		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/IntelSMDVideo.h xbmc/cores/dvdplayer/DVDCodecs/Video/IntelSMDVideo.h
+		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.cpp xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.cpp
+		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.h xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.h
 	CONFIGURE_COMMAND	${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh 
 	BUILD_COMMAND 		make ${PARALLEL}
 	BUILD_IN_SOURCE 	1

@@ -23,15 +23,15 @@
 
 #if defined(HAS_INTEL_SMD)
 
-#include "AdvancedSettings.h"
+#include "settings/AdvancedSettings.h"
 #include "IntelSMDVideo.h"
-#include "IntelSMDGlobals.h"
+#include "../../../IntelSMDGlobals.h"
 #include "DVDClock.h"
-#include "utils/Atomics.h"
-#include "utils/Thread.h"
+#include "threads/Atomics.h"
+#include "threads/Thread.h"
 #include "utils/log.h"
 #include "utils/fastmemcpy.h"
-#include "WinSystemGDL.h"
+//#include "WinSystemGDL.h"
 #include "Application.h"
 
 #define __MODULE_NAME__ "IntelSMD"
@@ -1362,7 +1362,7 @@ bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
   pDvdVideoPicture->color_matrix = 0;
   pDvdVideoPicture->iFlags = DVP_FLAG_ALLOCATED;
   //pDvdVideoPicture->iFlags = 0;
-  pDvdVideoPicture->format = DVDVideoPicture::FMT_NV12;
+//TODO(q)  pDvdVideoPicture->format = DVDVideoPicture::FMT_NV12;
 
   ismd_viddec_stream_properties_t prop;
 

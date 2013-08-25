@@ -22,15 +22,15 @@
 
 #if defined(HAS_INTEL_SMD)
 
-#include "GUISettings.h"
-#include "AdvancedSettings.h"
+#include "settings/GUISettings.h"
+#include "settings/AdvancedSettings.h"
 #include "DVDClock.h"
 #include "DVDStreamInfo.h"
 #include "DVDVideoCodecSMD.h"
 #include "utils/log.h"
 #include "utils/TimeUtils.h"
 #include "Application.h"
-#include "IntelSMDGlobals.h"
+#include "../../../IntelSMDGlobals.h"
 
 #define __MODULE_NAME__ "DVDVideoCodecSMD"
 
@@ -53,13 +53,13 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
   ismd_codec_type_t codec_type;
 
   // found out if video hardware decoding is enforced
-  printf("CDVDVideoCodecSMD::Open force hardware %d\n", g_advancedSettings.m_bForceVideoHardwareDecoding);
+//  printf("CDVDVideoCodecSMD::Open force hardware %d\n", g_advancedSettings.m_bForceVideoHardwareDecoding);
   printf("CDVDVideoCodecSMD::Open width %d  height %d type %d\n", hints.width, hints.height, hints.codec);
 
   // Run some SD content in software mode
   // since hardware is not always compatible
   if(hints.width * hints.height <= 720 * 576 && hints.width * hints.height > 0 &&
-      !g_advancedSettings.m_bForceVideoHardwareDecoding &&
+      /* TODO(q) !g_advancedSettings.m_bForceVideoHardwareDecoding && */ 
       (hints.codec == CODEC_ID_MPEG4))
   {
     return false;
@@ -118,7 +118,7 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
   m_Duration = (DVD_TIME_BASE / (24.0 * 1000.0/1001.0));
   m_DropPictures = false;
   m_DecodeStarted = false;
-  m_bIsDirectRendering = true;
+// TODO(q)  m_bIsDirectRendering = true;
 
   CLog::Log(LOGINFO, "Opened Intel SMD Codec, %s", m_pFormatName);
 
