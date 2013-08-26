@@ -77,7 +77,7 @@ ExternalProject_Add(
 	PREFIX 				${CMAKE_BINARY_DIR}/gdb
 	URL 				http://ftp.gnu.org/gnu/gdb/gdb-6.8a.tar.bz2
 	URL_MD5				da20d043e6729f74b909bd507bcae5c9
-	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --with-sysroot=${SYSROOT} --target=${TARGET} --prefix=${TARGET_DIR} --program-prefix=${TARGET}-
+	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --with-sysroot=${SYSROOT} --target=${TARGET} --prefix=${TARGET_DIR} --program-prefix=${TARGET}- --disable-werror
 	BUILD_COMMAND 		make ${PARALLEL}
 	DEPENDS 			gcc2
 )
@@ -97,7 +97,7 @@ ExternalProject_Add(
 	PREFIX 				${CMAKE_BINARY_DIR}/gdb
 	URL 				http://ftp.gnu.org/gnu/gdb/gdb-6.8a.tar.bz2
 	URL_MD5				da20d043e6729f74b909bd507bcae5c9
-	CONFIGURE_COMMAND 	LDFLAGS=-L${SYSROOT}/usr/local/lib <SOURCE_DIR>/configure --host=${TARGET} --prefix=${SYSROOT}/usr/local/
+	CONFIGURE_COMMAND 	LDFLAGS=-L${SYSROOT}/usr/local/lib <SOURCE_DIR>/configure --host=${TARGET} --prefix=${SYSROOT}/usr/local/ --disable-werror
 	BUILD_COMMAND 		make ${PARALLEL}
 	DEPENDS 			gcc2 termcap
 )
