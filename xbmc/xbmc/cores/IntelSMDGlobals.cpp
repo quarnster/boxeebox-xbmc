@@ -311,16 +311,16 @@ bool CIntelSMDGlobals::InitAudio()
 
 
   if(!CreateAudioProcessor())
-//    return false;
-//
-  // Configure audio outputs according to settings
-//  BuildAudioOutputs();
-//
-//  return true;
-//}
+   return false;
 
-//bool  CIntelSMDGlobals::BuildAudioOutputs()
-//{
+  // Configure audio outputs according to settings
+  BuildAudioOutputs();
+
+  return true;
+}
+
+bool  CIntelSMDGlobals::BuildAudioOutputs()
+{
   ismd_result_t result;
 
   int audioOutputMode = g_guiSettings.GetInt("audiooutput.mode");
@@ -2197,11 +2197,12 @@ bool CIntelSMDGlobals::CheckCodecHWDecode(int Codec)
 {
 
   VERBOSE();
-  CLog::Log(LOGERROR,
-        "CIntelSMDAudioRenderer::Resume - ismd_audio_set_master_volume: %d",
-        result);
   switch(Codec)
   {
+  case CODEC_ID_MP3:
+    return (ISMD_SUCCESS == ismd_audio_codec_available(ISMD_AUDIO_MEDIA_FMT_MPEG));
+  case CODEC_ID_AAC:
+    return (ISMD_SUCCESS == ismd_audio_codec_available(ISMD_AUDIO_MEDIA_FMT_AAC));
   case CODEC_ID_AC3:
     return (ISMD_SUCCESS == ismd_audio_codec_available(ISMD_AUDIO_MEDIA_FMT_DD));
   case CODEC_ID_EAC3:
