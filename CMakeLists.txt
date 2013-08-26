@@ -20,10 +20,13 @@ if(EXISTS Case_Test.txt)
 	message(FATAL_ERROR "The filesystem needs to be case sensitive. You can always create and mount a case sensitive file system image file.")
 endif()
 
-add_custom_target(xbmc-refresh
-	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/xbmc ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc
-	COMMAND 			touch ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc-stamp/xbmc-download
-)
+if(EXISTS ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc)
+	set(XBMC_REFRESH xbmc-refresh)
+	add_custom_target(xbmc-refresh
+		COMMAND 			${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/xbmc ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc
+		COMMAND 			touch ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc-stamp/xbmc-download
+	)
+endif()
 
 ExternalProject_Add(
 	toolchain
@@ -62,7 +65,7 @@ ExternalProject_Add(
 	CMAKE_ARGS			-DSYSROOT=${SYSROOT} -DPARALLEL=${PARALLEL}
 	BUILD_COMMAND 		PATH=$ENV{PATH}:${SYSROOT}/usr/bin make
 	INSTALL_COMMAND		""
-	DEPENDS				libs intel xbmc-refresh
+	DEPENDS				libs intel ${XBMC_REFRESH}
 )
 
 set(libs
@@ -170,5 +173,5 @@ add_custom_target(refresh
 	COMMAND 			touch ${CMAKE_BINARY_DIR}/toolchain-prefix/src/toolchain-stamp/toolchain-download
 	COMMAND 			touch ${CMAKE_BINARY_DIR}/libs-prefix/src/libs-stamp/libs-download
 	COMMAND 			touch ${CMAKE_BINARY_DIR}/intel-prefix/src/intel-stamp/intel-download
-	DEPENDS xbmc-refresh
+	DEPENDS 			${XBMC_REFRESH}
 )
