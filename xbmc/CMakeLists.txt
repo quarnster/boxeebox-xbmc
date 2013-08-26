@@ -20,7 +20,7 @@ export PYTHON_NOVERSIONCHECK=\"y\"
 export PYTHON=\"${TARGET_DIR}/bin/python\"
 export PYTHON_CPPFLAGS=\"-I${TARGET_DIR}/include/python2.7\"
 export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
-../xbmc/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-gl --disable-sdl --disable-alsa --disable-mysql --disable-x11 --disable-samba  --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick --enable-debug --disable-texturepacker
+../xbmc/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-gl --disable-sdl --disable-mysql --disable-x11 --disable-samba  --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick --enable-debug --disable-texturepacker
 "
 )
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh)
@@ -32,7 +32,7 @@ ExternalProject_Add(
 	xbmc
 	URL 				http://mirrors.xbmc.org/releases/source/xbmc-12.2.tar.gz
 	URL_MD5 			489f3877decae4e265ece54f9eaef0ba
-	PATCH_COMMAND		patch -p1 < ${CMAKE_SOURCE_DIR}/xbmc.patch
+	PATCH_COMMAND		patch -p1 -N < ${CMAKE_SOURCE_DIR}/xbmc.patch
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/windowing/egl/EGLNativeTypeBoxee.cpp xbmc/windowing/egl/EGLNativeTypeBoxee.cpp
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/windowing/egl/EGLNativeTypeBoxee.h xbmc/windowing/egl/EGLNativeTypeBoxee.h
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/IntelSMDGlobals.cpp xbmc/cores/IntelSMDGlobals.cpp

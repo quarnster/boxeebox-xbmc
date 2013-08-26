@@ -333,7 +333,7 @@ ExternalProject_Add(
 		COMMAND mv python hostpython
 		COMMAND mv Parser/pgen Parser/hostpgen
 		COMMAND make distclean
-		COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/Python-2.7.2-xcompile.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/Python-2.7.2-xcompile.patch
 		COMMAND sed -e "13735,13738d" -i configure
 		COMMAND sed -e "185d" -i Makefile.pre.in
 		COMMAND sed -e "954,959d" -i Makefile.pre.in
@@ -398,14 +398,6 @@ add_custom_command(OUTPUT ${TARGET_DIR}/lib/libGLESv2.so
 )
 
 add_custom_target(dummylibs ALL DEPENDS DEPENDS ${TARGET_DIR}/lib/libEGL.so ${TARGET_DIR}/lib/libGLESv2.so)
-
-ExternalProject_Add(
-	alsa
-	URL 				ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.27.2.tar.bz2
-	URL_MD5 			69129a7c37697f81ac092335e9fa452b
-	CONFIGURE_COMMAND 	LDFLAGS=-L${TARGET_DIR}/lib ${BASIC_CONF}
-	BUILD_COMMAND 		make ${PARALLEL}
-)
 
 ExternalProject_Add(
 	ffmpeg
