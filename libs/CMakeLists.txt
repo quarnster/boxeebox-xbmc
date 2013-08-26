@@ -405,5 +405,4 @@ ExternalProject_Add(
 	URL_MD5 			4997660dfc077922e37d0583f9322f6b
 	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --enable-shared --disable-static --disable-programs --enable-gpl
 	BUILD_COMMAND 		make ${PARALLEL}
-	DEPENDS				alsa
 )
