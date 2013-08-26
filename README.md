@@ -36,17 +36,16 @@ make
 
 Please do submit a pull request with any tweaks needed to make it build alright this far.
 
-## Making changes to libs/*, toolchain/* or xbmc/*
+## Making changes to libs/*, toolchain/*, intel/* or xbmc/* 
 
-Changes to these files are unfortunately not picked up automatically, so you'll have to
-manually copy any modified files and make the build system respect your changes via
-for example:
+Changes to these files are unfortunately not picked up automatically, but there's a
+"refresh" target that will try to pull in the changes and make the build system
+respect them:
 
+```bash
+make refresh
 ```
-cp ../toolchain/* toolchain-prefix/src/toolchain/ && touch toolchain-prefix/src/toolchain-stamp/toolchain-download
-cp ../libs/* libs-prefix/src/libs/ && touch libs-prefix/src/libs-stamp/libs-download
-cp ../xbmc/* xbmc-prefix/src/xbmc/ && touch xbmc-prefix/src/xbmc-stamp/xbmc-download
-```
+
 
 ## Installing
 

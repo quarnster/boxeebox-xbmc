@@ -157,3 +157,14 @@ add_custom_target(
 	COMMAND 			${SYSROOT}/usr/bin/i686-pc-linux-gnu-gdb -x ${CMAKE_BINARY_DIR}/gdb.txt
 	DEPENDS 			xbmc boxeelibs
 )
+
+add_custom_target(refresh
+	COMMAND 			cp -r ${CMAKE_SOURCE_DIR}/toolchain/* ${CMAKE_BINARY_DIR}/toolchain-prefix/src/toolchain/
+	COMMAND 			cp -r ${CMAKE_SOURCE_DIR}/libs/* ${CMAKE_BINARY_DIR}/libs-prefix/src/libs/
+	COMMAND 			cp -r ${CMAKE_SOURCE_DIR}/intel/* ${CMAKE_BINARY_DIR}/intel-prefix/src/intel/
+	COMMAND 			cp -r ${CMAKE_SOURCE_DIR}/xbmc/* ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/
+	COMMAND 			touch ${CMAKE_BINARY_DIR}/toolchain-prefix/src/toolchain-stamp/toolchain-download
+	COMMAND 			touch ${CMAKE_BINARY_DIR}/libs-prefix/src/libs-stamp/libs-download
+	COMMAND 			touch ${CMAKE_BINARY_DIR}/intel-prefix/src/intel-stamp/intel-download
+	COMMAND 			touch ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc-stamp/xbmc-download
+)

@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 2.8)
 set(TARGET "i686-pc-linux-gnu")
 set(TARGET_DIR "${SYSROOT}/usr")
 
-set(BINUTILS_VERSION "2.18" CACHE "Version of binutils to build" STRING)
-set(GCC_VERSION "4.2.1" CACHE "Version of GCC to build" STRING)
+set(BINUTILS_VERSION "2.18" CACHE STRING "Version of binutils to build")
+set(GCC_VERSION "4.2.1" CACHE STRING "Version of GCC to build")
+set(ENABLE_GDB OFF CACHE BOOL "Wether to build gdb or not")
 
 include(ExternalProject)
 
@@ -72,6 +73,7 @@ ExternalProject_Add(
 	DEPENDS 			glibc
 )
 
+if(ENABLE_GDB)
 ExternalProject_Add(
 	gdb
 	PREFIX 				${CMAKE_BINARY_DIR}/gdb
@@ -91,7 +93,6 @@ ExternalProject_Add(
 	DEPENDS 			gcc2
 )
 
-
 ExternalProject_Add(
 	targetgdb
 	PREFIX 				${CMAKE_BINARY_DIR}/gdb
@@ -101,7 +102,7 @@ ExternalProject_Add(
 	BUILD_COMMAND 		make ${PARALLEL}
 	DEPENDS 			gcc2 termcap
 )
-
+endif()
 
 file(WRITE "${SYSROOT}/usr/bin/${TARGET}-pkg-config" "
 #!/bin/bash
