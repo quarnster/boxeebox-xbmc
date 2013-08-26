@@ -695,10 +695,6 @@ unsigned int CAESinkIntelSMD::AddPackets(uint8_t* data, unsigned int len, bool h
     return len;
   }
 
-  // don't do anything if demuxer is connected directly to decoder
-  if(g_IntelSMDGlobals.IsDemuxToAudio())
-    return len;
-
   if (m_bTimed)
   {
 // TODO(q)

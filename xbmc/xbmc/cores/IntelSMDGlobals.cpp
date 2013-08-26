@@ -70,12 +70,6 @@ CIntelSMDGlobals::CIntelSMDGlobals()
   VERBOSE();
 
   m_main_clock = -1;
-  m_demux = -1;
-  m_demux_input_port = -1;
-  m_demux_video_port = -1;
-  m_demux_audio_port = -1;
-  m_demux_ves_filter_handle = -1;
-  m_demux_aes_filter_handle = -1;
   m_audioProcessor = -1;
   m_viddec = -1;
   m_viddec_input_port = -1;
@@ -97,9 +91,6 @@ CIntelSMDGlobals::CIntelSMDGlobals()
   m_video_start_pts = ISMD_NO_PTS;
 
   m_bFlushFlag = false;
-
-  m_bDemuxToVideo = false;
-  m_bDemuxToAudio = false;
 
   m_audioOutputHDMI = -1;
   m_audioOutputSPDIF = -1;
@@ -770,265 +761,6 @@ void CIntelSMDGlobals::SendStartPacket(ismd_pts_t start_pts,
   }
 }
 
-bool CIntelSMDGlobals::CreateDemuxer()
-{
-  VERBOSE();
-  ismd_result_t ismd_ret;
-  unsigned output_buf_size = 0;
-
-  if(m_demux != -1)
-  {
-    CLog::Log(LOGWARNING, "CIntelSMDGlobals::CreateDemuxer demux is already open, closing");
-    DeleteDemuxer();
-  }
-
-  ismd_ret = ismd_demux_stream_open(
-      ISMD_DEMUX_STREAM_TYPE_MPEG2_TRANSPORT_STREAM, &m_demux,
-      &m_demux_input_port);
-
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::CreateDemuxer ismd_demux_stream_open failed %d", ismd_ret);
-    return false;
-  }
-
-  // create the video filter
-  output_buf_size = 32 * 1024;
-  ismd_ret = ismd_demux_filter_open(m_demux, ISMD_DEMUX_OUTPUT_ES,
-      output_buf_size, &m_demux_ves_filter_handle, &m_demux_video_port);
-
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::CreateDemuxer failed at ismd_demux_filter_open %d", ismd_ret);
-    return false;
-  }
-
-  // create the audio filter
-  output_buf_size = 8 * 1024;
-  ismd_ret = ismd_demux_filter_open(m_demux, ISMD_DEMUX_OUTPUT_ES,
-      output_buf_size, &m_demux_aes_filter_handle, &m_demux_audio_port);
-
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::CreateDemuxer failed at ismd_demux_filter_open %d", ismd_ret);
-    return false;
-  }
-
-  // Clock
-  ismd_ret = ismd_dev_set_clock(m_demux, m_main_clock);
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::CreateDemuxer: failed at ismd_dev_set_clock %d", ismd_ret);
-    return false;
-  }
-
-  ismd_ret = ismd_demux_stream_use_arrival_time(m_demux, true);
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::CreateDemuxer: failed at ismd_demux_stream_use_arrival_time %d", ismd_ret);
-    return false;
-  }
-
-  ismd_ret = ismd_dev_set_state(m_demux, ISMD_DEV_STATE_PAUSE);
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::CreateDemuxer:failed at ismd_dev_set_state %d", ismd_ret);
-    return false;
-  }
-
-  ismd_ret = ismd_demux_enable_leaky_filters(m_demux);
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::CreateDemuxer:failed at ismd_demux_enable_leaky_filters %d", ismd_ret);
-    return false;
-  }
-
-  return true;
-}
-
-bool CIntelSMDGlobals::DeleteDemuxer()
-{
-  VERBOSE();
-  ismd_result_t res = ISMD_ERROR_UNSPECIFIED;
-
-  if (m_demux == -1)
-    return true;
-
-  SetDemuxDeviceState(ISMD_DEV_STATE_STOP);
-  FlushDemuxer();
-
-  if (m_demux_ves_filter_handle != -1)
-    ismd_demux_filter_close(m_demux, m_demux_ves_filter_handle);
-
-  if (m_demux_aes_filter_handle != -1)
-    ismd_demux_filter_close(m_demux, m_demux_aes_filter_handle);
-
-  ismd_dev_close(m_demux);
-
-  m_demux = -1;
-  m_demux_ves_filter_handle = -1;
-  m_demux_aes_filter_handle = -1;
-  m_demux_input_port = -1;
-
-  m_demux_video_port = -1;
-  m_demux_audio_port = -1;
-
-  m_bDemuxToAudio = false;
-  m_bDemuxToVideo = false;
-
-  return true;
-}
-
-bool CIntelSMDGlobals::FlushDemuxer()
-{
-  VERBOSE();
-  CSingleLock lock(m_Lock);
-  ismd_result_t ret = ISMD_ERROR_UNSPECIFIED;
-
-  SetDemuxDeviceState(ISMD_DEV_STATE_PAUSE);
-
-  if (m_demux != -1)
-    ret = ismd_dev_flush(m_demux);
-  if (ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::FlushDemuxer ismd_dev_flush failed %d", ret);
-    return false;
-  }
-
-  return true;
-}
-
-bool CIntelSMDGlobals::SetDemuxDeviceState(ismd_dev_state_t state)
-{
-  VERBOSE();
-  ismd_result_t ret;
-
-  if (state == ISMD_DEV_STATE_INVALID)
-  {
-    CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::SetDemuxDeviceState setting device to invalid");
-    return true;
-  }
-
-  CSingleLock lock(m_Lock);
-
-  if (m_demux == -1)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::SetDemuxDeviceState device = -1");
-    return false;
-  }
-
-  ret = ismd_dev_set_state(m_demux, state);
-  if (ret != ISMD_SUCCESS)
-    CLog::Log(
-        LOGWARNING,
-        "CIntelSMDGlobals::SetDemuxDeviceState ismd_dev_set_state %d on demux device failed %d",
-        state, ret);
-
-  CLog::Log(LOGDEBUG, "SetDemuxDeviceState state %d ret %d", state, ret);
-
-  return true;
-}
-
-bool CIntelSMDGlobals::ConnectDemuxerToAudio(ismd_dev_t audio_device)
-{
-  VERBOSE();
-  ismd_result_t ismd_ret;
-  ismd_port_handle_t demux_output_port;
-  ismd_port_handle_t audio_input;
-
-
-  ismd_ret = ismd_demux_filter_get_output_port(m_demux, m_demux_aes_filter_handle, &demux_output_port);
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::ConnectDemuxerToAudio failed at ismd_demux_filter_get_output_port %d", ismd_ret);
-    return false;
-  }
-
-  ismd_ret = ismd_audio_input_get_port(m_audioProcessor, audio_device, &audio_input);
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::ConnectDemuxerToAudio failed at ismd_audio_input_get_port, %d", ismd_ret);
-    return false;
-  }
-
-  ismd_ret = ismd_port_connect(demux_output_port, audio_input);
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "failed at ismd_port_connect, ts_aud to audio");
-    return false;
-  }
-
-  m_bDemuxToAudio = true;
-
-  return true;
-}
-
-bool CIntelSMDGlobals::ConnectDemuxerToVideo()
-{
-  VERBOSE();
-  ismd_result_t ismd_ret;
-  ismd_port_handle_t demux_output_port;
-
-
-  if(GetVidDecInput() == -1)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::ConnectDemuxerToVideo failed GetVidDecInput is -1\n");
-    return false;
-  }
-
-  ismd_ret = ismd_demux_filter_get_output_port(m_demux, m_demux_ves_filter_handle, &demux_output_port);
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::ConnectDemuxerToVideo failed at ismd_port_connect, ts_vid to viddec %d", ismd_ret);
-    return false;
-  }
-
-  ismd_ret = ismd_port_connect(demux_output_port, GetVidDecInput());
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::ConnectDemuxerToVideo failed at ismd_port_connect, ts_vid to viddec\n");
-    return false;
-  }
-
-  m_bDemuxToVideo = true;
-
-  return true;
-}
-
-bool CIntelSMDGlobals::SetDemuxDeviceBaseTime(ismd_time_t time)
-{
-  //printf("%s", __FUNCTION__);
-  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::SetDemuxDeviceBaseTime base time %.2f",
-      IsmdToDvdPts(time) / 1000000);
-
-  ismd_result_t ret;
-  ismd_dev_state_t state = ISMD_DEV_STATE_INVALID;
-
-  CSingleLock lock(m_Lock);
-
-  if (m_demux != -1)
-  {
-    ismd_dev_get_state(m_demux, &state);
-    if (state == ISMD_DEV_STATE_PLAY)
-    {
-      CLog::Log(LOGWARNING,
-          "CIntelSMDGlobals::SetDemuxDeviceBaseTime device is running. Ignoring request");
-      return true;
-    }
-
-    ret = ismd_dev_set_stream_base_time(m_demux, time);
-    if (ret != ISMD_SUCCESS)
-    {
-      CLog::Log(LOGERROR,
-          "CIntelSMDGlobals::SetDemuxDeviceBaseTime ismd_dev_set_stream_base_time for demux device failed");
-    }
-  }
-
-  return true;
-}
-
 bool CIntelSMDGlobals::CreateVideoDecoder(ismd_codec_type_t codec_type)
 {
   VERBOSE();
@@ -1162,7 +894,6 @@ bool CIntelSMDGlobals::DeleteVideoDecoder()
   m_viddec_output_port = -1;
   m_viddec_user_data_port = -1;
   m_viddec_user_data_event = -1;
-  m_bDemuxToVideo = false;
 
   return true;
 }
@@ -1614,23 +1345,14 @@ bool CIntelSMDGlobals::DeleteAudioProcessor()
   if (m_audioProcessor == -1)
     return true;
 
-//  CHalServicesFactory::GetInstance().SetAudioDACState(false);
-
   result = ismd_audio_close_processor(m_audioProcessor);
   if (result != ISMD_SUCCESS)
   {
     CLog::Log(LOGERROR, "CIntelSMDGlobals::DestroyAudioProcessor - error closing device: %d", result);
-//    CHalServicesFactory::GetInstance().SetAudioDACState(true);
     return false;
   }
 
   m_audioProcessor = -1;
-
-  // This should invalidate all devices
-  m_bDemuxToAudio = false;
-
-//  CHalServicesFactory::GetInstance().SetAudioDACState(true);
-
   return true;
 }
 

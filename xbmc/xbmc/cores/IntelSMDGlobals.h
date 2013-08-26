@@ -26,7 +26,6 @@ extern "C"
 #include <ismd_viddec.h>
 #include <ismd_vidrend.h>
 #include <ismd_audio.h>
-#include <ismd_demux.h>
 #include <libgdl.h>
 #include <pal_soc_info.h>
 }
@@ -143,21 +142,6 @@ public:
   ismd_pts_t DvdToIsmdPts(double pts);
   double IsmdToDvdPts(ismd_pts_t pts);
 
-  bool CreateDemuxer();
-  bool DeleteDemuxer();
-  ismd_dev_t GetDemuxer() { return m_demux; }
-  bool FlushDemuxer();
-  bool ConnectDemuxerToVideo();
-  bool ConnectDemuxerToAudio(ismd_dev_t device);
-  bool SetDemuxDeviceState(ismd_dev_state_t state);
-  ismd_port_handle_t GetDemuxInput() { return m_demux_input_port; }
-  ismd_port_handle_t GetDemuxAudioPort() { return m_demux_audio_port; }
-  ismd_port_handle_t GetDemuxVideoPort() { return m_demux_video_port; }
-  ismd_demux_filter_handle_t GetDemuxVideoFilter() { return m_demux_ves_filter_handle; }
-  ismd_demux_filter_handle_t GetDemuxAudioFilter() { return m_demux_aes_filter_handle; }
-
-  bool SetDemuxDeviceBaseTime(ismd_time_t time);
-
   bool CreateVideoRender(gdl_plane_id_t plane);
   bool DeleteVideoRender();
   bool CreateVideoDecoder(ismd_codec_type_t codec_type);
@@ -195,9 +179,6 @@ public:
 
   ismd_dev_state_t DVDSpeedToSMD(int dvdSpeed);
 
-  bool IsDemuxToVideo() { return m_bDemuxToVideo; }
-  bool IsDemuxToAudio() { return m_bDemuxToAudio; }
-
 protected:
 
   bool SetClockPrimary();
@@ -211,14 +192,6 @@ protected:
   ismd_time_t  m_base_time;
   ismd_time_t  m_pause_base_time;
   ismd_time_t  m_pause_cur_time;
-
-  // demuxer
-  ismd_dev_t m_demux;
-  ismd_port_handle_t m_demux_input_port;
-  ismd_port_handle_t m_demux_video_port;
-  ismd_port_handle_t m_demux_audio_port;
-  ismd_demux_filter_handle_t m_demux_ves_filter_handle;
-  ismd_demux_filter_handle_t m_demux_aes_filter_handle;
 
   // Video
   ismd_dev_t m_viddec;
@@ -249,9 +222,6 @@ protected:
   ismd_audio_output_t     m_audioOutputI2S0;
 
   bool m_bFlushFlag;
-  bool m_bDemuxToVideo;
-  bool m_bDemuxToAudio;
-
 
   CCriticalSection m_Lock;
 };

@@ -36,15 +36,17 @@ make
 
 Please do submit a pull request with any tweaks needed to make it build alright this far.
 
-## Making changes to libs/*, toolchain/*, intel/* or xbmc/* 
+## Making changes to libs/*, toolchain/* or intel/*
 
-Changes to these files are unfortunately not picked up automatically, but there's a
-"refresh" target that will try to pull in the changes and make the build system
+Changes to these files are unfortunately not picked up automatically at the moment, but there's
+a "refresh" target that will try to pull in the changes and make the build system
 respect them:
 
 ```bash
 make refresh
 ```
+
+Changes in the xbmc directory should be picked up automatically.
 
 
 ## Installing
