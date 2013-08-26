@@ -26,7 +26,7 @@ export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh)
 
 add_custom_target(
-	deps ALL
+	copydeps ALL
 	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/windowing/egl/EGLNativeTypeBoxee.cpp                 ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/windowing/egl/EGLNativeTypeBoxee.cpp
 	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/windowing/egl/EGLNativeTypeBoxee.h                   ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/windowing/egl/EGLNativeTypeBoxee.h
 	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/IntelSMDGlobals.cpp                            ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/IntelSMDGlobals.cpp
@@ -39,8 +39,6 @@ add_custom_target(
 	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.h   ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.h
 	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.cpp ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.cpp
 	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.h   ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.h
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxSMD.cpp          ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxSMD.cpp
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxSMD.h            ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxSMD.h
 	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.cpp           ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.cpp
 	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.h             ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.h
 )
@@ -55,5 +53,5 @@ ExternalProject_Add(
 	CONFIGURE_COMMAND	${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh 
 	BUILD_COMMAND 		make ${PARALLEL}
 	BUILD_IN_SOURCE 	1
-	DEPENDS 			deps
 )
+add_dependencies(xbmc copydeps)
