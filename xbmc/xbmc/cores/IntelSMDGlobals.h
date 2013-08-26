@@ -38,12 +38,6 @@ extern "C"
 #define GDL_FLASH_GRAPHICS_PLANE  GDL_PLANE_ID_UPP_C  // middle for pages with embedded video
 
 #define SMD_CLOCK_FREQ 90000
-#define SMD_TO_DVD(time) (double)(((double)(time) / SMD_CLOCK_FREQ) * DVD_TIME_BASE)
-#define DVD_TO_SMD(time) (ismd_time_t)(((double)(time) / DVD_TIME_BASE) * SMD_CLOCK_FREQ)
-#define HW_AUDIO_DECODING_NUM 9
-
-#define MAX_SECTION_SIZE 4096 // Size of largest section that can exist
-#define DEMUX_FILTER_SIZE MAX_SECTION_SIZE
 
 enum InterlaceMode
 {
@@ -71,12 +65,10 @@ public:
   ismd_dev_t GetVidRender() { return m_video_render; }
   ismd_port_handle_t GetVidDecInput() { return m_viddec_input_port; }
   ismd_port_handle_t GetVidDecOutput() { return m_viddec_output_port; }
-  ismd_port_handle_t GetVideDecUserDataPort() { return m_viddec_user_data_port; }
   ismd_port_handle_t GetVidProcInput() { return m_video_input_port_proc; }
   ismd_port_handle_t GetVidProcOutput() { return m_video_output_port_proc; }
   ismd_port_handle_t GetVidRenderInput() { return m_video_input_port_renderer; }
   ismd_port_handle_t GetVidRenderOutput() { return m_video_output_port_renderer; }
-  ismd_event_t GetVideoDecUserEvent() { return m_viddec_user_data_event; }
   bool SetVideoRenderBaseTime(ismd_time_t time);
 
   bool  InitAudio();
@@ -147,7 +139,6 @@ public:
   bool CreateVideoDecoder(ismd_codec_type_t codec_type);
   bool DeleteVideoDecoder();
   bool ConnectDecoderToRenderer();
-  bool CreateVidDecUserDataPort();
 
   bool MuteVideoRender(bool mute);
 
@@ -177,8 +168,6 @@ public:
   static bool SetMasterVolume(float nVolume);
   static void Mute(bool bMute);
 
-  ismd_dev_state_t DVDSpeedToSMD(int dvdSpeed);
-
 protected:
 
   bool SetClockPrimary();
@@ -188,42 +177,40 @@ protected:
   bool                  RemoveAllAudioOutput();
 
   // clock
-  ismd_clock_t  m_main_clock;
-  ismd_time_t  m_base_time;
-  ismd_time_t  m_pause_base_time;
-  ismd_time_t  m_pause_cur_time;
+  ismd_clock_t            m_main_clock;
+  ismd_time_t             m_base_time;
+  ismd_time_t             m_pause_base_time;
+  ismd_time_t             m_pause_cur_time;
 
   // Video
-  ismd_dev_t m_viddec;
-  ismd_dev_t m_video_proc;
-  ismd_dev_t m_video_render;
-  ismd_port_handle_t  m_viddec_input_port;
-  ismd_port_handle_t  m_viddec_output_port;
-  ismd_port_handle_t m_viddec_user_data_port;
-  ismd_port_handle_t m_video_input_port_proc;
-  ismd_port_handle_t m_video_output_port_proc;
-  ismd_port_handle_t m_video_input_port_renderer;
-  ismd_port_handle_t m_video_output_port_renderer;
-  ismd_event_t m_viddec_user_data_event;
-  ismd_codec_type_t m_video_codec;
+  ismd_dev_t              m_viddec;
+  ismd_dev_t              m_video_proc;
+  ismd_dev_t              m_video_render;
+  ismd_port_handle_t      m_viddec_input_port;
+  ismd_port_handle_t      m_viddec_output_port;
+  ismd_port_handle_t      m_video_input_port_proc;
+  ismd_port_handle_t      m_video_output_port_proc;
+  ismd_port_handle_t      m_video_input_port_renderer;
+  ismd_port_handle_t      m_video_output_port_renderer;
+  ismd_codec_type_t       m_video_codec;
 
-  ismd_dev_state_t m_RenderState;
+  ismd_dev_state_t        m_RenderState;
 
-  ismd_pts_t m_audio_start_pts;
-  ismd_pts_t m_video_start_pts;
+  ismd_pts_t              m_audio_start_pts;
+  ismd_pts_t              m_video_start_pts;
 
   ismd_audio_processor_t  m_audioProcessor;
 
-  ismd_dev_t m_primaryAudioInput; // for AV main playback
+  ismd_dev_t              m_primaryAudioInput; // for AV main playback
 
   // Audio outputs
   ismd_audio_output_t     m_audioOutputHDMI;
   ismd_audio_output_t     m_audioOutputSPDIF;
   ismd_audio_output_t     m_audioOutputI2S0;
 
-  bool m_bFlushFlag;
+  bool                    m_bFlushFlag;
 
-  CCriticalSection m_Lock;
+  CCriticalSection        m_Lock;
 };
 
 

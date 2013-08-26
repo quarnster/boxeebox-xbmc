@@ -54,12 +54,12 @@ extern "C" {
 #define VERBOSE()
 #endif
 
-#ifndef DVD_TIME_BASE
-#define DVD_TIME_BASE 1000000
-#endif
-#ifndef DVD_NOPTS_VALUE
-#define DVD_NOPTS_VALUE    (-1LL<<52) // should be possible to represent in both double and __int64
-#endif
+// #ifndef DVD_TIME_BASE
+// #define DVD_TIME_BASE 1000000
+// #endif
+// #ifndef DVD_NOPTS_VALUE
+// #define DVD_NOPTS_VALUE    (-1LL<<52) // should be possible to represent in both double and __int64
+// #endif
 
 #define AUDIO_OUTPUT_DELAY 39 // requested by dolby cert
 
@@ -74,7 +74,6 @@ CIntelSMDGlobals::CIntelSMDGlobals()
   m_viddec = -1;
   m_viddec_input_port = -1;
   m_viddec_output_port = -1;
-  m_viddec_user_data_port = -1;
   m_video_proc = -1;
   m_video_render = -1;
   m_video_input_port_proc = -1;
@@ -82,7 +81,6 @@ CIntelSMDGlobals::CIntelSMDGlobals()
   m_video_output_port_renderer = -1;
   m_video_output_port_proc = -1;
   m_video_codec = ISMD_CODEC_TYPE_INVALID;
-  m_viddec_user_data_event = -1;
 
   m_base_time = 0;
   m_pause_base_time = 0;
@@ -683,8 +681,6 @@ void CIntelSMDGlobals::CreateStartPacket(ismd_pts_t start_pts,
     return;
   }
 
-  //printf("***Create start packet to Video renderer. pts = %.2f", IsmdToDvdPts(start_pts) / 1000000);
-
   newsegment_data.linear_start = 0;
   newsegment_data.start = start_pts;
   newsegment_data.stop = ISMD_NO_PTS;
@@ -723,18 +719,6 @@ void CIntelSMDGlobals::SendStartPacket(ismd_pts_t start_pts,
       return;
     }
   }
-
-  /*
-   printf("***Sending start packet to ");
-   if(port == m_viddec_input_port)
-   printf("Video decoder. pts = %.2f", IsmdToDvdPts(start_pts) / 1000000);
-   else if(port == m_video_input_port_proc)
-   printf("Video proc. pts = %.2f", IsmdToDvdPts(start_pts) / 1000000);
-   else if(port == m_audio_inputPort)
-   printf("Audio device. pts = %.2f", IsmdToDvdPts(start_pts) / 1000000);
-   else
-   printf("Unknown input. pts = %.2f", IsmdToDvdPts(start_pts) / 1000000);
-   */
 
   newsegment_data.linear_start = 0;
   newsegment_data.start = start_pts;
@@ -811,66 +795,9 @@ bool CIntelSMDGlobals::CreateVideoDecoder(ismd_codec_type_t codec_type)
     return false;
   }
 
-  // set default fps
-  /*
-   res = ismd_viddec_set_frame_rate(m_viddec, 30000, 1001, false);
-   if (res != ISMD_SUCCESS)
-   {
-   CLog::Log(LOGERROR, "ismd_viddec_set_frame_rate failed <%d>", res);
-   return false;
-   }
-   */
-
-  /*
-   res = ismd_viddec_set_frame_output_policy(m_viddec, ISMD_VIDDEC_DECODE_ORDER);
-   if (res != ISMD_SUCCESS)
-   {
-   CLog::Log(LOGERROR, "ismd_viddec_set_frame_output_policy failed <%d>", res);
-   return false;
-   }
-   */
   SetVideoDecoderState(ISMD_DEV_STATE_PAUSE);
 
   m_video_codec = codec_type;
-
-  return true;
-}
-
-bool CIntelSMDGlobals::CreateVidDecUserDataPort()
-{
-  VERBOSE();
-  ismd_result_t res;
-
-  res = ismd_viddec_get_user_data_port(m_viddec, &m_viddec_user_data_port);
-  if (res != ISMD_SUCCESS)
-  {
-    CLog::Log(
-        LOGERROR,
-        "CIntelSMDGlobals::CreateVidDecUserDataPort ismd_viddec_get_user_data_port failed <%d>",
-        res);
-    return false;
-  }
-
-  res = ismd_event_alloc(&m_viddec_user_data_event);
-  if (res != ISMD_SUCCESS)
-  {
-    CLog::Log(
-        LOGERROR,
-        "CIntelSMDGlobals::CreateVidDecUserDataPort ismd_event_alloc failed <%d>",
-        res);
-    return false;
-  }
-
-  res = ismd_port_attach(m_viddec_user_data_port, m_viddec_user_data_event,
-      ISMD_QUEUE_EVENT_NOT_EMPTY, ISMD_QUEUE_WATERMARK_NONE);
-  if (res != ISMD_SUCCESS)
-  {
-    CLog::Log(
-        LOGERROR,
-        "CIntelSMDGlobals::CreateVidDecUserDataPort ismd_port_attach failed <%d>",
-        res);
-    return false;
-  }
 
   return true;
 }
@@ -892,8 +819,6 @@ bool CIntelSMDGlobals::DeleteVideoDecoder()
   m_viddec = -1;
   m_viddec_input_port = -1;
   m_viddec_output_port = -1;
-  m_viddec_user_data_port = -1;
-  m_viddec_user_data_event = -1;
 
   return true;
 }
@@ -1636,18 +1561,6 @@ bool CIntelSMDGlobals::SetVideoRenderState(ismd_dev_state_t state)
     }
   }
 
-  /*
-   if(state == ISMD_DEV_STATE_PLAY)
-   {
-   ret = ismd_vidrend_set_flush_policy(m_video_render, ISMD_VIDREND_FLUSH_POLICY_DISPLAY_BLACK);
-   if (ret != ISMD_SUCCESS)
-   {
-   printf("CIntelSMDGlobals::SetVideoRenderState ismd_vidrend_set_flush_policy failed before play");
-   return false;
-   }
-   }
-   */
-
   if (m_video_render != -1)
   {
     ret = ismd_dev_set_state(m_video_render, state);
@@ -1659,18 +1572,6 @@ bool CIntelSMDGlobals::SetVideoRenderState(ismd_dev_state_t state)
       return false;
     }
   }
-
-  /*
-   if(state == ISMD_DEV_STATE_PAUSE)
-   {
-   ret = ismd_vidrend_set_flush_policy(m_video_render, ISMD_VIDREND_FLUSH_POLICY_REPEAT_FRAME);
-   if (ret != ISMD_SUCCESS)
-   {
-   printf("CIntelSMDGlobals::SetVideoRenderState ismd_vidrend_set_flush_policy failed after pause");
-   return false;
-   }
-   }
-   */
 
   m_RenderState = state;
 
@@ -1944,21 +1845,6 @@ bool CIntelSMDGlobals::CheckCodecHWDecode(int Codec)
     return (ISMD_SUCCESS == ismd_audio_codec_available(ISMD_AUDIO_MEDIA_FMT_AAC_LOAS));
   default:
     return false;
-  }
-}
-
-ismd_dev_state_t CIntelSMDGlobals::DVDSpeedToSMD(int dvdSpeed)
-{
-  switch (dvdSpeed)
-  {
-  case DVD_PLAYSPEED_PAUSE:
-    return ISMD_DEV_STATE_PAUSE;
-  case DVD_PLAYSPEED_NORMAL:
-    return ISMD_DEV_STATE_PLAY;
-  // case DVD_PLAYSPEED_STOP:
-  //   return ISMD_DEV_STATE_STOP;
-  default:
-    return ISMD_DEV_STATE_PLAY;
   }
 }
 
