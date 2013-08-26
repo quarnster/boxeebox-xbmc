@@ -21,7 +21,7 @@ if(EXISTS Case_Test.txt)
 endif()
 
 add_custom_target(xbmc-refresh
-	COMMAND 			cp -r ${CMAKE_SOURCE_DIR}/xbmc/* ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/
+	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/xbmc ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc
 	COMMAND 			touch ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc-stamp/xbmc-download
 )
 
