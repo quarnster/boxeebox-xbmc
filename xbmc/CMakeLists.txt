@@ -47,6 +47,8 @@ ExternalProject_Add(
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.h xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.h
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxSMD.cpp xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxSMD.cpp
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxSMD.h xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxSMD.h
+		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.cpp xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.cpp
+		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.h xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.h
 	CONFIGURE_COMMAND	${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh 
 	BUILD_COMMAND 		make ${PARALLEL}
 	BUILD_IN_SOURCE 	1
