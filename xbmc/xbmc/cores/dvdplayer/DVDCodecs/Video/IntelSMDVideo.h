@@ -94,15 +94,12 @@ public:
   void CloseDecoder(void);
   void SetDefaults();
 
-  void Pause();
-  void Resume();
   void Reset();
   void Resync(double pts) {}
 
   bool AddInput(unsigned char *pData, size_t size, double dts, double pts);
 
   bool GetPicture(DVDVideoPicture* pDvdVideoPicture);
-  void SetDropState(bool bDrop);
 
   void SetWidth(unsigned int width) { m_width = m_dwidth = width; }
   void SetHeight(unsigned int height) { m_height = m_dheight = height; }
@@ -120,12 +117,8 @@ public:
 
 protected:
   virtual ~CIntelSMDVideo();
-  bool CheckStartRunning();
 
   bool          m_IsConfigured;
-  bool          m_drop_state;
-  unsigned int  m_OutputTimeout;
-  unsigned int  m_field;
   unsigned int  m_width;
   unsigned int  m_height;
   unsigned int  m_dwidth;

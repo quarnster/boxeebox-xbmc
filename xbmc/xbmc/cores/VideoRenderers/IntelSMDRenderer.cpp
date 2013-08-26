@@ -47,28 +47,6 @@ namespace ismd {
 #define ROUND_DOWN(num, amt) ((num%amt) ? num - (num%amt): num)
 #define CACHE_LINE_SIZE 64
 
-union pts_union
-{
-  double  pts_d;
-  int64_t pts_i;
-};
-
-#if 0
-static int64_t pts_dtoi(double pts)
-{
-  pts_union u;
-  u.pts_d = pts;
-  return u.pts_i;
-}
-
-static double pts_itod(int64_t pts)
-{
-  pts_union u;
-  u.pts_i = pts;
-  return u.pts_d;
-}
-#endif
-
 static void cpy_I420_to_NV12(uint8_t *I420_Y, int strid_I420_Y,
     uint8_t *I420_U, int strid_I420_U, uint8_t *I420_V, int strid_I420_V,
     uint8_t *NV12_Y, int strid_NV12_Y, uint8_t *NV12_UV, int strid_NV12_UV,
@@ -124,153 +102,6 @@ static void cpy_I420_to_NV12(uint8_t *I420_Y, int strid_I420_Y,
   return;
 }
 
-#if 0
-static void uv_to_nv12(void *dest_uv, int dest_uv_stride,
-
-void *src_u, void *src_v, int src_u_stride, int src_v_stride,
-
-int width, /* number of u bytes per row */
-int height)
-{
-  int row;
-  int round_bytes_to_copy;
-  uintptr_t dest_row;
-  uintptr_t src_u_row;
-  uintptr_t src_v_row;
-
-  assert((uintptr_t)dest_uv % 32 == 0);
-  assert(dest_uv_stride % 32 == 0);
-  assert(src_u_stride == src_v_stride);
-  assert(width >= 16);
-
-  //printf("\t %d: %d %d %d\n", __LINE__,     dest_uv_stride,     src_u_stride,     src_v_stride     );
-  //write_buffer_to_file("u_uv_to_nv12",src_u, src_u_stride, height, width);
-  //write_buffer_to_file("v_uv_to_nv12",src_v, src_v_stride, height, width);
-
-  round_bytes_to_copy = (width / 16) * 16;
-
-  dest_row = (uintptr_t)dest_uv;
-  src_u_row = (uintptr_t)src_u;
-  src_v_row = (uintptr_t)src_v;
-
-  for (row = 0; row < height; row++) {
-
-    /* process the row */
-    asm (
-        "movl %0, %%edi # dest_row\n\t"
-        "movl %1, %%eax # src_u_row\n\t"
-        "movl %2, %%ebx # src_v_row\n\t"
-        "movl %3, %%ecx # round bytes to copy\n\t"
-        "movl %4, %%edx # total bytes to copy\n\t"
-        "movl %%ecx, %%esi\n\t"
-
-        "next_chunk:\n\t"
-        /* read the next 16 U/V bytes */
-        "movdqu -16(%%eax, %%ecx, 1), %%xmm1\n\t"
-        "movdqu -16(%%ebx, %%ecx, 1), %%xmm2\n\t"
-
-        /* generate the next 16 UV pairs */
-        "movdqa %%xmm1, %%xmm3\n\t"
-        "movdqa %%xmm2, %%xmm4\n\t"
-
-        "punpckhbw %%xmm2, %%xmm1\n\t"
-        "punpcklbw %%xmm4, %%xmm3\n\t"
-
-        /* store the results */
-        "movntdq %%xmm1, -16(%%edi, %%ecx, 2)\n\t"
-        "movntdq %%xmm3, -32(%%edi, %%ecx, 2)\n\t"
-
-        "subl $16, %%ecx\n\t"
-        "jz done_with_chunks\n\t"
-
-        "jmp next_chunk\n\t"
-        "done_with_chunks:\n\t"
-
-        "sfence\n\t"
-
-        /* if width == chunked_bytes, we're done */
-        "cmpl %%edx, %%esi\n\t"
-        "je done_uv\n\t"
-        /* else, we need to handle the remaining few bytes */
-
-        /* read the last 16 U/V bytes */
-        "movdqu -16(%%eax, %%edx, 1), %%xmm1\n\t"
-        "movdqu -16(%%ebx, %%edx, 1), %%xmm2\n\t"
-
-        /* generate the last 16 UV pairs */
-        "movdqa %%xmm1, %%xmm3\n\t"
-        "movdqa %%xmm2, %%xmm4\n\t"
-
-        "punpckhbw %%xmm2, %%xmm1\n\t"
-        "punpcklbw %%xmm4, %%xmm3\n\t"
-
-        /* store the results */
-        "movdqu %%xmm1, -16(%%edi, %%edx, 2)\n\t"
-        "movdqu %%xmm3, -32(%%edi, %%edx, 2)\n\t"
-        "clflush -1(%%edi, %%edx, 2)\n\t"
-        "clflush -32(%%edi, %%edx, 2)\n\t"
-
-        "done_uv:\n\t"
-
-        :
-        : "g"(dest_row),
-          "g"(src_u_row),
-          "g"(src_v_row),
-          "g"(round_bytes_to_copy),
-          "g"(width)
-          : "eax", "ebx", "ecx", "edx", "edi", "esi"
-    );
-
-    dest_row += dest_uv_stride;
-    src_u_row += src_u_stride;
-    src_v_row += src_v_stride;
-  }
-}
-
-static void uv_to_nv12_2(
-    void *dest_uv,
-    int dest_uv_stride,
-
-    void *src_u,
-    void *src_v,
-    int src_u_stride,
-    int src_v_stride,
-
-    int width, /* number of u bytes per row */
-    int height)
-{
-  int row;
-  int round_bytes_to_copy;
-  unsigned char* dest_row;
-  unsigned char* src_u_row;
-  unsigned char* src_v_row;
-
-  assert((uintptr_t)dest_uv % 32 == 0);
-  assert(dest_uv_stride % 32 == 0);
-  assert(src_u_stride == src_v_stride);
-  assert(width >= 16);
-
-  round_bytes_to_copy = (width / 16) * 16;
-
-  dest_row = (unsigned char*)dest_uv;
-  src_u_row = (unsigned char*)src_u;
-  src_v_row = (unsigned char*)src_v;
-
-  for (row = 0; row < height; row++)
-  {
-    for(int i = 0; i < width / 2; i++)
-    {
-      *(dest_row + 2 * i + 0) = src_u_row[i];
-      *(dest_row + 2 * i + 1) = src_v_row[i];
-    }
-
-    dest_row += dest_uv_stride;
-    src_u_row += src_u_stride;
-    src_v_row += src_v_stride;
-  }
-}
-#endif
-
 CIntelSMDRenderer::CIntelSMDRenderer()
 {
   printf("%s\n", __FUNCTION__);
@@ -297,7 +128,6 @@ void CIntelSMDRenderer::SetDefaults()
   m_destHeight = 0;
   m_fps = 0;
 
-  m_startTime = 0;
   m_iYV12RenderBuffer = 0;
   m_NumYV12Buffers = NUM_BUFFERS;
   m_PTS = DVD_NOPTS_VALUE;
@@ -314,8 +144,6 @@ void CIntelSMDRenderer::SetDefaults()
 
   m_resolution = g_guiSettings.m_LookAndFeelResolution;
 
-  m_lastAspectNum = 0;
-  m_lastAspectDenom = 0;
   m_aspectTransition = 0;
 
 }
@@ -344,29 +172,6 @@ void CIntelSMDRenderer::UnInit()
   gdl_flip(GDL_PLANE_ID_UPP_B, GDL_SURFACE_INVALID, GDL_FLIP_ASYNC);
 
   SetDefaults();
-}
-
-void CIntelSMDRenderer::SetSpeed(int speed)
-{
-  if(m_bUsingSMDecoder)
-    return;
-
-  printf("CIntelSMDRenderer::SetSpeed %d\n", speed);
-
-  if(speed == DVD_PLAYSPEED_PAUSE)
-  {
-    g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PAUSE);
-  }
-  else
-  {
-    if(!m_bFlushFlag)
-    {
-      g_IntelSMDGlobals.SetVideoRenderBaseTime(g_IntelSMDGlobals.GetBaseTime());
-      g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PLAY);
-    }
-    else
-      printf("CIntelSMDRenderer::SetSpeed flush flag is set, ignoring request\n");
-  }
 }
 
 void CIntelSMDRenderer::Flush()
@@ -451,11 +256,6 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
   m_iFlags = flags;
   m_fps = fps;
 
-  // if (flags & CONF_FLAGS_EXTERN_IMAGE)
-  //   m_bNullRendering = true;
-  // else
-  //   m_bNullRendering = false;
-
   if (flags & CONF_FLAGS_SMD_DECODING)
     m_bUsingSMDecoder = true;
   else
@@ -473,13 +273,6 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
     CLog::Log(LOGINFO, "Video rendering using NULL renderer");
   else
     CLog::Log(LOGINFO, "Video rendering using software decoder");
-
-  bool keep43ar = g_guiSettings.GetBool("ota.keep43ar");
-
-  // if (g_application.IsPlayingLiveTV() && !keep43ar)
-  // {
-  //   g_stSettings.m_currentVideoSettings.m_ViewMode = VIEW_MODE_STRETCH_16x9;
-  // }
 
   // Calculate the input frame aspect ratio.
   CalculateFrameAspectRatio(d_width, d_height);
@@ -632,17 +425,6 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
   cpy_I420_to_NV12(plane[0], m_sourceWidth, plane[1], m_sourceWidth / 2, plane[2], m_sourceWidth / 2,
       ptr, systemStride, ptr + (destHeight * systemStride), systemStride, destWidth, destHeight, 0);
 
-#if 0
-  // Copy Y data
-  for (int line = 0; line < m_sourceHeight; line++)
-  {
-    OS_MEMCPY(ptr + (line * SYSTEM_STRIDE), plane[0] + (line * m_sourceWidth), m_sourceWidth);
-  }
-
-  uv_to_nv12(ptr + (m_sourceHeight * SYSTEM_STRIDE), SYSTEM_STRIDE, plane[1], plane[2], m_sourceWidth / 2, m_sourceWidth / 2,
-   m_sourceWidth, m_sourceHeight);
-#endif
-
 
   OS_UNMAP_IO_FROM_MEM(ptr, height_to_alloc * systemStride);
 
@@ -745,23 +527,17 @@ void CIntelSMDRenderer::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
 {
   if (!m_bConfigured)
   {
-    // if(g_application.GetCurrentPlayer() == EPC_FLASHPLAYER)
-    //     g_graphicsContext.Clear();
-
     return;
   }
 
   if(m_bNullRendering)
   {
     g_graphicsContext.Clear();
-    Render(flags);
     return;
   }
 
   if(clear)
     g_graphicsContext.Clear();
-  // else if (g_application.GetCurrentPlayer() == EPC_FLASHPLAYER)
-  //   g_graphicsContext.Clear();
 
   ManageDisplay();
 
@@ -774,7 +550,6 @@ void CIntelSMDRenderer::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
 
   ConfigureVideoProc();
 
-  Render(flags);
 }
 
 int CIntelSMDRenderer::NextYV12Texture()
@@ -783,32 +558,6 @@ int CIntelSMDRenderer::NextYV12Texture()
     return (m_iYV12RenderBuffer + 1) % m_NumYV12Buffers;
   else
     return -1;
-}
-
-unsigned int CIntelSMDRenderer::DrawSlice(unsigned char *src[], int stride[], int w, int h, int x, int y)
-{
-  printf("%s\n", __FUNCTION__);
-  return 0;
-}
-
-void CIntelSMDRenderer::Render(DWORD flags)
-{
-  return;
-}
-
-bool CIntelSMDRenderer::SupportsBrightness()
-{
-  return false;
-}
-
-bool CIntelSMDRenderer::SupportsContrast()
-{
-  return false;
-}
-
-bool CIntelSMDRenderer::SupportsGamma()
-{
-  return false;
 }
 
 int CIntelSMDRenderer::ConfigureGDLPlane(gdl_plane_id_t plane)
@@ -920,11 +669,6 @@ int CIntelSMDRenderer::ConfigureDeinterlace()
     break;
   }
 
-  // if(g_application.IsPlayingLiveTV())
-  // {
-  //   smd_policy = ismd::VIDEO;
-  // }
-
   if(interlace_display)
   {
     if(deinterlace_policy == INTERLACE_MODE_AUTO)
@@ -1006,11 +750,6 @@ int CIntelSMDRenderer::ConfigureVideoProc()
       desty = (int)viewWindow.y1;
     }
 
-    /*
-    printf("croppedX1 %d croppedY1 %d croppedWidth %d croppedHeight %d sW %d sH %d\n",
-     croppedX1, croppedY1, croppedWidth, croppedHeight, screenWidth, screenHeight);
-    */
-    
     if( croppedX1 < 0 ) croppedX1 = 0;
     if( croppedY1 < 0 ) croppedY1 = 0;
     if( croppedX1 + croppedWidth > m_sourceRect.Width() )
@@ -1049,15 +788,6 @@ int CIntelSMDRenderer::ConfigureVideoProc()
   }
   else if( height & 1 ) height--;
   else if( desty & 1 ) desty--;
-  
-  /*
-  printf("width = %d height = %d aspect ratio = %dx%d, destx = %d desty = %d\n",
-      width, height, aspect_ratio_num, aspect_ratio_denom, destx, desty );
-
-  printf("source (%f,%f) (%f,%f), dest (%f,%f) (%f,%f)\n",
-     m_sourceRect.x1, m_sourceRect.y1, m_sourceRect.x2, m_sourceRect.y2,
-      m_destRect.x1, m_destRect.y1, m_destRect.x2, m_destRect.y2);
-      */
 
   ret = ismd::ismd_vidpproc_set_dest_params2(video_proc,
             width,
@@ -1079,8 +809,6 @@ EINTERLACEMETHOD CIntelSMDRenderer::AutoInterlaceMethod()
 {
     return VS_INTERLACEMETHOD_NONE;
 }
-
-
 
 #endif
 

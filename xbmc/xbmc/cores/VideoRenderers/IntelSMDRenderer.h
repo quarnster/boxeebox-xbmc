@@ -73,35 +73,25 @@ public:
   virtual bool         IsConfigured() { return m_bConfigured; }
   virtual int          GetImage(YV12Image *image, /*TODO(q) double pts,*/ int source = AUTOSOURCE, bool readonly = false);
   virtual void         ReleaseImage(int source, bool preserve = false);
-  virtual unsigned int DrawSlice(unsigned char *src[], int stride[], int w, int h, int x, int y);
   virtual void         FlipPage(int source) { }
   virtual unsigned int PreInit();
   virtual void         UnInit();
   virtual void         Reset(); /* resets renderer after seek for example */
-  virtual void         SetSpeed(int speed);
   virtual void         Flush();
 
   virtual bool AddVideoPicture(DVDVideoPicture* picture);
   virtual void RenderUpdate(bool clear, DWORD flags = 0, DWORD alpha = 255);
 
   // Feature support
-  virtual bool SupportsBrightness();
-  virtual bool SupportsContrast();
-  virtual bool SupportsGamma();
-
-  // Feature support
-  virtual bool SupportsMultiPassRendering() { return false; }
   virtual bool Supports(ERENDERFEATURE feature) { return false; }
   virtual bool Supports(EINTERLACEMETHOD method) { return false; }
   virtual bool Supports(ESCALINGMETHOD method) { return false; }
   virtual bool Supports(EDEINTERLACEMODE mode) {return false;}
   bool RenderCapture(CRenderCapture* capture) { return false; }
-  bool IsTimed() { return true; }
 
 
 protected:
   virtual void SetDefaults();
-  virtual void Render(DWORD flags);
   virtual int ConfigureGDLPlane(gdl_plane_id_t plane);
   virtual int ConfigureVideoProc();
   virtual int ConfigureDeinterlace();
@@ -115,14 +105,7 @@ protected:
   virtual int NextYV12Texture();
 
   bool m_bConfigured;
-  bool m_bValidated;
-  bool m_bImageReady;
   unsigned m_iFlags;
-  unsigned int m_flipindex; // just a counter to keep track of if a image has been uploaded
-
-  float m_clearColour;
-  CRect m_crop;
-  float m_aspecterror;
 
   YUVMEMORYBUFFERS m_YUVMemoryTexture;
   int m_iYV12RenderBuffer;
@@ -131,7 +114,6 @@ protected:
   bool m_bNullRendering;
   bool m_bCropping;
 
-  ismd_time_t m_startTime;
   double m_PTS;
   double m_FirstPTS;
 
@@ -140,8 +122,6 @@ protected:
 
   unsigned int m_destWidth;
   unsigned int m_destHeight;
-  unsigned int m_lastAspectNum;
-  unsigned int m_lastAspectDenom;
   unsigned int m_aspectTransition;
 
   CCriticalSection m_renderBufLock;

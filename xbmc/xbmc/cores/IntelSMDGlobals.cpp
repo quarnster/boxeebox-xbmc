@@ -325,9 +325,9 @@ bool  CIntelSMDGlobals::BuildAudioOutputs()
 
   int audioOutputMode = g_guiSettings.GetInt("audiooutput.mode");
 
-  bool bIsHDMI = (AUDIO_HDMI == audioOutputMode);
-  bool bIsSPDIF = (AUDIO_IEC958 == audioOutputMode);
-  bool bIsAnalog = (AUDIO_ANALOG == audioOutputMode);
+  bool bIsHDMI = true; //TODO(q) (AUDIO_HDMI == audioOutputMode);
+  bool bIsSPDIF = true; //TODO(q) (AUDIO_IEC958 == audioOutputMode);
+  bool bIsAnalog = true; //TODO(q) (AUDIO_ANALOG == audioOutputMode);
   // bool bIsAllOutputs = (audioOutputMode == AUDIO_ALL_OUTPUTS);
   // if (bIsAllOutputs)
   //   bIsHDMI = bIsSPDIF = bIsAnalog = true;
@@ -371,17 +371,22 @@ ismd_audio_output_t CIntelSMDGlobals::AddAudioOutput(int output)
   output_config.ch_map = 0;
   output_config.sample_rate = 48000;
 
+  ismd_dev_t dev;
+
   switch(output)
   {
   case AUDIO_HDMI:
+      dev = m_audioOutputHDMI;
       hwId = GEN3_HW_OUTPUT_HDMI;
       name = "HDMI";
       break;
   case AUDIO_IEC958:
+    dev = m_audioOutputSPDIF;
     hwId = GEN3_HW_OUTPUT_SPDIF;
     name = "SPDIF";
     break;
   case AUDIO_ANALOG:
+    dev = m_audioOutputI2S0;
     hwId = GEN3_HW_OUTPUT_I2S0;
     name = "I2S0";
     break;
@@ -394,8 +399,8 @@ ismd_audio_output_t CIntelSMDGlobals::AddAudioOutput(int output)
 
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::AddAudioOutput - error add output %s %d", name.c_str(), result);
-    return -1;
+    CLog::Log(LOGERROR, "CIntelSMDGlobals::AddAudioOutput - error add output %s %d, returning existing: %d", name.c_str(), result, dev);
+    return dev;
   }
 
   if(g_guiSettings.GetBool("audiooutput.enable_audio_output_delay"))
@@ -1757,35 +1762,35 @@ bool CIntelSMDGlobals::ConfigureAudioOutput(ismd_audio_output_t output, ismd_aud
   if (result != ISMD_SUCCESS)
   {
     CLog::Log(LOGWARNING, "CIntelSMDGlobals::ConfigureAudioOutput ismd_audio_output_set_delay failed %d", result);
-    return false;
+//    return false;
   }
 
   result = ismd_audio_output_set_sample_size(m_audioProcessor, output, output_config.sample_size);
   if (result != ISMD_SUCCESS)
   {
     CLog::Log(LOGWARNING, "CIntelSMDGlobals::ConfigureAudioOutput ismd_audio_output_set_sample_size failed %d", result);
-    return false;
+//    return false;
   }
 
   result = ismd_audio_output_set_channel_config(m_audioProcessor, output, output_config.ch_config);
   if (result != ISMD_SUCCESS)
   {
     CLog::Log(LOGWARNING, "CIntelSMDGlobals::ConfigureAudioOutput ismd_audio_output_set_sample_size failed %d", result);
-    return false;
+//    return false;
   }
 
   result = ismd_audio_output_set_mode(m_audioProcessor, output, output_config.out_mode);
   if (result != ISMD_SUCCESS)
   {
     CLog::Log(LOGWARNING, "CIntelSMDGlobals::ConfigureAudioOutput ismd_audio_output_set_sample_size failed %d", result);
-    return false;
+//    return false;
   }
 
   result = ismd_audio_output_set_sample_rate(m_audioProcessor, output, output_config.sample_rate);
   if (result != ISMD_SUCCESS)
   {
     CLog::Log(LOGWARNING, "CIntelSMDGlobals::ConfigureAudioOutput ismd_audio_output_set_sample_size failed %d", result);
-    return false;
+//    return false;
   }
 
   return true;

@@ -44,7 +44,6 @@
 CDVDVideoCodecSMD::CDVDVideoCodecSMD() :
 m_Device(NULL),
 m_DecodeStarted(false),
-m_DropPictures(false),
 m_Duration(0.0),
 m_pFormatName("smd: none")
 {
@@ -124,9 +123,7 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 
   // default duration to 23.976 fps, have to guess something.
   m_Duration = (DVD_TIME_BASE / (24.0 * 1000.0/1001.0));
-  m_DropPictures = false;
   m_DecodeStarted = false;
-// TODO(q)  m_bIsDirectRendering = true;
 
   CLog::Log(LOGINFO, "Opened Intel SMD Codec, %s", m_pFormatName);
 
@@ -141,15 +138,6 @@ void CDVDVideoCodecSMD::Dispose(void)
     m_Device->CloseDecoder();
     m_Device = NULL;
   }
-}
-
-void CDVDVideoCodecSMD::SetSpeed(int speed)
-{
-  VERBOSE();
-  if(speed == DVD_PLAYSPEED_PAUSE)
-    m_Device->Pause();
-  else
-    m_Device->Resume();
 }
 
 int CDVDVideoCodecSMD::Decode(BYTE *pData, int iSize, double pts, double dts)
@@ -202,15 +190,6 @@ void CDVDVideoCodecSMD::Reset(void)
   }
 }
 
-void CDVDVideoCodecSMD::Resync(double pts)
-{
-  VERBOSE();
-  if(m_Device)
-  {
-    m_Device->Resync(pts);
-  }
-}
-
 bool CDVDVideoCodecSMD::GetPicture(DVDVideoPicture* pDvdVideoPicture)
 {
   VERBOSE();
@@ -221,87 +200,6 @@ bool CDVDVideoCodecSMD::GetPicture(DVDVideoPicture* pDvdVideoPicture)
   pDvdVideoPicture->iDuration = 0;
 
   return ret;
-}
-
-bool CDVDVideoCodecSMD::GetUserData(DVDVideoUserData* pDvdVideoUserData)
-{
-  VERBOSE();
-  ismd_result_t ismd_ret;
-  ismd_port_handle_t user_data_port;
-  ismd_event_t user_data_event;
-  ismd_buffer_handle_t buffer;
-  ismd_buffer_descriptor_t ismd_buf_desc;
-  uint8_t *buf_ptr;
-
-  pDvdVideoUserData->data = NULL;
-  pDvdVideoUserData->size = 0;
-
-  user_data_port = g_IntelSMDGlobals.GetVideDecUserDataPort();
-  if(user_data_port == -1)
-    return false;
-
-  user_data_event = g_IntelSMDGlobals.GetVideoDecUserEvent();
-  if(user_data_event == -1)
-      return false;
-
-  ismd_ret = ismd_event_wait(user_data_event, 5000); //only wait 5 seconds so there is a way out of the loop
-        if (ismd_ret == ISMD_ERROR_TIMEOUT) {
-            printf("Time out for user data\n");
-            return false;
-        } else if (ismd_ret != ISMD_SUCCESS) {
-           printf("got unexpected error waiting for user data\n");
-           return false;
-        }
-
-  ismd_ret = ismd_port_read(user_data_port, &buffer);
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    //CLog::Log(LOGERROR, "CDVDVideoCodecSMD::GetUserData ismd_port_read failed. %d", ismd_ret);
-    return false;
-  }
-
-  printf("#@#@# Data found on user data\n");
-
-  ismd_ret = ismd_buffer_read_desc(buffer, &ismd_buf_desc);
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CDVDVideoCodecSMD::GetUserData ismd_buffer_read_desc failed. %d", ismd_ret);
-    return false;
-  }
-
-  printf("successfully read buffer, data level: %d\n", ismd_buf_desc.phys.level);
-
-  buf_ptr = (uint8_t *)OS_MAP_IO_TO_MEM_NOCACHE(ismd_buf_desc.phys.base,ismd_buf_desc.phys.size);
-
-  //here is the spot to do stuff with the data
-
-  OS_UNMAP_IO_FROM_MEM(buf_ptr, ismd_buf_desc.phys.size);
-
-  //need to dereference this buffer as SMD driver created reference when it made the buffer so it can be freed
-  ismd_ret = ismd_buffer_dereference(buffer);
-  if (ismd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CDVDVideoCodecSMD::GetUserData ismd_buffer_dereference failed. %d", ismd_ret);
-    return false;
-  }
-
-  Sleep(1);
-
-  return false;
-}
-
-void CDVDVideoCodecSMD::SetDropState(bool bDrop)
-{
-  VERBOSE();
-  m_DropPictures = bDrop;
-  m_Device->SetDropState(m_DropPictures);
-}
-
-void CDVDVideoCodecSMD::DisablePtsCorrection(bool bDisable)
-{
-  VERBOSE();
-  if(m_Device)
-    m_Device->DisablePtsCorrection(bDisable);
 }
 
 #endif

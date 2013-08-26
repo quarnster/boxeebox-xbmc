@@ -37,18 +37,13 @@ public:
   virtual void Dispose(void);
   virtual int  Decode(BYTE *pData, int iSize, double pts, double dts);
   virtual void Reset(void);
-  virtual void Resync(double pts);
-  virtual void SetSpeed(int speed);
   virtual bool GetPicture(DVDVideoPicture *pDvdVideoPicture);
-  virtual void SetDropState(bool bDrop);
+  virtual void SetDropState(bool bDrop) {}
   virtual const char* GetName(void) { return (const char*)m_pFormatName; }
-  virtual void DisablePtsCorrection(bool bDisable);
-  virtual bool GetUserData(DVDVideoUserData* pDvdVideoUserData);
 
 protected:
   CIntelSMDVideo*       m_Device;
   bool                  m_DecodeStarted;
-  bool                  m_DropPictures;
   double                m_Duration;
   const char*           m_pFormatName;
 };

@@ -99,6 +99,7 @@ bool CDVDAudioCodecSMD::IsHWDecodeAudioCodec( int Codec )
 
 bool CDVDAudioCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
+  CLog::Log(LOGDEBUG, "CDVDAudioCodecSMD::Open called with codec: %d, %x", hints.codec, hints.codec);
   bool bSupportsHWDecode = IsHWDecodeAudioCodec( hints.codec );
   bool bSupportsPassthrough = IsPassthroughAudioCodec( hints.codec );
 

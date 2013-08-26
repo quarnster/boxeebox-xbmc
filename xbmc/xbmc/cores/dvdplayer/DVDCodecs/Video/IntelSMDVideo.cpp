@@ -89,7 +89,6 @@ void CIntelSMDVideo::SetDefaults()
 {
   VERBOSE();
   m_IsConfigured = false;
-  m_drop_state = false;
   m_bRunning = false;
   m_width = 0;
   m_height = 0;
@@ -943,29 +942,6 @@ CIntelSMDVideo::Vc1_viddec_convert_AP (Vc1Viddec *viddec, unsigned char *buf,int
   return outbuf;
 }
 
-void CIntelSMDVideo::Pause()
-{
-  VERBOSE();
-
-  g_IntelSMDGlobals.SetVideoDecoderState(ISMD_DEV_STATE_PAUSE);
-  g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PAUSE);
-}
-
-void CIntelSMDVideo::Resume()
-{
-  VERBOSE();
-
-  g_IntelSMDGlobals.SetVideoRenderBaseTime(g_IntelSMDGlobals.GetBaseTime());
-
-  if(!m_bFlushFlag)
-  {
-    g_IntelSMDGlobals.SetVideoDecoderState(ISMD_DEV_STATE_PLAY);
-    g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PLAY);
-
-    m_bRunning = true;
-  }
-}
-
 void CIntelSMDVideo::Reset()
 {
   VERBOSE();
@@ -978,38 +954,6 @@ void CIntelSMDVideo::Reset()
 
   g_IntelSMDGlobals.FlushVideoDecoder();
   g_IntelSMDGlobals.FlushVideoRender();
-}
-
-bool CIntelSMDVideo::CheckStartRunning()
-{
-  VERBOSE();
-  /*
-  printf("m_bRunning %d m_bFlushFlag %d has audio %d in menu %d playing %d\n",
-      m_bRunning, m_bFlushFlag, g_application.m_pPlayer->HasAudio(), g_application.m_pPlayer->IsInMenu(),
-      g_IntelSMDGlobals.GetAudioDeviceState(g_IntelSMDGlobals.GetPrimaryAudioDevice()) == ISMD_DEV_STATE_PLAY);
-      */
-
-
-  // we're allready running
-  if(g_IntelSMDGlobals.GetVideoRenderState() == ISMD_DEV_STATE_PLAY)
-    return false;
-
-  // we're waiting for the first packet
-  if(m_bFlushFlag)
-    return false;
-
-  // We don't have audio, so we should not wait
-  if(!g_application.m_pPlayer->HasAudio())
-    return true;
-
-  if(g_application.m_pPlayer->IsInMenu())
-    return true;
-
-  // Start only if audio started
-  if(g_IntelSMDGlobals.GetAudioDeviceState(g_IntelSMDGlobals.GetPrimaryAudioDevice()) == ISMD_DEV_STATE_PLAY)
-    return true;
-
-  return false;
 }
 
 int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, double pts, int bufSize)
@@ -1260,7 +1204,6 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
   }
   */
 
-  m_drop_state = false;
   m_IsConfigured = true;
   m_bRunning = true;
 
@@ -1432,17 +1375,6 @@ bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
 
   return true;
 }
-
-void CIntelSMDVideo::SetDropState(bool bDrop)
-{
-  VERBOSE();
-  if (m_drop_state != bDrop)
-  {
-    m_drop_state = bDrop;
-    CLog::Log(LOGDEBUG, "%s: SetDropState... %d", __MODULE_NAME__, m_drop_state);
-  }
-}
-
 
 bool CIntelSMDVideo::GetInputPortStatus(unsigned int& curDepth, unsigned int& maxDepth)
 {
