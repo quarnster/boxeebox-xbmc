@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 find_package(PythonInterp)
 
+set(ENABLE_TESTS OFF CACHE BOOL "Whether to build the tests or not")
+
+
 execute_process(COMMAND ls -1 ${CMAKE_SOURCE_DIR}/headers OUTPUT_VARIABLE headers)
 string(REGEX REPLACE "\n" ";" headers ${headers})
 
@@ -61,3 +64,24 @@ add_custom_target(install ALL
 			libosal.so
 			libplatform_config.so
 )
+
+
+if(ENABLE_TESTS) 
+	set(CGO_CFLAGS "-I/Volumes/Skivavbild/boxee-xbmc/sysroot/usr/local/include/")
+	set(CGO_LDFLAGS "-L/Volumes/Skivavbild/boxee-xbmc/sysroot/usr/local/lib -lismd_audio -lismd_core -losal -lm -lgdl")
+
+
+	macro(GoTest name)
+		set(TESTS ${TESTS} ${name})
+		add_custom_target(
+			${name}
+			COMMAND CC=${SYSROOT}/usr/bin/i686-pc-linux-gnu-gcc CGO_CFLAGS=${CGO_CFLAGS} CGO_LDFLAGS=${CGO_LDFLAGS} CGO_ENABLED=1 GOOS=linux GOARCH=386 go build -ldflags="-extld=${SYSROOT}/usr/bin/i686-pc-linux-gnu-gcc" ${CMAKE_SOURCE_DIR}/tests/${name}.go
+			COMMAND ftp -u boxeebox:/tmp/${name} ${name}
+			DEPENDS ${CMAKE_SOURCE_DIR}/tests/${name}.go
+		)
+	endmacro()
+
+	GoTest(audio)
+
+endif()
+
