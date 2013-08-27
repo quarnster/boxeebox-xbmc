@@ -163,7 +163,6 @@ int CDVDVideoCodecSMD::Decode(BYTE *pData, int iSize, double pts, double dts)
     return VC_ERROR;
 
   // We don't want to drain the demuxer too fast
-  // TODO(q) why?
   unsigned int curDepth = 0, maxDepth = 0;
   m_Device->GetInputPortStatus(curDepth, maxDepth);
 

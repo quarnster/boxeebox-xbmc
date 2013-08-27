@@ -258,22 +258,10 @@ int CDVDAudioCodecSMD::GetSampleRate()
 AEDataFormat CDVDAudioCodecSMD::GetDataFormat()
 {
   switch (m_sample_size) {
-  default: return AE_FMT_S8;
+  case  8: return AE_FMT_S8;
+  default:
   case 16: return AE_FMT_S16LE;
   }
-}
-
-// See DVDPlayerAudio.h
-unsigned char CDVDAudioCodecSMD::GetFlags()
-{
-  unsigned char flags = 0;
-  if( m_bHardwareDecode ) flags |= FFLAG_HWDECODE;
-  else                    flags |= FFLAG_PASSTHROUGH;
-
-  if( CODEC_ID_TRUEHD == m_Codec || m_bIsDTSHD )
-    flags |= FFLAG_HDFORMAT;
-
-  return flags; 
 }
 
 void CDVDAudioCodecSMD::GetStreamInfo()

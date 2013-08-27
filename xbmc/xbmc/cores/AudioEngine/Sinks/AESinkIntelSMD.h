@@ -44,7 +44,7 @@ public:
 
   virtual double        GetDelay        ();
   virtual double        GetCacheTime    ();
-  virtual double        GetCacheTotal   () { return 0.0; }
+  virtual double        GetCacheTotal   ();
   virtual unsigned int  AddPackets      (uint8_t *data, unsigned int frames, bool hasAudio);
   virtual void          Drain           ();
   virtual bool          HasVolume() { return true; }
@@ -58,51 +58,19 @@ public:
 
 private:
   unsigned int SendDataToInput(unsigned char* buffer_data, unsigned int buffer_size, ismd_pts_t pts = ISMD_NO_PTS);
-
-  void ConfigureDolbyModes(ismd_audio_processor_t proc_handle, ismd_dev_t input_handle);
-  void ConfigureDolbyPlusModes(ismd_audio_processor_t proc_handle, ismd_dev_t input_handle, bool bAC3Encode);
-  void ConfigureDolbyTrueHDModes(ismd_audio_processor_t proc_handle, ismd_dev_t input_handle);
-  void ConfigureDTSModes(ismd_audio_processor_t proc_handle, ismd_dev_t input_handle);
-
   ismd_audio_format_t GetISMDFormat(AEDataFormat format);
-//  AUDIO_CODEC_VENDOR  GetAudioCodecVendor(AEAudioFormat format);
-
   void SetDefaultOutputConfig(ismd_audio_output_config_t& output_config);
-  void ConfigureAudioOutputParams(ismd_audio_output_config_t& output_config,
-      int output, int sampleSize, int sampleRate, int channels, ismd_audio_format_t format, bool bPassthrough);
+  void ConfigureAudioOutputParams(ismd_audio_output_config_t& output_config, int output, int sampleSize, int sampleRate, int channels, ismd_audio_format_t format, bool bPassthrough);
 
   float m_fCurrentVolume;
   bool m_bPause;
   bool m_bIsAllocated;
 
-  bool m_bAC3Encode;
-
-  bool m_bIsHDMI;
-  bool m_bIsSPDIF;
-  bool m_bIsAnalog;
-  bool m_bIsAllOutputs;
-
   ismd_dev_t        m_audioDevice;
   ismd_dev_handle_t m_audioDeviceInput;
-
-  enum AEChannel* m_channelMap;
-  unsigned int m_uiBitsPerSample;
-  unsigned int m_uiChannels;
-  AEDataFormat m_audioMediaFormat;
-  unsigned int m_uiSamplesPerSec;
-  bool m_bTimed;
-  bool m_bFlushFlag;
+  
   unsigned int m_dwChunkSize;
   unsigned int m_dwBufferLen;
-
-  ismd_pts_t m_lastPts;
-  ismd_pts_t m_lastSync;
-  bool m_bDisablePtsCorrection;
-
-  // data for small chunks collection
-  ismd_pts_t m_first_pts;
-  unsigned int m_ChunksCollectedSize;
-  unsigned char *m_pChunksCollected;
 
   bool LoadEDID();
   void UnloadEDID();

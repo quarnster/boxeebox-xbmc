@@ -81,7 +81,7 @@ void CIntelSMDVideo::SetDefaults()
   m_bDiscontinuity = false;
   m_bFlushFlag = true;
   m_lastPTS  = m_ptsCorrection = ISMD_NO_PTS;
-  m_bDisablePtsCorrection = false;
+  m_bDisablePtsCorrection = true;
 }
 
 void CIntelSMDVideo::RemoveInstance(void)

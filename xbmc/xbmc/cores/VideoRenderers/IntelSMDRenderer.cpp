@@ -268,11 +268,11 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
   }
 
   if (m_bUsingSMDecoder)
-    CLog::Log(LOGINFO, "Video rendering using SMD decoder");
+    CLog::Log(LOGINFO, "%s::%s - Video rendering using SMD decoder", "CIntelSMDRenderer", __FUNCTION__);
   else if (m_bNullRendering)
-    CLog::Log(LOGINFO, "Video rendering using NULL renderer");
+    CLog::Log(LOGINFO, "%s::%s - Video rendering using NULL renderer", "CIntelSMDRenderer", __FUNCTION__);
   else
-    CLog::Log(LOGINFO, "Video rendering using software decoder");
+    CLog::Log(LOGINFO, "%s::%s - Video rendering using software decoder", "CIntelSMDRenderer", __FUNCTION__);
 
   // Calculate the input frame aspect ratio.
   CalculateFrameAspectRatio(d_width, d_height);
