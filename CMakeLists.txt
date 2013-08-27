@@ -131,7 +131,8 @@ endforeach()
 
 add_custom_target(
 	shares
-	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/share/xbmc/addons ${TARGET_DIR}/addons
+	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/lib/xbmc/addons ${TARGET_DIR}/addons
+	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/lib/xbmc/system ${TARGET_DIR}/system
 	DEPENDS 			${shares}
 )
 
