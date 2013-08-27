@@ -27,8 +27,6 @@
 #include <ismd_vidpproc.h>
 #include "utils/log.h"
 #include "../threads/SingleLock.h"
-//#include "HalServices.h"
-//#include "lib/libBoxee/bxoemconfiguration.h"
 
 #ifndef UINT64_C
 #define UINT64_C(x) (const unsigned long long)(x)
@@ -53,13 +51,6 @@ extern "C" {
 #else
 #define VERBOSE()
 #endif
-
-// #ifndef DVD_TIME_BASE
-// #define DVD_TIME_BASE 1000000
-// #endif
-// #ifndef DVD_NOPTS_VALUE
-// #define DVD_NOPTS_VALUE    (-1LL<<52) // should be possible to represent in both double and __int64
-// #endif
 
 #define AUDIO_OUTPUT_DELAY 39 // requested by dolby cert
 

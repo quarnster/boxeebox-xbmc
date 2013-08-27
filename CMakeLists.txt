@@ -86,7 +86,6 @@ set(libs
 	libavutil.so.52
 	libswscale.so.2
 	libjpeg.so.62
-	libasound.so.2
 )
 foreach(lib ${libs})
 	add_custom_target(
