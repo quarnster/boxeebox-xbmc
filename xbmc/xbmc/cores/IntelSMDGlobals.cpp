@@ -46,7 +46,7 @@ extern "C" {
 
 #define __MODULE_NAME__ "IntelSMDGlobals"
 
-#if 1
+#if 0
 #define VERBOSE() CLog::Log(LOGDEBUG, "%s::%s", __MODULE_NAME__, __FUNCTION__)
 #else
 #define VERBOSE()
@@ -191,8 +191,9 @@ ismd_time_t CIntelSMDGlobals::GetCurrentTime()
 
 void CIntelSMDGlobals::SetBaseTime(ismd_time_t time)
 {
-  CLog::Log(LOGINFO, "Setting base time %.2f", IsmdToDvdPts(time) / 1000000);
-  m_base_time = time + 45000;
+  CLog::Log(LOGINFO, "Setting base time %d ms", DVD_TIME_TO_MSEC(IsmdToDvdPts(time)));
+  // TODO(q): why + 45000??
+  m_base_time = time + 45000; 
 }
 
 bool CIntelSMDGlobals::SetCurrentTime(ismd_time_t time)
@@ -542,8 +543,7 @@ bool CIntelSMDGlobals::SetAudioStartPts(ismd_pts_t pts)
   if (pts < 0 && pts != ISMD_NO_PTS)
     pts = 0;
 
-  CLog::Log(LOGINFO, "CIntelSMDGlobals::SetAudioStartPts %.2f ",
-      IsmdToDvdPts(pts) / 1000000.0);
+  CLog::Log(LOGINFO, "CIntelSMDGlobals::SetAudioStartPts %d ms ", DVD_TIME_TO_MSEC(IsmdToDvdPts(pts)));
 
   m_audio_start_pts = pts;
 
@@ -564,8 +564,7 @@ bool CIntelSMDGlobals::SetVideoStartPts(ismd_pts_t pts)
   if (pts < 0 && pts != ISMD_NO_PTS)
     pts = 0;
 
-  CLog::Log(LOGINFO, "CIntelSMDGlobals::SetVideoStartPts %.2f ",
-      IsmdToDvdPts(pts) / 1000000.0);
+  CLog::Log(LOGINFO, "CIntelSMDGlobals::SetVideoStartPts %d ms", DVD_TIME_TO_MSEC(IsmdToDvdPts(pts)));
 
   m_video_start_pts = pts;
 
@@ -1670,8 +1669,7 @@ bool CIntelSMDGlobals::FlushVideoRender()
 bool CIntelSMDGlobals::SetVideoRenderBaseTime(ismd_time_t time)
 {
   //printf("%s", __FUNCTION__);
-  CLog::Log(LOGINFO, "SetVideoRenderBaseTime base time %.2f",
-      IsmdToDvdPts(time) / 1000000);
+  CLog::Log(LOGINFO, "SetVideoRenderBaseTime base time %d ms", DVD_TIME_TO_MSEC(IsmdToDvdPts(time)));
 
   ismd_result_t ret;
   ismd_dev_state_t state = ISMD_DEV_STATE_INVALID;
@@ -1717,8 +1715,7 @@ bool CIntelSMDGlobals::SetVideoRenderBaseTime(ismd_time_t time)
 bool CIntelSMDGlobals::SetAudioDeviceBaseTime(ismd_time_t time, ismd_dev_t device)
 {
   //printf("%s", __FUNCTION__);
-  CLog::Log(LOGINFO, "SetAudioDeviceBaseTime base time %.2f",
-      IsmdToDvdPts(time) / 1000000);
+  CLog::Log(LOGINFO, "SetAudioDeviceBaseTime base time %d ms", DVD_TIME_TO_MSEC(IsmdToDvdPts(time)));
 
   ismd_result_t ret;
   ismd_dev_state_t state = ISMD_DEV_STATE_INVALID;

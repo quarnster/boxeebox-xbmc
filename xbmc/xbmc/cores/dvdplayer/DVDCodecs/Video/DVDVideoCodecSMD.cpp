@@ -45,7 +45,7 @@ CDVDVideoCodecSMD::CDVDVideoCodecSMD() :
 m_Device(NULL),
 m_DecodeStarted(false),
 m_Duration(0.0),
-m_pFormatName("smd: none")
+m_pFormatName("SMD: codec not configured")
 {
 }
 
@@ -60,8 +60,8 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
   ismd_codec_type_t codec_type;
 
   // found out if video hardware decoding is enforced
-  printf("CDVDVideoCodecSMD::Open force hardware %d\n", !hints.software);
-  printf("CDVDVideoCodecSMD::Open width %d  height %d type %d\n", hints.width, hints.height, hints.codec);
+  CLog::Log(LOGDEBUG, "CDVDVideoCodecSMD::Open force hardware %d\n", !hints.software);
+  CLog::Log(LOGDEBUG, "CDVDVideoCodecSMD::Open width %d  height %d type %d\n", hints.width, hints.height, hints.codec);
 
   // Run some SD content in software mode
   // since hardware is not always compatible
@@ -163,6 +163,7 @@ int CDVDVideoCodecSMD::Decode(BYTE *pData, int iSize, double pts, double dts)
     return VC_ERROR;
 
   // We don't want to drain the demuxer too fast
+  // TODO(q) why?
   unsigned int curDepth = 0, maxDepth = 0;
   m_Device->GetInputPortStatus(curDepth, maxDepth);
 

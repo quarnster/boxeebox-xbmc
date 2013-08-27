@@ -31,36 +31,15 @@
 #include "threads/Thread.h"
 #include "utils/log.h"
 #include "utils/fastmemcpy.h"
-//#include "WinSystemGDL.h"
 #include "Application.h"
 
-#define __MODULE_NAME__ "IntelSMD"
+#define __MODULE_NAME__ "IntelSMDVideo"
 
 #if 0
 #define VERBOSE() CLog::Log(LOGDEBUG, "%s::%s", __MODULE_NAME__, __FUNCTION__)
 #else
 #define VERBOSE()
 #endif
-
-union pts_union
-{
-  double  pts_d;
-  int64_t pts_i;
-};
-
-static int64_t pts_dtoi(double pts)
-{
-  pts_union u;
-  u.pts_d = pts;
-  return u.pts_i;
-}
-
-static double pts_itod(int64_t pts)
-{
-  pts_union u;
-  u.pts_i = pts;
-  return u.pts_d;
-}
 
 void mp_msg(int mod, int lev, const char *format, ... ){}
 #define MSGT_DECVIDEO 0
@@ -125,7 +104,7 @@ CIntelSMDVideo* CIntelSMDVideo::GetInstance(void)
   return m_pInstance;
 }
 
-bool CIntelSMDVideo::vc1_viddec_init (Vc1Viddec *viddec)
+void CIntelSMDVideo::vc1_viddec_init (Vc1Viddec *viddec)
 {
   VERBOSE();
 
@@ -692,11 +671,6 @@ unsigned char *H264_viddec_convert(H264Viddec *viddec, unsigned char *buf,
   }
 }
 
-
-
-
-
-
 void
 CIntelSMDVideo::vc1_viddec_SPMP_PESpacket_PayloadFormatHeader (Vc1Viddec *viddec, unsigned char *pCodecData, int width, int height)
 {
@@ -732,7 +706,6 @@ CIntelSMDVideo::vc1_viddec_SPMP_PESpacket_PayloadFormatHeader (Vc1Viddec *viddec
   viddec->size_SPMP_PESpacket_PayloadFormatHeader = 4 + byte_written;
 
 }
-
 
 unsigned char *
 CIntelSMDVideo::Vc1_viddec_convert_SPMP (Vc1Viddec *viddec, unsigned char *buf, int size,
@@ -799,7 +772,7 @@ int CIntelSMDVideo::vc1_viddec_encapsulate_and_write_ebdu ( unsigned char* pDes,
 {
   VERBOSE();
   int    ZeroRun = 0;
-  int i;
+  unsigned int i;
   unsigned int j = 0;
 
   const unsigned char Escape  = 0x03;
@@ -956,7 +929,7 @@ void CIntelSMDVideo::Reset()
   g_IntelSMDGlobals.FlushVideoRender();
 }
 
-int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, double pts, int bufSize)
+int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, double pts, unsigned int bufSize)
 {
   VERBOSE();
   ismd_es_buf_attr_t *buf_attrs;
@@ -1098,7 +1071,7 @@ int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, d
 
     if(ismd_ret != ISMD_SUCCESS)
     {
-      printf("CIntelSMDVideo::WriteToInputPort failed. %d\n", ismd_ret);
+      CLog::Log(LOGWARNING, "CIntelSMDVideo::WriteToInputPort failed. %d\n", ismd_ret);
       ismd_buffer_dereference(buffer_handle);
     }
   }
@@ -1141,9 +1114,6 @@ int CIntelSMDVideo::WriteToRenderer()
 bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_type, int extradata_size, void *extradata)
 {
   VERBOSE();
-  bool bOK;
-
-  ismd_result_t result;
 
   if (m_IsConfigured)
     CloseDecoder();
@@ -1197,13 +1167,6 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
     m_bNeedVC1Conversion = true;
   }
 
-  /*
-  if(g_application.m_pPlayer && g_application.m_pPlayer->HasLiveTV())
-  {
-    g_IntelSMDGlobals.CreateVidDecUserDataPort();
-  }
-  */
-
   m_IsConfigured = true;
   m_bRunning = true;
 
@@ -1251,8 +1214,6 @@ bool CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, dou
   unsigned int demuxer_bytes = size;
   double demuxer_pts = pts;
   uint8_t *demuxer_content = pData;
-  unsigned int CurDepth = 0;
-  unsigned int MaxDepth = 0;
 
   unsigned int outbuf_size = 0;
   uint8_t *outbuf = NULL;
@@ -1369,7 +1330,7 @@ bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
   }
   else
   {
-    printf("CIntelSMDVideo::GetPicture ismd_viddec_get_stream_properties failed %d\n", res);
+    CLog::Log(LOGERROR, "CIntelSMDVideo::GetPicture ismd_viddec_get_stream_properties failed %d\n", res);
     return false;
   }
 
@@ -1379,8 +1340,6 @@ bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
 bool CIntelSMDVideo::GetInputPortStatus(unsigned int& curDepth, unsigned int& maxDepth)
 {
   VERBOSE();
-  ismd_port_handle_t inputPort = g_IntelSMDGlobals.GetVidDecInput();
-
   g_IntelSMDGlobals.GetPortStatus(g_IntelSMDGlobals.GetVidDecInput(), curDepth, maxDepth);
 
   return true;

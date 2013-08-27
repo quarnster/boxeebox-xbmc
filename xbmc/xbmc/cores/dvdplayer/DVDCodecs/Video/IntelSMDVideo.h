@@ -31,14 +31,6 @@
 #include "DVDVideoCodec.h"
 #include "threads/Thread.h"
 
-struct H264BSFContext {
-  uint8_t  length_size;
-  uint8_t  first_idr;
-  uint8_t *sps_pps_data;
-  uint32_t size;
-} ;
-
-
 #define MAX_SIZE_PES_SEQUENCE_HEADER 16
 
 typedef struct H264Viddec {
@@ -78,12 +70,6 @@ typedef struct Vc1Viddec {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#define INTEL_SMD_FIELD_FULL        0x00
-#define INTEL_SMD_FIELD_EVEN        0x01
-#define INTEL_SMD_FIELD_ODD         0x02
-
-#define INPUT_LIST_SIZE 20
-
 class CIntelSMDVideo
 {
 public:
@@ -92,11 +78,8 @@ public:
 
   bool OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_type, int extradata_size, void *extradata);
   void CloseDecoder(void);
-  void SetDefaults();
 
   void Reset();
-  void Resync(double pts) {}
-
   bool AddInput(unsigned char *pData, size_t size, double dts, double pts);
 
   bool GetPicture(DVDVideoPicture* pDvdVideoPicture);
@@ -104,19 +87,21 @@ public:
   void SetWidth(unsigned int width) { m_width = m_dwidth = width; }
   void SetHeight(unsigned int height) { m_height = m_dheight = height; }
 
-  int WriteToInputPort(unsigned char* data, unsigned int length, double pts, int bufSize);
-  int WriteToRenderer();
-  unsigned char *Vc1_viddec_convert_AP (Vc1Viddec *viddec, unsigned char *buf,int size, bool need_seq_hdr,unsigned int *outbuf_size);
-  unsigned char *Vc1_viddec_convert_SPMP (Vc1Viddec *viddec, unsigned char *buf, int size, bool need_seq_hdr, unsigned int *outbuf_size);\
-  int vc1_viddec_encapsulate_and_write_ebdu ( unsigned char* pDes, unsigned int SizeDes, unsigned char* pRbdu, unsigned int SizeRBDU );
-  void vc1_viddec_SPMP_PESpacket_PayloadFormatHeader (Vc1Viddec *viddec, unsigned char *pCodecData, int width, int height);
-  bool vc1_viddec_init (Vc1Viddec *viddec);
-
   bool GetInputPortStatus(unsigned int& curDepth, unsigned int& maxDepth);
-  void DisablePtsCorrection(bool bDisable) { m_bDisablePtsCorrection = bDisable; }
 
 protected:
   virtual ~CIntelSMDVideo();
+
+private:
+  unsigned char *Vc1_viddec_convert_AP (Vc1Viddec *viddec, unsigned char *buf,int size, bool need_seq_hdr,unsigned int *outbuf_size);
+  unsigned char *Vc1_viddec_convert_SPMP (Vc1Viddec *viddec, unsigned char *buf, int size, bool need_seq_hdr, unsigned int *outbuf_size);
+  int vc1_viddec_encapsulate_and_write_ebdu ( unsigned char* pDes, unsigned int SizeDes, unsigned char* pRbdu, unsigned int SizeRBDU );
+  void vc1_viddec_SPMP_PESpacket_PayloadFormatHeader (Vc1Viddec *viddec, unsigned char *pCodecData, int width, int height);
+  void vc1_viddec_init (Vc1Viddec *viddec);
+  int WriteToInputPort(unsigned char* data, unsigned int length, double pts, unsigned int bufSize);
+  int WriteToRenderer();
+  void DisablePtsCorrection(bool bDisable) { m_bDisablePtsCorrection = bDisable; }
+  void SetDefaults();
 
   bool          m_IsConfigured;
   unsigned int  m_width;

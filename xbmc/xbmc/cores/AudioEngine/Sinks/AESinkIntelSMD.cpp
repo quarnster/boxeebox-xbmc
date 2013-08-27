@@ -54,19 +54,6 @@ CAESinkIntelSMD::edidHint* CAESinkIntelSMD::m_edidTable = NULL;
 
 ismd_dev_t tmpDevice = -1;
 
-static const int _default_channel_layouts[] =
-  { AUDIO_CHAN_CONFIG_2_CH,     // if channel count is 0, assume stereo
-    AUDIO_CHAN_CONFIG_1_CH,     // for PCM 1 channel we map to 2 channels
-    AUDIO_CHAN_CONFIG_2_CH,
-    0xFFFFF210,                 // 3CH: Left, Center, Right
-    0xFFFF4320,                 // 4CH: Left, Right, Left Sur, Right Sur
-    0xFFF43210,                 // 5CH: Left, Center, Right, Left Sur, Right Sur
-    AUDIO_CHAN_CONFIG_6_CH,
-    0xF6543210,                 // 7CH: Left, Center, Right, Left Sur, Right Sur, Left Rear Sur, Right Rear Sur
-    AUDIO_CHAN_CONFIG_8_CH
-  };
-
-
 CAESinkIntelSMD::CAESinkIntelSMD()
 {
   VERBOSE2();
@@ -135,7 +122,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
 
   int audioOutputMode = g_guiSettings.GetInt("audiooutput.mode");
   bool bCanDDEncode = false;
-  int inputChannelConfig = AUDIO_CHAN_CONFIG_INVALID;
+  int inputChannelConfig = AUDIO_CHAN_CONFIG_2_CH;
 
   // TODO(q)
   m_bIsHDMI = true;   //(AUDIO_HDMI == audioOutputMode);
@@ -398,116 +385,6 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   CLog::Log(LOGINFO, "CAESinkIntelSMD::Initialize done");
 
   return true;
-}
-
-int CAESinkIntelSMD::BuildChannelConfig( CAEChannelInfo info )
-{
-  VERBOSE();
-  int res = 0;
-  int iChannels = info.Count();
-  // SMD will have major issues should this ever occur.
-  if( iChannels > 8 )
-  {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::BuildChannelConfig received more than 8 channels? (%d)", iChannels);
-    return 0;
-  }
-
-  if( false /* TODO(q) !channelMap*/ )
-  {
-    // if we don't have a mapping, it's guesswork. how do 4ch or 5ch streams work? who knows.
-    // use some defaults from intel and try some other things here
-    // mono and stereo are probably always right, though AUDIO_CHAN_CONFIG_1_CH is configured as center-only
-
-    res = _default_channel_layouts[iChannels];
-
-    if( iChannels > 2 )
-      CLog::Log(LOGWARNING, "CAESinkIntelSMD::BuildChannelConfig - using a default configuration for %d channels; your channel mapping may be wrong\n", iChannels);
-  }
-  else
-  {
-    int i;
-    bool bBackToSur = false;     // if we are outputing 5.1 we may have to remap the back channels to surround
-    bool bUsingSides = false;    // if we use the side channels this is true
-    bool bUsingOffC = false;     // if we use left/right of center channels this is true
-    for( i = 0; i < iChannels; i++ )
-    {
-      int val = -1;
-
-      // PCM remap - we assume side channels are surrounds, but also support left/right of center being surrounds
-      //  we can't, however, handle both channel sets being present in a stream.
-      switch( info[i] )
-      {
-        case AE_CH_FL:  val = ISMD_AUDIO_CHANNEL_LEFT; break;
-        case AE_CH_FR:  val = ISMD_AUDIO_CHANNEL_RIGHT; break;
-        case AE_CH_FC:  val = (iChannels > 1) ? ISMD_AUDIO_CHANNEL_CENTER : ISMD_AUDIO_CHANNEL_LEFT; break;
-        case AE_CH_LFE: val = ISMD_AUDIO_CHANNEL_LFE; break;
-        case AE_CH_BL:
-        {
-          if( iChannels == 8 )
-            val = ISMD_AUDIO_CHANNEL_LEFT_REAR_SUR;
-          else
-          {
-            val = ISMD_AUDIO_CHANNEL_LEFT_SUR;
-            bBackToSur = true;
-          }
-          break;
-        }
-        case AE_CH_BR:
-        {
-          if( iChannels == 8 )
-            val = ISMD_AUDIO_CHANNEL_RIGHT_REAR_SUR;
-          else
-          {
-            val = ISMD_AUDIO_CHANNEL_RIGHT_SUR;
-            bBackToSur = true;
-          }
-          break;
-        }
-        case AE_CH_FLOC: val = ISMD_AUDIO_CHANNEL_LEFT_SUR; bUsingOffC = true; break;
-        case AE_CH_FROC: val = ISMD_AUDIO_CHANNEL_RIGHT_SUR; bUsingOffC = true; break;
-        case AE_CH_SL:   val = ISMD_AUDIO_CHANNEL_LEFT_SUR; bUsingSides = true; break;
-        case AE_CH_SR:   val = ISMD_AUDIO_CHANNEL_RIGHT_SUR; bUsingSides = true; break;
-        default: break;
-      };
-
-      if( val == -1 )
-      {
-        CLog::Log(LOGWARNING, "CAESinkIntelSMD::BuildChannelConfig - invalid channel %d\n", info[i] );
-        break;
-      }
-
-      if( bUsingSides && bUsingOffC )
-      {
-        CLog::Log(LOGWARNING, "CAESinkIntelSMD::BuildChannelConfig - given both side and off center channels - aborting");
-        break;
-      }
-
-      res |= (val << (4*i));
-    }
-
-    if( i < iChannels )
-    {
-      // Here we have a problem. The source content has a channel layout that we couldn't convert, so at this point we are better off using a
-      // default channel layout. We'll never get the layout to be accurate anyways, and at least this way SMD is seeing the right amount of PCM...
-      CLog::Log(LOGWARNING, "CAESinkIntelSMD::BuildChannelConfig - switching back to default channel layout since not all channels were found");
-      res = _default_channel_layouts[iChannels];
-    }
-    else
-    {
-      if( bBackToSur )
-      {
-        CLog::Log(LOGINFO, "CAESinkIntelSMD::BuildChannelConfig - remapping back channels to surround speakers for 5.1 audio out");
-      }
-      // mark the remaining slots invalid
-      for( int i = iChannels; i < 8; i++ )
-      {
-        res |= (ISMD_AUDIO_CHANNEL_INVALID << (i*4));
-      }
-    }
-  }
-
-  CLog::Log(LOGDEBUG, "CAESinkIntelSMD::BuildChannelConfig - %d channels layed out as 0x%08x\n", iChannels, res);
-  return res;
 }
 
 void CAESinkIntelSMD::Deinitialize()
@@ -1440,55 +1317,18 @@ ismd_audio_format_t CAESinkIntelSMD::GetISMDFormat(AEDataFormat audioMediaFormat
      case AE_FMT_LPCM:
        ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_PCM;
        break;
-     // TODO(q)
-     // case AUDIO_MEDIA_FMT_DVD_PCM:
-     //   ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_DVD_PCM;
-     //   break;
-     // case AUDIO_MEDIA_FMT_BLURAY_PCM:
-     //   ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_BLURAY_PCM;
-     //   break;
-     // case AUDIO_MEDIA_FMT_MPEG:
-     //   ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_MPEG;
-     //   break;
      case AE_FMT_AAC:
        ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_AAC;
        break;
-     // TODO(q)
-     // case AUDIO_MEDIA_FMT_AAC_LOAS:
-     //   ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_AAC_LOAS;
-     //   break;
-     // case AUDIO_MEDIA_FMT_AAC_LATM:
-     //   ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_AAC_LOAS;
-     //   break;
-     // case AUDIO_MEDIA_FMT_DD:
-     //   ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_DD;
-     //   break;
-     // case AUDIO_MEDIA_FMT_DD_PLUS:
-     //   ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_DD_PLUS;
-     //   break;
      case AE_FMT_TRUEHD:
        ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_TRUE_HD;
        break;
      case AE_FMT_DTSHD:
        ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_DTS_HD;
        break;
-     // TODO(q)
-     // case AUDIO_MEDIA_FMT_DTS_HD_HRA:
-     //   ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_DTS_HD_HRA;
-     //   break;
-     // case AUDIO_MEDIA_FMT_DTS_HD_MA:
-     //   ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_DTS_HD_MA;
-     //   break;
      case AE_FMT_DTS:
        ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_DTS;
        break;
-     // TODO(q)
-     // case AUDIO_MEDIA_FMT_DTS_LBR:
-     //   ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_DTS_LBR;
-     //   break;
-     // case AUDIO_MEDIA_FMT_WM9:
-     //   ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_WM9;
-     //   break;
      default:
        CLog::Log(LOGERROR, "CAESinkIntelSMD::GetISMDFormat - unknown audio media format requested: %d", audioMediaFormat);
        return ISMD_AUDIO_MEDIA_FMT_INVALID;
@@ -1496,45 +1336,6 @@ ismd_audio_format_t CAESinkIntelSMD::GetISMDFormat(AEDataFormat audioMediaFormat
 
   return ismdAudioInputFormat;
 }
-/* TODO(q)
-AUDIO_CODEC_VENDOR  CAESinkIntelSMD::GetAudioCodecVendor(AudioMediaFormat format)
-{
-  AUDIO_CODEC_VENDOR decoding_vendor = AUDIO_VENDOR_NONE;
-
-  switch(format)
-  {
-    // TODO(q)
-    // case AUDIO_MEDIA_FMT_DD:
-    //   decoding_vendor = AUDIO_VENDOR_DOLBY;
-    //   break;
-    // case AUDIO_MEDIA_FMT_DD_PLUS:
-    //   decoding_vendor = AUDIO_VENDOR_DOLBY;
-    //   break;
-    case AE_FMT_TRUEHD:
-      decoding_vendor = AUDIO_VENDOR_DOLBY;
-      break;
-    case AE_FMT_DTSHD:
-      decoding_vendor = AUDIO_VENDOR_DTS;
-      break;
-    // case AUDIO_MEDIA_FMT_DTS_HD_HRA:
-    //   decoding_vendor = AUDIO_VENDOR_DTS;
-    //   break;
-    // case AUDIO_MEDIA_FMT_DTS_HD_MA:
-    //   decoding_vendor = AUDIO_VENDOR_DTS;
-    //   break;
-    case AE_FMT_DTS:
-      decoding_vendor = AUDIO_VENDOR_DTS;
-      break;
-    // case AUDIO_MEDIA_FMT_DTS_LBR:
-    //   decoding_vendor = AUDIO_VENDOR_DTS;
-    //   break;
-    default:
-      break;
-  }
-
-  return decoding_vendor;
-}
-*/
 
 void CAESinkIntelSMD::ConfigureAudioOutputParams(ismd_audio_output_config_t& output_config, int output,
     int sampleSize, int sampleRate, int channels, ismd_audio_format_t format, bool bPassthrough)
@@ -1635,14 +1436,7 @@ bool CAESinkIntelSMD::IsCompatible(const AEAudioFormat format, const std::string
     return false;
   }
   switch (format.m_dataFormat) {
-  case AE_FMT_TRUEHD:
-  case AE_FMT_U8:
-  case AE_FMT_S8:
   case AE_FMT_S16LE:
-  case AE_FMT_DTSHD:
-  case AE_FMT_DTS:
-  case AE_FMT_LPCM:
-  case AE_FMT_AAC:
     break;
   default:
     return false;
@@ -1660,16 +1454,7 @@ void CAESinkIntelSMD::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   info.m_displayName = "IntelSMD";
   info.m_deviceType =  AE_DEVTYPE_HDMI;
   info.m_sampleRates.push_back(48000);
-  info.m_sampleRates.push_back(44100);
-  info.m_sampleRates.push_back(22050);
-  info.m_dataFormats.push_back(AE_FMT_TRUEHD);
-  info.m_dataFormats.push_back(AE_FMT_U8);
-  info.m_dataFormats.push_back(AE_FMT_S8);
   info.m_dataFormats.push_back(AE_FMT_S16LE);
-  info.m_dataFormats.push_back(AE_FMT_DTSHD);
-  info.m_dataFormats.push_back(AE_FMT_DTS);
-  info.m_dataFormats.push_back(AE_FMT_LPCM);
-  info.m_dataFormats.push_back(AE_FMT_AAC);
   AEChannel channels[] = {AE_CH_FL , AE_CH_FR, AE_CH_NULL};
   info.m_channels = CAEChannelInfo(channels);
   list.push_back(info);

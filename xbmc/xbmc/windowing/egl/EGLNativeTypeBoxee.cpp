@@ -43,6 +43,8 @@ bool CEGLNativeTypeBoxee::CheckCompatibility()
 void CEGLNativeTypeBoxee::Initialize()
 {
   gdl_init();
+  int enable = 1;
+  gdl_port_set_attr(GDL_PD_ID_HDMI, GDL_PD_ATTR_ID_POWER, &enable);
   return;
 }
 void CEGLNativeTypeBoxee::Destroy()

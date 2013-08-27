@@ -57,7 +57,6 @@ public:
   static  void          EnumerateDevicesEx(AEDeviceInfoList &list, bool force = false);
 
 private:
-  static int BuildChannelConfig( CAEChannelInfo info );
   unsigned int SendDataToInput(unsigned char* buffer_data, unsigned int buffer_size, ismd_pts_t pts = ISMD_NO_PTS);
 
   void ConfigureDolbyModes(ismd_audio_processor_t proc_handle, ismd_dev_t input_handle);
