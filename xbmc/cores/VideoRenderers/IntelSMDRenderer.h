@@ -63,7 +63,7 @@ public:
   CIntelSMDRenderer();  
   virtual ~CIntelSMDRenderer();
 
-  virtual void Update(bool bPauseDrawing);
+  virtual void Update();
   virtual void SetupScreenshot() {};
 
   virtual EINTERLACEMETHOD AutoInterlaceMethod();
@@ -79,7 +79,7 @@ public:
   virtual void         Reset(); /* resets renderer after seek for example */
   virtual void         Flush();
 
-  virtual bool AddVideoPicture(DVDVideoPicture* picture);
+  virtual bool AddVideoPicture(DVDVideoPicture *picture, int index);
   virtual void RenderUpdate(bool clear, DWORD flags = 0, DWORD alpha = 255);
 
   // Feature support

@@ -36,7 +36,9 @@
 #include "settings/MediaSettings.h"
 #include "settings/Settings.h"
 
-#if defined(HAS_GL)
+#if defined(HAS_INTEL_SMD)
+  #include "IntelSMDRenderer.h"
+#elif defined(HAS_GL)
   #include "LinuxRendererGL.h"
 #elif HAS_GLES == 2
   #include "LinuxRendererGLES.h"
@@ -427,7 +429,9 @@ unsigned int CXBMCRenderManager::PreInit()
   m_bIsStarted = false;
   if (!m_pRenderer)
   {
-#if defined(HAS_GL)
+#if defined(HAS_INTEL_SMD)
+    m_pRenderer = new CIntelSMDRenderer();
+#elif defined(HAS_GL)
     m_pRenderer = new CLinuxRendererGL();
 #elif HAS_GLES == 2
     m_pRenderer = new CLinuxRendererGLES();

@@ -22,7 +22,6 @@
 
 #if defined(HAS_INTEL_SMD)
 
-#include "settings/GUISettings.h"
 #include "settings/AdvancedSettings.h"
 #include "DVDClock.h"
 #include "DVDStreamInfo.h"

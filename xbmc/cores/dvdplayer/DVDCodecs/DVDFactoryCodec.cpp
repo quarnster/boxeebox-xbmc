@@ -43,6 +43,9 @@
 #include "utils/AMLUtils.h"
 #include "Video/DVDVideoCodecAmlogic.h"
 #endif
+#if defined(HAS_INTEL_SMD)
+#include "Video/DVDVideoCodecSMD.h"
+#endif
 #include "Audio/DVDAudioCodecFFmpeg.h"
 #include "Audio/DVDAudioCodecLibMad.h"
 #include "Audio/DVDAudioCodecPcm.h"
@@ -184,7 +187,9 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
 #elif defined(TARGET_POSIX) && !defined(TARGET_DARWIN)
   hwSupport += "VAAPI:no ";
 #endif
-
+#if defined(HAS_INTEL_SMD)
+  hwSupport += "IntelSMD:yes ";
+#endif
   CLog::Log(LOGDEBUG, "CDVDFactoryCodec: compiled in hardware support: %s", hwSupport.c_str());
 #if !defined(HAS_LIBAMCODEC)
   // dvd's have weird still-frames in it, which is not fully supported in ffmpeg
@@ -285,6 +290,10 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
         break;
     }
   }
+#endif
+
+#if defined(HAS_INTEL_SMD)
+     if( (pCodec = OpenCodec(new CDVDVideoCodecSMD(), hint, options)) ) return pCodec;
 #endif
 
   // try to decide if we want to try halfres decoding

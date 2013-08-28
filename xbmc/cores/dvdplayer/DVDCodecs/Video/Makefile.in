@@ -34,6 +34,9 @@ INCLUDES += -I${prefix}/opt/android-source/system/core/include
 INCLUDES += -I${prefix}/opt/android-source/libhardware/include
 endif
 
+SRCS += DVDVideoCodecSMD.cpp
+SRCS += IntelSMDVideo.cpp
+
 ifeq (@USE_LIBAMCODEC@,1)
 SRCS += AMLCodec.cpp
 SRCS += DVDVideoCodecAmlogic.cpp

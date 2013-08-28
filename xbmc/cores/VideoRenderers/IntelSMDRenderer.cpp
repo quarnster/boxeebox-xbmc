@@ -26,13 +26,13 @@
 
 #include "IntelSMDRenderer.h"
 #include "xbmc/cores/IntelSMDGlobals.h"
-#include "settings/Settings.h"
+#include "settings/DisplaySettings.h"
+#include "settings/MediaSettings.h"
 #include "utils/log.h"
 #include "xbmc/threads/SingleLock.h"
 #include "../dvdplayer/DVDClock.h"
 #include "guilib/GUITexture.h"
 #include "guilib/TransformMatrix.h"
-#include "xbmc/settings/GUISettings.h"
 #include "Application.h"
 
 #include <ismd_core_protected.h>
@@ -142,7 +142,7 @@ void CIntelSMDRenderer::SetDefaults()
     for (int p = 0; p < MAX_PLANES; p++)
       m_YUVMemoryTexture[b][p] = NULL;
 
-  m_resolution = g_guiSettings.m_LookAndFeelResolution;
+  m_resolution = CDisplaySettings::Get().GetCurrentResolution();
 
   m_aspectTransition = 0;
 
@@ -228,10 +228,11 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
 
   // print overscan values
   RESOLUTION iRes = g_graphicsContext.GetVideoResolution();
-  int left = g_settings.m_ResInfo[iRes].Overscan.left;
-  int top = g_settings.m_ResInfo[iRes].Overscan.top;
-  int right = g_settings.m_ResInfo[iRes].Overscan.right;
-  int bottom = g_settings.m_ResInfo[iRes].Overscan.bottom;
+  const RESOLUTION_INFO& res = CDisplaySettings::Get().GetResolutionInfo(iRes);
+  int left = res.Overscan.left;
+  int top = res.Overscan.top;
+  int right = res.Overscan.right;
+  int bottom = res.Overscan.bottom;
   CLog::Log(LOGINFO, "CIntelSMDRenderer configure overscan values left %d top %d right %d bottom %d", left, top, right, bottom);
 
   // if only fps change, no need to reconfigure everything
@@ -278,7 +279,7 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
   CalculateFrameAspectRatio(d_width, d_height);
   if(!m_bNullRendering && (flags & CONF_FLAGS_FULLSCREEN))
     ChooseBestResolution(fps);
-  SetViewMode(g_settings.m_currentVideoSettings.m_ViewMode);
+  SetViewMode(CMediaSettings::Get().GetCurrentVideoSettings().m_ViewMode);
   ManageDisplay();
 
   if (!m_bNullRendering && !m_bConfigured)
@@ -294,7 +295,7 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
   return true;
 }
 
-bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture* picture) {
+bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
   return m_bUsingSMDecoder;
 }
 
@@ -359,7 +360,7 @@ void CIntelSMDRenderer::Reset()
   UnInit();
 }
 
-void CIntelSMDRenderer::Update(bool bPauseDrawing)
+void CIntelSMDRenderer::Update()
 {
   //printf("%s\n", __FUNCTION__);
   if (!m_bConfigured)
@@ -603,8 +604,9 @@ int CIntelSMDRenderer::ConfigureVideoFilters()
 
   ismd_dev_t video_proc = g_IntelSMDGlobals.GetVidProc();
 
-  bool deringing_filter = g_guiSettings.GetBool("videoplayback.deringing");
-  bool gaussian_filter = g_guiSettings.GetBool("videoplayback.gaussian");
+  // TODO(q)
+  bool deringing_filter = false; // g_guiSettings.GetBool("videoplayback.deringing");
+  bool gaussian_filter =  false; // g_guiSettings.GetBool("videoplayback.gaussian");
 
   if (deringing_filter)
     res = ismd::ismd_vidpproc_deringing_enable(video_proc);
@@ -640,8 +642,8 @@ int CIntelSMDRenderer::ConfigureDeinterlace()
 
   int iResolution = g_graphicsContext.GetVideoResolution();
   ismd_dev_t video_proc = g_IntelSMDGlobals.GetVidProc();
-  int deinterlace_policy = g_guiSettings.GetInt("videoplayback.interlacemode");
-  bool interlace_display = g_settings.m_ResInfo[iResolution].dwFlags & D3DPRESENTFLAG_INTERLACED;
+  int deinterlace_policy = CMediaSettings::Get().GetCurrentVideoSettings().m_DeinterlaceMode;
+  bool interlace_display = CDisplaySettings::Get().GetResolutionInfo(iResolution).dwFlags & D3DPRESENTFLAG_INTERLACED;
   ismd::ismd_vidpproc_deinterlace_policy_t smd_policy = ismd::NONE;
 
   switch(deinterlace_policy)

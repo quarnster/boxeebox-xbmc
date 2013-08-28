@@ -1073,7 +1073,12 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
       flags |= CONF_FLAGS_FULLSCREEN;
       m_bAllowFullscreen = false; // only allow on first configure
     }
-
+#ifdef HAS_INTEL_SMD
+    if(pPicture->format == RENDER_FMT_NV12)
+    {
+      flags |= CONF_FLAGS_SMD_DECODING;
+    }
+#endif
     flags |= stereo_flags;
 
     CLog::Log(LOGDEBUG,"%s - change configuration. %dx%d. framerate: %4.2f. format: %s",__FUNCTION__,pPicture->iWidth, pPicture->iHeight, config_framerate, formatstr.c_str());

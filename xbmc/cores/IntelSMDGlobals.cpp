@@ -90,6 +90,7 @@ CIntelSMDGlobals::CIntelSMDGlobals()
 
   ResetClock();
   CreateMainClock();
+  InitAudio();
 }
 
 CIntelSMDGlobals::~CIntelSMDGlobals()
@@ -97,6 +98,7 @@ CIntelSMDGlobals::~CIntelSMDGlobals()
   VERBOSE();
 
   DestroyMainClock();
+  DeInitAudio(); 
 }
 
 bool CIntelSMDGlobals::CreateMainClock()

@@ -134,6 +134,14 @@ add_custom_target(
 	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${SYSROOT}/usr/lib/libz.so.1 ${TARGET_DIR}/libz.so.1
 )
 
+add_custom_target(
+	pythonlibs
+	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/lib/python2.7 ${TARGET_DIR}/python2.7
+	# If we don't null out the site.py it'll complain about a broken installation.
+	# Unclear if this is much better, but atleast some of python seems to run fine.
+	COMMAND 			echo "" > ${TARGET_DIR}/python2.7/site.py
+)
+
 set(shares
 	addons
 	language
@@ -169,5 +177,5 @@ add_custom_target(
 
 add_custom_target(
 	dist
-	DEPENDS shares ${libs} libstdc++ libz quickdist
+	DEPENDS shares ${libs} libstdc++ libz pythonlibs quickdist
 )

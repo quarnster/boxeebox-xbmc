@@ -19,6 +19,8 @@ SRCS += LinuxRendererGLES.cpp
 SRCS += OverlayRendererGL.cpp
 endif
 
+SRCS += IntelSMDRenderer.cpp
+
 LIB = VideoRenderer.a
 
 include @abs_top_srcdir@/Makefile.include

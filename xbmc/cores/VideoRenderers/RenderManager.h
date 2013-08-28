@@ -44,6 +44,7 @@ class CWinRenderer;
 class CLinuxRenderer;
 class CLinuxRendererGL;
 class CLinuxRendererGLES;
+class CIntelSMDRenderer;
 
 class CXBMCRenderManager
 {
@@ -141,8 +142,9 @@ public:
   void UpdateResolution();
 
   bool RendererHandlesPresent() const;
-
-#ifdef HAS_GL
+#if defined(HAS_INTEL_SMD)
+  CIntelSMDRenderer   *m_pRenderer;
+#elif defined(HAS_GL)
   CLinuxRendererGL    *m_pRenderer;
 #elif HAS_GLES == 2
   CLinuxRendererGLES  *m_pRenderer;

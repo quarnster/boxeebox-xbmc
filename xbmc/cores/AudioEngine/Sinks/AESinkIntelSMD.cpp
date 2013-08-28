@@ -76,7 +76,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   ismd_result_t result;
 
   // TODO(q)
-  m_dwChunkSize = 8*1024;
+  m_dwChunkSize = 4*1024;
   m_dwBufferLen = m_dwChunkSize;
   static enum AEChannel map[3] = {AE_CH_FL, AE_CH_FR , AE_CH_NULL};
   format.m_dataFormat = AE_FMT_S16LE;
@@ -455,12 +455,12 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
   }
 
 //  static unsigned int s = 0; 
-  if (true) {
-    unsigned int curDepth = 0;
-    unsigned int maxDepth = 0;
-    g_IntelSMDGlobals.GetPortStatus(m_audioDeviceInput, curDepth, maxDepth);
-    printf("cur: %d, max: %d, c1: %d, c2: %d\n", curDepth, maxDepth, c1, counter);
-  }
+  // if (true) {
+  //   unsigned int curDepth = 0;
+  //   unsigned int maxDepth = 0;
+  //   g_IntelSMDGlobals.GetPortStatus(m_audioDeviceInput, curDepth, maxDepth);
+  //   printf("cur: %d, max: %d, c1: %d, c2: %d\n", curDepth, maxDepth, c1, counter);
+  // }
   if(smd_ret != ISMD_SUCCESS)
   {
     CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput failed to write buffer %d\n", smd_ret);

@@ -70,7 +70,7 @@ killall Boxee
 /etc/rc3.d/U94boxeehal stop
 killall BoxeeHal
 cd <WHATEVER_YOUR_TARGET_DIR_WAS>
-./xbmc.bin --debug -fs --standalone
+AE_ENGINE=active PYTHONPATH=$PWD/python2.7:$PWD/python2.7/lib-dynload XBMC_HOME=$PWD ./xbmc.bin
 ```
 
 # References
