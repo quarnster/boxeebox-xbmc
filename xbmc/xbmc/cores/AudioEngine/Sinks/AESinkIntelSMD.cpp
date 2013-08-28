@@ -48,10 +48,6 @@ extern "C"
 
 CCriticalSection CAESinkIntelSMD::m_SMDAudioLock;
 
-static const unsigned int s_edidRates[] = {32000,44100,48000,88200,96000,176400,192000};
-static const unsigned int s_edidSampleSizes[] = {16,20,24,32};
-CAESinkIntelSMD::edidHint* CAESinkIntelSMD::m_edidTable = NULL;
-
 ismd_dev_t tmpDevice = -1;
 
 CAESinkIntelSMD::CAESinkIntelSMD()
@@ -81,7 +77,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   ismd_result_t result;
 
   // TODO(q)
-  m_dwChunkSize = 4*1024;
+  m_dwChunkSize = 8*1024;
   m_dwBufferLen = m_dwChunkSize;
   static enum AEChannel map[3] = {AE_CH_FL, AE_CH_FR , AE_CH_NULL};
   format.m_dataFormat = AE_FMT_S16LE;
@@ -95,7 +91,6 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   ismd_audio_processor_t  audioProcessor = -1;
   ismd_audio_format_t     ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_INVALID;
 
-  bool bUseEDID = g_guiSettings.GetBool("videoscreen.forceedid");
   int inputChannelConfig = AUDIO_CHAN_CONFIG_2_CH;
 
   audioProcessor = g_IntelSMDGlobals.GetAudioProcessor();
@@ -109,12 +104,6 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   g_IntelSMDGlobals.DisableAudioOutput(g_IntelSMDGlobals.GetHDMIOutput());
   // g_IntelSMDGlobals.DisableAudioOutput(g_IntelSMDGlobals.GetSPDIFOutput());
   // g_IntelSMDGlobals.DisableAudioOutput(g_IntelSMDGlobals.GetI2SOutput());
-
-  if(bUseEDID)
-  {
-    UnloadEDID();
-    (void)LoadEDID();
-  }
 
   m_audioDevice = g_IntelSMDGlobals.CreateAudioInput(false);
   if(m_audioDevice == -1)
@@ -285,6 +274,7 @@ void CAESinkIntelSMD::Deinitialize()
 
 double CAESinkIntelSMD::GetCacheTotal()
 {
+  return 0;/*
   unsigned int curDepth = 0;
   unsigned int maxDepth = 0;
 
@@ -310,11 +300,11 @@ double CAESinkIntelSMD::GetCacheTotal()
   }
 
   return ((double) (maxDepth * m_dwBufferLen)/(2*2*48000.0));
-
+*/
 }
 double CAESinkIntelSMD::GetDelay()
 {
-  return m_dwBufferLen/(2*2*48000.0);
+  return GetCacheTime()+m_dwBufferLen/(2*2*48000.0);
 }
 
 double CAESinkIntelSMD::GetCacheTime()
@@ -352,7 +342,6 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
   VERBOSE();
   ismd_result_t smd_ret;
   ismd_buffer_handle_t ismdBuffer;
-  ismd_es_buf_attr_t *buf_attrs;
   ismd_buffer_descriptor_t ismdBufferDesc;
 
   //printf("audio packet size %d\n", buffer_size);
@@ -370,13 +359,6 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
     return 0;
   }
 
-  static unsigned int s = 0; 
-  if (s++ % 8 == 0) {
-    unsigned int curDepth = 0;
-    unsigned int maxDepth = 0;
-    g_IntelSMDGlobals.GetPortStatus(m_audioDeviceInput, curDepth, maxDepth);
-    printf("cur: %d, max: %d\n", curDepth, maxDepth);
-  }
  
   int counter = 0;
   while (counter < 1000)
@@ -387,7 +369,7 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
       if(g_IntelSMDGlobals.GetAudioDeviceState(m_audioDevice) != ISMD_DEV_STATE_STOP)
       {
         counter++;
-        usleep(1000);
+        Sleep(100);
       }
       else
       {
@@ -400,7 +382,7 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
  
   if (smd_ret != ISMD_SUCCESS)
   {
-//    CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput - error allocating buffer: %d", smd_ret);
+    CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput - error allocating buffer: %d", smd_ret);
     return 0;
   }
 
@@ -412,23 +394,38 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
     return 0;
   }
 
-  unsigned char* buf_ptr = (uint8_t *) OS_MAP_IO_TO_MEM_NOCACHE(ismdBufferDesc.phys.base, buffer_size);
+  short* buf_ptr = (short *) OS_MAP_IO_TO_MEM_NOCACHE(ismdBufferDesc.phys.base, buffer_size);
   if(buf_ptr == NULL)
   {
     CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput - unable to mmap buffer %d", ismdBufferDesc.phys.base);
     ismd_buffer_dereference(ismdBuffer);
     return 0;    
   }
+  short *sb = (short*) buffer_data;
+  static double pos = 0;
+  static double ppos = 0;
+  static double pitch = 2*3.1415927*440.0/48000.0;
+  static double ppitch = 2*3.1415927/48000.0;
+  for (int i = 0; i < buffer_size/4; i++)
+  {
+    double s = sin(pos);
+    double p = sin(ppos);
+    buf_ptr[i*2+0] = sb[i*2+0] + (short)(4000*p*s);
+    buf_ptr[i*2+1] = sb[i*2+1] + (short)(4000*(1-p)*s);
+    pos += pitch;
+    ppos += ppitch;
+  }
 
-  memcpy(buf_ptr, buffer_data, buffer_size);
+//  memcpy(buf_ptr, buffer_data, buffer_size);
   OS_UNMAP_IO_FROM_MEM(buf_ptr, buffer_size);
 
   ismdBufferDesc.phys.level = buffer_size;
 
-  buf_attrs = (ismd_es_buf_attr_t *) ismdBufferDesc.attributes;
-  buf_attrs->original_pts = local_pts;
-  buf_attrs->local_pts = local_pts;
-  buf_attrs->discontinuity = false;
+  // ismd_es_buf_attr_t *buf_attrs;
+  // buf_attrs = (ismd_es_buf_attr_t *) ismdBufferDesc.attributes;
+  // buf_attrs->original_pts = local_pts;
+  // buf_attrs->local_pts = local_pts;
+  // buf_attrs->discontinuity = false;
 
   smd_ret = ismd_buffer_update_desc(ismdBuffer, &ismdBufferDesc);
   if (smd_ret != ISMD_SUCCESS)
@@ -437,7 +434,7 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
     ismd_buffer_dereference(ismdBuffer);
     return 0;
   }
-
+  int c1 = counter;
   counter = 0;
   while (counter < 1000)
   {
@@ -447,7 +444,7 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
       if(g_IntelSMDGlobals.GetAudioDeviceState(m_audioDevice) != ISMD_DEV_STATE_STOP)
       {
         counter++;
-        usleep(1000);
+        Sleep(100);
       }
       else
       {
@@ -458,9 +455,16 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
       break;
   }
 
+//  static unsigned int s = 0; 
+  if (true) {
+    unsigned int curDepth = 0;
+    unsigned int maxDepth = 0;
+    g_IntelSMDGlobals.GetPortStatus(m_audioDeviceInput, curDepth, maxDepth);
+    printf("cur: %d, max: %d, c1: %d, c2: %d\n", curDepth, maxDepth, c1, counter);
+  }
   if(smd_ret != ISMD_SUCCESS)
   {
-//    CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput failed to write buffer %d\n", smd_ret);
+    CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput failed to write buffer %d\n", smd_ret);
     ismd_buffer_dereference(ismdBuffer);
     buffer_size = 0;
   }
@@ -475,6 +479,18 @@ unsigned int CAESinkIntelSMD::AddPackets(uint8_t* data, unsigned int len, bool h
   // Len is in frames, we want it in bytes
   len *= 4;
 
+
+  // // Let it drain for a bit before we lock the pipe down
+  // unsigned int curDepth = 0;
+  // unsigned int maxDepth = 0;
+  // g_IntelSMDGlobals.GetPortStatus(m_audioDeviceInput, curDepth, maxDepth);
+
+  // if (maxDepth != 0)
+  // {
+  //   Sleep(10*curDepth/maxDepth);
+  // }
+
+
   // What's the maximal write size - either a chunk if provided, or the full buffer
   unsigned int block_size = (m_dwChunkSize ? m_dwChunkSize : m_dwBufferLen);
 
@@ -485,7 +501,6 @@ unsigned int CAESinkIntelSMD::AddPackets(uint8_t* data, unsigned int len, bool h
   ismd_pts_t local_pts = ISMD_NO_PTS;
   unsigned char* pBuffer = NULL;
   unsigned int total = 0;
-  unsigned int dataSent = 0;
   if (!m_bIsAllocated)
   {
     CLog::Log(LOGERROR,"CAESinkIntelSMD::AddPackets - sanity failed. no valid play handle!");
@@ -497,15 +512,14 @@ unsigned int CAESinkIntelSMD::AddPackets(uint8_t* data, unsigned int len, bool h
 
   //printf("len %d chunksize %d m_bTimed %d\n", len, m_dwChunkSize, m_bTimed);
 
-  while (len && len >= m_dwChunkSize) // We want to write at least one chunk at a time
+  while (len)
   {
     unsigned int bytes_to_copy = len > block_size ? block_size : len;
-//    printf("bytes_to_copy %d block size %d m_ChunksCollectedSize %d\n", bytes_to_copy, block_size, m_ChunksCollectedSize);
-    dataSent = SendDataToInput(pBuffer, bytes_to_copy, local_pts);
+    unsigned int dataSent = SendDataToInput(pBuffer, bytes_to_copy, local_pts);
 
     if(dataSent != bytes_to_copy)
     {
-//      CLog::Log(LOGERROR, "CAESinkIntelSMD::AddPackets SendDataToInput failed. req %d actual %d", len, dataSent);
+      CLog::Log(LOGERROR, "CAESinkIntelSMD::AddPackets SendDataToInput failed. req %d actual %d", len, dataSent);
       return 0;
     }
 
@@ -518,7 +532,7 @@ unsigned int CAESinkIntelSMD::AddPackets(uint8_t* data, unsigned int len, bool h
 
 void CAESinkIntelSMD::Drain()
 {
-  VERBOSE();
+  VERBOSE2();
   CSingleLock lock(m_SMDAudioLock);
   g_IntelSMDGlobals.FlushAudioDevice(m_audioDevice);
 
@@ -566,8 +580,7 @@ void CAESinkIntelSMD::SetVolume(float nVolume)
 
 bool CAESinkIntelSMD::SoftSuspend()
 {
-  VERBOSE();
-   CLog::Log(LOGDEBUG, "CAESinkIntelSMD %s\n", __FUNCTION__);
+  VERBOSE2();
 
   // We need to wait until we're done with our packets
   CSingleLock lock(m_SMDAudioLock);
@@ -588,7 +601,7 @@ bool CAESinkIntelSMD::SoftSuspend()
 
 bool CAESinkIntelSMD::SoftResume()
 {
-  VERBOSE();
+  VERBOSE2();
   CSingleLock lock(m_SMDAudioLock);
   if (!m_bIsAllocated)
     return false;
@@ -600,276 +613,6 @@ bool CAESinkIntelSMD::SoftResume()
   m_bPause = false;
 
   return true;
-}
-
-
-// Based on ismd examples
-bool CAESinkIntelSMD::LoadEDID()
-{
-  VERBOSE();
-  bool ret = false;
-  gdl_hdmi_audio_ctrl_t ctrl;
-  edidHint** cur = &m_edidTable;
-
-  // Set up our control
-  ctrl.cmd_id = GDL_HDMI_AUDIO_GET_CAPS;
-  ctrl.data._get_caps.index = 0;
-
-  while( gdl_port_recv(GDL_PD_ID_HDMI, GDL_PD_RECV_HDMI_AUDIO_CTRL, &ctrl, sizeof(ctrl)) == GDL_SUCCESS )
-  {
-    edidHint* hint = new edidHint;
-    if( !hint ) return false;
-
-    ret = true;
-
-    hint->format = MapGDLAudioFormat( (gdl_hdmi_audio_fmt_t)ctrl.data._get_caps.cap.format );
-    if( ISMD_AUDIO_MEDIA_FMT_INVALID == hint->format )
-    {
-      delete hint;
-      ctrl.data._get_caps.index++;
-      continue;
-    }
-    else
-    {
-      // For any formats we support bitstreaming on, flag them in the smdglobals here
-      // TODO(q): Everything was already commented out??
-/*  
-      switch( hint->format )
-      {
-        case ISMD_AUDIO_MEDIA_FMT_DD:
-          //g_IntelSMDGlobals.SetCodecHDMIBitstream( CODEC_ID_AC3, true);
-          break;
-        case ISMD_AUDIO_MEDIA_FMT_DD_PLUS:
-          //g_IntelSMDGlobals.SetCodecHDMIBitstream( CODEC_ID_EAC3, true );
-          break;
-        case ISMD_AUDIO_MEDIA_FMT_TRUE_HD:
-          //g_IntelSMDGlobals.SetCodecHDMIBitstream( CODEC_ID_TRUEHD, true );
-          break;
-        case ISMD_AUDIO_MEDIA_FMT_DTS:
-          //g_IntelSMDGlobals.SetCodecHDMIBitstream( CODEC_ID_DTS, true );
-          break;
-        case ISMD_AUDIO_MEDIA_FMT_DTS_HD_MA:
-          //g_IntelSMDGlobals.SetCodecHDMIBitstream( SMD_CODEC_DTSHD, true );
-          break;
-        default:
-          break;
-      };
-*/
-    }
-    
-    hint->channels = (int)ctrl.data._get_caps.cap.max_channels;
-    hint->sample_rates = (unsigned char) (ctrl.data._get_caps.cap.fs & 0x7f);
-    if( ISMD_AUDIO_MEDIA_FMT_PCM == hint->format )
-    {
-      hint->sample_sizes = (ctrl.data._get_caps.cap.ss_bitrate & 0x07);
-      if( hint->sample_sizes & 0x04 )
-        hint->sample_sizes |= 0x08;  // if we support 24, we support 32.
-    }
-    else
-      hint->sample_sizes = 0;
-
-    *cur = hint;
-    cur = &( hint->next );
-
-    // get the next block
-    ctrl.data._get_caps.index++;
-  }
-
-  *cur = NULL;
-
-  DumpEDID();
-
-  return ret;
-}
-void CAESinkIntelSMD::UnloadEDID()
-{
-  VERBOSE();
-  while( m_edidTable )
-  {
-    edidHint* nxt = m_edidTable->next;
-    delete[] m_edidTable;
-    m_edidTable = nxt;
-  }
-}
-void CAESinkIntelSMD::DumpEDID()
-{
-  VERBOSE();
-  const char* formats[] = {"invalid","LPCM","DVDPCM","BRPCM","MPEG","AAC","AACLOAS","DD","DD+","TrueHD","DTS-HD","DTS-HD-HRA","DTS-HD-MA","DTS","DTS-LBR","WM9"};
-  CLog::Log(LOGINFO,"HDMI Audio sink supports the following formats:\n");
-  for( edidHint* cur = m_edidTable; cur; cur = cur->next )
-  {
-    CStdString line;
-    line.Format("* Format: %s Max channels: %d Samplerates: ", formats[cur->format], cur->channels);
-
-    for( unsigned int z = 0; z < sizeof(s_edidRates); z++ )
-    {
-      if( cur->sample_rates & (1<<z) )
-      {
-        line.AppendFormat("%d ",s_edidRates[z]);
-      }         
-    }
-    if( ISMD_AUDIO_MEDIA_FMT_PCM == cur->format )
-    {
-      line.AppendFormat("Sample Sizes: ");
-      for( unsigned int z = 0; z< sizeof(s_edidSampleSizes); z++ )
-      {
-        if( cur->sample_sizes & (1<<z) )
-        {
-          line.AppendFormat("%d ",s_edidSampleSizes[z]);
-        }
-      }
-    }
-    CLog::Log(LOGINFO, "%s", line.c_str());
-  }
-}
-
-bool CAESinkIntelSMD::CheckEDIDSupport( ismd_audio_format_t format, int& iChannels, unsigned int& uiSampleRate, unsigned int& uiSampleSize )
-{
-  VERBOSE();
-  //
-  // If we have EDID data then see if our settings are viable
-  // We have to match the format. After that, we prefer to match channels, then sample rate, then sample size
-  // The result is if we have a 7.1 8 channel 192khz stream and have to pick between 2 ch at 192khz or 8 ch at
-  // 48khz, we'll do the latter, and keep the surround experience for the user.
-  //
-
-  edidHint* cur = NULL;
-  unsigned int suggSampleRate = uiSampleRate;
-  unsigned int suggSampleSize = uiSampleSize;
-  int suggChannels = iChannels;
-  bool bFormatSupported = false;
-  bool bFullMatch = false;
-
-  if( !m_edidTable )
-    return false;
-
-  for( cur = m_edidTable; cur; cur = cur->next )
-  {
-    bool bSuggested = false;
-
-    // Check by format and channels
-    if( cur->format != format )
-      continue;
-
-    bFormatSupported = true;
-
-    // Right format. See if the proper channel count is reflected
-    // if not, we'll suggest a resample
-    // if so, we update our suggestions to reflect this format entry
-    if( cur->channels < iChannels )
-    {
-      suggChannels = cur->channels;
-      bSuggested = true;
-    }
-    else
-    {
-      suggChannels = iChannels;
-      suggSampleRate = uiSampleRate;
-      suggSampleSize = uiSampleSize;
-    }
-
-    // Next, see if the sample rate is supported
-    for( unsigned int z = 0; z < sizeof(s_edidRates); z++ )
-    {
-      if( s_edidRates[z] == uiSampleRate )
-      {
-        if( !(cur->sample_rates & (1<<z)) )
-        {
-          // For now, try force resample to 48khz and worry if that isn't supported
-          if( !(cur->sample_rates & 4) )
-            CLog::Log(LOGERROR, "CAESinkIntelSMD::Initialize - your audio sink indicates it doesn't support 48khz"); 
-          suggSampleRate = 48000;
-          bSuggested = true;
-        }
-        break;
-      }
-    }
-
-    // Last, see if the sample size is supported for PCM
-    if( ISMD_AUDIO_MEDIA_FMT_PCM == format )
-    {
-      for( unsigned int y = 0; y < sizeof(s_edidSampleSizes); y++ )
-      {
-        if( s_edidSampleSizes[y] == uiSampleSize )
-        {
-          if( !(cur->sample_sizes & (1<<y)) )
-          {
-            // For now, try force resample to 16khz and worry if that isn't supported
-            if( !(cur->sample_rates & 1) )
-              CLog::Log(LOGERROR, "CAESinkIntelSMD::Initialize - your audio sink indicates it doesn't support 16bit/sample");
-            suggSampleSize = 16;
-            bSuggested = true;
-          }
-          break;
-        }
-      }
-    }
-
-    // If we didn't make any suggestions, then this was a match; exit out
-    if( !bSuggested )
-    {
-      bFullMatch = true;
-      break;
-    }
-  }
-
-  if( bFormatSupported )
-  {
-    if( bFullMatch )
-    {
-      return true;
-    }
-    else
-    {
-      uiSampleRate = suggSampleRate;
-      uiSampleSize = suggSampleSize;
-      iChannels = suggChannels;
-    }
-  }
-  return false;
-}
-
-//static
-ismd_audio_format_t CAESinkIntelSMD::MapGDLAudioFormat( gdl_hdmi_audio_fmt_t f )
-{
-  VERBOSE();
-  ismd_audio_format_t result = ISMD_AUDIO_MEDIA_FMT_INVALID;
-  switch(f)
-  {
-    case GDL_HDMI_AUDIO_FORMAT_PCM:
-      result = ISMD_AUDIO_MEDIA_FMT_PCM;
-      break;
-    case GDL_HDMI_AUDIO_FORMAT_MPEG1:
-    case GDL_HDMI_AUDIO_FORMAT_MPEG2:
-    case GDL_HDMI_AUDIO_FORMAT_MP3:
-      result = ISMD_AUDIO_MEDIA_FMT_MPEG;
-      break;
-    case GDL_HDMI_AUDIO_FORMAT_AAC:
-      result = ISMD_AUDIO_MEDIA_FMT_AAC;
-      break;
-    case GDL_HDMI_AUDIO_FORMAT_DTS:
-      result = ISMD_AUDIO_MEDIA_FMT_DTS;
-      break;
-    case GDL_HDMI_AUDIO_FORMAT_AC3:
-      result = ISMD_AUDIO_MEDIA_FMT_DD;
-      break;
-    case GDL_HDMI_AUDIO_FORMAT_DDP:
-      result = ISMD_AUDIO_MEDIA_FMT_DD_PLUS;
-      break;
-    case GDL_HDMI_AUDIO_FORMAT_DTSHD:
-      result = ISMD_AUDIO_MEDIA_FMT_DTS_HD_MA;
-      break;
-    case GDL_HDMI_AUDIO_FORMAT_MLP:
-      result = ISMD_AUDIO_MEDIA_FMT_TRUE_HD;
-      break;
-    case GDL_HDMI_AUDIO_FORMAT_WMA_PRO:
-      result = ISMD_AUDIO_MEDIA_FMT_WM9;
-      break;
-    default:
-      break;
-
-  };
-  return result;
 }
 
 ismd_audio_format_t CAESinkIntelSMD::GetISMDFormat(AEDataFormat audioMediaFormat)
@@ -920,7 +663,6 @@ void CAESinkIntelSMD::ConfigureAudioOutputParams(ismd_audio_output_config_t& out
     int sampleSize, int sampleRate, int channels, ismd_audio_format_t format, bool bPassthrough)
 {
   VERBOSE();
-  bool bUseEDID = g_guiSettings.GetBool("videoscreen.forceedid");
   bool bLPCMMode = g_guiSettings.GetBool("audiooutput.lpcm71passthrough");
 
   CLog::Log(LOGINFO, "CAESinkIntelSMD::ConfigureAudioOutputParams %s sample size %d sample rate %d channels %d format %d",
@@ -945,22 +687,8 @@ void CAESinkIntelSMD::ConfigureAudioOutputParams(ismd_audio_output_config_t& out
     unsigned int suggSampleSize = sampleSize;
     int suggChannels = channels;
 
-    if (bUseEDID)
-    {
-      CLog::Log(LOGINFO, "CAESinkIntelSMD::ConfigureAudioOutputParams Testing EDID for sample rate %d sample size %d", suggSampleRate, suggSampleSize);
-      if (CheckEDIDSupport(bPassthrough ? format : ISMD_AUDIO_MEDIA_FMT_PCM, suggChannels, suggSampleRate, suggSampleSize))
-      {
-        output_config.sample_rate = suggSampleRate;
-        output_config.sample_size = suggSampleSize;
-        CLog::Log(LOGINFO, "CAESinkIntelSMD::ConfigureAudioOutputParams EDID results sample rate %d sample size %d", suggSampleRate, suggSampleSize);
-      } else
-        CLog::Log(LOGINFO, "CAESinkIntelSMD::ConfigureAudioOutputParams no EDID support found");
-    }
-    else
-    {
-      sampleRate = 48000;
-      sampleSize = 16;
-    }
+    sampleRate = 48000;
+    sampleSize = 16;
     if(bLPCMMode)
     {
       if(channels == 8)

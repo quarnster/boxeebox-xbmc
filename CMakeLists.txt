@@ -61,7 +61,7 @@ ExternalProject_Add(
 	CMAKE_COMMAND 		PATH=$ENV{PATH}:${SYSROOT}/usr/bin cmake
 	CMAKE_ARGS			-DSYSROOT=${SYSROOT} -DPARALLEL=${PARALLEL}
 	BUILD_COMMAND 		PATH=$ENV{PATH}:${SYSROOT}/usr/bin make
-	INSTALL_COMMAND		""
+	INSTALL_COMMAND		PATH=$ENV{PATH}:${SYSROOT}/usr/bin make install
 	DEPENDS				libs intel
 )
 add_dependencies(xbmc xbmc-refresh)
@@ -136,6 +136,16 @@ add_custom_target(
 	DEPENDS 			${shares}
 )
 
+add_custom_target(
+	quickdist
+	COMMAND 			PATH=$ENV{PATH}:${SYSROOT}/usr/bin ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc-build/ make copydeps
+	COMMAND 			PATH=$ENV{PATH}:${SYSROOT}/usr/bin ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc-build/xbmc-prefix/src/xbmc make -j8
+	COMMAND 			PATH=$ENV{PATH}:${SYSROOT}/usr/bin ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc-build/xbmc-prefix/src/xbmc install-binaries
+	COMMAND 			${CMAKE_COMMAND} -E copy ${SYSROOT}/usr/local/lib/xbmc/xbmc.bin ${CMAKE_BINARY_DIR}/xbmc.bin
+	COMMAND 			${SYSROOT}/usr/bin/i686-pc-linux-gnu-strip ${CMAKE_BINARY_DIR}/xbmc.bin
+	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/xbmc.bin ${TARGET_DIR}/xbmc.bin
+	DEPENDS 			xbmc-refresh
+)
 add_custom_target(
 	dist
 	COMMAND 			${CMAKE_COMMAND} -E copy ${SYSROOT}/usr/local/lib/xbmc/xbmc.bin ${CMAKE_BINARY_DIR}/xbmc.bin

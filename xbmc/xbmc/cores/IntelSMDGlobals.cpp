@@ -500,12 +500,12 @@ ismd_dev_t CIntelSMDGlobals::CreateAudioInput(bool timed)
     return -1;
   }
 
-  result = ismd_dev_set_clock(device, m_main_clock);
-  if (result != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::CreateAudioInput ismd_dev_set_clock failed (timed %d) %d", timed, result);
-    return -1;
-  }
+  // result = ismd_dev_set_clock(device, m_main_clock);
+  // if (result != ISMD_SUCCESS)
+  // {
+  //   CLog::Log(LOGERROR, "CIntelSMDGlobals::CreateAudioInput ismd_dev_set_clock failed (timed %d) %d", timed, result);
+  //   return -1;
+  // }
 
   return device;
 }

@@ -25,22 +25,24 @@ export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
 )
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh)
 
+set(XBMC_DIR ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc)
+
 add_custom_target(
 	copydeps ALL
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/windowing/egl/EGLNativeTypeBoxee.cpp                 ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/windowing/egl/EGLNativeTypeBoxee.cpp
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/windowing/egl/EGLNativeTypeBoxee.h                   ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/windowing/egl/EGLNativeTypeBoxee.h
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/IntelSMDGlobals.cpp                            ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/IntelSMDGlobals.cpp
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/IntelSMDGlobals.h                              ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/IntelSMDGlobals.h
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/VideoRenderers/IntelSMDRenderer.cpp            ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/VideoRenderers/IntelSMDRenderer.cpp
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/VideoRenderers/IntelSMDRenderer.h              ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/VideoRenderers/IntelSMDRenderer.h
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/IntelSMDVideo.cpp    ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/dvdplayer/DVDCodecs/Video/IntelSMDVideo.cpp
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/IntelSMDVideo.h      ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/dvdplayer/DVDCodecs/Video/IntelSMDVideo.h
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.cpp ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.cpp
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.h   ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.h
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.cpp ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.cpp
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.h   ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.h
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.cpp           ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.cpp
-	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.h             ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.h
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/windowing/egl/EGLNativeTypeBoxee.cpp                 ${XBMC_DIR}/xbmc/windowing/egl/EGLNativeTypeBoxee.cpp
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/windowing/egl/EGLNativeTypeBoxee.h                   ${XBMC_DIR}/xbmc/windowing/egl/EGLNativeTypeBoxee.h
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/IntelSMDGlobals.cpp                            ${XBMC_DIR}/xbmc/cores/IntelSMDGlobals.cpp
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/IntelSMDGlobals.h                              ${XBMC_DIR}/xbmc/cores/IntelSMDGlobals.h
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/VideoRenderers/IntelSMDRenderer.cpp            ${XBMC_DIR}/xbmc/cores/VideoRenderers/IntelSMDRenderer.cpp
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/VideoRenderers/IntelSMDRenderer.h              ${XBMC_DIR}/xbmc/cores/VideoRenderers/IntelSMDRenderer.h
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/IntelSMDVideo.cpp    ${XBMC_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/IntelSMDVideo.cpp
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/IntelSMDVideo.h      ${XBMC_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/IntelSMDVideo.h
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.cpp ${XBMC_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.cpp
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.h   ${XBMC_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSMD.h
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.cpp ${XBMC_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.cpp
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.h   ${XBMC_DIR}/xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecSMD.h
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.cpp           ${XBMC_DIR}/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.cpp
+	COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.h             ${XBMC_DIR}/xbmc/cores/AudioEngine/Sinks/AESinkIntelSMD.h
 )
 
 # Note to self: xbmc.patch generated by:
@@ -52,6 +54,12 @@ ExternalProject_Add(
 	PATCH_COMMAND		patch -p1 -N < ${CMAKE_SOURCE_DIR}/xbmc.patch
 	CONFIGURE_COMMAND	${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh 
 	BUILD_COMMAND 		make ${PARALLEL}
+	INSTALL_COMMAND 	""
 	BUILD_IN_SOURCE 	1
 )
 add_dependencies(xbmc copydeps)
+
+add_custom_target(install
+	COMMAND make install
+	WORKING_DIRECTORY ${XBMC_DIR}
+)

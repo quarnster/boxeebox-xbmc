@@ -71,23 +71,6 @@ private:
   
   unsigned int m_dwChunkSize;
   unsigned int m_dwBufferLen;
-
-  bool LoadEDID();
-  void UnloadEDID();
-  bool CheckEDIDSupport( ismd_audio_format_t format, int& iChannels, unsigned int& uiSampleRate, unsigned int& uiSampleSize );
-  void DumpEDID();
-  static ismd_audio_format_t MapGDLAudioFormat( gdl_hdmi_audio_fmt_t f );
-
-  typedef struct _edidCaps
-  {
-    ismd_audio_format_t format;
-    int channels;
-    unsigned char sample_rates; // 7 bit field corresponding to m_edidRates
-    unsigned char sample_sizes; // 4 bit field corresponding to m_edidSampleSizes, PCM only
-    struct _edidCaps* next;
-  } edidHint;
-  static edidHint* m_edidTable;
-
 };
 
 #endif

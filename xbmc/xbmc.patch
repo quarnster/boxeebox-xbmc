@@ -186,13 +186,13 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderFlags.h xbmc/x
  #endif
 diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderManager.cpp xbmc/xbmc/cores/VideoRenderers/RenderManager.cpp
 --- xbmc-12.2/xbmc/cores/VideoRenderers/RenderManager.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/VideoRenderers/RenderManager.cpp	2013-08-27 17:35:26.000000000 +0200
++++ xbmc/xbmc/cores/VideoRenderers/RenderManager.cpp	2013-08-27 22:03:49.000000000 +0200
 @@ -35,7 +35,9 @@
  #include "settings/GUISettings.h"
  #include "settings/AdvancedSettings.h"
  
 -#if defined(HAS_GL)
-+#if defined(HAS_INTEL_SMD)
++#if defined(HAS_INTEL_SMD2)
 +  #include "IntelSMDRenderer.h"
 +#elif defined(HAS_GL)
    #include "LinuxRendererGL.h"
@@ -203,7 +203,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderManager.cpp xb
    if (!m_pRenderer)
    {
 -#if defined(HAS_GL)
-+#if defined(HAS_INTEL_SMD)
++#if defined(HAS_INTEL_SMD2)
 +    m_pRenderer = new CIntelSMDRenderer();
 +#elif defined(HAS_GL)
      m_pRenderer = new CLinuxRendererGL();
@@ -211,7 +211,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderManager.cpp xb
      m_pRenderer = new CLinuxRendererGLES();
 diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderManager.h xbmc/xbmc/cores/VideoRenderers/RenderManager.h
 --- xbmc-12.2/xbmc/cores/VideoRenderers/RenderManager.h	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/VideoRenderers/RenderManager.h	2013-08-27 17:35:26.000000000 +0200
++++ xbmc/xbmc/cores/VideoRenderers/RenderManager.h	2013-08-27 22:04:02.000000000 +0200
 @@ -43,6 +43,7 @@
  class CLinuxRenderer;
  class CLinuxRendererGL;
@@ -225,7 +225,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/VideoRenderers/RenderManager.h xbmc
    void UpdateResolution();
  
 -#ifdef HAS_GL
-+#if defined(HAS_INTEL_SMD)
++#if defined(HAS_INTEL_SMD2)
 +  CIntelSMDRenderer   *m_pRenderer;
 +#elif defined(HAS_GL)
    CLinuxRendererGL    *m_pRenderer;
@@ -335,7 +335,7 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/Audio/Makefile.
  SRCS += DVDAudioCodecPassthroughFFmpeg.cpp
 diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp xbmc/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2013-08-27 17:43:56.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2013-08-27 22:05:10.000000000 +0200
 @@ -48,7 +48,10 @@
  #include "Overlay/DVDOverlayCodecText.h"
  #include "Overlay/DVDOverlayCodecTX3G.h"
@@ -352,15 +352,15 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec
  
    CLog::Log(LOGDEBUG, "CDVDFactoryCodec: compiled in hardware support: %s", hwSupport.c_str());
  
-+#ifdef HAS_INTEL_SMD
-+    // for DVD use libmpeg2
-+//    if(hint.width == 720 && (hint.height == 480 || hint.height == 576))
-+//      if( hint.codec == CODEC_ID_MPEG2VIDEO && (pCodec = OpenCodec(new CDVDVideoCodecLibMpeg2(), hint, dvdOptions)) )
-+//        return pCodec;
++// #ifdef HAS_INTEL_SMD
++//     // for DVD use libmpeg2
++// //    if(hint.width == 720 && (hint.height == 480 || hint.height == 576))
++// //      if( hint.codec == CODEC_ID_MPEG2VIDEO && (pCodec = OpenCodec(new CDVDVideoCodecLibMpeg2(), hint, dvdOptions)) )
++// //        return pCodec;
 +
-+    if( !hint.software && (pCodec = OpenCodec(new CDVDVideoCodecSMD(), hint, options)) )
-+      return pCodec;
-+#endif
++//     if( !hint.software && (pCodec = OpenCodec(new CDVDVideoCodecSMD(), hint, options)) )
++//       return pCodec;
++// #endif
 +
    // dvd's have weird still-frames in it, which is not fully supported in ffmpeg
    if(hint.stills && (hint.codec == CODEC_ID_MPEG2VIDEO || hint.codec == CODEC_ID_MPEG1VIDEO))
@@ -541,15 +541,15 @@ diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayer.cpp xbmc/xbmc/c
    // In case we stalled, don't output any subs
 diff -x generated -r -u xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerAudio.cpp xbmc/xbmc/cores/dvdplayer/DVDPlayerAudio.cpp
 --- xbmc-12.2/xbmc/cores/dvdplayer/DVDPlayerAudio.cpp	2013-05-03 07:57:41.000000000 +0200
-+++ xbmc/xbmc/cores/dvdplayer/DVDPlayerAudio.cpp	2013-08-27 19:45:07.000000000 +0200
++++ xbmc/xbmc/cores/dvdplayer/DVDPlayerAudio.cpp	2013-08-28 06:27:33.000000000 +0200
 @@ -648,8 +648,10 @@
    if( fabs(error) > DVD_MSEC_TO_TIME(100) || m_syncclock )
    {
      m_pClock->Discontinuity(clock+error);
-+#ifndef HAS_INTEL_SMD
++//#ifndef HAS_INTEL_SMD
      if(m_speed == DVD_PLAYSPEED_NORMAL)
        CLog::Log(LOGDEBUG, "CDVDPlayerAudio:: Discontinuity1 - was:%f, should be:%f, error:%f", clock, clock+error, error);
-+#endif
++//#endif
  
      m_errorbuff = 0;
      m_errorcount = 0;
