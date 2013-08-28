@@ -564,7 +564,7 @@ ifeq ($(findstring freebsd,@ARCH@), freebsd)
 		-exec printf " -- %-75.75s\r" "{}" \;
 else
 ifeq ($(findstring Darwin,$(shell uname -s)),Darwin)
-	@find -E system addons -type f -not -iregex ".*svn.*" \
+	@find system addons -type f -not -iregex ".*svn.*" \
 		-iregex ".*@ARCH@.*|.*\.vis|.*\.xbs" \
 		-exec sh -c "install -d \"$(DESTDIR)$(libdir)/xbmc/\`dirname '{}'\`\"" \; \
 		-and \
@@ -603,7 +603,7 @@ ifeq ($(findstring bsd,@ARCH@), bsd)
 		-exec printf " -- %-75.75s\r" "{}" \;
 else
 ifeq ($(findstring Darwin,$(shell uname -s)),Darwin)
-	@find -E addons language media sounds userdata system -type f \
+	@find addons language media sounds userdata system -type f \
 		-not -iregex ".*@ARCH@.*|.*\.vis|.*\.xbs|.*svn.*|.*\.so|.*\.dll|$(subst ${space},|,$(INSTALL_FILTER))" \
 		-exec sh -c "install -d \"$(DESTDIR)$(datarootdir)/xbmc/\`dirname '{}'\`\"" \; \
 		-and \

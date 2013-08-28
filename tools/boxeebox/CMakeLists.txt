@@ -8,6 +8,7 @@ get_filename_component(SR "${CMAKE_SOURCE_DIR}/sysroot" REALPATH)
 
 set(SYSROOT ${SR} CACHE PATH "The sysroot directory where everything will be installed")
 set(PARALLEL "-j8" CACHE STRING "Arguments for make for parallel builds")
+set(TARGET i686-pc-linux-gnu)
 set(TARGET_DIR ${CMAKE_SOURCE_DIR}/dist CACHE PATH "Directory to install everything to")
 set(BOXEEBOX_IP "boxeebox" CACHE STRING "ipaddress or hostname of your boxeebox (only used for remote debugging)")
 message("Using Sysroot: ${SYSROOT}")
@@ -19,11 +20,6 @@ file(WRITE case_test.txt)
 if(EXISTS Case_Test.txt)
 	message(FATAL_ERROR "The filesystem needs to be case sensitive. You can always create and mount a case sensitive file system image file.")
 endif()
-
-add_custom_target(xbmc-refresh
-	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/xbmc ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc
-	COMMAND 			touch ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc-stamp/xbmc-download
-)
 
 ExternalProject_Add(
 	toolchain
@@ -55,16 +51,44 @@ ExternalProject_Add(
 )
 
 
-ExternalProject_Add(
-	xbmc
-	URL 				${CMAKE_SOURCE_DIR}/xbmc
-	CMAKE_COMMAND 		PATH=$ENV{PATH}:${SYSROOT}/usr/bin cmake
-	CMAKE_ARGS			-DSYSROOT=${SYSROOT} -DPARALLEL=${PARALLEL}
-	BUILD_COMMAND 		PATH=$ENV{PATH}:${SYSROOT}/usr/bin make
-	INSTALL_COMMAND		PATH=$ENV{PATH}:${SYSROOT}/usr/bin make install
-	DEPENDS				libs intel
+set(local ${SYSROOT}/usr/local)
+
+file(WRITE ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh
+"
+#!/bin/sh
+PF=`${SYSROOT}/usr/bin/${TARGET}-pkg-config --libs python`
+export LDFLAGS=\"-L${local}/lib -lgcc -lm -ltinyxml -lgdl -lismd_core -lismd_viddec -lismd_vidpproc -lismd_audio -lismd_vidrend -lismd_demux -losal -lplatform_config\"
+export CFLAGS=\"-DTARGET_BOXEE=1 -DTIXML_USE_STL -I${local}/include -DHAS_INTEL_SMD\"
+export CXXFLAGS=\"$CFLAGS\"
+export FREETYPE2_CFLAGS=\"-I${local}/include/freetype2\"
+export PYTHON_VERSION=\"2.7.2\"
+export PYTHON_NOVERSIONCHECK=\"y\"
+export PYTHON=\"${local}/bin/python\"
+export PYTHON_CPPFLAGS=\"-I${local}/include/python2.7\"
+export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
+${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --disable-gl --disable-sdl --disable-mysql --disable-x11 --disable-samba  --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick --enable-debug --disable-texturepacker
+"
 )
-add_dependencies(xbmc xbmc-refresh)
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh)
+
+add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/../../Makefile
+	COMMAND PATH=$ENV{PATH}:${SYSROOT}/usr/bin ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh
+	DEPENDS libs
+)
+
+add_custom_target(
+	xbmc ALL
+	COMMAND PATH=$ENV{PATH}:${SYSROOT}/usr/bin make ${PARALLEL}
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../../
+	DEPENDS ${CMAKE_SOURCE_DIR}/../../Makefile
+)
+
+add_custom_target(
+	xbmc-install
+	COMMAND PATH=$ENV{PATH}:${SYSROOT}/usr/bin make install
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../../
+	DEPENDS ${CMAKE_SOURCE_DIR}/../../xbmc.bin
+)
 
 set(libs
 	libjasper.so.1
@@ -91,7 +115,6 @@ foreach(lib ${libs})
 	add_custom_target(
 		${lib}
 		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${SYSROOT}/usr/local/lib/${lib} ${TARGET_DIR}/${lib}
-		DEPENDS			xbmc
 	)
 endforeach()
 
@@ -125,7 +148,7 @@ foreach(share ${shares})
 	add_custom_target(
 		${share}
 		COMMAND 		${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/share/xbmc/${share} ${TARGET_DIR}/${share}
-		DEPENDS			xbmc
+		DEPENDS			xbmc-install
 	)
 endforeach()
 
@@ -133,53 +156,18 @@ add_custom_target(
 	shares
 	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/lib/xbmc/addons ${TARGET_DIR}/addons
 	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/lib/xbmc/system ${TARGET_DIR}/system
-	DEPENDS 			${shares}
+	DEPENDS 			${shares} 
 )
 
 add_custom_target(
 	quickdist
-	COMMAND 			PATH=$ENV{PATH}:${SYSROOT}/usr/bin ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc-build/ make copydeps
-	COMMAND 			PATH=$ENV{PATH}:${SYSROOT}/usr/bin ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc-build/xbmc-prefix/src/xbmc make -j8
-	COMMAND 			PATH=$ENV{PATH}:${SYSROOT}/usr/bin ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/xbmc-prefix/src/xbmc-build/xbmc-prefix/src/xbmc install-binaries
-	COMMAND 			${CMAKE_COMMAND} -E copy ${SYSROOT}/usr/local/lib/xbmc/xbmc.bin ${CMAKE_BINARY_DIR}/xbmc.bin
+	COMMAND 			${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/../../xbmc.bin ${CMAKE_BINARY_DIR}/xbmc.bin
 	COMMAND 			${SYSROOT}/usr/bin/i686-pc-linux-gnu-strip ${CMAKE_BINARY_DIR}/xbmc.bin
 	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/xbmc.bin ${TARGET_DIR}/xbmc.bin
-	DEPENDS 			xbmc-refresh
-)
-add_custom_target(
-	dist
-	COMMAND 			${CMAKE_COMMAND} -E copy ${SYSROOT}/usr/local/lib/xbmc/xbmc.bin ${CMAKE_BINARY_DIR}/xbmc.bin
-	COMMAND 			${SYSROOT}/usr/bin/i686-pc-linux-gnu-strip ${CMAKE_BINARY_DIR}/xbmc.bin
-	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/xbmc.bin ${TARGET_DIR}/xbmc.bin
-	DEPENDS 			xbmc ${libs} libstdc++ libz
-)
-
-add_custom_command(
-	OUTPUT boxeelibs
-	COMMAND 			${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/boxeelibs
-	COMMAND 			${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/boxeelibs wget ftp://${BOXEEBOX_IP}/lib/*
-)
-
-file(WRITE ${CMAKE_BINARY_DIR}/gdb.txt
-"
-set solib-search-path ${CMAKE_BINARY_DIR}/boxeelibs
-file ${SYSROOT}/usr/local/lib/xbmc/xbmc.bin
-target remote ${BOXEEBOX_IP}:12345
-"
+	DEPENDS 			xbmc ${CMAKE_SOURCE_DIR}/../../xbmc.bin
 )
 
 add_custom_target(
-	debug
-	COMMAND 			${SYSROOT}/usr/bin/i686-pc-linux-gnu-gdb -x ${CMAKE_BINARY_DIR}/gdb.txt
-	DEPENDS 			xbmc boxeelibs
-)
-
-add_custom_target(refresh
-	COMMAND 			cp -r ${CMAKE_SOURCE_DIR}/toolchain/* ${CMAKE_BINARY_DIR}/toolchain-prefix/src/toolchain/
-	COMMAND 			cp -r ${CMAKE_SOURCE_DIR}/libs/* ${CMAKE_BINARY_DIR}/libs-prefix/src/libs/
-	COMMAND 			cp -r ${CMAKE_SOURCE_DIR}/intel/* ${CMAKE_BINARY_DIR}/intel-prefix/src/intel/
-	COMMAND 			touch ${CMAKE_BINARY_DIR}/toolchain-prefix/src/toolchain-stamp/toolchain-download
-	COMMAND 			touch ${CMAKE_BINARY_DIR}/libs-prefix/src/libs-stamp/libs-download
-	COMMAND 			touch ${CMAKE_BINARY_DIR}/intel-prefix/src/intel-stamp/intel-download
-	DEPENDS 			xbmc-refresh
+	dist
+	DEPENDS shares ${libs} libstdc++ libz quickdist
 )

@@ -28,7 +28,9 @@ to be case sensitive.
 ```bash
 git clone https://github.com/quarnster/boxeebox-xbmc.git
 cd boxeebox-xbmc
-mdkir build
+./bootstrap
+cd tools/boxeebox
+mkdir build
 cd build
 cmake -DTARGET_DIR=<WHERE_YOU_WANT_TO_INSTALL_XBMC> ..
 make

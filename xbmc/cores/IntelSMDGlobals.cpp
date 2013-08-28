@@ -22,7 +22,8 @@
  */
 
 #include "xbmc/settings/Settings.h"
-#include "xbmc/settings/GUISettings.h" // for AUDIO_*
+#include "AudioEngine/AEAudioFormat.h"
+#include "AudioEngine/Utils/AEDeviceInfo.h"  // for AE_DEVTYPE_*
 #include "IntelSMDGlobals.h"
 #include <ismd_vidpproc.h>
 #include "utils/log.h"
@@ -302,12 +303,10 @@ bool CIntelSMDGlobals::InitAudio()
 
 bool  CIntelSMDGlobals::BuildAudioOutputs()
 {
-  ismd_result_t result;
+//  int audioOutputMode = g_guiSettings.GetInt("audiooutput.mode");
 
-  int audioOutputMode = g_guiSettings.GetInt("audiooutput.mode");
-
-  bool bIsHDMI = true; //TODO(q) (AUDIO_HDMI == audioOutputMode);
-  bool bIsSPDIF = true; //TODO(q) (AUDIO_IEC958 == audioOutputMode);
+  bool bIsHDMI = true; //TODO(q) (AE_DEVTYPE_HDMI == audioOutputMode);
+  bool bIsSPDIF = true; //TODO(q) (AE_DEVTYPE_IEC958 == audioOutputMode);
   bool bIsAnalog = true; //TODO(q) (AUDIO_ANALOG == audioOutputMode);
   // bool bIsAllOutputs = (audioOutputMode == AUDIO_ALL_OUTPUTS);
   // if (bIsAllOutputs)
@@ -319,19 +318,20 @@ bool  CIntelSMDGlobals::BuildAudioOutputs()
 
   if (bIsHDMI)
   {
-    m_audioOutputHDMI = AddAudioOutput(AUDIO_HDMI);
+    m_audioOutputHDMI = AddAudioOutput(AE_DEVTYPE_HDMI);
     EnableAudioOutput(m_audioOutputHDMI);
   }
   if (bIsSPDIF)
   {
-    m_audioOutputSPDIF = AddAudioOutput(AUDIO_IEC958);
+    m_audioOutputSPDIF = AddAudioOutput(AE_DEVTYPE_IEC958);
     EnableAudioOutput(m_audioOutputSPDIF);
   }
-  if (bIsAnalog)
-  {
-    m_audioOutputI2S0 = AddAudioOutput(AUDIO_ANALOG);
-    EnableAudioOutput(m_audioOutputI2S0);
-  }
+  // if (bIsAnalog)
+  // {
+  //   m_audioOutputI2S0 = AddAudioOutput(AUDIO_ANALOG);
+  //   EnableAudioOutput(m_audioOutputI2S0);
+  // }
+  return true;
 }
 
 ismd_audio_output_t CIntelSMDGlobals::AddAudioOutput(int output)
@@ -339,7 +339,7 @@ ismd_audio_output_t CIntelSMDGlobals::AddAudioOutput(int output)
   VERBOSE();
   ismd_result_t result;
   int hwId = 0;
-  CStdString name;
+  std::string name;
 
   ismd_audio_output_t audio_output = -1;
 
@@ -356,21 +356,21 @@ ismd_audio_output_t CIntelSMDGlobals::AddAudioOutput(int output)
 
   switch(output)
   {
-  case AUDIO_HDMI:
+  case AE_DEVTYPE_HDMI:
       dev = m_audioOutputHDMI;
       hwId = GEN3_HW_OUTPUT_HDMI;
       name = "HDMI";
       break;
-  case AUDIO_IEC958:
+  case AE_DEVTYPE_IEC958:
     dev = m_audioOutputSPDIF;
     hwId = GEN3_HW_OUTPUT_SPDIF;
     name = "SPDIF";
     break;
-  case AUDIO_ANALOG:
-    dev = m_audioOutputI2S0;
-    hwId = GEN3_HW_OUTPUT_I2S0;
-    name = "I2S0";
-    break;
+  // case AUDIO_ANALOG:
+  //   dev = m_audioOutputI2S0;
+  //   hwId = GEN3_HW_OUTPUT_I2S0;
+  //   name = "I2S0";
+  //   break;
   default:
     CLog::Log(LOGERROR, "CIntelSMDGlobals::AddAudioOutput - Unkown output");
     return -1;
@@ -384,14 +384,15 @@ ismd_audio_output_t CIntelSMDGlobals::AddAudioOutput(int output)
     return dev;
   }
 
-  if(g_guiSettings.GetBool("audiooutput.enable_audio_output_delay"))
-  {
-    result = ismd_audio_output_set_delay(m_audioProcessor, hwId, AUDIO_OUTPUT_DELAY);
-    if (result != ISMD_SUCCESS)
-      CLog::Log(LOGWARNING, "CIntelSMDGlobals::AddAudioOutput - ismd_audio_output_set_delay %s %d failed %d", name.c_str(), AUDIO_OUTPUT_DELAY, result);
+  // TODO(q)
+  // if(g_guiSettings.GetBool("audiooutput.enable_audio_output_delay"))
+  // {
+  //   result = ismd_audio_output_set_delay(m_audioProcessor, hwId, AUDIO_OUTPUT_DELAY);
+  //   if (result != ISMD_SUCCESS)
+  //     CLog::Log(LOGWARNING, "CIntelSMDGlobals::AddAudioOutput - ismd_audio_output_set_delay %s %d failed %d", name.c_str(), AUDIO_OUTPUT_DELAY, result);
 
-    CLog::Log(LOGINFO, "CIntelSMDGlobals::AddAudioOutput - Output Added %s", name.c_str());
-  }
+  //   CLog::Log(LOGINFO, "CIntelSMDGlobals::AddAudioOutput - Output Added %s", name.c_str());
+  // }
 
   CLog::Log(LOGINFO, "CIntelSMDGlobals::AddAudioOutput %s", name.c_str());
 
@@ -431,7 +432,7 @@ bool CIntelSMDGlobals::RemoveAudioOutput(ismd_audio_output_t output)
 {
   VERBOSE();
   ismd_result_t result;
-  CStdString name;
+  std::string name;
 
   if(output == m_audioOutputHDMI)
     name = "HDMI";
@@ -1779,7 +1780,7 @@ bool CIntelSMDGlobals::SetMasterVolume(float nVolume)
     return false;
   }
 
-  if (nVolume == VOLUME_MINIMUM)
+  if (nVolume == 0)
   {
     if (!muted)
       result = ismd_audio_mute(audioProcessor, true);

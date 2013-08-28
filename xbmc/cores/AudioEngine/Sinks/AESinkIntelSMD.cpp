@@ -23,8 +23,7 @@
 #include "AESinkIntelSMD.h"
 #include "utils/log.h"
 #include "../../IntelSMDGlobals.h"
-#include "settings/GUISettings.h"
-#include "settings/Settings.h"
+#include "Utils/AEDeviceInfo.h"
 extern "C"
 {
 #include <ismd_core.h>
@@ -163,7 +162,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
 //     unsigned int samplesPerSec = format.m_sampleRate;
 //     unsigned int bitsPerSec = uiBitsPerSample;
 
-//     ConfigureAudioOutputParams(spdif_output_config, AUDIO_IEC958, bitsPerSec,
+//     ConfigureAudioOutputParams(spdif_output_config, AE_DEVTYPE_IEC958, bitsPerSec,
 //         samplesPerSec, format.m_channelLayout.Count(), ismdAudioInputFormat, bSPDIFPassthrough);
 //     if(!g_IntelSMDGlobals.ConfigureAudioOutput(OutputSPDIF, spdif_output_config))
 //     {
@@ -178,7 +177,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   {
     ismd_audio_output_t OutputHDMI = g_IntelSMDGlobals.GetHDMIOutput();
     ismd_audio_output_config_t hdmi_output_config;
-    ConfigureAudioOutputParams(hdmi_output_config, AUDIO_HDMI, uiBitsPerSample,
+    ConfigureAudioOutputParams(hdmi_output_config, AE_DEVTYPE_HDMI, uiBitsPerSample,
       format.m_sampleRate, format.m_channelLayout.Count(), ismdAudioInputFormat, false);
     if(!g_IntelSMDGlobals.ConfigureAudioOutput(OutputHDMI, hdmi_output_config))
     {
@@ -230,7 +229,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   g_IntelSMDGlobals.SetBaseTime(0);
   g_IntelSMDGlobals.SetAudioDeviceState(ISMD_DEV_STATE_PLAY, m_audioDevice);
 
-  m_fCurrentVolume = g_settings.m_fVolumeLevel;
+//  m_fCurrentVolume = g_settings.m_fVolumeLevel;
   g_IntelSMDGlobals.SetMasterVolume(m_fCurrentVolume);
 
   m_bPause = false;
@@ -401,22 +400,22 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
     ismd_buffer_dereference(ismdBuffer);
     return 0;    
   }
-  short *sb = (short*) buffer_data;
-  static double pos = 0;
-  static double ppos = 0;
-  static double pitch = 2*3.1415927*440.0/48000.0;
-  static double ppitch = 2*3.1415927/48000.0;
-  for (int i = 0; i < buffer_size/4; i++)
-  {
-    double s = sin(pos);
-    double p = sin(ppos);
-    buf_ptr[i*2+0] = sb[i*2+0] + (short)(4000*p*s);
-    buf_ptr[i*2+1] = sb[i*2+1] + (short)(4000*(1-p)*s);
-    pos += pitch;
-    ppos += ppitch;
-  }
+  // short *sb = (short*) buffer_data;
+  // static double pos = 0;
+  // static double ppos = 0;
+  // static double pitch = 2*3.1415927*440.0/48000.0;
+  // static double ppitch = 2*3.1415927/48000.0;
+  // for (int i = 0; i < buffer_size/4; i++)
+  // {
+  //   double s = sin(pos);
+  //   double p = sin(ppos);
+  //   buf_ptr[i*2+0] = sb[i*2+0] + (short)(4000*p*s);
+  //   buf_ptr[i*2+1] = sb[i*2+1] + (short)(4000*(1-p)*s);
+  //   pos += pitch;
+  //   ppos += ppitch;
+  // }
 
-//  memcpy(buf_ptr, buffer_data, buffer_size);
+  memcpy(buf_ptr, buffer_data, buffer_size);
   OS_UNMAP_IO_FROM_MEM(buf_ptr, buffer_size);
 
   ismdBufferDesc.phys.level = buffer_size;
@@ -473,7 +472,7 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
 }
 
 
-unsigned int CAESinkIntelSMD::AddPackets(uint8_t* data, unsigned int len, bool hasAudio)
+unsigned int CAESinkIntelSMD::AddPackets(uint8_t* data, unsigned int len, bool hasAudio, bool blocking)
 {
   VERBOSE();
   // Len is in frames, we want it in bytes
@@ -663,10 +662,10 @@ void CAESinkIntelSMD::ConfigureAudioOutputParams(ismd_audio_output_config_t& out
     int sampleSize, int sampleRate, int channels, ismd_audio_format_t format, bool bPassthrough)
 {
   VERBOSE();
-  bool bLPCMMode = g_guiSettings.GetBool("audiooutput.lpcm71passthrough");
+  bool bLPCMMode = false; //TODO(q) g_guiSettings.GetBool("audiooutput.lpcm71passthrough");
 
   CLog::Log(LOGINFO, "CAESinkIntelSMD::ConfigureAudioOutputParams %s sample size %d sample rate %d channels %d format %d",
-      output == AUDIO_HDMI ? "HDMI" : "SPDIF", sampleSize, sampleRate, channels, format);
+      output == AE_DEVTYPE_HDMI ? "HDMI" : "SPDIF", sampleSize, sampleRate, channels, format);
 
   SetDefaultOutputConfig(output_config);
 
@@ -678,15 +677,11 @@ void CAESinkIntelSMD::ConfigureAudioOutputParams(ismd_audio_output_config_t& out
     output_config.out_mode = ISMD_AUDIO_OUTPUT_PASSTHROUGH;
   }
 
-  if(output == AUDIO_HDMI)
+  if(output == AE_DEVTYPE_HDMI)
   {
     // We need to match input to output freq on HDMI
     // We only do this if we have edid info
     // Last item - if we have audio data from EDID and are on HDMI, then validate the output
-    unsigned int suggSampleRate = sampleRate;
-    unsigned int suggSampleSize = sampleSize;
-    int suggChannels = channels;
-
     sampleRate = 48000;
     sampleSize = 16;
     if(bLPCMMode)
@@ -705,7 +700,7 @@ void CAESinkIntelSMD::ConfigureAudioOutputParams(ismd_audio_output_config_t& out
   } // HDMI
 
 
-  if(output == AUDIO_IEC958)
+  if(output == AE_DEVTYPE_IEC958)
   {
     if(sampleRate == 48000 || sampleRate == 96000 || sampleRate == 32000 || sampleRate == 44100 || sampleRate == 88200)
       output_config.sample_rate = sampleRate;
@@ -730,7 +725,7 @@ void CAESinkIntelSMD::SetDefaultOutputConfig(ismd_audio_output_config_t& output_
   output_config.stream_delay = 0;
 }
 
-bool CAESinkIntelSMD::IsCompatible(const AEAudioFormat format, const std::string device)
+bool CAESinkIntelSMD::IsCompatible(const AEAudioFormat &format, const std::string &device)
 {
   VERBOSE();
   // TODO(q)

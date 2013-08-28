@@ -26,7 +26,9 @@
 #pragma comment(lib, "turbojpeg-static.lib")
 #endif
 
+extern "C" {
 #include <jpeglib.h>
+} 
 #include "utils/StdString.h"
 #include "iimage.h"
 
