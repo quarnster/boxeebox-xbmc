@@ -73,7 +73,7 @@ execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh)
 
 add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/../../Makefile
 	COMMAND PATH=$ENV{PATH}:${SYSROOT}/usr/bin ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh
-	DEPENDS libs
+	DEPENDS libs ${CMAKE_SOURCE_DIR}/../../configure
 )
 
 add_custom_target(
