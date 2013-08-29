@@ -324,6 +324,25 @@ ExternalProject_Add(
 	DEPENDS libgcrypt openssl
 )
 
+file(WRITE ${CMAKE_BINARY_DIR}/python_configure_helper.sh
+"
+export CC=${TARGET}-gcc
+export CXX=${TARGET}-g++
+export CPPFLAGS=\"-I${TARGET_DIR}/include -I${SYSROOT}/usr/include\"
+export CFLAGS=-I${TARGET_DIR}/include
+export LDFLAGS=\"-L${TARGET_DIR}/lib -L${SYSROOT}/usr/lib\"
+export MACHDEP=Linux
+export ac_sys_system=Linux
+export ac_cv_prog_AR=${TARGET}-ar
+export ac_cv_file__dev_ptmx=no
+export ac_cv_file__dev_ptc=no
+export enable_toolbox_glue=no
+./configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-ipv6  --build=${HOSTMACHINE} --target=${TARGET} --with-system-expat
+")
+
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/python_configure_helper.sh)
+
+# Note to self: diff -x generated -r -u Python-2.7.2 python | grep -v '^Only in' > /Volumes/Skivavbild/boxee-xbmc/tools/boxeebox/libs/Python-2.7.2-xcompile.patch
 ExternalProject_Add(
 	python
 	URL 				http://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.bz2
@@ -337,7 +356,7 @@ ExternalProject_Add(
 		COMMAND sed -e "13735,13738d" -i configure
 		COMMAND sed -e "185d" -i Makefile.pre.in
 		COMMAND sed -e "954,959d" -i Makefile.pre.in
-	CONFIGURE_COMMAND   CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib MACHDEP=Linux ac_sys_system=Linux ac_cv_prog_AR=${TARGET}-ar ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no enable_toolbox_glue=no ${BASIC_CONF} --disable-ipv6  --build=${HOSTMACHINE} 
+	CONFIGURE_COMMAND   ${CMAKE_BINARY_DIR}/python_configure_helper.sh
 		COMMAND rm -f Include/graminit.h
 		COMMAND rm -f Python/graminit.c
 		COMMAND Parser/hostpgen <SOURCE_DIR>/Grammar/Grammar Include/graminit.h Python/graminit.c

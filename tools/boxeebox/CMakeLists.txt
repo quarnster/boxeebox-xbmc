@@ -179,3 +179,17 @@ add_custom_target(
 	dist
 	DEPENDS shares ${libs} libstdc++ libz pythonlibs quickdist
 )
+
+add_custom_target(
+	libs-refresh
+	COMMAND       cp -r ${CMAKE_SOURCE_DIR}/libs/* ${CMAKE_BINARY_DIR}/libs-prefix/src/libs/
+	COMMAND       touch ${CMAKE_BINARY_DIR}/libs-prefix/src/libs-stamp/libs-download
+)
+
+add_custom_target(refresh
+	COMMAND       cp -r ${CMAKE_SOURCE_DIR}/toolchain/* ${CMAKE_BINARY_DIR}/toolchain-prefix/src/toolchain/
+	COMMAND       cp -r ${CMAKE_SOURCE_DIR}/intel/* ${CMAKE_BINARY_DIR}/intel-prefix/src/intel/
+	COMMAND       touch ${CMAKE_BINARY_DIR}/toolchain-prefix/src/toolchain-stamp/toolchain-download
+	COMMAND       touch ${CMAKE_BINARY_DIR}/intel-prefix/src/intel-stamp/intel-download
+	DEPENDS libs-refresh
+)
