@@ -44,7 +44,30 @@ void CEGLNativeTypeBoxee::Initialize()
 {
   gdl_init();
   int enable = 1;
+
+  gdl_rectangle_t srcRect, dstRect;
+  gdl_display_info_t   display_info;
+  gdl_get_display_info(GDL_DISPLAY_ID_0, &display_info);
+
+  dstRect.origin.x = 0;
+  dstRect.origin.y = 0;
+  dstRect.width = display_info.tvmode.width;
+  dstRect.height = display_info.tvmode.height;
+
+  srcRect.origin.x = 0;
+  srcRect.origin.y = 0;
+  srcRect.width = display_info.tvmode.width;
+  srcRect.height = display_info.tvmode.height;
+
+
   gdl_port_set_attr(GDL_PD_ID_HDMI, GDL_PD_ATTR_ID_POWER, &enable);
+  gdl_plane_reset(GDL_GRAPHICS_PLANE);
+  gdl_plane_config_begin(GDL_GRAPHICS_PLANE);
+  gdl_plane_set_uint(GDL_PLANE_SRC_COLOR_SPACE, GDL_COLOR_SPACE_RGB);
+  gdl_plane_set_uint(GDL_PLANE_PIXEL_FORMAT, GDL_PF_ARGB_32);
+  gdl_plane_set_rect(GDL_PLANE_DST_RECT, &dstRect);
+  gdl_plane_set_rect(GDL_PLANE_SRC_RECT, &srcRect);
+  gdl_plane_config_end(GDL_FALSE);
   return;
 }
 void CEGLNativeTypeBoxee::Destroy()
@@ -99,11 +122,21 @@ bool CEGLNativeTypeBoxee::DestroyNativeWindow()
 bool CEGLNativeTypeBoxee::GetNativeResolution(RESOLUTION_INFO *res) const
 {
 #if defined(TARGET_BOXEE)
-  res->iWidth = 1280;
-  res->iHeight= 720;
+  gdl_display_info_t   display_info;
+  gdl_get_display_info(GDL_DISPLAY_ID_0, &display_info);
 
-  res->fRefreshRate = 60;
-  res->dwFlags= D3DPRESENTFLAG_PROGRESSIVE;
+  res->iWidth = display_info.tvmode.width;
+  res->iHeight= display_info.tvmode.height;
+
+  res->fRefreshRate = display_info.tvmode.refresh;
+  if (display_info.tvmode.interlaced)
+  {
+    res->dwFlags = D3DPRESENTFLAG_INTERLACED;
+  }
+  else
+  { 
+    res->dwFlags = D3DPRESENTFLAG_PROGRESSIVE;
+  }
   res->iScreen       = 0;
   res->bFullScreen   = true;
   res->iSubtitles    = (int)(0.965 * res->iHeight);
