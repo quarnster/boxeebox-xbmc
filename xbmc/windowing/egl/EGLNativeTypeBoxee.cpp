@@ -128,7 +128,21 @@ bool CEGLNativeTypeBoxee::GetNativeResolution(RESOLUTION_INFO *res) const
   res->iWidth = display_info.tvmode.width;
   res->iHeight= display_info.tvmode.height;
 
-  res->fRefreshRate = display_info.tvmode.refresh;
+  switch (display_info.tvmode.refresh)
+  {
+    case GDL_REFRESH_23_98: res->fRefreshRate = 23.98; break;
+    case GDL_REFRESH_24:    res->fRefreshRate = 24;    break;
+    case GDL_REFRESH_25:    res->fRefreshRate = 25;    break;
+    case GDL_REFRESH_29_97: res->fRefreshRate = 29.97; break;
+    case GDL_REFRESH_30:    res->fRefreshRate = 30;    break;
+    case GDL_REFRESH_50:    res->fRefreshRate = 50;    break;
+    case GDL_REFRESH_59_94: res->fRefreshRate = 59.94; break;
+    case GDL_REFRESH_60:    res->fRefreshRate = 60;    break;
+    case GDL_REFRESH_48:    res->fRefreshRate = 48;    break;
+    case GDL_REFRESH_47_96: res->fRefreshRate = 47.96; break;
+    default:                res->fRefreshRate = 0;     break;
+  }
+
   if (display_info.tvmode.interlaced)
   {
     res->dwFlags = D3DPRESENTFLAG_INTERLACED;
