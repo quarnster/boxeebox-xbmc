@@ -951,43 +951,22 @@ int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, d
     CLog::Log(LOGERROR, "CIntelSMDVideo::WriteToInputPort input port is -1\n");
     return 0;
   }
-  if (pts < 0) {
-    pts = 0;
-  }
   ismd_pts_t newPts = g_IntelSMDGlobals.DvdToIsmdPts(pts);
 
   if(m_bFlushFlag)
   {
-    printf("Flush %f\n", newPts/90000.0);
-
-    if (g_IntelSMDGlobals.GetCurrentTime() < newPts)
-    {
-      // Just initialize the time to a value that allows adjustments in both positive
-      // and negative directions.
-      g_IntelSMDGlobals.SetCurrentTime(newPts+60*90000);
-    }
-
     g_IntelSMDGlobals.FlushVideoDecoder();
     g_IntelSMDGlobals.FlushVideoRender();
     g_IntelSMDGlobals.SendStartPacket(newPts, inputPort);
-    g_IntelSMDGlobals.SetVideoRenderBaseTime(g_IntelSMDGlobals.GetCurrentTime()+90000-newPts);
+    // Just adding a second to allow for an initial buffering.
+    // Bufmon will later adjust this as appropriate to avoid buffer underruns.
+    g_IntelSMDGlobals.SetVideoRenderBaseTime(g_IntelSMDGlobals.GetCurrentTime()+90000);
     g_IntelSMDGlobals.SetVideoDecoderState(ISMD_DEV_STATE_PLAY);
     g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PLAY);
 
     m_bRunning = true;
     m_bFlushFlag = false;
   }
-  ismd_time_t basetime;
-  ismd_vidrend_get_base_time(g_IntelSMDGlobals.GetVidRender(), &basetime);
-  static int counter = 0;
-
-  if (++counter % 30 == 0) {
-    ismd_time_t current = g_IntelSMDGlobals.GetCurrentTime();
-    double diff = (double)(newPts) - (double)(current-basetime);
-    printf("current time: %f, basetime: %f, current videorenderer time: %f, timestamp: %f (should be: videorenderer time + ~1 second), actual diff: %f\n", current/90000.0, (basetime)/90000.0, (current-basetime)/90000.0, newPts/90000.0, diff/90000.0);
-  }
-
-  //printf("VPTS = %.2f\n", g_IntelSMDGlobals.IsmdToDvdPts(newPts) / 1000000);
 
   while (amount_of_data > 0 && m_bRunning)
   {
@@ -1029,7 +1008,7 @@ int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, d
 
     //the input port should be full frequently when doing file, or any other push mode
     int counter = 0;
-    while (m_bRunning && counter < 5)
+    while (m_bRunning && counter < 10)
     {
       ismd_ret = ismd_port_write(inputPort, buffer_handle);
       if(ismd_ret != ISMD_SUCCESS)

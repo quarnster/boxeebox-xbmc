@@ -157,20 +157,8 @@ int CDVDVideoCodecSMD::Decode(BYTE *pData, int iSize, double dts, double pts)
   if(!ret)
     return VC_ERROR;
 
-  // We don't want to drain the demuxer too fast.
-  // quarnster: This is likely to force a more realtime
-  //            feel for pause/resume as the queue will
-  //            never be too long.
-  //            It could potentially cause unwanted
-  //            buffer underruns, no? TODO(q)
-  unsigned int curDepth = 0, maxDepth = 0;
-  m_Device->GetInputPortStatus(curDepth, maxDepth);
-
-  int sleepLen = (int)(((float)curDepth / maxDepth) * 10000);
-
   if(ret)
   {
-    usleep(sleepLen);
     ret = VC_PICTURE | VC_BUFFER;
   }
   else
