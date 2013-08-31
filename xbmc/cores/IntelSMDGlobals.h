@@ -90,8 +90,6 @@ public:
   bool  EnableAudioInput(ismd_dev_t input);
   bool  DisableAudioInput(ismd_dev_t input);
 
-  bool SetAudioDeviceBaseTime(ismd_time_t time, ismd_dev_t device);
-
   ismd_dev_t          CreateAudioInput(bool timed);
   bool                RemoveAudioInput(ismd_dev_t device);
 
@@ -102,32 +100,12 @@ public:
 
   ismd_time_t         GetCurrentTime();
   bool                SetCurrentTime(ismd_time_t time);
-  ismd_time_t         GetPauseCurrentTime() { return m_pause_cur_time; }
-  void                SetBaseTime(ismd_time_t time);
-  ismd_time_t         GetBaseTime() { CSingleLock lock(m_Lock); return m_base_time; }
 
   ismd_result_t    GetPortStatus(ismd_port_handle_t port, unsigned int& curDepth, unsigned int& maxDepth);
   ismd_dev_state_t GetRenderState() { return m_RenderState; }
-  bool SetStartPts(ismd_pts_t pts);
-  bool SetAudioStartPts(ismd_pts_t pts);
-  bool SetVideoStartPts(ismd_pts_t pts);
-  ismd_pts_t GetAudioStartPts() { return m_audio_start_pts; }
-  ismd_pts_t GetVideoStartPts() { return m_video_start_pts; }
-  ismd_pts_t GetAudioCurrentTime();
-  ismd_pts_t GetAudioPauseCurrentTime();
-  ismd_pts_t GetVideoCurrentTime();
-  ismd_pts_t GetVideoPauseCurrentTime();
-  ismd_pts_t Resync(bool bDisablePtsCorrection = false);
-
-  void SetFlushFlag(bool flag) { CSingleLock lock(m_Lock); m_bFlushFlag = flag; }
-  bool GetFlushFlag() { CSingleLock lock(m_Lock); return m_bFlushFlag; }
 
   bool CreateMainClock();
   void DestroyMainClock();
-
-  void PauseClock();
-  void ResumeClock();
-  void ResetClock();
 
   void CreateStartPacket(ismd_pts_t start_pts, ismd_buffer_handle_t buffer_handle);
   void SendStartPacket(ismd_pts_t start_pts, ismd_port_handle_t port, ismd_buffer_handle_t buffer = 0);
@@ -139,8 +117,6 @@ public:
   bool CreateVideoDecoder(ismd_codec_type_t codec_type);
   bool DeleteVideoDecoder();
   bool ConnectDecoderToRenderer();
-
-  bool MuteVideoRender(bool mute);
 
   bool SetAudioDeviceState(ismd_dev_state_t state, ismd_dev_t device);
   bool SetVideoDecoderState(ismd_dev_state_t state);
@@ -154,10 +130,6 @@ public:
   bool FlushAudioDevice(ismd_dev_t device);
   bool FlushVideoDecoder();
   bool FlushVideoRender();
-
-  float GetRenderFPS();
-  double GetFrameDuration();
-  float GetDecoderFPS();
 
   bool PrintVideoStreamStats();
   bool PrintVideoStreaProp();
@@ -178,11 +150,9 @@ protected:
 
   // clock
   ismd_clock_t            m_main_clock;
-  ismd_time_t             m_base_time;
-  ismd_time_t             m_pause_base_time;
-  ismd_time_t             m_pause_cur_time;
 
   // Video
+  ismd_dev_t              m_bufmon;
   ismd_dev_t              m_viddec;
   ismd_dev_t              m_video_proc;
   ismd_dev_t              m_video_render;
@@ -196,9 +166,6 @@ protected:
 
   ismd_dev_state_t        m_RenderState;
 
-  ismd_pts_t              m_audio_start_pts;
-  ismd_pts_t              m_video_start_pts;
-
   ismd_audio_processor_t  m_audioProcessor;
 
   ismd_dev_t              m_primaryAudioInput; // for AV main playback
@@ -207,8 +174,6 @@ protected:
   ismd_audio_output_t     m_audioOutputHDMI;
   ismd_audio_output_t     m_audioOutputSPDIF;
   ismd_audio_output_t     m_audioOutputI2S0;
-
-  bool                    m_bFlushFlag;
 
   CCriticalSection        m_Lock;
 };

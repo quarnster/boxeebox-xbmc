@@ -43,7 +43,6 @@
 CDVDVideoCodecSMD::CDVDVideoCodecSMD() :
 m_Device(NULL),
 m_DecodeStarted(false),
-m_Duration(0.0),
 m_pFormatName("SMD: codec not configured")
 {
 }
@@ -119,9 +118,6 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
     return false;
   }
 
-
-  // default duration to 23.976 fps, have to guess something.
-  m_Duration = (DVD_TIME_BASE / (24.0 * 1000.0/1001.0));
   m_DecodeStarted = false;
 
   CLog::Log(LOGINFO, "Opened Intel SMD Codec, %s", m_pFormatName);
@@ -161,15 +157,20 @@ int CDVDVideoCodecSMD::Decode(BYTE *pData, int iSize, double pts, double dts)
   if(!ret)
     return VC_ERROR;
 
-  // We don't want to drain the demuxer too fast
+  // We don't want to drain the demuxer too fast.
+  // quarnster: This is likely to force a more realtime
+  //            feel for pause/resume as the queue will
+  //            never be too long.
+  //            It could potentially cause unwanted
+  //            buffer underruns, no? TODO(q)
   unsigned int curDepth = 0, maxDepth = 0;
   m_Device->GetInputPortStatus(curDepth, maxDepth);
 
-  int sleepLen = (int)(((float)curDepth / maxDepth) * 100);
+  int sleepLen = (int)(((float)curDepth / maxDepth) * 10000);
 
   if(ret)
   {
-    Sleep(sleepLen);
+    usleep(sleepLen);
     ret = VC_PICTURE | VC_BUFFER;
   }
   else
@@ -195,9 +196,6 @@ bool CDVDVideoCodecSMD::GetPicture(DVDVideoPicture* pDvdVideoPicture)
   bool  ret;
 
   ret = m_Device->GetPicture(pDvdVideoPicture);
-  m_Duration = 0.0;//pDvdVideoPicture->iDuration;
-  pDvdVideoPicture->iDuration = 0;
-
   return ret;
 }
 

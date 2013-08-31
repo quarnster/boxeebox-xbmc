@@ -165,7 +165,6 @@ void CIntelSMDRenderer::UnInit()
   {
     ReleaseYUVBuffers();
     g_IntelSMDGlobals.DeleteVideoRender();
-    g_IntelSMDGlobals.ResetClock();
   }
 
   // clear video plane to remove any video leftovers
@@ -296,6 +295,11 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
 }
 
 bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
+  static int count = 0;
+  if (++count % 100 == 0) {
+//     g_IntelSMDGlobals.PrintVideoStreamStats();
+     g_IntelSMDGlobals.PrintRenderStats();
+  }
   return m_bUsingSMDecoder;
 }
 
@@ -462,39 +466,40 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
   {
     ismd_pts_t start = ismd_pts;
 
-    if(start == ISMD_NO_PTS && g_IntelSMDGlobals.GetAudioStartPts() != ISMD_NO_PTS)
-      start = g_IntelSMDGlobals.GetAudioStartPts();
+    // TODO(q)
+    // if(start == ISMD_NO_PTS && g_IntelSMDGlobals.GetAudioStartPts() != ISMD_NO_PTS)
+    //   start = g_IntelSMDGlobals.GetAudioStartPts();
 
-    if (!m_bUsingSMDecoder)
-    {
-      g_IntelSMDGlobals.FlushVideoRender();
+    // if (!m_bUsingSMDecoder)
+    // {
+    //   g_IntelSMDGlobals.FlushVideoRender();
 
-      if (g_IntelSMDGlobals.GetFlushFlag())
-      {
-        //printf("Setting base time from renderer\n");
-        g_IntelSMDGlobals.SetBaseTime(g_IntelSMDGlobals.GetCurrentTime());
-        g_IntelSMDGlobals.SetFlushFlag(false);
-      }
-    }
+    //   if (g_IntelSMDGlobals.GetFlushFlag())
+    //   {
+    //     //printf("Setting base time from renderer\n");
+    //     g_IntelSMDGlobals.SetBaseTime(g_IntelSMDGlobals.GetCurrentTime());
+    //     g_IntelSMDGlobals.SetFlushFlag(false);
+    //   }
+    // }
 
     // Add a new_segment buffer to the next video buffer
-    g_IntelSMDGlobals.SetVideoStartPts(start);
-    g_IntelSMDGlobals.SetVideoRenderBaseTime(g_IntelSMDGlobals.GetBaseTime());
-    g_IntelSMDGlobals.CreateStartPacket(start, renderBuf);
-    g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PLAY);
+    // g_IntelSMDGlobals.SetVideoStartPts(start);
+    // g_IntelSMDGlobals.SetVideoRenderBaseTime(g_IntelSMDGlobals.GetBaseTime());
+    // g_IntelSMDGlobals.CreateStartPacket(start, renderBuf);
+    // g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PLAY);
     m_bFlushFlag = false;
     m_bRunning = true;
   }
 
-  ismd_pts_t syncPTS = g_IntelSMDGlobals.Resync();
-  if(syncPTS != ISMD_NO_PTS)
-  {
-    if(syncPTS != g_IntelSMDGlobals.GetVideoStartPts())
-    {
-      g_IntelSMDGlobals.SetVideoStartPts(syncPTS);
-      g_IntelSMDGlobals.CreateStartPacket(syncPTS, renderBuf);
-    }
-  }
+  // ismd_pts_t syncPTS = g_IntelSMDGlobals.Resync();
+  // if(syncPTS != ISMD_NO_PTS)
+  // {
+  //   if(syncPTS != g_IntelSMDGlobals.GetVideoStartPts())
+  //   {
+  //     g_IntelSMDGlobals.SetVideoStartPts(syncPTS);
+  //     g_IntelSMDGlobals.CreateStartPacket(syncPTS, renderBuf);
+  //   }
+  // }
 
   result = ISMD_ERROR_UNSPECIFIED;
 
@@ -510,7 +515,7 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
     if(g_IntelSMDGlobals.GetVideoRenderState() != ISMD_DEV_STATE_STOP)
     {
       retry++;
-      Sleep(100);
+      usleep(5000);
     } else
       break;
   }

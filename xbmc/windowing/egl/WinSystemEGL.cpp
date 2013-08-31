@@ -417,7 +417,7 @@ void CWinSystemEGL::ShowOSMouse(bool show)
 
 bool CWinSystemEGL::HasCursor()
 {
-#ifdef TARGET_ANDROID
+#if defined(TARGET_ANDROID) || defined(TARGET_BOXEE)
   return false;
 #else
   return true;

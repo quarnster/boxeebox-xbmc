@@ -935,7 +935,6 @@ int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, d
   ismd_es_buf_attr_t *buf_attrs;
   ismd_result_t ismd_ret;
   uint8_t *ptr;
-  ismd_pts_t newPts;
   ismd_buffer_descriptor_t buffer_desc;
 
   //recommend using 32 kB buffers as these are already allocated in the memory map,
@@ -952,57 +951,40 @@ int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, d
     CLog::Log(LOGERROR, "CIntelSMDVideo::WriteToInputPort input port is -1\n");
     return 0;
   }
-
-  if(pts < 0)
+  if (pts < 0) {
     pts = 0;
-
-  newPts = g_IntelSMDGlobals.DvdToIsmdPts(pts);
-
-  // try to render late packets immediately
-  if (newPts != ISMD_NO_PTS && !m_bFlushFlag && !m_bDisablePtsCorrection)
-  {
-    ismd_pts_t current = g_IntelSMDGlobals.GetVideoCurrentTime();
-    if (newPts < current && current != ISMD_NO_PTS)
-      newPts = current;
   }
+  ismd_pts_t newPts = g_IntelSMDGlobals.DvdToIsmdPts(pts);
 
   if(m_bFlushFlag)
   {
-    ismd_pts_t start = newPts;
+    printf("Flush %f\n", newPts/90000.0);
 
-    if(start == ISMD_NO_PTS && g_IntelSMDGlobals.GetAudioStartPts() != ISMD_NO_PTS)
-      start = g_IntelSMDGlobals.GetAudioStartPts();
-
-    if (g_IntelSMDGlobals.GetFlushFlag())
+    if (g_IntelSMDGlobals.GetCurrentTime() < newPts)
     {
-      CLog::Log(LOGDEBUG, "Setting base time from video\n");
-      g_IntelSMDGlobals.SetBaseTime(g_IntelSMDGlobals.GetCurrentTime());
-      g_IntelSMDGlobals.SetFlushFlag(false);
+      // Just initialize the time to a value that allows adjustments in both positive
+      // and negative directions.
+      g_IntelSMDGlobals.SetCurrentTime(newPts+60*90000);
     }
 
     g_IntelSMDGlobals.FlushVideoDecoder();
     g_IntelSMDGlobals.FlushVideoRender();
-
-    g_IntelSMDGlobals.SetVideoStartPts(start);
-    g_IntelSMDGlobals.SendStartPacket(start, inputPort);
-    g_IntelSMDGlobals.SetVideoRenderBaseTime(g_IntelSMDGlobals.GetBaseTime());
+    g_IntelSMDGlobals.SendStartPacket(newPts, inputPort);
+    g_IntelSMDGlobals.SetVideoRenderBaseTime(g_IntelSMDGlobals.GetCurrentTime()+90000-newPts);
     g_IntelSMDGlobals.SetVideoDecoderState(ISMD_DEV_STATE_PLAY);
     g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PLAY);
 
     m_bRunning = true;
     m_bFlushFlag = false;
   }
+  ismd_time_t basetime;
+  ismd_vidrend_get_base_time(g_IntelSMDGlobals.GetVidRender(), &basetime);
+  static int counter = 0;
 
-
-  // we now resync the video to audio (if required)
-  ismd_pts_t syncPTS = g_IntelSMDGlobals.Resync(m_bDisablePtsCorrection);
-  if(syncPTS != ISMD_NO_PTS)
-  {
-    if(syncPTS != g_IntelSMDGlobals.GetVideoStartPts())
-    {
-      g_IntelSMDGlobals.SetVideoStartPts(syncPTS);
-      g_IntelSMDGlobals.SendStartPacket(syncPTS, inputPort);
-    }
+  if (++counter % 30 == 0) {
+    ismd_time_t current = g_IntelSMDGlobals.GetCurrentTime();
+    double diff = (double)(newPts) - (double)(current-basetime);
+    printf("current time: %f, basetime: %f, current videorenderer time: %f, timestamp: %f (should be: videorenderer time + ~1 second), actual diff: %f\n", current/90000.0, (basetime)/90000.0, (current-basetime)/90000.0, newPts/90000.0, diff/90000.0);
   }
 
   //printf("VPTS = %.2f\n", g_IntelSMDGlobals.IsmdToDvdPts(newPts) / 1000000);
@@ -1014,14 +996,14 @@ int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, d
     ismd_ret = ismd_buffer_alloc(bufSize, &buffer_handle);
     if (ismd_ret != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "CIntelSMDVideo::WriteToInputPort ismd_buffer_alloc failed <%d>\n", ismd_ret);
+      printf("CIntelSMDVideo::WriteToInputPort ismd_buffer_alloc failed <%d>\n", ismd_ret);
       return 0;
     }
 
     ismd_ret = ismd_buffer_read_desc(buffer_handle, &buffer_desc);
     if (ismd_ret != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "CIntelSMDVideo::WriteToInputPort ismd_buffer_read_desc failed <%d>\n", ismd_ret);
+      printf("CIntelSMDVideo::WriteToInputPort ismd_buffer_read_desc failed <%d>\n", ismd_ret);
       return 0;
     }
 
@@ -1034,7 +1016,7 @@ int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, d
 
     buf_attrs->original_pts = newPts;
     buf_attrs->local_pts = newPts;
-    buf_attrs->discontinuity = false;
+    buf_attrs->discontinuity = m_bDiscontinuity;
 
     m_bDiscontinuity = false;
 
@@ -1053,7 +1035,7 @@ int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, d
       if(ismd_ret != ISMD_SUCCESS)
       {
         counter++;
-        Sleep(20);
+        usleep(5000);
       }
       else
         break;
@@ -1071,45 +1053,15 @@ int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, d
 
     if(ismd_ret != ISMD_SUCCESS)
     {
-      CLog::Log(LOGWARNING, "CIntelSMDVideo::WriteToInputPort failed. %d\n", ismd_ret);
+      printf("CIntelSMDVideo::WriteToInputPort failed. %d\n", ismd_ret);
+      m_bFlushFlag = true;
+
       ismd_buffer_dereference(buffer_handle);
     }
   }
 
   return 1;
 }
-
-int CIntelSMDVideo::WriteToRenderer()
-{
-  VERBOSE();
-  ismd_result_t result;
-  ismd_buffer_handle_t buffer_out_handle = ISMD_BUFFER_HANDLE_INVALID;
-  ismd_port_handle_t outputPort = g_IntelSMDGlobals.GetVidDecOutput();
-  ismd_port_handle_t inputPort = g_IntelSMDGlobals.GetVidProcInput();
-
-  for(int i=0;i<2;i++)
-  {
-    result = ismd_port_read(outputPort, &buffer_out_handle);
-    if(result == ISMD_SUCCESS)
-      break;
-  }
-  if(result != ISMD_SUCCESS)
-    return 0;
-
-  while(true)
-  {
-    result = ismd_port_write(inputPort, buffer_out_handle);
-    if(result != ISMD_SUCCESS)
-    {
-      Sleep(20);
-    }
-    else
-      break;
-  }
-
-  return 0;
-}
-
 
 bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_type, int extradata_size, void *extradata)
 {
@@ -1191,7 +1143,6 @@ void CIntelSMDVideo::CloseDecoder(void)
 
   g_IntelSMDGlobals.DeleteVideoDecoder();
   g_IntelSMDGlobals.DeleteVideoRender();
-  g_IntelSMDGlobals.ResetClock();
 
   if (m_vc1_converter.AP_Buffer)
     delete m_vc1_converter.AP_Buffer;

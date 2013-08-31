@@ -138,7 +138,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
     {
       CLog::Log(LOGERROR, "ismd_audio_input_set_data_format failed. retrying %d %d", counter, result);
       counter++;
-      Sleep(100);
+      usleep(1000);
     }
     else
       break;
@@ -226,7 +226,6 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
 // //      return false;
 //   }
 
-  g_IntelSMDGlobals.SetBaseTime(0);
   g_IntelSMDGlobals.SetAudioDeviceState(ISMD_DEV_STATE_PLAY, m_audioDevice);
 
 //  m_fCurrentVolume = g_settings.m_fVolumeLevel;
@@ -273,7 +272,6 @@ void CAESinkIntelSMD::Deinitialize()
 
 double CAESinkIntelSMD::GetCacheTotal()
 {
-  return 0;/*
   unsigned int curDepth = 0;
   unsigned int maxDepth = 0;
 
@@ -299,7 +297,6 @@ double CAESinkIntelSMD::GetCacheTotal()
   }
 
   return ((double) (maxDepth * m_dwBufferLen)/(2*2*48000.0));
-*/
 }
 double CAESinkIntelSMD::GetDelay()
 {
@@ -368,7 +365,7 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
       if(g_IntelSMDGlobals.GetAudioDeviceState(m_audioDevice) != ISMD_DEV_STATE_STOP)
       {
         counter++;
-        Sleep(100);
+        usleep(5000);
       }
       else
       {
@@ -443,7 +440,7 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
       if(g_IntelSMDGlobals.GetAudioDeviceState(m_audioDevice) != ISMD_DEV_STATE_STOP)
       {
         counter++;
-        Sleep(100);
+        usleep(5000);
       }
       else
       {

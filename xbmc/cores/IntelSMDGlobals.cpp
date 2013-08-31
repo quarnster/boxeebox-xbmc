@@ -26,6 +26,7 @@
 #include "AudioEngine/Utils/AEDeviceInfo.h"  // for AE_DEVTYPE_*
 #include "IntelSMDGlobals.h"
 #include <ismd_vidpproc.h>
+#include <ismd_bufmon.h>
 #include "utils/log.h"
 #include "../threads/SingleLock.h"
 
@@ -73,14 +74,9 @@ CIntelSMDGlobals::CIntelSMDGlobals()
   m_video_output_port_renderer = -1;
   m_video_output_port_proc = -1;
   m_video_codec = ISMD_CODEC_TYPE_INVALID;
+  m_bufmon = -1;
 
-  m_base_time = 0;
-  m_pause_base_time = 0;
   m_RenderState = ISMD_DEV_STATE_INVALID;
-  m_audio_start_pts = ISMD_NO_PTS;
-  m_video_start_pts = ISMD_NO_PTS;
-
-  m_bFlushFlag = false;
 
   m_audioOutputHDMI = -1;
   m_audioOutputSPDIF = -1;
@@ -88,7 +84,6 @@ CIntelSMDGlobals::CIntelSMDGlobals()
 
   m_primaryAudioInput = -1;
 
-  ResetClock();
   CreateMainClock();
   InitAudio();
 }
@@ -192,13 +187,6 @@ ismd_time_t CIntelSMDGlobals::GetCurrentTime()
   return current;
 }
 
-void CIntelSMDGlobals::SetBaseTime(ismd_time_t time)
-{
-  CLog::Log(LOGINFO, "Setting base time %d ms", DVD_TIME_TO_MSEC(IsmdToDvdPts(time)));
-  // TODO(q): why + 45000??
-  m_base_time = time + 45000; 
-}
-
 bool CIntelSMDGlobals::SetCurrentTime(ismd_time_t time)
 {
   VERBOSE();
@@ -222,49 +210,6 @@ bool CIntelSMDGlobals::SetCurrentTime(ismd_time_t time)
   }
 
   return true;
-}
-
-void CIntelSMDGlobals::PauseClock()
-{
-  VERBOSE();
-  CSingleLock lock(m_Lock);
-
-  m_pause_base_time = GetBaseTime();
-  m_pause_cur_time = GetCurrentTime();
-}
-
-void CIntelSMDGlobals::ResumeClock()
-{
-  VERBOSE();
-  CSingleLock lock(m_Lock);
-
-  if (m_pause_base_time == 0)
-  {
-    if (m_base_time != 0)
-      m_pause_base_time = GetBaseTime();
-    else
-      m_pause_base_time = GetCurrentTime();
-  }
-  if (m_pause_cur_time == 0)
-    m_pause_cur_time = GetCurrentTime();
-
-  ismd_time_t offset = GetCurrentTime() - m_pause_cur_time;
-  m_base_time = m_pause_base_time + offset;
-
-  m_pause_base_time = 0;
-  m_pause_cur_time = 0;
-}
-
-void CIntelSMDGlobals::ResetClock()
-{
-  VERBOSE();
-
-  m_base_time = 0;
-  m_pause_base_time = 0;
-  m_pause_cur_time = 0;
-  m_audio_start_pts = ISMD_NO_PTS;
-  m_video_start_pts = ISMD_NO_PTS;
-  m_bFlushFlag = false;
 }
 
 ismd_pts_t CIntelSMDGlobals::DvdToIsmdPts(double pts)
@@ -532,133 +477,6 @@ bool CIntelSMDGlobals::RemoveAudioInput(ismd_dev_t device)
   return true;
 }
 
-bool CIntelSMDGlobals::SetAudioStartPts(ismd_pts_t pts)
-{
-  VERBOSE();
-  CSingleLock lock(m_Lock);
-
-  if (pts == ISMD_NO_PTS)
-  {
-    CLog::Log(LOGWARNING, "CIntelSMDGlobals::SetAudioStartPts got ISMD_NO_PTS");
-    return false;
-  }
-
-  if (pts < 0 && pts != ISMD_NO_PTS)
-    pts = 0;
-
-  CLog::Log(LOGINFO, "CIntelSMDGlobals::SetAudioStartPts %d ms ", DVD_TIME_TO_MSEC(IsmdToDvdPts(pts)));
-
-  m_audio_start_pts = pts;
-
-  return true;
-}
-
-bool CIntelSMDGlobals::SetVideoStartPts(ismd_pts_t pts)
-{
-  VERBOSE();
-  CSingleLock lock(m_Lock);
-
-  if (pts == ISMD_NO_PTS)
-  {
-    CLog::Log(LOGWARNING, "CIntelSMDGlobals::SetVideoStartPts got ISMD_NO_PTS");
-    return false;
-  }
-
-  if (pts < 0 && pts != ISMD_NO_PTS)
-    pts = 0;
-
-  CLog::Log(LOGINFO, "CIntelSMDGlobals::SetVideoStartPts %d ms", DVD_TIME_TO_MSEC(IsmdToDvdPts(pts)));
-
-  m_video_start_pts = pts;
-
-  return true;
-}
-
-ismd_pts_t CIntelSMDGlobals::GetAudioCurrentTime()
-{
-  VERBOSE();
-  ismd_pts_t start = GetAudioStartPts();
-
-  if (start == ISMD_NO_PTS || (GetCurrentTime() < GetBaseTime()))
-    return ISMD_NO_PTS;
-
-  return start + GetCurrentTime() - GetBaseTime();
-}
-
-ismd_pts_t CIntelSMDGlobals::GetVideoCurrentTime()
-{
-  VERBOSE();
-  ismd_pts_t start = GetVideoStartPts();
-
-  if (start == ISMD_NO_PTS || (GetCurrentTime() < GetBaseTime()))
-    return ISMD_NO_PTS;
-
-  return start + GetCurrentTime() - GetBaseTime();
-}
-
-ismd_pts_t CIntelSMDGlobals::GetAudioPauseCurrentTime()
-{
-  VERBOSE();
-  ismd_pts_t start = GetAudioStartPts();
-
-  if (start == ISMD_NO_PTS || (GetCurrentTime() < GetBaseTime()))
-    return ISMD_NO_PTS;
-
-  return start + GetPauseCurrentTime() - GetBaseTime();
-}
-
-ismd_pts_t CIntelSMDGlobals::GetVideoPauseCurrentTime()
-{
-  VERBOSE();
-  ismd_pts_t start = GetVideoStartPts();
-
-  if (start == ISMD_NO_PTS || (GetCurrentTime() < GetBaseTime()))
-    return ISMD_NO_PTS;
-
-  return start + GetPauseCurrentTime() - GetBaseTime();
-}
-
-ismd_pts_t CIntelSMDGlobals::Resync(bool bDisablePtsCorrection)
-{
-  VERBOSE();
-  ismd_pts_t audioStart;
-  ismd_pts_t videoStart;
-  ismd_pts_t deltaPTS;
-  ismd_pts_t eps = 10000;
-  ismd_pts_t newPTS;
-
-  audioStart = GetAudioStartPts();
-  videoStart = GetVideoStartPts();
-
-  if (audioStart == ISMD_NO_PTS)
-    return ISMD_NO_PTS;
-
-  if (videoStart == ISMD_NO_PTS)
-    return audioStart;
-
-  deltaPTS = abs(videoStart - audioStart);
-
-  if (deltaPTS == 0)
-    return videoStart;
-
-  if (bDisablePtsCorrection)
-    CLog::Log(LOGINFO, "CIntelSMDGlobals::Resync no pts correction");
-
-  if (deltaPTS > eps && deltaPTS < 90000 * 15 && !bDisablePtsCorrection)
-  {
-    if (videoStart < audioStart)
-      newPTS = videoStart + deltaPTS / 4;
-    else
-      newPTS = videoStart - deltaPTS / 4;
-  }
-  else
-  {
-    newPTS = audioStart;
-  }
-
-  return newPTS;
-}
-
 void CIntelSMDGlobals::CreateStartPacket(ismd_pts_t start_pts,
     ismd_buffer_handle_t buffer_handle)
 {
@@ -771,8 +589,7 @@ bool CIntelSMDGlobals::CreateVideoDecoder(ismd_codec_type_t codec_type)
     return false;
   }
 
-  res = ismd_viddec_set_pts_interpolation_policy(m_viddec,
-      ISMD_VIDDEC_INTERPOLATE_MISSING_PTS, 0);
+  res = ismd_viddec_set_pts_interpolation_policy(m_viddec, ISMD_VIDDEC_INTERPOLATE_MISSING_PTS, 0);
   if (res != ISMD_SUCCESS)
   {
     CLog::Log(LOGERROR, "ismd_viddec_set_pts_interpolation_policy failed <%d>",
@@ -825,7 +642,7 @@ bool CIntelSMDGlobals::PrintVideoStreamStats()
   result = ismd_viddec_get_stream_statistics(m_viddec, &stat);
 
   if (result == ISMD_SUCCESS)
-    CLog::Log(LOGDEBUG,
+    printf(
         "current_bit_rate %lu \
         total_bytes %lu \
         frames_decoded %lu \
@@ -835,7 +652,7 @@ bool CIntelSMDGlobals::PrintVideoStreamStats()
         unsupported_profile_errors %lu \
         unsupported_level_errors %lu \
         unsupported_feature_errors %lu \
-        unsupported_resolution_errors %lu ",
+        unsupported_resolution_errors %lu\n",
 
         stat.current_bit_rate, stat.total_bytes, stat.frames_decoded,
         stat.frames_dropped, stat.error_frames,
@@ -1011,6 +828,19 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
           "CIntelSMDGlobals::CreateVideoRender ismd_vidrend_enable_max_hold_time failed");
       return false;
     }
+
+    res = ismd_bufmon_open(&m_bufmon);
+    if (res != ISMD_SUCCESS)
+    {
+      CLog::Log(LOGWARNING, "CIntelSMDGlobals::CreateVideoRender ismd_bufmon_open failed, playback will be choppy: %d", res);
+    }
+    else
+    {
+      ismd_event_t underrun;
+      printf("Add renderer:  %d\n", ismd_bufmon_add_renderer(m_bufmon, m_video_render, &underrun));
+      printf("Set underrun:  %d\n", ismd_dev_set_underrun_event(m_video_render, underrun)); 
+      printf("Set clock   :  %d\n", ismd_dev_set_clock(m_bufmon, m_main_clock));
+    }
   }
 
   //Connect DPE and Render
@@ -1037,71 +867,6 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
   return true;
 }
 
-bool CIntelSMDGlobals::MuteVideoRender(bool mute)
-{
-  VERBOSE();
-  ismd_result_t res;
-
-  if (m_video_render == -1)
-      return false;
-
-  res = ismd_vidrend_mute(m_video_render, mute ? ISMD_VIDREND_MUTE_DISPLAY_BLACK_FRAME : ISMD_VIDREND_MUTE_NONE);
-  if (res != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::MuteVideoRender with %d failed. %d", mute, res);
-    return false;
-  }
-
-  return true;
-}
-
-float CIntelSMDGlobals::GetRenderFPS()
-{
-  VERBOSE();
-  ismd_result_t res;
-  float fps = 0;
-  ismd_vidrend_status_t status;
-  ismd_vidrend_stats_t stat;
-
-  if (m_video_render == -1)
-    return 0;
-
-  res = ismd_vidrend_get_status(m_video_render, &status);
-  if (res == ISMD_SUCCESS)
-    res = ismd_vidrend_get_stats(m_video_render, &stat);
-
-  if (res == ISMD_SUCCESS)
-    // we want to make sure some frames were actually rendered
-    if (stat.frames_displayed > 30)
-      fps = 90000.0f / status.content_pts_interval;
-
-  return fps;
-}
-
-float CIntelSMDGlobals::GetDecoderFPS()
-{
-  float fps = 0;
-
-  // check some frames were actually rendered
-  if (GetRenderFPS() == 0)
-    return 0;
-
-  ismd_viddec_stream_properties_t prop;
-  ismd_result_t res = ismd_viddec_get_stream_properties(GetVidDec(), &prop);
-  if (res == ISMD_SUCCESS)
-  {
-    int num = prop.frame_rate_num;
-    int den = prop.frame_rate_den;
-    if (num != 0 && den != 0)
-    {
-      fps = (float) num / (float) den;
-      //printf("SMD fps %f", fps);
-    }
-  }
-
-  return fps;
-}
-
 ismd_result_t CIntelSMDGlobals::GetPortStatus(ismd_port_handle_t port,
     unsigned int& curDepth, unsigned int& maxDepth)
 {
@@ -1124,28 +889,6 @@ ismd_result_t CIntelSMDGlobals::GetPortStatus(ismd_port_handle_t port,
   return ret;
 }
 
-double CIntelSMDGlobals::GetFrameDuration()
-{
-  ismd_result_t res;
-  float duration = 0;
-  ismd_vidrend_status_t status;
-  ismd_vidrend_stats_t stat;
-
-  if (m_video_render == -1)
-    return 0;
-
-  res = ismd_vidrend_get_status(m_video_render, &status);
-  if (res == ISMD_SUCCESS)
-    res = ismd_vidrend_get_stats(m_video_render, &stat);
-
-  if (res == ISMD_SUCCESS)
-    // we want to make sure some frames were actually rendered
-    if (stat.frames_displayed > 30)
-      duration = IsmdToDvdPts(status.content_pts_interval);
-
-  return duration;
-}
-
 bool CIntelSMDGlobals::DeleteVideoRender()
 {
   VERBOSE();
@@ -1157,6 +900,8 @@ bool CIntelSMDGlobals::DeleteVideoRender()
     ismd_dev_close(m_video_proc);
   if (m_video_render != -1)
     ismd_dev_close(m_video_render);
+  if (m_bufmon != -1)
+    ismd_dev_close(m_bufmon);
 
   m_video_proc = -1;
   m_video_input_port_proc = 0;
@@ -1165,6 +910,8 @@ bool CIntelSMDGlobals::DeleteVideoRender()
   m_video_render = -1;
   m_video_input_port_renderer = -1;
   m_video_output_port_renderer = -1;
+
+  m_bufmon = -1;
 
   return true;
 }
@@ -1203,7 +950,7 @@ bool CIntelSMDGlobals::PrintRenderStats()
   result = ismd_vidrend_get_stats(m_video_render, &stat);
 
   if (result == ISMD_SUCCESS)
-    CLog::Log(LOGDEBUG,
+    printf(
         "vsyncs_frame_received %d\
         vsyncs_frame_skipped %d\
         vsyncs_top_received %d\
@@ -1218,7 +965,7 @@ bool CIntelSMDGlobals::PrintRenderStats()
         frames_late %d\
         frames_out_of_order %d\
         frames_out_of_segment %d\
-        late_flips %d",
+        late_flips %d\n",
 
         stat.vsyncs_frame_received, stat.vsyncs_frame_skipped,
         stat.vsyncs_top_received, stat.vsyncs_top_skipped,
@@ -1547,9 +1294,7 @@ bool CIntelSMDGlobals::SetVideoRenderState(ismd_dev_state_t state)
     ret = ismd_dev_set_state(m_video_proc, state);
     if (ret != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR,
-          "CIntelSMDGlobals::SetVideoRenderState ismd_dev_set_state on video proc failed %d",
-          ret);
+      CLog::Log(LOGERROR, "CIntelSMDGlobals::SetVideoRenderState ismd_dev_set_state on video proc failed %d", ret);
       return false;
     }
   }
@@ -1559,9 +1304,16 @@ bool CIntelSMDGlobals::SetVideoRenderState(ismd_dev_state_t state)
     ret = ismd_dev_set_state(m_video_render, state);
     if (ret != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR,
-          "CIntelSMDGlobals::SetVideoRenderState ismd_dev_set_state on video render failed %d",
-          ret);
+      CLog::Log(LOGERROR, "CIntelSMDGlobals::SetVideoRenderState ismd_dev_set_state on video render failed %d", ret);
+      return false;
+    }
+  }
+  if (m_bufmon != -1)
+  {
+    ret = ismd_dev_set_state(m_bufmon, state);
+    if (ret != ISMD_SUCCESS)
+    {
+      CLog::Log(LOGERROR, "CIntelSMDGlobals::SetVideoRenderState ismd_dev_set_state on bufmon failed %d", ret);
       return false;
     }
   }
@@ -1709,39 +1461,6 @@ bool CIntelSMDGlobals::SetVideoRenderBaseTime(ismd_time_t time)
           "CIntelSMDGlobals::SetVideoRenderBaseTime ismd_dev_set_stream_base_time for video render failed %d",
           ret);
       return false;
-    }
-  }
-
-  return true;
-}
-
-bool CIntelSMDGlobals::SetAudioDeviceBaseTime(ismd_time_t time, ismd_dev_t device)
-{
-  //printf("%s", __FUNCTION__);
-  CLog::Log(LOGINFO, "SetAudioDeviceBaseTime base time %d ms", DVD_TIME_TO_MSEC(IsmdToDvdPts(time)));
-
-  ismd_result_t ret;
-  ismd_dev_state_t state = ISMD_DEV_STATE_INVALID;
-
-  CSingleLock lock(m_Lock);
-
-  if (device != -1)
-  {
-    ret = ismd_dev_get_state(device, &state);
-    if (ret != ISMD_SUCCESS)
-    {
-      CLog::Log(LOGERROR, "CIntelSMDGlobals::SetAudioDeviceState ismd_dev_get_state for audio device %d failed %d", device, ret);
-    }
-    if (state == ISMD_DEV_STATE_PLAY)
-    {
-      CLog::Log(LOGDEBUG, "CIntelSMDGlobals::SetAudioDeviceBaseTime device is running. Ignoring request");
-      return true;
-    }
-
-    ret = ismd_dev_set_stream_base_time(device, time);
-    if (ret != ISMD_SUCCESS)
-    {
-      CLog::Log(LOGERROR, "CIntelSMDGlobals::SetAudioDeviceState ismd_dev_set_stream_base_time for audio device %d failed %d", device, ret);
     }
   }
 

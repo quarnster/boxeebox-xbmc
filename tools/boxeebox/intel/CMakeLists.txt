@@ -30,6 +30,7 @@ set(ismds
 	ismd_vidrend
 	ismd_audio
 	ismd_demux
+	ismd_bufmon
 )
 add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/libgdl.so
 	COMMAND cat ${CMAKE_SOURCE_DIR}/headers/gdl.h | ${PYTHON_EXECUTABLE} -c \"import sys, re\; print '\#include <gdl.h>\\n%s' % '\\n'.join(filter(lambda a: not '\\ngdl_init' in a, ['%s {}' %x for x in re.compile(r'^\(GDL_API\\s[^\;]+\)\;', re.M).findall(sys.stdin.read())]))\" > ${CMAKE_BINARY_DIR}/libgdl.c

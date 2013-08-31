@@ -99,7 +99,6 @@ private:
   void vc1_viddec_SPMP_PESpacket_PayloadFormatHeader (Vc1Viddec *viddec, unsigned char *pCodecData, int width, int height);
   void vc1_viddec_init (Vc1Viddec *viddec);
   int WriteToInputPort(unsigned char* data, unsigned int length, double pts, unsigned int bufSize);
-  int WriteToRenderer();
   void DisablePtsCorrection(bool bDisable) { m_bDisablePtsCorrection = bDisable; }
   void SetDefaults();
 
