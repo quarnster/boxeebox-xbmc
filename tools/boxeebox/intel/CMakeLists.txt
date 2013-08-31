@@ -68,8 +68,8 @@ add_custom_target(install ALL
 
 
 if(ENABLE_TESTS) 
-	set(CGO_CFLAGS "-I/Volumes/Skivavbild/boxee-xbmc/sysroot/usr/local/include/")
-	set(CGO_LDFLAGS "-L/Volumes/Skivavbild/boxee-xbmc/sysroot/usr/local/lib -lismd_audio -lismd_core -losal -lm -lgdl")
+	set(CGO_CFLAGS "-I${SYSROOT}/usr/local/include/")
+	set(CGO_LDFLAGS "-L${SYSROOT}/usr/local/lib -lismd_audio -lismd_core -losal -lm -lgdl")
 
 
 	macro(GoTest name)
@@ -83,6 +83,7 @@ if(ENABLE_TESTS)
 	endmacro()
 
 	GoTest(audio)
+	GoTest(video)
 
 endif()
 
