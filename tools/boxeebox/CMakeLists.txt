@@ -57,7 +57,7 @@ file(WRITE ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh
 "
 #!/bin/sh
 PF=`${SYSROOT}/usr/bin/${TARGET}-pkg-config --libs python`
-export LDFLAGS=\"-L${local}/lib -lgcc -lm -ltinyxml -lgdl -lismd_core -lismd_viddec -lismd_vidpproc -lismd_audio -lismd_vidrend -lismd_demux -lismd_bufmon -losal -lplatform_config\"
+export LDFLAGS=\"-L${local}/lib -lgcc -lm -ltinyxml -lgdl -lismd_core -lismd_viddec -lismd_vidpproc -lismd_audio -lismd_vidrend -lismd_demux -lismd_bufmon -losal -lplatform_config -Wl,-rpath=${SYSROOT}/usr/local/lib -Wl,-rpath=${SYSROOT}/lib -Wl,-rpath=${SYSROOT}/usr/lib\"
 export CFLAGS=\"-DTARGET_BOXEE=1 -DTIXML_USE_STL -I${local}/include -DHAS_INTEL_SMD\"
 export CXXFLAGS=\"$CFLAGS\"
 export FREETYPE2_CFLAGS=\"-I${local}/include/freetype2\"
@@ -66,7 +66,7 @@ export PYTHON_NOVERSIONCHECK=\"y\"
 export PYTHON=\"${local}/bin/python\"
 export PYTHON_CPPFLAGS=\"-I${local}/include/python2.7\"
 export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
-${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --disable-gl --disable-sdl --disable-mysql --disable-x11 --disable-samba  --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick --enable-debug --disable-texturepacker
+${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --disable-gl --disable-sdl --disable-mysql --disable-x11 --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick --enable-debug --disable-texturepacker
 "
 )
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh)
@@ -110,6 +110,10 @@ set(libs
 	libavutil.so.52
 	libswscale.so.2
 	libjpeg.so.62
+	libsmbclient.so.0
+	libtdb.so.1
+	libtalloc.so.2
+	libtevent.so.0
 )
 foreach(lib ${libs})
 	add_custom_target(
@@ -164,7 +168,7 @@ add_custom_target(
 	shares
 	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/lib/xbmc/addons ${TARGET_DIR}/addons
 	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/lib/xbmc/system ${TARGET_DIR}/system
-	DEPENDS 			${shares} 
+	DEPENDS 			${shares}
 )
 
 add_custom_target(
@@ -176,8 +180,13 @@ add_custom_target(
 )
 
 add_custom_target(
+	libdist
+	DEPENDS ${libs} libstdc++ libz
+)
+
+add_custom_target(
 	dist
-	DEPENDS shares ${libs} libstdc++ libz pythonlibs quickdist
+	DEPENDS shares libdist pythonlibs quickdist
 )
 
 add_custom_target(

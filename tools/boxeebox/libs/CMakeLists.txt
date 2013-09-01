@@ -52,7 +52,7 @@ ExternalProject_Add(
 	openssl
 	URL 				ftp://ftp.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.0.1e.tar.gz
 	URL_MD5 			66bf6f10f060d561929de96f9dfe5b8c
-	CONFIGURE_COMMAND 	CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib AR=${TARGET}-ar INSTALL_PREFIX=${TARGET_DIR} <SOURCE_DIR>/Configure linux-elf --openssldir=/ 
+	CONFIGURE_COMMAND 	CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib AR=${TARGET}-ar INSTALL_PREFIX=${TARGET_DIR} <SOURCE_DIR>/Configure linux-elf --openssldir=/
 	DEPENDS zlib
 	BUILD_IN_SOURCE 	1
 )
@@ -62,7 +62,7 @@ ExternalProject_Add(
 	URL 				http://download.osgeo.org/libtiff/tiff-4.0.3.tar.gz
 	URL_MD5 			051c1068e6a0627f461948c365290410
 	CONFIGURE_COMMAND	${BASIC_CONF}
-)	
+)
 
 
 
@@ -86,7 +86,7 @@ ExternalProject_Add(
 	yayl
 	GIT_REPOSITORY  	https://github.com/lloyd/yajl.git
 	GIT_TAG				2.0.1
-	CONFIGURE_COMMAND 	${BASIC_CMAKE} 
+	CONFIGURE_COMMAND 	${BASIC_CMAKE}
 )
 
 ExternalProject_Add(
@@ -211,7 +211,7 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	fftw3
-	URL 				http://www.fftw.org/fftw-3.3.3.tar.gz 
+	URL 				http://www.fftw.org/fftw-3.3.3.tar.gz
 	URL_MD5 			0a05ca9c7b3bfddc8278e7c40791a1c2
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
@@ -274,7 +274,7 @@ ExternalProject_Add(
 	vorbis-tools
 	URL 				http://downloads.xiph.org/releases/vorbis/vorbis-tools-1.4.0.tar.gz
 	URL_MD5 			567e0fb8d321b2cd7124f8208b8b90e6
-	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} 
+	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF}
 	DEPENDS flac
 )
 ExternalProject_Add(
@@ -324,6 +324,26 @@ ExternalProject_Add(
 	DEPENDS libgcrypt openssl
 )
 
+ExternalProject_Add(
+	util-linux
+	URL					https://www.kernel.org/pub/linux/utils/util-linux/v2.23/util-linux-2.23.2.tar.bz2
+	URL_MD5				39a02ad0b3b37824c394f40930b7aa38
+	CONFIGURE_COMMAND	${BASIC_CONF} --without-ncurses
+	BUILD_COMMAND		""
+	INSTALL_COMMAND		make install-uuidincHEADERS
+)
+
+ExternalProject_Add(
+	samba
+	URL 				http://ftp.samba.org/pub/samba/samba-3.6.18.tar.gz
+	URL_MD5 			c7eec3e83fe4c4750240a8a0a214bbd4
+	CONFIGURE_COMMAND	CC=${TARGET}-gcc CFLAGS=-I${SYSROOT}/usr/local/include LDFLAGS=-L${SYSROOT}/usr/local/lib ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 ./configure --prefix=${TARGET_DIR} --host=${TARGET} samba_cv_CC_NEGATIVE_ENUM_VALUES=yes libreplace_cv_HAVE_GETADDRINFO=no ac_cv_file__proc_sys_kernel_core_pattern=yes  samba_cv_HAVE_STAT_ST_FLAGS=no samba_cv_DARWIN_INITGROUPS=no --without-ldap --without-krb5 --without-ads --disable-cups --enable-swat=no --with-winbind=no
+	BUILD_COMMAND 		${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} libsmbclient libtalloc libtevent libtdb
+	INSTALL_COMMAND 	${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} installlibsmbclient installlibtalloc installlibtevent installlibtdb
+	BUILD_IN_SOURCE 	1
+	DEPENDS 			util-linux
+)
+
 file(WRITE ${CMAKE_BINARY_DIR}/python_configure_helper.sh
 "
 export CC=${TARGET}-gcc
@@ -370,10 +390,10 @@ ExternalProject_Add(
 	boost
 	URL 				http://sourceforge.net/projects/boost/files/boost/1.54.0/boost_1_54_0.tar.bz2/download
 	URL_MD5 			15cb8c0803064faef0c4ddf5bc5ca279
-	PATCH_COMMAND 		${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/boost.user-config.jam ./tools/build/v2/user-config.jam  
+	PATCH_COMMAND 		${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/boost.user-config.jam ./tools/build/v2/user-config.jam
 	CONFIGURE_COMMAND 	./bootstrap.sh --prefix=${TARGET_DIR}
 	BUILD_COMMAND 		""
-	INSTALL_COMMAND 	./b2 include=${TARGET_DIR}/include linkflags="-L${TARGET_DIR}/lib" toolset=gcc-i686 link=static target-os=linux --without-mpi --without-context --without-log --without-python --without-coroutine ${PARALLEL} install 
+	INSTALL_COMMAND 	./b2 include=${TARGET_DIR}/include linkflags="-L${TARGET_DIR}/lib" toolset=gcc-i686 link=static target-os=linux --without-mpi --without-context --without-log --without-python --without-coroutine ${PARALLEL} install
 	BUILD_IN_SOURCE 	1
 	DEPENDS 			zlib bzip2
 )
