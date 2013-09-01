@@ -73,7 +73,6 @@ CIntelSMDGlobals::CIntelSMDGlobals()
   m_video_input_port_renderer = -1;
   m_video_output_port_renderer = -1;
   m_video_output_port_proc = -1;
-  m_video_codec = ISMD_CODEC_TYPE_INVALID;
   m_bufmon = -1;
 
   m_RenderState = ISMD_DEV_STATE_INVALID;
@@ -93,7 +92,7 @@ CIntelSMDGlobals::~CIntelSMDGlobals()
   VERBOSE();
 
   DestroyMainClock();
-  DeInitAudio(); 
+  DeInitAudio();
 }
 
 bool CIntelSMDGlobals::CreateMainClock()
@@ -607,8 +606,6 @@ bool CIntelSMDGlobals::CreateVideoDecoder(ismd_codec_type_t codec_type)
 
   SetVideoDecoderState(ISMD_DEV_STATE_PAUSE);
 
-  m_video_codec = codec_type;
-
   return true;
 }
 
@@ -631,71 +628,6 @@ bool CIntelSMDGlobals::DeleteVideoDecoder()
   m_viddec_output_port = -1;
 
   return true;
-}
-
-bool CIntelSMDGlobals::PrintVideoStreamStats()
-{
-  VERBOSE();
-  ismd_result_t result;
-  ismd_viddec_stream_statistics_t stat;
-
-  result = ismd_viddec_get_stream_statistics(m_viddec, &stat);
-
-  if (result == ISMD_SUCCESS)
-    printf(
-        "current_bit_rate %lu \
-        total_bytes %lu \
-        frames_decoded %lu \
-        frames_dropped %lu \
-        error_frames %lu \
-        invalid_bitstream_syntax_errors %lu \
-        unsupported_profile_errors %lu \
-        unsupported_level_errors %lu \
-        unsupported_feature_errors %lu \
-        unsupported_resolution_errors %lu\n",
-
-        stat.current_bit_rate, stat.total_bytes, stat.frames_decoded,
-        stat.frames_dropped, stat.error_frames,
-        stat.invalid_bitstream_syntax_errors, stat.unsupported_profile_errors,
-        stat.unsupported_level_errors, stat.unsupported_feature_errors,
-        stat.unsupported_resolution_errors);
-  else
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::PrintVideoStreamStats failed");
-
-  return (result == ISMD_SUCCESS);
-}
-
-bool CIntelSMDGlobals::PrintVideoStreaProp()
-{
-  VERBOSE();
-  ismd_result_t result;
-
-  ismd_viddec_stream_properties_t prop;
-
-  result = ismd_viddec_get_stream_properties(m_viddec, &prop);
-
-  if (result == ISMD_SUCCESS)
-    CLog::Log(LOGDEBUG,
-        "codec_type %lu \
-        nom_bit_rate %lu \
-        frame_rate_num %lu \
-        frame_rate_den %lu \
-        coded_height %lu \
-        coded_width %lu \
-        display_height %lu \
-        display_width %lu \
-        profile %lu \
-        level %lu \
-        is_stream_interlaced %lu \
-        sample_aspect_ratio %lu ",
-        prop.codec_type, prop.nom_bit_rate, prop.frame_rate_num,
-        prop.frame_rate_den, prop.coded_height, prop.coded_width,
-        prop.display_height, prop.display_width, prop.profile, prop.level,
-        prop.is_stream_interlaced, prop.sample_aspect_ratio);
-  else
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::PrintVideoStreaProp failed");
-
-  return (result == ISMD_SUCCESS);
 }
 
 bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
@@ -838,7 +770,7 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
     {
       ismd_event_t underrun;
       printf("Add renderer:  %d\n", ismd_bufmon_add_renderer(m_bufmon, m_video_render, &underrun));
-      printf("Set underrun:  %d\n", ismd_dev_set_underrun_event(m_video_render, underrun)); 
+      printf("Set underrun:  %d\n", ismd_dev_set_underrun_event(m_video_render, underrun));
       printf("Set clock   :  %d\n", ismd_dev_set_clock(m_bufmon, m_main_clock));
     }
   }
@@ -1529,33 +1461,6 @@ bool CIntelSMDGlobals::SetMasterVolume(float nVolume)
   }
 
   return (result == ISMD_SUCCESS);
-}
-
-bool CIntelSMDGlobals::CheckCodecHWDecode(int Codec)
-{
-
-  VERBOSE();
-  switch(Codec)
-  {
-  case CODEC_ID_MP3:
-    return (ISMD_SUCCESS == ismd_audio_codec_available(ISMD_AUDIO_MEDIA_FMT_MPEG));
-  case CODEC_ID_AAC:
-    return (ISMD_SUCCESS == ismd_audio_codec_available(ISMD_AUDIO_MEDIA_FMT_AAC));
-  case CODEC_ID_AC3:
-    return (ISMD_SUCCESS == ismd_audio_codec_available(ISMD_AUDIO_MEDIA_FMT_DD));
-  case CODEC_ID_EAC3:
-    return (ISMD_SUCCESS == ismd_audio_codec_available(ISMD_AUDIO_MEDIA_FMT_DD_PLUS));
-  case CODEC_ID_TRUEHD:
-    return (ISMD_SUCCESS == ismd_audio_codec_available(ISMD_AUDIO_MEDIA_FMT_TRUE_HD));
-  case CODEC_ID_DTS:
-    return (ISMD_SUCCESS == ismd_audio_codec_available(ISMD_AUDIO_MEDIA_FMT_DTS));
-  case SMD_CODEC_DTSHD:
-    return (ISMD_SUCCESS == ismd_audio_codec_available(ISMD_AUDIO_MEDIA_FMT_DTS_HD));
-  case CODEC_ID_AAC_LATM:
-    return (ISMD_SUCCESS == ismd_audio_codec_available(ISMD_AUDIO_MEDIA_FMT_AAC_LOAS));
-  default:
-    return false;
-  }
 }
 
 #endif

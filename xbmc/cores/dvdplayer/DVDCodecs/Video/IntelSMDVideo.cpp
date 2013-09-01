@@ -80,8 +80,6 @@ void CIntelSMDVideo::SetDefaults()
   memset(&m_H264_converter, 0, sizeof(m_H264_converter));
   m_bDiscontinuity = false;
   m_bFlushFlag = true;
-  m_lastPTS  = m_ptsCorrection = ISMD_NO_PTS;
-  m_bDisablePtsCorrection = true;
 }
 
 void CIntelSMDVideo::RemoveInstance(void)
@@ -922,7 +920,6 @@ void CIntelSMDVideo::Reset()
   m_bRunning = false;
 
   m_bFlushFlag = true;
-  m_lastPTS  = m_ptsCorrection = ISMD_NO_PTS;
   m_bDiscontinuity = true;
 
   g_IntelSMDGlobals.FlushVideoDecoder();
@@ -1073,10 +1070,10 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
   if(m_codec_type == ISMD_CODEC_TYPE_H264 && extradata_size > 0)
   {
     h264_viddec_init (&m_H264_converter);
-   
+
     m_bNeedH264Conversion = h264_viddec_parse_codec_priv_data(&m_H264_converter,(unsigned char *)extradata, extradata_size);
     //printf("h264_viddec_parse_codec_priv_data %d\n", m_bNeedH264Conversion);
-   
+
   }
 
   if (m_ffmpegCodedId == CODEC_ID_WMV3 &&  extradata_size >= 4){

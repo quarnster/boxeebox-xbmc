@@ -99,7 +99,6 @@ private:
   void vc1_viddec_SPMP_PESpacket_PayloadFormatHeader (Vc1Viddec *viddec, unsigned char *pCodecData, int width, int height);
   void vc1_viddec_init (Vc1Viddec *viddec);
   int WriteToInputPort(unsigned char* data, unsigned int length, double pts, unsigned int bufSize);
-  void DisablePtsCorrection(bool bDisable) { m_bDisablePtsCorrection = bDisable; }
   void SetDefaults();
 
   bool          m_IsConfigured;
@@ -118,10 +117,6 @@ private:
   bool m_bRunning;
   bool m_bDiscontinuity;
   bool m_bFlushFlag;
-  ismd_pts_t m_lastPTS;
-  ismd_pts_t m_ptsCorrection;
-
-  bool m_bDisablePtsCorrection;
 
 private:
   CIntelSMDVideo();

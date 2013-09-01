@@ -168,7 +168,7 @@ void CIntelSMDRenderer::UnInit()
   }
 
   // clear video plane to remove any video leftovers
-  gdl_flip(GDL_PLANE_ID_UPP_B, GDL_SURFACE_INVALID, GDL_FLIP_ASYNC);
+  gdl_flip(GDL_VIDEO_PLANE, GDL_SURFACE_INVALID, GDL_FLIP_ASYNC);
 
   SetDefaults();
 }
@@ -710,7 +710,7 @@ int CIntelSMDRenderer::ConfigureVideoProc()
 
   int aspect_ratio_num = 100;
   int aspect_ratio_denom = 100;
-  
+
   ismd_dev_t video_proc = g_IntelSMDGlobals.GetVidProc();
 
   if(video_proc == -1)
@@ -727,23 +727,23 @@ int CIntelSMDRenderer::ConfigureVideoProc()
       width > viewWindow.Width()||
       height > viewWindow.Height() )
   {
-    int croppedX1 = (int)m_sourceRect.x1, 
+    int croppedX1 = (int)m_sourceRect.x1,
         croppedY1 = (int)m_sourceRect.y1,
         croppedWidth = (int)m_sourceRect.Width(),
         croppedHeight = (int)m_sourceRect.Height();
-    
+
     // core image from the source rect is being blown out of the viewing area
     // usually this happens due to zoom or overscan adjustments
     // what we do here is calculate any scaling ratio applied to the source rect, so
     // we can crop accordingly
-    
+
     // adjust the destination window
     if( destx < viewWindow.x1 || width > viewWindow.Width() )
     {
       float scale = m_destRect.Width() / m_sourceRect.Width();
       croppedWidth = (int) (viewWindow.Width() / scale);
       croppedX1 += (int)((m_sourceRect.Width() - croppedWidth) / 2);
-      
+
       width = (unsigned int)viewWindow.Width();
       destx = (int)viewWindow.x1;
     }
@@ -763,7 +763,7 @@ int CIntelSMDRenderer::ConfigureVideoProc()
       croppedWidth = (int)m_sourceRect.Width() - croppedX1;
     if( croppedY1 + croppedHeight > m_sourceRect.Height() )
       croppedHeight = (int)m_sourceRect.Height() - croppedY1;
-    
+
     ret = ismd::ismd_vidpproc_set_crop_input(video_proc,
                   (unsigned int)croppedX1,
                   (unsigned int)croppedY1,
@@ -774,7 +774,7 @@ int CIntelSMDRenderer::ConfigureVideoProc()
       printf("ismd_vidpproc_set_crop_input failed\n");
       return 0;
     }
-    
+
     m_bCropping = true;
   }
   else if (m_bCropping)
@@ -782,12 +782,12 @@ int CIntelSMDRenderer::ConfigureVideoProc()
     ismd::ismd_vidpproc_disable_crop_input( video_proc );
     m_bCropping = false;
   }
-  
+
   if( destx < 0 ) destx = 0;
   if( desty < 0 ) desty = 0;
   if( destx + width > (unsigned int) screenWidth ) width = screenWidth - destx;
   if( desty + height > (unsigned int) screenHeight ) height = screenHeight - desty;
-  
+
   if( desty & 1 && height & 1)
   {
     desty--;

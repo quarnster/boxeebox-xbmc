@@ -125,17 +125,11 @@ public:
   ismd_dev_state_t GetVideoRenderState() { return m_RenderState; }
   ismd_dev_state_t GetAudioDeviceState(ismd_dev_t device);
 
-  ismd_codec_type_t GetVideoCodec() { return m_video_codec; }
-
   bool FlushAudioDevice(ismd_dev_t device);
   bool FlushVideoDecoder();
   bool FlushVideoRender();
 
-  bool PrintVideoStreamStats();
-  bool PrintVideoStreaProp();
   bool PrintRenderStats();
-
-  bool CheckCodecHWDecode( int Codec );
 
   static bool SetMasterVolume(float nVolume);
   static void Mute(bool bMute);
@@ -162,7 +156,6 @@ protected:
   ismd_port_handle_t      m_video_output_port_proc;
   ismd_port_handle_t      m_video_input_port_renderer;
   ismd_port_handle_t      m_video_output_port_renderer;
-  ismd_codec_type_t       m_video_codec;
 
   ismd_dev_state_t        m_RenderState;
 
