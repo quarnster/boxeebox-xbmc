@@ -80,8 +80,6 @@
 #define CONF_FLAGS_STEREO_CADANCE_LEFT_RIGHT 0x000000
 #define CONF_FLAGS_STEREO_CADANCE_RIGHT_LEFT 0x008000
 
-#define CONF_FLAGS_SMD_DECODING 0x10000
-
 namespace RenderManager {
 
   unsigned int GetFlagsColorMatrix(unsigned int color_matrix, unsigned width, unsigned height);

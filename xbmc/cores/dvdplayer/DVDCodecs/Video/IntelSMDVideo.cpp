@@ -53,6 +53,7 @@ void mp_msg(int mod, int lev, const char *format, ... ){}
 CIntelSMDVideo* CIntelSMDVideo::m_pInstance = NULL;
 
 CIntelSMDVideo::CIntelSMDVideo()
+: m_buffer(NULL)
 {
   VERBOSE();
   SetDefaults();
@@ -68,17 +69,14 @@ void CIntelSMDVideo::SetDefaults()
 {
   VERBOSE();
   m_IsConfigured = false;
-  m_bRunning = false;
   m_width = 0;
   m_height = 0;
   m_dwidth = 0;
   m_dheight = 0;
   m_codec_type = ISMD_CODEC_TYPE_INVALID;
-  m_ffmpegCodedId = CODEC_ID_NONE;
   m_bNeedVC1Conversion = m_bNeedWMV3Conversion = m_bNeedH264Conversion = false;
   memset(&m_vc1_converter, 0, sizeof(m_vc1_converter));
   memset(&m_H264_converter, 0, sizeof(m_H264_converter));
-  m_bDiscontinuity = false;
   m_bFlushFlag = true;
 }
 
@@ -814,9 +812,6 @@ int CIntelSMDVideo::vc1_viddec_encapsulate_and_write_ebdu ( unsigned char* pDes,
   return j;
 }
 
-
-
-
 unsigned char *
 CIntelSMDVideo::Vc1_viddec_convert_AP (Vc1Viddec *viddec, unsigned char *buf,int size,
     bool need_seq_hdr,unsigned int *outbuf_size)
@@ -917,126 +912,17 @@ void CIntelSMDVideo::Reset()
 {
   VERBOSE();
 
-  m_bRunning = false;
-
   m_bFlushFlag = true;
-  m_bDiscontinuity = true;
+
+  CSingleLock lock(m_bufferLock);
+  if (m_buffer)
+  {
+    delete m_buffer;
+    m_buffer = NULL;
+  }
 
   g_IntelSMDGlobals.FlushVideoDecoder();
   g_IntelSMDGlobals.FlushVideoRender();
-}
-
-int CIntelSMDVideo::WriteToInputPort(unsigned char* data, unsigned int length, double pts, unsigned int bufSize)
-{
-  VERBOSE();
-  ismd_es_buf_attr_t *buf_attrs;
-  ismd_result_t ismd_ret;
-  uint8_t *ptr;
-  ismd_buffer_descriptor_t buffer_desc;
-
-  //recommend using 32 kB buffers as these are already allocated in the memory map,
-  //break data into smaller pieces if over 32 kB
-  //need to get the buffer descriptor so it can be modified
-
-  unsigned char* ptr_to_data = data;
-  unsigned int amount_of_data = length;
-
-  ismd_port_handle_t inputPort = g_IntelSMDGlobals.GetVidDecInput();
-
-  if(inputPort == -1)
-  {
-    CLog::Log(LOGERROR, "CIntelSMDVideo::WriteToInputPort input port is -1\n");
-    return 0;
-  }
-  ismd_pts_t newPts = g_IntelSMDGlobals.DvdToIsmdPts(pts);
-
-  if(m_bFlushFlag)
-  {
-    g_IntelSMDGlobals.FlushVideoDecoder();
-    g_IntelSMDGlobals.FlushVideoRender();
-    g_IntelSMDGlobals.SendStartPacket(newPts, inputPort);
-    // Just adding a second to allow for an initial buffering.
-    // Bufmon will later adjust this as appropriate to avoid buffer underruns.
-    g_IntelSMDGlobals.SetVideoRenderBaseTime(g_IntelSMDGlobals.GetCurrentTime()+90000);
-    g_IntelSMDGlobals.SetVideoDecoderState(ISMD_DEV_STATE_PLAY);
-    g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PLAY);
-
-    m_bRunning = true;
-    m_bFlushFlag = false;
-  }
-
-  while (amount_of_data > 0 && m_bRunning)
-  {
-    /* Create input buffer */
-    ismd_buffer_handle_t buffer_handle;
-    ismd_ret = ismd_buffer_alloc(bufSize, &buffer_handle);
-    if (ismd_ret != ISMD_SUCCESS)
-    {
-      printf("CIntelSMDVideo::WriteToInputPort ismd_buffer_alloc failed <%d>\n", ismd_ret);
-      return 0;
-    }
-
-    ismd_ret = ismd_buffer_read_desc(buffer_handle, &buffer_desc);
-    if (ismd_ret != ISMD_SUCCESS)
-    {
-      printf("CIntelSMDVideo::WriteToInputPort ismd_buffer_read_desc failed <%d>\n", ismd_ret);
-      return 0;
-    }
-
-    ptr = (unsigned char*) OS_MAP_IO_TO_MEM_NOCACHE(buffer_desc.phys.base, buffer_desc.phys.size);
-    OS_MEMCPY(ptr, ptr_to_data, amount_of_data > bufSize ? bufSize : amount_of_data); //ptr to data should be the data being copied to viddec
-    OS_UNMAP_IO_FROM_MEM(ptr, buffer_desc.phys.size);
-
-    buffer_desc.phys.level = amount_of_data > bufSize ? bufSize : amount_of_data;
-    buf_attrs = (ismd_es_buf_attr_t *) buffer_desc.attributes;
-
-    buf_attrs->original_pts = newPts;
-    buf_attrs->local_pts = newPts;
-    buf_attrs->discontinuity = m_bDiscontinuity;
-
-    m_bDiscontinuity = false;
-
-    ismd_ret = ismd_buffer_update_desc(buffer_handle, &buffer_desc);
-    if (ismd_ret != ISMD_SUCCESS)
-    {
-      printf("-- ismd_buffer_update_desc failed <%d>\n", ismd_ret);
-      return 0;
-    }
-
-    //the input port should be full frequently when doing file, or any other push mode
-    int counter = 0;
-    while (m_bRunning && counter < 10)
-    {
-      ismd_ret = ismd_port_write(inputPort, buffer_handle);
-      if(ismd_ret != ISMD_SUCCESS)
-      {
-        counter++;
-        usleep(5000);
-      }
-      else
-        break;
-    }
-
-    if (amount_of_data > bufSize)
-    {
-      amount_of_data -= bufSize;
-      ptr_to_data += bufSize;
-    }
-    else
-    {
-      amount_of_data = 0;
-    }
-
-    if(ismd_ret != ISMD_SUCCESS)
-    {
-      printf("CIntelSMDVideo::WriteToInputPort failed. %d\n", ismd_ret);
-      m_bFlushFlag = true;
-
-      ismd_buffer_dereference(buffer_handle);
-    }
-  }
-
-  return 1;
 }
 
 bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_type, int extradata_size, void *extradata)
@@ -1047,7 +933,6 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
     CloseDecoder();
 
   m_codec_type = codec_type;
-  m_ffmpegCodedId = ffmpegCodedId;
 
   if(!g_IntelSMDGlobals.CreateVideoDecoder(m_codec_type))
   {
@@ -1076,14 +961,14 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
 
   }
 
-  if (m_ffmpegCodedId == CODEC_ID_WMV3 &&  extradata_size >= 4){
+  if (ffmpegCodedId == CODEC_ID_WMV3 &&  extradata_size >= 4){
     CLog::Log(LOGERROR, "CIntelSMDVideo::OpenDecoder WMV3 stream annex e");
     vc1_viddec_init(&m_vc1_converter);
     vc1_viddec_SPMP_PESpacket_PayloadFormatHeader(&m_vc1_converter,(unsigned char*)extradata,m_width, m_height);
     m_bNeedWMV3Conversion = true;
   }
 
-  if (m_ffmpegCodedId == CODEC_ID_VC1 && extradata_size > 0)
+  if (ffmpegCodedId == CODEC_ID_VC1 && extradata_size > 0)
   {
     CLog::Log(LOGERROR, "CIntelSMDVideo::OpenDecoder VC1 stream annex e");
     printf("CIntelSMDVideo::OpenDecoder VC1 stream annex e\n");
@@ -1096,7 +981,6 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
   }
 
   m_IsConfigured = true;
-  m_bRunning = true;
 
   g_IntelSMDGlobals.SetVideoDecoderState(ISMD_DEV_STATE_PAUSE);
   g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PAUSE);
@@ -1112,8 +996,6 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
 void CIntelSMDVideo::CloseDecoder(void)
 {
   VERBOSE();
-
-  m_bRunning = false;
 
   Sleep(100);
 
@@ -1139,7 +1021,6 @@ bool CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, dou
   VERBOSE();
   bool filtered = false;
   unsigned int demuxer_bytes = size;
-  double demuxer_pts = pts;
   uint8_t *demuxer_content = pData;
 
   unsigned int outbuf_size = 0;
@@ -1181,7 +1062,87 @@ bool CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, dou
 
   //printf("PTS = %.2f\n", demuxer_pts / DVD_TIME_BASE);
 
-  int retVal = WriteToInputPort(demuxer_content, demuxer_bytes, demuxer_pts, 32 * 1024);
+  CSingleLock lock(m_bufferLock);
+  ismd_result_t ismd_ret = ISMD_SUCCESS;
+  ismd_buffer_descriptor_t buffer_desc;
+  ismd_es_buf_attr_t *buf_attrs;
+
+  unsigned char *ptr;
+
+  if (!m_buffer)
+  {
+    m_buffer = new CISMDBuffer;
+    m_buffer->firstpts = DVD_NOPTS_VALUE;
+  }
+  if (m_bFlushFlag)
+    m_buffer->m_bFlush = m_bFlushFlag;
+
+  if (m_buffer->firstpts == DVD_NOPTS_VALUE && pts != DVD_NOPTS_VALUE)
+    m_buffer->firstpts = pts;
+
+  if (pts == DVD_NOPTS_VALUE)
+    pts = 0;
+
+  m_buffer->pts = pts;
+  m_buffer->dts = dts;
+
+  outbuf = demuxer_content;
+  outbuf_size = demuxer_bytes;
+  while (outbuf_size > 0)
+  {
+
+    //recommend using 32 kB buffers as these are already allocated in the memory map,
+    //break data into smaller pieces if over 32 kB
+    const int bufSize = 32*1024;
+    unsigned int copy = bufSize;
+
+    ismd_buffer_handle_t buffer_handle;
+    ismd_ret = ismd_buffer_alloc(bufSize, &buffer_handle);
+    if (ismd_ret != ISMD_SUCCESS)
+    {
+      printf("CIntelSMDVideo::WriteToInputPort ismd_buffer_alloc failed <%d>, %d\n", ismd_ret, bufSize);
+      goto cleanup;
+    }
+
+    ismd_ret = ismd_buffer_read_desc(buffer_handle, &buffer_desc);
+    if (ismd_ret != ISMD_SUCCESS)
+    {
+      printf("CIntelSMDVideo::WriteToInputPort ismd_buffer_read_desc failed <%d>\n", ismd_ret);
+      goto cleanup;
+    }
+
+    if (copy > outbuf_size)
+      copy = outbuf_size;
+
+    ptr = (unsigned char*) OS_MAP_IO_TO_MEM_NOCACHE(buffer_desc.phys.base, buffer_desc.phys.size);
+    OS_MEMCPY(ptr, outbuf, copy);
+    OS_UNMAP_IO_FROM_MEM(ptr, buffer_desc.phys.size);
+
+    buffer_desc.phys.level = copy;
+
+    buf_attrs = (ismd_es_buf_attr_t *) buffer_desc.attributes;
+
+    buf_attrs->original_pts = g_IntelSMDGlobals.DvdToIsmdPts(pts);
+    buf_attrs->local_pts = g_IntelSMDGlobals.DvdToIsmdPts(pts);
+
+
+    ismd_ret = ismd_buffer_update_desc(buffer_handle, &buffer_desc);
+    if (ismd_ret != ISMD_SUCCESS)
+    {
+      printf("-- ismd_buffer_update_desc failed <%d>\n", ismd_ret);
+      goto cleanup;
+    }
+    m_buffer->m_buffers.push(buffer_handle);
+  cleanup:
+    if (ismd_ret != ISMD_SUCCESS)
+    {
+      ismd_buffer_dereference(buffer_handle);
+      break;
+    }
+    outbuf_size -= copy;
+    outbuf += copy;
+  }
+
 
   if (filtered)
   {
@@ -1194,14 +1155,41 @@ bool CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, dou
       free(demuxer_content);
   }
 
-  return retVal;
+
+  unsigned int curDepth;
+  unsigned int maxDepth;
+  g_IntelSMDGlobals.GetPortStatus(g_IntelSMDGlobals.GetVidDecInput(), curDepth, maxDepth);
+  unsigned int queueLen =  curDepth + m_buffer->m_buffers.size();
+
+  const unsigned int maxQueue = ISMD_VIDEO_BUFFER_QUEUE;
+
+  if (
+     !m_bFlushFlag &&
+      queueLen < (maxDepth / 2) &&
+      queueLen < maxQueue &&
+     !m_buffer->m_buffers.empty() &&
+      ismd_ret == ISMD_SUCCESS)
+  {
+    // Report that the frame is "dropped" just to queue up frames a bit
+    return false;
+  }
+  if (m_bFlushFlag)
+    m_bFlushFlag = false;
+
+  printf("Buffers: %d, %d, %d\n", m_buffer->m_buffers.size(), curDepth, maxDepth);
+
+  return !m_buffer->m_buffers.empty();
 }
 
 bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
 {
   VERBOSE();
-  pDvdVideoPicture->dts = DVD_NOPTS_VALUE;
-  pDvdVideoPicture->pts = DVD_NOPTS_VALUE;
+  CSingleLock lock(m_bufferLock);
+  if (m_buffer == NULL || m_buffer->m_buffers.empty())
+    return false;
+
+  pDvdVideoPicture->dts = m_buffer->dts;
+  pDvdVideoPicture->pts = m_buffer->pts;
 
   pDvdVideoPicture->data[0] = NULL;
   pDvdVideoPicture->iLineSize[0] = 0;
@@ -1216,7 +1204,10 @@ bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
   pDvdVideoPicture->color_matrix = 0;
   pDvdVideoPicture->iFlags = DVP_FLAG_ALLOCATED;
   //pDvdVideoPicture->iFlags = 0;
-  pDvdVideoPicture->format = RENDER_FMT_NV12;
+  pDvdVideoPicture->format = RENDER_FMT_ISMD;
+  pDvdVideoPicture->ismdbuf = m_buffer;
+
+  m_buffer = NULL;
 
   ismd_viddec_stream_properties_t prop;
 
@@ -1264,13 +1255,11 @@ bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
   return true;
 }
 
-bool CIntelSMDVideo::GetInputPortStatus(unsigned int& curDepth, unsigned int& maxDepth)
+bool CIntelSMDVideo::ClearPicture(DVDVideoPicture *pDvdVideoPicture)
 {
-  VERBOSE();
-  g_IntelSMDGlobals.GetPortStatus(g_IntelSMDGlobals.GetVidDecInput(), curDepth, maxDepth);
-
+  if (pDvdVideoPicture->format != RENDER_FMT_ISMD)
+    return false;
+  delete pDvdVideoPicture->ismdbuf;
   return true;
 }
-
-
 #endif

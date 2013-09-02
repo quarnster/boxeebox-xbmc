@@ -39,6 +39,7 @@ class COpenMax;
 class COpenMaxVideo;
 struct OpenMaxVideoBuffer;
 class CStageFrightVideo;
+class CISMDBuffer;
 typedef void* EGLImageKHR;
 
 // should be entirely filled by all codecs
@@ -75,6 +76,9 @@ struct DVDVideoPicture
     struct {
       CStageFrightVideo* stf;
       EGLImageKHR eglimg;
+    };
+    struct {
+      CISMDBuffer *ismdbuf;
     };
   };
 
@@ -173,7 +177,7 @@ public:
   /*
    * returns true if successfull
    * the data is cleared to zero
-   */ 
+   */
   virtual bool ClearPicture(DVDVideoPicture* pDvdVideoPicture)
   {
     memset(pDvdVideoPicture, 0, sizeof(DVDVideoPicture));

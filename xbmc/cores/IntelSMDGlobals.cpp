@@ -235,8 +235,6 @@ double CIntelSMDGlobals::IsmdToDvdPts(ismd_pts_t pts)
 bool CIntelSMDGlobals::InitAudio()
 {
   VERBOSE();
-  ismd_result_t result;
-
 
   if(!CreateAudioProcessor())
    return false;
@@ -613,8 +611,6 @@ bool CIntelSMDGlobals::DeleteVideoDecoder()
 {
   VERBOSE();
 
-  ismd_result_t res;
-
   if (m_viddec == -1)
     return true;
 
@@ -761,18 +757,18 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
       return false;
     }
 
-    res = ismd_bufmon_open(&m_bufmon);
-    if (res != ISMD_SUCCESS)
-    {
-      CLog::Log(LOGWARNING, "CIntelSMDGlobals::CreateVideoRender ismd_bufmon_open failed, playback will be choppy: %d", res);
-    }
-    else
-    {
-      ismd_event_t underrun;
-      printf("Add renderer:  %d\n", ismd_bufmon_add_renderer(m_bufmon, m_video_render, &underrun));
-      printf("Set underrun:  %d\n", ismd_dev_set_underrun_event(m_video_render, underrun));
-      printf("Set clock   :  %d\n", ismd_dev_set_clock(m_bufmon, m_main_clock));
-    }
+    // res = ismd_bufmon_open(&m_bufmon);
+    // if (res != ISMD_SUCCESS)
+    // {
+    //   CLog::Log(LOGWARNING, "CIntelSMDGlobals::CreateVideoRender ismd_bufmon_open failed, playback will be choppy: %d", res);
+    // }
+    // else
+    // {
+    //   ismd_event_t underrun;
+    //   printf("Add renderer:  %d\n", ismd_bufmon_add_renderer(m_bufmon, m_video_render, &underrun));
+    //   printf("Set underrun:  %d\n", ismd_dev_set_underrun_event(m_video_render, underrun));
+    //   printf("Set clock   :  %d\n", ismd_dev_set_clock(m_bufmon, m_main_clock));
+    // }
   }
 
   //Connect DPE and Render

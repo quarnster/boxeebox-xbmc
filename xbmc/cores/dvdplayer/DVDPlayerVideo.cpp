@@ -998,6 +998,7 @@ static std::string GetRenderFormatName(ERenderFormat format)
     case RENDER_FMT_CVBREF:    return "BGRA";
     case RENDER_FMT_EGLIMG:    return "EGLIMG";
     case RENDER_FMT_BYPASS:    return "BYPASS";
+    case RENDER_FMT_ISMD:      return "ISMD";
     case RENDER_FMT_NONE:      return "NONE";
   }
   return "UNKNOWN";
@@ -1073,12 +1074,6 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
       flags |= CONF_FLAGS_FULLSCREEN;
       m_bAllowFullscreen = false; // only allow on first configure
     }
-#ifdef HAS_INTEL_SMD
-    if(pPicture->format == RENDER_FMT_NV12)
-    {
-      flags |= CONF_FLAGS_SMD_DECODING;
-    }
-#endif
     flags |= stereo_flags;
 
     CLog::Log(LOGDEBUG,"%s - change configuration. %dx%d. framerate: %4.2f. format: %s",__FUNCTION__,pPicture->iWidth, pPicture->iHeight, config_framerate, formatstr.c_str());

@@ -145,17 +145,13 @@ int CDVDVideoCodecSMD::Decode(BYTE *pData, int iSize, double dts, double pts)
     return ret;
   }
 
-  double new_pts = pts;
-  if(new_pts == DVD_NOPTS_VALUE && dts != DVD_NOPTS_VALUE)
-    new_pts = dts;
-
   if (pData)
   {
-    ret = m_Device->AddInput(pData, iSize, 0, new_pts);
+    ret = m_Device->AddInput(pData, iSize, dts, pts);
   }
 
-  if(!ret)
-    return VC_ERROR;
+  // if(!ret)
+  //   return VC_ERROR;
 
   if(ret)
   {
@@ -186,5 +182,16 @@ bool CDVDVideoCodecSMD::GetPicture(DVDVideoPicture* pDvdVideoPicture)
   ret = m_Device->GetPicture(pDvdVideoPicture);
   return ret;
 }
+
+bool CDVDVideoCodecSMD::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
+{
+  VERBOSE();
+  if (m_Device->ClearPicture(pDvdVideoPicture))
+  {
+    return CDVDVideoCodec::ClearPicture(pDvdVideoPicture);
+  }
+  return false;
+}
+
 
 #endif

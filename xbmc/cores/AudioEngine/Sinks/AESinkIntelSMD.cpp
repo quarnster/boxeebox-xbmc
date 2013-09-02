@@ -55,7 +55,7 @@ CAESinkIntelSMD::CAESinkIntelSMD()
   m_bIsAllocated = false;
   m_dwChunkSize = 0;
   m_dwBufferLen = 0;
-  
+
   m_audioDevice = -1;
   m_audioDeviceInput = -1;
 
@@ -355,7 +355,7 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
     return 0;
   }
 
- 
+
   int counter = 0;
   while (counter < 1000)
   {
@@ -375,7 +375,7 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
     else
       break;
   }
- 
+
   if (smd_ret != ISMD_SUCCESS)
   {
     CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput - error allocating buffer: %d", smd_ret);
@@ -395,33 +395,13 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
   {
     CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput - unable to mmap buffer %d", ismdBufferDesc.phys.base);
     ismd_buffer_dereference(ismdBuffer);
-    return 0;    
+    return 0;
   }
-  // short *sb = (short*) buffer_data;
-  // static double pos = 0;
-  // static double ppos = 0;
-  // static double pitch = 2*3.1415927*440.0/48000.0;
-  // static double ppitch = 2*3.1415927/48000.0;
-  // for (int i = 0; i < buffer_size/4; i++)
-  // {
-  //   double s = sin(pos);
-  //   double p = sin(ppos);
-  //   buf_ptr[i*2+0] = sb[i*2+0] + (short)(4000*p*s);
-  //   buf_ptr[i*2+1] = sb[i*2+1] + (short)(4000*(1-p)*s);
-  //   pos += pitch;
-  //   ppos += ppitch;
-  // }
 
   memcpy(buf_ptr, buffer_data, buffer_size);
   OS_UNMAP_IO_FROM_MEM(buf_ptr, buffer_size);
 
   ismdBufferDesc.phys.level = buffer_size;
-
-  // ismd_es_buf_attr_t *buf_attrs;
-  // buf_attrs = (ismd_es_buf_attr_t *) ismdBufferDesc.attributes;
-  // buf_attrs->original_pts = local_pts;
-  // buf_attrs->local_pts = local_pts;
-  // buf_attrs->discontinuity = false;
 
   smd_ret = ismd_buffer_update_desc(ismdBuffer, &ismdBufferDesc);
   if (smd_ret != ISMD_SUCCESS)
@@ -430,7 +410,6 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
     ismd_buffer_dereference(ismdBuffer);
     return 0;
   }
-  int c1 = counter;
   counter = 0;
   while (counter < 1000)
   {
@@ -450,14 +429,6 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
     else
       break;
   }
-
-//  static unsigned int s = 0; 
-  // if (true) {
-  //   unsigned int curDepth = 0;
-  //   unsigned int maxDepth = 0;
-  //   g_IntelSMDGlobals.GetPortStatus(m_audioDeviceInput, curDepth, maxDepth);
-  //   printf("cur: %d, max: %d, c1: %d, c2: %d\n", curDepth, maxDepth, c1, counter);
-  // }
   if(smd_ret != ISMD_SUCCESS)
   {
     CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput failed to write buffer %d\n", smd_ret);
@@ -561,7 +532,7 @@ void CAESinkIntelSMD::Drain()
       CLog::Log(LOGERROR, "CAESinkIntelSMD::WaitCompletion - error getting port status: %d", smd_ret);
       return;
     }
-  } 
+  }
 }
 
 void CAESinkIntelSMD::SetVolume(float nVolume)
@@ -592,7 +563,7 @@ bool CAESinkIntelSMD::SoftSuspend()
   m_bPause = true;
 
   return true;
- 
+
 }
 
 bool CAESinkIntelSMD::SoftResume()

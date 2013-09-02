@@ -9,7 +9,7 @@
 #include <ismd_core.h>
 #include "gdl_types.h"
 
-#define NUM_BUFFERS 2
+#define ISMD_NUM_BUFFERS 2
 
 #define MAX_PLANES 3
 #define MAX_FIELDS 3
@@ -53,14 +53,14 @@ struct VideoVertex
 #define FIELD_EVEN 2
 
 typedef unsigned char*    YUVMEMORYPLANES[MAX_PLANES];
-typedef YUVMEMORYPLANES   YUVMEMORYBUFFERS[NUM_BUFFERS];
+typedef YUVMEMORYPLANES   YUVMEMORYBUFFERS[ISMD_NUM_BUFFERS];
 
 class CRenderCapture;
 
 class CIntelSMDRenderer : public CBaseRenderer
 {
 public:
-  CIntelSMDRenderer();  
+  CIntelSMDRenderer();
   virtual ~CIntelSMDRenderer();
 
   virtual void Update();
@@ -107,10 +107,11 @@ protected:
   bool m_bConfigured;
   unsigned m_iFlags;
 
+  ERenderFormat m_format;
+
   YUVMEMORYBUFFERS m_YUVMemoryTexture;
   int m_iYV12RenderBuffer;
   int m_NumYV12Buffers;
-  bool m_bUsingSMDecoder;
   bool m_bNullRendering;
   bool m_bCropping;
 

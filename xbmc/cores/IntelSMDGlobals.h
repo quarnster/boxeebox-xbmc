@@ -30,6 +30,7 @@ extern "C"
 #include <pal_soc_info.h>
 }
 
+#include <queue>
 #include "xbmc/threads/SingleLock.h"
 #include "dvdplayer/DVDClock.h"
 
@@ -38,6 +39,8 @@ extern "C"
 #define GDL_FLASH_GRAPHICS_PLANE  GDL_PLANE_ID_UPP_C  // middle for pages with embedded video
 
 #define SMD_CLOCK_FREQ 90000
+
+#define ISMD_VIDEO_BUFFER_QUEUE 30
 
 enum InterlaceMode
 {
@@ -52,6 +55,24 @@ enum InterlaceMode
 
 // arbitrary value to allow communication of DTSHD support
 #define SMD_CODEC_DTSHD 0xf0f0f0f0
+
+class CISMDBuffer {
+public:
+  CISMDBuffer() : m_bFlush(false) {
+  }
+  ~CISMDBuffer() {
+    while (!m_buffers.empty())
+    {
+      ismd_buffer_dereference(m_buffers.front());
+      m_buffers.pop();
+    }
+  }
+  double firstpts;
+  double pts;
+  double dts;
+  bool m_bFlush;
+  std::queue<ismd_buffer_handle_t> m_buffers;
+};
 
 class CIntelSMDGlobals
 {

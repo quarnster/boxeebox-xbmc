@@ -25,11 +25,11 @@
 #include "libavcodec/avcodec.h"
 #include <ismd_core.h>
 #include <ismd_viddec.h>
-#include <deque>
-#include <vector>
+#include <queue>
 
 #include "DVDVideoCodec.h"
 #include "threads/Thread.h"
+#include "xbmc/threads/SingleLock.h"
 
 #define MAX_SIZE_PES_SEQUENCE_HEADER 16
 
@@ -68,6 +68,7 @@ typedef struct Vc1Viddec {
 
 
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 class CIntelSMDVideo
@@ -83,11 +84,10 @@ public:
   bool AddInput(unsigned char *pData, size_t size, double dts, double pts);
 
   bool GetPicture(DVDVideoPicture* pDvdVideoPicture);
+  bool ClearPicture(DVDVideoPicture* pDvdVideoPicture);
 
   void SetWidth(unsigned int width) { m_width = m_dwidth = width; }
   void SetHeight(unsigned int height) { m_height = m_dheight = height; }
-
-  bool GetInputPortStatus(unsigned int& curDepth, unsigned int& maxDepth);
 
 protected:
   virtual ~CIntelSMDVideo();
@@ -98,7 +98,6 @@ private:
   int vc1_viddec_encapsulate_and_write_ebdu ( unsigned char* pDes, unsigned int SizeDes, unsigned char* pRbdu, unsigned int SizeRBDU );
   void vc1_viddec_SPMP_PESpacket_PayloadFormatHeader (Vc1Viddec *viddec, unsigned char *pCodecData, int width, int height);
   void vc1_viddec_init (Vc1Viddec *viddec);
-  int WriteToInputPort(unsigned char* data, unsigned int length, double pts, unsigned int bufSize);
   void SetDefaults();
 
   bool          m_IsConfigured;
@@ -109,14 +108,14 @@ private:
   Vc1Viddec       m_vc1_converter;
   H264Viddec      m_H264_converter;
   ismd_codec_type_t m_codec_type;
-  CodecID         m_ffmpegCodedId;
   bool            m_bNeedWMV3Conversion;
   bool            m_bNeedVC1Conversion;
   bool            m_bNeedH264Conversion;
 
-  bool m_bRunning;
-  bool m_bDiscontinuity;
   bool m_bFlushFlag;
+
+  CISMDBuffer               *m_buffer;
+  CCriticalSection           m_bufferLock;
 
 private:
   CIntelSMDVideo();
