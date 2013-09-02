@@ -1069,6 +1069,15 @@ bool CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, dou
 
   unsigned char *ptr;
 
+  if (pts == DVD_NOPTS_VALUE)
+  {
+    if (dts != DVD_NOPTS_VALUE)
+      pts = dts;
+    else
+      pts = 0;
+  }
+
+
   if (!m_buffer)
   {
     m_buffer = new CISMDBuffer;
@@ -1079,9 +1088,6 @@ bool CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, dou
 
   if (m_buffer->firstpts == DVD_NOPTS_VALUE && pts != DVD_NOPTS_VALUE)
     m_buffer->firstpts = pts;
-
-  if (pts == DVD_NOPTS_VALUE)
-    pts = 0;
 
   m_buffer->pts = pts;
   m_buffer->dts = dts;

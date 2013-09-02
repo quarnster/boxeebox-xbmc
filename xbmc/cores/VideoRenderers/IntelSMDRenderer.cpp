@@ -355,7 +355,7 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
   bool discontinuity = m_bFlushFlag || picture->ismdbuf->m_bFlush; // || (position.current_time != ISMD_NO_PTS && position.base_time != ISMD_NO_PTS && position.linear_time != ISMD_NO_PTS && position.base_time < position.current_time && ((position.current_time - position.base_time) > position.linear_time));
   if (lastClockChange != 0)
     lastClockChange--;
-  if (lastClockChange == 0 && !discontinuity && fabs(diff) > 0.25 && expected > 0 && position.segment_time != ISMD_NO_PTS)
+  if (lastClockChange == 0 && !discontinuity && fabs(diff) > 0.05 && expected > 0 && position.segment_time != ISMD_NO_PTS)
   {
     lastClockChange = 5;
     // Adjust clock sync, but not too much
