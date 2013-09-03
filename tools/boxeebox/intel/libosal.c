@@ -13,4 +13,4 @@ void os_unmap_io_from_mem(
     void * virt_addr,
     unsigned long size){}
 
-void _os_info( TCHAR *szFormat, ... ) {}
+void _os_info( const TCHAR *szFormat, ... ) {}
