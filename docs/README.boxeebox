@@ -23,6 +23,9 @@ I'm pretty sure my OSX brew line was similar.
 Your system must be capable of executing "configure" scripts and your filesystem needs
 to be case sensitive.
 
+If you receive an error on linux/ubuntu under the cmake step, try using:
+cmake ..
+
 # Building
 
 ```bash
