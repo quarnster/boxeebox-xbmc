@@ -81,7 +81,7 @@ public:
   void CloseDecoder(void);
 
   void Reset();
-  bool AddInput(unsigned char *pData, size_t size, double dts, double pts);
+  int AddInput(unsigned char *pData, size_t size, double dts, double pts);
 
   bool GetPicture(DVDVideoPicture* pDvdVideoPicture);
   bool ClearPicture(DVDVideoPicture* pDvdVideoPicture);

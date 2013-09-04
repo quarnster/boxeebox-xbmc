@@ -40,6 +40,7 @@ public:
   virtual bool GetPicture(DVDVideoPicture *pDvdVideoPicture);
   virtual bool ClearPicture(DVDVideoPicture *pDvdVideoPicture);
   virtual void SetDropState(bool bDrop) {}
+  virtual void SetSpeed(int iSpeed);
   virtual const char* GetName(void) { return (const char*)m_pFormatName; }
 
 protected:

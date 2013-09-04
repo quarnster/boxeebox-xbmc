@@ -1016,7 +1016,7 @@ void CIntelSMDVideo::CloseDecoder(void)
   CLog::Log(LOGDEBUG, "%s: codec closed", __MODULE_NAME__);
 }
 
-bool CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, double pts)
+int CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, double pts)
 {
   VERBOSE();
   bool filtered = false;
@@ -1168,23 +1168,32 @@ bool CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, dou
   unsigned int queueLen =  curDepth + m_buffer->m_buffers.size();
 
   const unsigned int maxQueue = ISMD_VIDEO_BUFFER_QUEUE;
+  ismd_vidrend_stream_position_info_t position;
+  ismd_vidrend_get_stream_position(g_IntelSMDGlobals.GetVidRender(), &position);
 
   if (
      !m_bFlushFlag &&
-      queueLen < (maxDepth / 2) &&
       queueLen < maxQueue &&
      !m_buffer->m_buffers.empty() &&
+      position.segment_time != ISMD_NO_PTS && // Just keep emitting frames until we figure out where we are
       ismd_ret == ISMD_SUCCESS)
   {
     // Report that the frame is "dropped" just to queue up frames a bit
-    return false;
+    return VC_BUFFER;
   }
   if (m_bFlushFlag)
+  {
     m_bFlushFlag = false;
+  }
 
-  printf("Buffers: %d, %d, %d\n", m_buffer->m_buffers.size(), curDepth, maxDepth);
-
-  return !m_buffer->m_buffers.empty();
+  if (!m_buffer->m_buffers.empty())
+  {
+    return VC_BUFFER|VC_PICTURE;
+  }
+  else
+  {
+    return VC_ERROR;
+  }
 }
 
 bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)

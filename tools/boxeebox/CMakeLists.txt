@@ -14,6 +14,8 @@ set(BOXEEBOX_IP "boxeebox" CACHE STRING "ipaddress or hostname of your boxeebox 
 message("Using Sysroot: ${SYSROOT}")
 
 
+find_program(HAVE_PV NAMES pv)
+
 include(ExternalProject)
 
 file(WRITE case_test.txt)
@@ -116,10 +118,17 @@ set(libs
 	libtevent.so.0
 )
 foreach(lib ${libs})
-	add_custom_target(
-		${lib}
-		COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${SYSROOT}/usr/local/lib/${lib} ${TARGET_DIR}/${lib}
-	)
+	if(HAVE_PV)
+		add_custom_target(
+			${lib}
+			COMMAND 		${HAVE_PV} ${SYSROOT}/usr/local/lib/${lib} > ${TARGET_DIR}/${lib}
+		)
+	else()
+		add_custom_target(
+			${lib}
+			COMMAND 		${CMAKE_COMMAND} -E copy_if_different ${SYSROOT}/usr/local/lib/${lib} ${TARGET_DIR}/${lib}
+		)
+	endif()
 endforeach()
 
 if(EXISTS ${SYSROOT}/usr/i686-pc-linux-gnu/lib/libstdc++.so.6)
@@ -156,6 +165,7 @@ set(shares
 	userdata
 )
 
+
 foreach(share ${shares})
 	add_custom_target(
 		${share}
@@ -171,11 +181,17 @@ add_custom_target(
 	DEPENDS 			${shares}
 )
 
+if(HAVE_PV)
+	set(COPY ${HAVE_PV} ${CMAKE_BINARY_DIR}/xbmc.bin > ${TARGET_DIR}/xbmc.bin)
+else()
+	set(COPY ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/xbmc.bin ${TARGET_DIR}/xbmc.bin)
+endif()
+
 add_custom_target(
 	quickdist
 	COMMAND 			${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/../../xbmc.bin ${CMAKE_BINARY_DIR}/xbmc.bin
 	COMMAND 			${SYSROOT}/usr/bin/i686-pc-linux-gnu-strip ${CMAKE_BINARY_DIR}/xbmc.bin
-	COMMAND 			${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/xbmc.bin ${TARGET_DIR}/xbmc.bin
+	COMMAND 			${COPY}
 	DEPENDS 			xbmc ${CMAKE_SOURCE_DIR}/../../xbmc.bin
 )
 

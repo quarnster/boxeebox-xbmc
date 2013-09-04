@@ -147,20 +147,10 @@ int CDVDVideoCodecSMD::Decode(BYTE *pData, int iSize, double dts, double pts)
 
   if (pData)
   {
-    ret = m_Device->AddInput(pData, iSize, dts, pts);
+    return m_Device->AddInput(pData, iSize, dts, pts);
   }
 
-  // if(!ret)
-  //   return VC_ERROR;
-
-  if(ret)
-  {
-    ret = VC_PICTURE | VC_BUFFER;
-  }
-  else
-    ret = VC_BUFFER;
-
-  return ret;
+  return VC_BUFFER;
 }
 
 void CDVDVideoCodecSMD::Reset(void)
@@ -193,5 +183,14 @@ bool CDVDVideoCodecSMD::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
   return false;
 }
 
+void CDVDVideoCodecSMD::SetSpeed(int iSpeed)
+{
+  switch (iSpeed)
+  {
+    case DVD_PLAYSPEED_PAUSE:
+      Reset();
+      break;
+  }
+}
 
 #endif

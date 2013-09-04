@@ -1225,6 +1225,9 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
   if (buffer < 0)
     return EOS_DROPPED;
 
+#ifdef HAS_INTEL_SMD
+  pts = iPlayingClock;
+#endif
   ProcessOverlays(pPicture, pts);
 
   int index = g_renderManager.AddVideoPicture(*pPicture);

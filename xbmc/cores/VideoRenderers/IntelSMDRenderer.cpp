@@ -328,17 +328,8 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
     addPts = g_IntelSMDGlobals.DvdToIsmdPts(add);
   else
     addPts = g_IntelSMDGlobals.DvdToIsmdPts(-add);
-  printf("pts: %.2f, flush: %d, ismdbuf: %d, %.2f, %.2f, add: %.2f\n", picture->pts/DVD_TIME_BASE, m_bFlushFlag, picture->ismdbuf->m_buffers.size(),picture->ismdbuf->firstpts/DVD_TIME_BASE, picture->ismdbuf->pts/DVD_TIME_BASE, add/DVD_TIME_BASE);
 
-  ismd_pts_t start = g_IntelSMDGlobals.DvdToIsmdPts(picture->ismdbuf->firstpts);
-  if (add > 0)
-  {
-    start += addPts;
-  }
-  else if (start >= addPts)
-  {
-    start -= addPts;
-  }
+  static ismd_pts_t start = g_IntelSMDGlobals.DvdToIsmdPts(picture->ismdbuf->firstpts);
   unsigned int curDepth;
   unsigned int maxDepth;
   g_IntelSMDGlobals.GetPortStatus(g_IntelSMDGlobals.GetVidDecInput(), curDepth, maxDepth);
@@ -349,24 +340,23 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
   double expected = CDVDClock::GetMasterClock()->GetClock()/(double)DVD_TIME_BASE;
   double actual = position.segment_time/90000.0;
   double diff = expected-actual;
-  printf("depth: %d, c: %.2f, b: %.2f, l: %.2f, dvd: %.2f, s: %.2f, f: %.2f, fl: %.2f, sp: %.2f\n", curDepth, position.current_time/90000.0, position.base_time/90000.0, position.linear_time/90000.0, expected, actual, position.first_segment_pts/90000.0, position.flip_time/90000.0, position.stream_position/90000.0);
-
   static int lastClockChange = 0;
-  bool discontinuity = m_bFlushFlag || picture->ismdbuf->m_bFlush; // || (position.current_time != ISMD_NO_PTS && position.base_time != ISMD_NO_PTS && position.linear_time != ISMD_NO_PTS && position.base_time < position.current_time && ((position.current_time - position.base_time) > position.linear_time));
+  bool discontinuity = m_bFlushFlag || picture->ismdbuf->m_bFlush; // || (position.current_time != ISMD_NO_PTS && position.base_time != ISMD_NO_PTS && position.linear_time != ISMD_NO_PTS && position.base_time < position.current_time && ((position.current_time - position.base_time)/90000.0-expected) > 0.5);
   if (lastClockChange != 0)
     lastClockChange--;
   if (lastClockChange == 0 && !discontinuity && fabs(diff) > 0.05 && expected > 0 && position.segment_time != ISMD_NO_PTS)
   {
-    lastClockChange = 5;
-    // Adjust clock sync, but not too much
-    diff = diff*90000/5;
-    printf("adjusting clock: %d, %.2f\n", ismd_clock_adjust_time(g_IntelSMDGlobals.GetSMDClock(), diff), diff);
+    lastClockChange = 1;
+    diff = diff*90000/2;
+    printf("Adjusting clock: %d, %.2f\n", ismd_clock_adjust_time(g_IntelSMDGlobals.GetSMDClock(), diff), diff);
   }
 
   if(discontinuity)
   {
     g_IntelSMDGlobals.FlushVideoDecoder();
     g_IntelSMDGlobals.FlushVideoRender();
+    start = g_IntelSMDGlobals.DvdToIsmdPts(picture->ismdbuf->firstpts);
+
     ismd_time_t base = g_IntelSMDGlobals.GetCurrentTime() + g_IntelSMDGlobals.DvdToIsmdPts(picture->ismdbuf->pts - picture->ismdbuf->firstpts);
     if (add > 0)
     {
@@ -378,6 +368,7 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
     }
     printf("flushing in AddPicture: %.2f, %.2f\n", start/90000.0, base/90000.0);
     g_IntelSMDGlobals.SetVideoRenderBaseTime(base);
+    g_IntelSMDGlobals.SendStartPacket(start, inputPort);
     g_IntelSMDGlobals.SetVideoDecoderState(ISMD_DEV_STATE_PLAY);
     g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PLAY);
     m_bRunning = true;
