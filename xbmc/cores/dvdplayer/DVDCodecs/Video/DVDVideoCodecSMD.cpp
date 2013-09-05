@@ -42,7 +42,6 @@
 
 CDVDVideoCodecSMD::CDVDVideoCodecSMD() :
 m_Device(NULL),
-m_DecodeStarted(false),
 m_pFormatName("SMD: codec not configured")
 {
 }
@@ -118,8 +117,6 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
     return false;
   }
 
-  m_DecodeStarted = false;
-
   CLog::Log(LOGINFO, "Opened Intel SMD Codec, %s", m_pFormatName);
 
   return true;
@@ -139,12 +136,6 @@ int CDVDVideoCodecSMD::Decode(BYTE *pData, int iSize, double dts, double pts)
 {
   VERBOSE();
   int ret = 0;
-
-  if (!m_DecodeStarted)
-  {
-    m_DecodeStarted = true;
-    return VC_FLUSHED;
-  }
 
   if(!pData)
   {
@@ -193,8 +184,8 @@ void CDVDVideoCodecSMD::SetSpeed(int iSpeed)
   switch (iSpeed)
   {
     case DVD_PLAYSPEED_PAUSE:
-      m_DecodeStarted = false;
-      Reset();
+      g_IntelSMDGlobals.SetVideoDecoderState(ISMD_DEV_STATE_PAUSE);
+      g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PAUSE);
       break;
   }
 }

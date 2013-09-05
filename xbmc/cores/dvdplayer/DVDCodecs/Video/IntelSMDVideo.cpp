@@ -1172,7 +1172,7 @@ int CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, doub
   if (
      !m_bFlushFlag &&
       queueLen < maxQueue &&
-     position.segment_time != ISMD_NO_PTS && // Just keep emitting frames until we figure out where we are
+      position.segment_time != ISMD_NO_PTS && // Just keep emitting frames until we figure out where we are
       ismd_ret == ISMD_SUCCESS)
   {
     // Report that the frame is "dropped" just to queue up frames a bit

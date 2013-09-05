@@ -335,24 +335,27 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
   bool discontinuity = m_bFlushFlag || picture->ismdbuf->m_bFlush;
   static int lastClockChange = 0;
 
-  if(discontinuity)
+  if(discontinuity || g_IntelSMDGlobals.GetRenderState() != ISMD_DEV_STATE_PLAY)
   {
-    g_IntelSMDGlobals.FlushVideoDecoder();
-    g_IntelSMDGlobals.FlushVideoRender();
-    start = g_IntelSMDGlobals.DvdToIsmdPts(picture->ismdbuf->firstpts);
-
-    if (add > 0)
-    {
-      start += addPts;
-    }
-    else if (start >= addPts)
-    {
-      start -= addPts;
-    }
+    // g_IntelSMDGlobals.FlushVideoDecoder();
+    // g_IntelSMDGlobals.FlushVideoRender();
     ismd_time_t dvdTime = g_IntelSMDGlobals.DvdToIsmdPts(CDVDClock::GetMasterClock()->GetClock());
-    if (g_IntelSMDGlobals.GetCurrentTime() < dvdTime)
+    if (discontinuity)
     {
-      g_IntelSMDGlobals.SetCurrentTime(dvdTime);
+      start = g_IntelSMDGlobals.DvdToIsmdPts(picture->ismdbuf->firstpts);
+
+      if (add > 0)
+      {
+        start += addPts;
+      }
+      else if (start >= addPts)
+      {
+        start -= addPts;
+      }
+      if (g_IntelSMDGlobals.GetCurrentTime() < dvdTime)
+      {
+        g_IntelSMDGlobals.SetCurrentTime(dvdTime);
+      }
     }
 
     base = g_IntelSMDGlobals.GetCurrentTime() + start - dvdTime + 90000/2;
@@ -372,8 +375,8 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
     lastClockChange--;
   if (lastClockChange == 0 && fabs(diff) > 0.05 && expected > 0 && current > base)
   {
-    lastClockChange = 2;
-    diff = diff*90000/2;
+    lastClockChange = 0;
+    diff = diff*90000;
     ismd_time_t curr;
     ismd_clock_get_time(g_IntelSMDGlobals.GetSMDClock(), &curr);
     if (curr > diff)
@@ -385,6 +388,7 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
       printf("Adjusting clock: %.2f -> %.2f, %.2f\n", curr/90000.0, adj/90000.0, diff/90000.0);
     }
   }
+
 
   ismd_result_t ismd_ret = ISMD_SUCCESS;
   ismd_es_buf_attr_t *buf_attrs;

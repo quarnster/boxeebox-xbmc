@@ -45,7 +45,6 @@ public:
 
 protected:
   CIntelSMDVideo*       m_Device;
-  bool                  m_DecodeStarted;
   const char*           m_pFormatName;
 };
 
