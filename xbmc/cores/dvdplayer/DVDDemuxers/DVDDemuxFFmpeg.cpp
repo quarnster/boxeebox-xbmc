@@ -106,7 +106,7 @@ void ff_avutil_log(void* ptr, int level, const char* format, va_list va)
 
   AVClass* avc= ptr ? *(AVClass**)ptr : NULL;
 
-  if(level >= AV_LOG_DEBUG && 
+  if(level >= AV_LOG_DEBUG &&
      (g_advancedSettings.m_extraLogLevels & LOGFFMPEG) == 0)
     return;
   else if(g_advancedSettings.m_logLevel <= LOG_LEVEL_NORMAL)
@@ -303,7 +303,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput)
       {
         url.SetProtocol("mmst");
         strFile = url.Get();
-      } 
+      }
     }
     if (result < 0 && m_dllAvFormat.avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, &options) < 0 )
     {
@@ -439,9 +439,9 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput)
   }
 
   // Avoid detecting framerate if advancedsettings.xml says so
-  if (g_advancedSettings.m_videoFpsDetect == 0) 
+  if (g_advancedSettings.m_videoFpsDetect == 0)
       m_pFormatContext->fps_probe_size = 0;
-  
+
   // analyse very short to speed up mjpeg playback start
   if (iformat && (strcmp(iformat->name, "mjpeg") == 0) && m_ioContext->seekable == 0)
     m_pFormatContext->max_analyze_duration = 500000;
@@ -481,6 +481,10 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput)
 
   // if format can be nonblocking, let's use that
   m_pFormatContext->flags |= AVFMT_FLAG_NONBLOCK;
+
+#ifdef HAS_INTEL_SMD
+  m_pFormatContext->flags |= AVFMT_FLAG_GENPTS;
+#endif
 
   // print some extra information
   m_dllAvFormat.av_dump_format(m_pFormatContext, 0, strFile.c_str(), 0);
@@ -760,13 +764,14 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
         // we need to get duration slightly different for matroska embedded text subtitels
         if(m_bMatroska && stream->codec->codec_id == AV_CODEC_ID_TEXT && m_pkt.pkt.convergence_duration != 0)
           m_pkt.pkt.duration = m_pkt.pkt.convergence_duration;
-
+#ifndef HAS_INTEL_SMD
         if(m_bAVI && stream->codec && stream->codec->codec_type == AVMEDIA_TYPE_VIDEO)
         {
           // AVI's always have borked pts, specially if m_pFormatContext->flags includes
           // AVFMT_FLAG_GENPTS so always use dts
           m_pkt.pkt.pts = AV_NOPTS_VALUE;
         }
+#endif
 
         // copy contents into our own packet
         pPacket->iSize = m_pkt.pkt.size;
@@ -1074,7 +1079,7 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
         st->iBlockAlign = pStream->codec->block_align;
         st->iBitRate = pStream->codec->bit_rate;
         st->iBitsPerSample = pStream->codec->bits_per_coded_sample;
-	
+
         if(m_dllAvUtil.av_dict_get(pStream->metadata, "title", NULL, 0))
           st->m_description = m_dllAvUtil.av_dict_get(pStream->metadata, "title", NULL, 0)->value;
 
@@ -1144,14 +1149,14 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
         st->iBitsPerPixel = pStream->codec->bits_per_coded_sample;
 
         AVDictionaryEntry *rtag = m_dllAvUtil.av_dict_get(pStream->metadata, "rotate", NULL, 0);
-        if (rtag) 
+        if (rtag)
           st->iOrientation = atoi(rtag->value);
 
         rtag = m_dllAvUtil.av_dict_get(pStream->metadata, "stereo_mode", NULL, 0);
         if (rtag && rtag->value)
           st->stereo_mode = rtag->value;
 
-        
+
         if ( m_pInput->IsStreamType(DVDSTREAM_TYPE_DVD) )
         {
           if (pStream->codec->codec_id == AV_CODEC_ID_PROBE)
@@ -1187,10 +1192,10 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
         {
           CDemuxStreamSubtitleFFmpeg* st = new CDemuxStreamSubtitleFFmpeg(this, pStream);
           stream = st;
-	    
+
           if(m_dllAvUtil.av_dict_get(pStream->metadata, "title", NULL, 0))
             st->m_description = m_dllAvUtil.av_dict_get(pStream->metadata, "title", NULL, 0)->value;
-	
+
           break;
         }
       }
@@ -1366,7 +1371,7 @@ int CDVDDemuxFFmpeg::GetChapter()
 void CDVDDemuxFFmpeg::GetChapterName(std::string& strChapterName)
 {
   CDVDInputStream::IChapter* ich = dynamic_cast<CDVDInputStream::IChapter*>(m_pInput);
-  if(ich)  
+  if(ich)
     ich->GetChapterName(strChapterName);
   else
   {
