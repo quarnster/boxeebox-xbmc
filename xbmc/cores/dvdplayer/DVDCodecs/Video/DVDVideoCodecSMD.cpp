@@ -140,6 +140,12 @@ int CDVDVideoCodecSMD::Decode(BYTE *pData, int iSize, double dts, double pts)
   VERBOSE();
   int ret = 0;
 
+  if (!m_DecodeStarted)
+  {
+    m_DecodeStarted = true;
+    return VC_FLUSHED;
+  }
+
   if(!pData)
   {
     return ret;
@@ -159,7 +165,6 @@ void CDVDVideoCodecSMD::Reset(void)
   // Decoder flush, reset started flag and dump all input and output.
   if(m_Device)
   {
-    m_DecodeStarted = false;
     m_Device->Reset();
   }
 }
@@ -188,6 +193,7 @@ void CDVDVideoCodecSMD::SetSpeed(int iSpeed)
   switch (iSpeed)
   {
     case DVD_PLAYSPEED_PAUSE:
+      m_DecodeStarted = false;
       Reset();
       break;
   }

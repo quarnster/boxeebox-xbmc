@@ -1227,6 +1227,7 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
 
 #ifdef HAS_INTEL_SMD
   pts = iPlayingClock;
+  pPicture->pts += m_iVideoDelay - DVD_SEC_TO_TIME(g_renderManager.GetDisplayLatency());
 #endif
   ProcessOverlays(pPicture, pts);
 

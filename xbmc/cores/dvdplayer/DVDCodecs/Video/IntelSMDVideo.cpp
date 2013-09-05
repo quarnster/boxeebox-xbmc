@@ -920,7 +920,6 @@ void CIntelSMDVideo::Reset()
     delete m_buffer;
     m_buffer = NULL;
   }
-
   g_IntelSMDGlobals.FlushVideoDecoder();
   g_IntelSMDGlobals.FlushVideoRender();
 }
@@ -957,8 +956,7 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
     h264_viddec_init (&m_H264_converter);
 
     m_bNeedH264Conversion = h264_viddec_parse_codec_priv_data(&m_H264_converter,(unsigned char *)extradata, extradata_size);
-    //printf("h264_viddec_parse_codec_priv_data %d\n", m_bNeedH264Conversion);
-
+    printf("h264_viddec_parse_codec_priv_data %d\n", m_bNeedH264Conversion);
   }
 
   if (ffmpegCodedId == CODEC_ID_WMV3 &&  extradata_size >= 4){
@@ -1174,8 +1172,7 @@ int CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, doub
   if (
      !m_bFlushFlag &&
       queueLen < maxQueue &&
-     !m_buffer->m_buffers.empty() &&
-      position.segment_time != ISMD_NO_PTS && // Just keep emitting frames until we figure out where we are
+     position.segment_time != ISMD_NO_PTS && // Just keep emitting frames until we figure out where we are
       ismd_ret == ISMD_SUCCESS)
   {
     // Report that the frame is "dropped" just to queue up frames a bit
