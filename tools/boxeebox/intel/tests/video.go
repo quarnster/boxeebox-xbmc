@@ -1,9 +1,8 @@
 package main
 
 /*
-#cgo LDFLAGS: -lismd_viddec -lismd_vidrend -lismd_vidpproc -lismd_bufmon -lavformat -lavcodec -lavutil
+#cgo LDFLAGS: -lismd_viddec -lismd_vidrend -lismd_vidpproc -lavformat -lavcodec -lavutil
 #include <libgdl.h>
-#include <ismd_bufmon.h>
 #include <ismd_core.h>
 #include <ismd_viddec.h>
 #include <ismd_vidpproc.h>
@@ -36,9 +35,8 @@ import (
 
 var (
 	m_main_clock                                                                                                                                            C.ismd_clock_t
-	m_video_bufmon, m_viddec, m_video_proc, m_video_render                                                                                                  C.ismd_dev_t
+	m_viddec, m_video_proc, m_video_render                                                                                                                  C.ismd_dev_t
 	m_viddec_input_port, m_viddec_output_port, m_video_input_port_proc, m_video_output_port_proc, m_video_input_port_renderer, m_video_output_port_renderer C.ismd_port_handle_t
-	m_video_codec                                                                                                                                           C.ismd_codec_type_t
 )
 
 func CreateStartPacket(start_pts C.ismd_pts_t, buffer_handle C.ismd_buffer_handle_t) {
@@ -99,11 +97,6 @@ func Init(codec_type C.ismd_codec_type_t, plane C.gdl_plane_id_t) {
 	log.Printf("%128s: %02d", "ismd_vidrend_set_flush_policy", C.ismd_vidrend_set_flush_policy(m_video_render, C.ISMD_VIDREND_FLUSH_POLICY_REPEAT_FRAME))
 	log.Printf("%128s: %02d", "ismd_vidrend_set_stop_policy", C.ismd_vidrend_set_stop_policy(m_video_render, C.ISMD_VIDREND_STOP_POLICY_DISPLAY_BLACK))
 	log.Printf("%128s: %02d", "ismd_vidrend_enable_max_hold_time", C.ismd_vidrend_enable_max_hold_time(m_video_render, 30, 1))
-	log.Printf("%128s: %02d", "ismd_bufmon_open", C.ismd_bufmon_open(&m_video_bufmon))
-	var underrun C.ismd_event_t
-	log.Printf("%128s: %02d", "ismd_bufmon_add_renderer", C.ismd_bufmon_add_renderer(m_video_bufmon, m_video_render, &underrun))
-	log.Printf("%128s: %02d", "ismd_dev_set_underrun_event", C.ismd_dev_set_underrun_event(m_video_render, underrun))
-	log.Printf("%128s: %02d", "ismd_dev_set_clock", C.ismd_dev_set_clock(m_video_bufmon, m_main_clock))
 	log.Printf("%128s: %02d", "ismd_port_connect", C.ismd_port_connect(m_viddec_output_port, m_video_input_port_proc))
 	log.Printf("%128s: %02d", "ismd_port_connect", C.ismd_port_connect(m_video_output_port_proc, m_video_input_port_renderer))
 
@@ -117,7 +110,6 @@ func Flush() {
 	log.Printf("%128s: %02d", "ismd_dev_flush", C.ismd_dev_flush(m_viddec))
 	log.Printf("%128s: %02d", "ismd_dev_flush", C.ismd_dev_flush(m_video_proc))
 	log.Printf("%128s: %02d", "ismd_dev_flush", C.ismd_dev_flush(m_video_render))
-	log.Printf("%128s: %02d", "ismd_dev_flush", C.ismd_dev_flush(m_video_bufmon))
 }
 
 func SetBaseTime(time C.ismd_time_t) {
@@ -128,7 +120,6 @@ func SetState(state C.ismd_dev_state_t) {
 	log.Printf("%128s: %02d", "ismd_dev_set_state", C.ismd_dev_set_state(m_viddec, state))
 	log.Printf("%128s: %02d", "ismd_dev_set_state", C.ismd_dev_set_state(m_video_proc, state))
 	log.Printf("%128s: %02d", "ismd_dev_set_state", C.ismd_dev_set_state(m_video_render, state))
-	log.Printf("%128s: %02d", "ismd_dev_set_state", C.ismd_dev_set_state(m_video_bufmon, state))
 }
 
 func GetCurrentTime() (ret C.ismd_time_t) {
@@ -149,7 +140,6 @@ func Destroy() {
 	log.Printf("%128s: %02d", "ismd_dev_close", C.ismd_dev_close(m_viddec))
 	log.Printf("%128s: %02d", "ismd_dev_close", C.ismd_dev_close(m_video_proc))
 	log.Printf("%128s: %02d", "ismd_dev_close", C.ismd_dev_close(m_video_render))
-	log.Printf("%128s: %02d", "ismd_dev_close", C.ismd_dev_close(m_video_bufmon))
 	log.Printf("%128s: %02d", "ismd_clock_free", C.ismd_clock_free(m_main_clock))
 }
 
@@ -169,54 +159,18 @@ func DvdToIsmdPts(pts float64) C.ismd_pts_t {
 
 var (
 	flushFlag = true
-	start     C.ismd_pts_t
-	counter   int
 )
 
 func WriteToInputPort(data uintptr, length C.size_t, pts float64, bufSize C.size_t) int {
 	newPts := DvdToIsmdPts(pts)
 	if flushFlag {
-		start = newPts
+		start := newPts
 		log.Printf("Flush %f", float64(newPts)/90000.0)
-
-		nt := C.ismd_time_t(newPts)
-		if GetCurrentTime() < nt {
-			// Just initialize the time to a value that allows adjustments in both positive
-			// and negative directions.
-			SetCurrentTime(nt + 60*90000)
-		}
 		Flush()
 		SendStartPacket(start, m_viddec_input_port)
 		SetBaseTime(GetCurrentTime() + 90000)
 		SetState(C.ISMD_DEV_STATE_PLAY)
 		flushFlag = false
-	}
-	var (
-		basetime C.ismd_time_t
-	)
-	C.ismd_vidrend_get_base_time(m_video_render, &basetime)
-	current := start + C.ismd_pts_t(GetCurrentTime()-basetime)
-	if GetCurrentTime() < basetime {
-		current = 0
-	}
-	if int(newPts) != C.ISMD_NO_PTS && newPts < current {
-		// Try to prevent out of order problems
-		newPts = current
-	}
-	counter++
-
-	if true || counter%30 == 0 {
-		current := GetCurrentTime()
-		currentVideo := start + C.ismd_pts_t(current-basetime)
-		diff := (float64)(newPts) - (float64)(currentVideo)
-		log.Printf("\ncurrent videorenderer time: %f, timestamp: %f (should be: videorenderer time + ~1 second), ffmpeg timestamp: %f, actual diff: %f", float64(currentVideo)/90000.0, float64(newPts)/90000.0, pts/1000000.0, diff/90000.0)
-		// if diff > 2*90000 {
-		// 	old := start
-
-		// 	start = newPts - 1*90000 + C.ismd_pts_t(basetime-current)
-		// 	log.Printf("Something's broken... adjusting sync %f -> %f", float64(old)/90000.0, float64(start)/90000.0)
-		// 	SendStartPacket(start, m_viddec_input_port)
-		// }
 	}
 	for length > 0 {
 		var (
@@ -309,9 +263,28 @@ func main() {
 		log.Fatalf("Could not open codec context: %d", err)
 	}
 	log.Printf("fmt_ctx: %+v", fmt_ctx)
-	log.Printf("video codec: %+v", (*fmt_ctx.streams).codec)
+	streams := (*[32]*C.AVStream)(unsafe.Pointer(fmt_ctx.streams))
+	log.Printf("video stream codec: %+v", streams[video_stream_idx].codec.codec_id)
 
-	Init(C.ISMD_CODEC_TYPE_MPEG2, C.GDL_PLANE_ID_UPP_C)
+	log.Printf("time_base: %+v", streams[video_stream_idx].time_base)
+	num := 1000000 * float64(streams[video_stream_idx].time_base.num)
+	den := float64(streams[video_stream_idx].time_base.den)
+
+	var codec C.ismd_codec_type_t
+	switch vc := streams[video_stream_idx].codec.codec_id; vc {
+	case C.AV_CODEC_ID_H264:
+		codec = C.ISMD_CODEC_TYPE_H264
+	case C.AV_CODEC_ID_MPEG1VIDEO:
+		fallthrough
+	case C.AV_CODEC_ID_MPEG2VIDEO:
+		codec = C.ISMD_CODEC_TYPE_MPEG2
+	case C.AV_CODEC_ID_MPEG4:
+		codec = C.ISMD_CODEC_TYPE_MPEG4
+	default:
+		log.Fatalf("Unhandled video codec: %d", vc)
+	}
+
+	Init(codec, C.GDL_PLANE_ID_UPP_C)
 	defer Destroy()
 
 	C.av_init_packet(&pkt)
@@ -324,38 +297,24 @@ func main() {
 		running = false
 	}()
 	frame := 0
-	// var last float64
-	// var lastdts float64
 	for running && C.av_read_frame(fmt_ctx, &pkt) >= 0 {
 		orig_pkt := pkt
+		wrote := false
 		for pkt.stream_index == video_stream_idx && (pkt.size > 0) {
-			pts := float64(pkt.pts)
-			//			dts := float64(pkt.dts)
-			// log.Printf("pts: %.2f, diff: %.2f, dts: %.2f, diff: %.2f", pts, pts-last, dts, dts-lastdts)
-			// last = pts
-			// lastdts = dts
-			WriteToInputPort(uintptr(unsafe.Pointer(pkt.data)), C.size_t(pkt.size), 1000.0*(pts/(2*30.0)), 32*1024)
-			// ret = decode_packet(&got_frame, 0)
-			// if ret < 0 {
-			// 	break
-			// }
-			// pkt.data += ret
-			// pkt.size -= ret
+			pts := num * float64(pkt.pts) / den
+			WriteToInputPort(uintptr(unsafe.Pointer(pkt.data)), C.size_t(pkt.size), pts, 32*1024)
+			wrote = true
 			break
 		}
-		frame++
-		if frame%100 == 0 {
-			var stat C.ismd_vidrend_stats_t
-			C.ismd_vidrend_get_stats(m_video_render, &stat)
-			log.Printf("%+v", stat)
+		if wrote {
+			frame++
+			if frame%100 == 0 {
+				var stat C.ismd_vidrend_stats_t
+				C.ismd_vidrend_get_stats(m_video_render, &stat)
+				log.Printf("%+v", stat)
+			}
 		}
 
 		C.av_free_packet(&orig_pkt)
 	}
-	// pkt.data = NULL
-	// pkt.size = 0
-	// do {
-	//     decode_packet(&got_frame, 1);
-	// } while (got_frame);
-
 }
