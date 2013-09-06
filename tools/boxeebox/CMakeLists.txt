@@ -201,8 +201,13 @@ add_custom_target(
 )
 
 add_custom_target(
+	gconv
+	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/lib/gconv ${TARGET_DIR}/gconv
+)
+
+add_custom_target(
 	dist
-	DEPENDS shares libdist pythonlibs quickdist
+	DEPENDS shares libdist pythonlibs quickdist gconv
 )
 
 add_custom_target(
