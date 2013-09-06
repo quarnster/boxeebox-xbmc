@@ -226,10 +226,9 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
   CLog::Log(LOGINFO, "CIntelSMDRenderer::Configure width %d height %d d_width %d d_height %d fps %f flags %d\n",
       width, height, d_width, d_height, fps, flags);
 
-  // if(width == 0 || height == 0 || d_width == 0 || d_height == 0)
-  //   return true;
+  if(width == 0 || height == 0 || d_width == 0 || d_height == 0)
+    return true;
 
-  Flush();
   // print overscan values
   RESOLUTION iRes = g_graphicsContext.GetVideoResolution();
   const RESOLUTION_INFO& res = CDisplaySettings::Get().GetResolutionInfo(iRes);
@@ -334,12 +333,15 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
 
   bool discontinuity = m_bFlushFlag || picture->ismdbuf->m_bFlush;
   static int lastClockChange = 0;
+  double dvdTime2 = CDVDClock::GetMasterClock()->GetClock();
+  if (dvdTime2 < 0)
+    dvdTime2 = 0;
+  ismd_time_t dvdTime = g_IntelSMDGlobals.DvdToIsmdPts(dvdTime2);
 
   if(discontinuity || g_IntelSMDGlobals.GetRenderState() != ISMD_DEV_STATE_PLAY)
   {
     // g_IntelSMDGlobals.FlushVideoDecoder();
     // g_IntelSMDGlobals.FlushVideoRender();
-    ismd_time_t dvdTime = g_IntelSMDGlobals.DvdToIsmdPts(CDVDClock::GetMasterClock()->GetClock());
     if (discontinuity)
     {
       start = g_IntelSMDGlobals.DvdToIsmdPts(picture->ismdbuf->firstpts);
@@ -368,7 +370,7 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
     m_bFlushFlag = false;
   }
   ismd_time_t current = g_IntelSMDGlobals.GetCurrentTime();
-  double expected = CDVDClock::GetMasterClock()->GetClock()/(double)DVD_TIME_BASE;
+  double expected = dvdTime2/(double)DVD_TIME_BASE;
   double actual = (current - base + start)/90000.0;
   double diff = expected-actual;
   if (lastClockChange != 0)
@@ -377,15 +379,13 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
   {
     lastClockChange = 0;
     diff = diff*90000;
-    ismd_time_t curr;
-    ismd_clock_get_time(g_IntelSMDGlobals.GetSMDClock(), &curr);
-    if (curr > diff)
+    if (current > diff)
     {
       ismd_clock_adjust_time(g_IntelSMDGlobals.GetSMDClock(), diff);
       ismd_time_t adj;
       ismd_clock_get_time(g_IntelSMDGlobals.GetSMDClock(), &adj);
 
-      printf("Adjusting clock: %.2f -> %.2f, %.2f\n", curr/90000.0, adj/90000.0, diff/90000.0);
+      printf("Adjusting clock: %.2f -> %.2f, %.2f\n", current/90000.0, adj/90000.0, diff/90000.0);
     }
   }
 
