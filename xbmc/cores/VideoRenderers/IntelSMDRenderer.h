@@ -104,6 +104,8 @@ protected:
 
   virtual int NextYV12Texture();
 
+  virtual void FlushAndSync(ismd_port_handle_t inputPort, bool flush, double firstpts, double add);
+
   bool m_bConfigured;
   unsigned m_iFlags;
 

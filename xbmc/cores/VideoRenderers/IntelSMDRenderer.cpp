@@ -296,47 +296,25 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
   return true;
 }
 
-bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
-  if (picture->format != RENDER_FMT_ISMD)
-    return false;
+void CIntelSMDRenderer::FlushAndSync(ismd_port_handle_t inputPort, bool flush, double firstpts, double add)
+{
+  static ismd_pts_t start = g_IntelSMDGlobals.DvdToIsmdPts(firstpts);
+  static ismd_pts_t base = g_IntelSMDGlobals.GetCurrentTime();
+  static int lastClockChange = 0;
 
-  static int count = 0;
-  if (++count % 100 == 0) {
-//     g_IntelSMDGlobals.PrintVideoStreamStats();
-     g_IntelSMDGlobals.PrintRenderStats();
-  }
+  if (firstpts < 0)
+    firstpts = 0;
 
-  if (picture->pts < 0)
-    picture->pts = 0;
-  if (picture->ismdbuf->pts < 0)
-    picture->ismdbuf->pts = 0;
-  if (picture->ismdbuf->firstpts < 0)
-    picture->ismdbuf->firstpts = 0;
-
-  ismd_port_handle_t inputPort = g_IntelSMDGlobals.GetVidDecInput();
-
-  if(inputPort == -1)
-  {
-    printf("CIntelSMDVideo::WriteToInputPort input port is -1\n");
-    return false;
-  }
-  double add = picture->pts - picture->ismdbuf->pts;
+  bool discontinuity = m_bFlushFlag || flush;
+  double dvdTime2 = CDVDClock::GetMasterClock()->GetClock();
+  if (dvdTime2 < 0)
+    dvdTime2 = 0;
+  ismd_time_t dvdTime = g_IntelSMDGlobals.DvdToIsmdPts(dvdTime2);
   ismd_pts_t addPts;
   if (add > 0)
     addPts = g_IntelSMDGlobals.DvdToIsmdPts(add);
   else
     addPts = g_IntelSMDGlobals.DvdToIsmdPts(-add);
-
-  static ismd_pts_t start = g_IntelSMDGlobals.DvdToIsmdPts(picture->ismdbuf->firstpts);
-  static ismd_pts_t base = g_IntelSMDGlobals.GetCurrentTime();
-
-
-  bool discontinuity = m_bFlushFlag || picture->ismdbuf->m_bFlush;
-  static int lastClockChange = 0;
-  double dvdTime2 = CDVDClock::GetMasterClock()->GetClock();
-  if (dvdTime2 < 0)
-    dvdTime2 = 0;
-  ismd_time_t dvdTime = g_IntelSMDGlobals.DvdToIsmdPts(dvdTime2);
 
   if(discontinuity || g_IntelSMDGlobals.GetRenderState() != ISMD_DEV_STATE_PLAY)
   {
@@ -344,7 +322,7 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
     // g_IntelSMDGlobals.FlushVideoRender();
     if (discontinuity)
     {
-      start = g_IntelSMDGlobals.DvdToIsmdPts(picture->ismdbuf->firstpts);
+      start = g_IntelSMDGlobals.DvdToIsmdPts(firstpts);
 
       if (add > 0)
       {
@@ -364,7 +342,10 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
     printf("flushing in AddPicture: %.2f, %.2f\n", start/90000.0, base/90000.0);
     g_IntelSMDGlobals.SetVideoRenderBaseTime(base);
     g_IntelSMDGlobals.SendStartPacket(start, inputPort);
-    g_IntelSMDGlobals.SetVideoDecoderState(ISMD_DEV_STATE_PLAY);
+    if (m_format == RENDER_FMT_ISMD)
+    {
+      g_IntelSMDGlobals.SetVideoDecoderState(ISMD_DEV_STATE_PLAY);
+    }
     g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PLAY);
     m_bRunning = true;
     m_bFlushFlag = false;
@@ -388,7 +369,39 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
       printf("Adjusting clock: %.2f -> %.2f, %.2f\n", current/90000.0, adj/90000.0, diff/90000.0);
     }
   }
+}
 
+bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
+{
+  if (picture->format != RENDER_FMT_ISMD)
+    return false;
+
+  static int count = 0;
+  if (++count % 100 == 0) {
+//     g_IntelSMDGlobals.PrintVideoStreamStats();
+     g_IntelSMDGlobals.PrintRenderStats();
+  }
+
+  if (picture->pts < 0)
+    picture->pts = 0;
+  if (picture->ismdbuf->pts < 0)
+    picture->ismdbuf->pts = 0;
+
+  ismd_port_handle_t inputPort = g_IntelSMDGlobals.GetVidDecInput();
+
+  if(inputPort == -1)
+  {
+    printf("CIntelSMDVideo::WriteToInputPort input port is -1\n");
+    return false;
+  }
+  double add = picture->pts - picture->ismdbuf->pts;
+  ismd_pts_t addPts;
+  if (add > 0)
+    addPts = g_IntelSMDGlobals.DvdToIsmdPts(add);
+  else
+    addPts = g_IntelSMDGlobals.DvdToIsmdPts(-add);
+
+  FlushAndSync(inputPort, picture->ismdbuf->m_bFlush, picture->ismdbuf->firstpts, add);
 
   ismd_result_t ismd_ret = ISMD_SUCCESS;
   ismd_es_buf_attr_t *buf_attrs;
@@ -417,8 +430,8 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index) {
       buf_attrs->original_pts -= addPts;
       buf_attrs->local_pts -= addPts;
     }
-    buf_attrs->discontinuity = discontinuity;
-    discontinuity = false;
+    buf_attrs->discontinuity = /*discontinuity*/false;
+//    discontinuity = false;
 
     ismd_ret = ismd_buffer_update_desc(buffer, &buffer_desc);
     if (ismd_ret != ISMD_SUCCESS)
@@ -467,8 +480,6 @@ int CIntelSMDRenderer::GetImage(YV12Image *image, /*double pts,*/ int source, bo
     return 0;
   }
 
-//TODO(q)  m_PTS = pts;
-
   /* take next available buffer */
   if( source == AUTOSOURCE )
     source = NextYV12Texture();
@@ -483,6 +494,7 @@ int CIntelSMDRenderer::GetImage(YV12Image *image, /*double pts,*/ int source, bo
   image->height = m_sourceHeight;
   image->width = m_sourceWidth;
   image->flags = 0;
+  image->bpp = 1;
 
   for(int i = 0; i < MAX_PLANES; i++)
   {
@@ -543,6 +555,7 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
     return;
   }
 
+  m_PTS = 0;
   ismd_pts = g_IntelSMDGlobals.DvdToIsmdPts(m_PTS);
 
   unsigned int destHeight = ROUND_DOWN(m_sourceHeight, 16);
@@ -611,44 +624,7 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
     return;
   }
 
-  if(m_bFlushFlag)
-  {
-    // TODO(q)
-    //ismd_pts_t start = ismd_pts;
-
-    // if(start == ISMD_NO_PTS && g_IntelSMDGlobals.GetAudioStartPts() != ISMD_NO_PTS)
-    //   start = g_IntelSMDGlobals.GetAudioStartPts();
-
-    // if (!m_bUsingSMDecoder)
-    // {
-    //   g_IntelSMDGlobals.FlushVideoRender();
-
-    //   if (g_IntelSMDGlobals.GetFlushFlag())
-    //   {
-    //     //printf("Setting base time from renderer\n");
-    //     g_IntelSMDGlobals.SetBaseTime(g_IntelSMDGlobals.GetCurrentTime());
-    //     g_IntelSMDGlobals.SetFlushFlag(false);
-    //   }
-    // }
-
-    // Add a new_segment buffer to the next video buffer
-    // g_IntelSMDGlobals.SetVideoStartPts(start);
-    // g_IntelSMDGlobals.SetVideoRenderBaseTime(g_IntelSMDGlobals.GetBaseTime());
-    // g_IntelSMDGlobals.CreateStartPacket(start, renderBuf);
-    // g_IntelSMDGlobals.SetVideoRenderState(ISMD_DEV_STATE_PLAY);
-    m_bFlushFlag = false;
-    m_bRunning = true;
-  }
-
-  // ismd_pts_t syncPTS = g_IntelSMDGlobals.Resync();
-  // if(syncPTS != ISMD_NO_PTS)
-  // {
-  //   if(syncPTS != g_IntelSMDGlobals.GetVideoStartPts())
-  //   {
-  //     g_IntelSMDGlobals.SetVideoStartPts(syncPTS);
-  //     g_IntelSMDGlobals.CreateStartPacket(syncPTS, renderBuf);
-  //   }
-  // }
+  FlushAndSync(video_input_port_proc, false, m_PTS, 0);
 
   result = ISMD_ERROR_UNSPECIFIED;
 
