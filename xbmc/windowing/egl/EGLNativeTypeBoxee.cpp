@@ -23,6 +23,7 @@
 #include "guilib/gui3d.h"
 #include "cores/IntelSMDGlobals.h"
 #include "utils/log.h"
+#include <math.h>
 
 CEGLNativeTypeBoxee::CEGLNativeTypeBoxee()
 {
@@ -30,7 +31,7 @@ CEGLNativeTypeBoxee::CEGLNativeTypeBoxee()
 
 CEGLNativeTypeBoxee::~CEGLNativeTypeBoxee()
 {
-} 
+}
 
 bool CEGLNativeTypeBoxee::CheckCompatibility()
 {
@@ -90,7 +91,7 @@ bool CEGLNativeTypeBoxee::CreateNativeWindow()
 #else
   return false;
 #endif
-}  
+}
 
 bool CEGLNativeTypeBoxee::GetNativeDisplay(XBNativeDisplayType **nativeDisplay) const
 {
@@ -119,16 +120,12 @@ bool CEGLNativeTypeBoxee::DestroyNativeWindow()
   return true;
 }
 
-bool CEGLNativeTypeBoxee::GetNativeResolution(RESOLUTION_INFO *res) const
+static void tvmode_to_RESOLUTION_INFO(gdl_tvmode_t tvmode, RESOLUTION_INFO *res)
 {
-#if defined(TARGET_BOXEE)
-  gdl_display_info_t   display_info;
-  gdl_get_display_info(GDL_DISPLAY_ID_0, &display_info);
+  res->iWidth = tvmode.width;
+  res->iHeight= tvmode.height;
 
-  res->iWidth = display_info.tvmode.width;
-  res->iHeight= display_info.tvmode.height;
-
-  switch (display_info.tvmode.refresh)
+  switch (tvmode.refresh)
   {
     case GDL_REFRESH_23_98: res->fRefreshRate = 23.98; break;
     case GDL_REFRESH_24:    res->fRefreshRate = 24;    break;
@@ -143,12 +140,12 @@ bool CEGLNativeTypeBoxee::GetNativeResolution(RESOLUTION_INFO *res) const
     default:                res->fRefreshRate = 0;     break;
   }
 
-  if (display_info.tvmode.interlaced)
+  if (tvmode.interlaced)
   {
     res->dwFlags = D3DPRESENTFLAG_INTERLACED;
   }
   else
-  { 
+  {
     res->dwFlags = D3DPRESENTFLAG_PROGRESSIVE;
   }
   res->iScreen       = 0;
@@ -159,6 +156,47 @@ bool CEGLNativeTypeBoxee::GetNativeResolution(RESOLUTION_INFO *res) const
   res->iScreenHeight = res->iHeight;
   res->strMode.Format("%dx%d @ %.2f%s - Full Screen", res->iScreenWidth, res->iScreenHeight, res->fRefreshRate,
   res->dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "");
+}
+
+static void RESOLUTION_INFO_to_tvmode(const RESOLUTION_INFO &res, gdl_tvmode_t *tvmode)
+{
+  tvmode->width  = res.iWidth;
+  tvmode->height = res.iHeight;
+
+  const gdl_refresh_t lut[] =  {
+      GDL_REFRESH_23_98,
+      GDL_REFRESH_24,
+      GDL_REFRESH_25,
+      GDL_REFRESH_29_97,
+      GDL_REFRESH_30,
+      GDL_REFRESH_50,
+      GDL_REFRESH_59_94,
+      GDL_REFRESH_60,
+      GDL_REFRESH_48,
+      GDL_REFRESH_47_96
+  };
+  const float vals[] = {23.98, 24, 25, 29.97, 30, 50, 59.94, 60, 48, 47.96};
+  float best = 1000;
+  int bi = 0;
+  for (int i = 0; i < 10; i++)
+  {
+    float curr = fabs(res.fRefreshRate-vals[i]);
+    if (curr < best)
+    {
+      best = curr;
+      bi = i;
+    }
+  }
+  tvmode->refresh = lut[bi];
+  tvmode->interlaced = (gdl_boolean_t) (res.dwFlags == D3DPRESENTFLAG_INTERLACED);
+}
+
+bool CEGLNativeTypeBoxee::GetNativeResolution(RESOLUTION_INFO *res) const
+{
+#if defined(TARGET_BOXEE)
+  gdl_display_info_t   display_info;
+  gdl_get_display_info(GDL_DISPLAY_ID_0, &display_info);
+  tvmode_to_RESOLUTION_INFO(display_info.tvmode, res);
   CLog::Log(LOGNOTICE,"Current resolution: %s\n",res->strMode.c_str());
   return true;
 #else
@@ -168,20 +206,36 @@ bool CEGLNativeTypeBoxee::GetNativeResolution(RESOLUTION_INFO *res) const
 
 bool CEGLNativeTypeBoxee::SetNativeResolution(const RESOLUTION_INFO &res)
 {
+/*
+  CLog::Log(LOGNOTICE,"Setting resolution: %s\n",res.strMode.c_str());
+  gdl_display_info_t   display_info;
+  memset(&display_info, 0, sizeof(display_info));
+  RESOLUTION_INFO_to_tvmode(res, &display_info.tvmode);
+  gdl_ret_t ret = gdl_set_display_info(&display_info);
+  printf("ret: %d\n", GDL_SUCCESS);
+  RESOLUTION_INFO check;
+  GetNativeResolution(&check);
+  printf("current resolution: %s\n", check.strMode.c_str());
+  return ret == GDL_SUCCESS;
+*/
   return false;
 }
 
 bool CEGLNativeTypeBoxee::ProbeResolutions(std::vector<RESOLUTION_INFO> &resolutions)
 {
-  RESOLUTION_INFO res;
-  bool ret = false;
-  ret = GetNativeResolution(&res);
-  if (ret && res.iWidth > 1 && res.iHeight > 1)
+  for (int i = 0; true; i++)
   {
+    RESOLUTION_INFO res;
+    gdl_tvmode_t tvmode;
+    if (gdl_get_port_tvmode_by_index(GDL_PD_ID_HDMI, i, &tvmode) != GDL_SUCCESS)
+    {
+      break;
+    }
+    tvmode_to_RESOLUTION_INFO(tvmode, &res);
+    printf("Available: %s\n", res.strMode.c_str());
     resolutions.push_back(res);
-    return true;
   }
-  return false;
+  return !resolutions.empty();
 }
 
 bool CEGLNativeTypeBoxee::GetPreferredResolution(RESOLUTION_INFO *res) const
