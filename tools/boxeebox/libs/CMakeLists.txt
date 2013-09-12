@@ -125,7 +125,7 @@ ExternalProject_Add(
 )
 ExternalProject_Add(
 	libpng
-	URL 				http://sourceforge.net/projects/libpng/files/libpng16/1.6.3/libpng-1.6.3.tar.gz/download
+	URL 				http://sourceforge.net/projects/libpng/files/libpng16/older-releases/1.6.3/libpng-1.6.3.tar.gz/download
 	URL_MD5 			98b652b6c174c35148f1f5f513fe490d
 	CONFIGURE_COMMAND 	CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib ${BASIC_CONF}
 	BUILD_COMMAND		CFLAGS=-I${TARGET_DIR}/include make ${PARALLEL}
