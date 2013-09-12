@@ -1,0 +1,3 @@
+<advancedsettings>
+    <cputempcommand>echo "$(/opt/local/bin/dtool 2|awk '{printf("%d\n",$1 + 0.5);}') C"</cputempcommand>
+</advancedsettings>

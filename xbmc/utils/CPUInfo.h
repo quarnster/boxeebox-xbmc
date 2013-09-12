@@ -74,6 +74,7 @@ public:
   bool getTemperature(CTemperature& temperature);
   std::string& getCPUModel() { return m_cpuModel; }
   std::string& getCPUBogoMips() { return m_cpuBogoMips; }
+  int getCPUFreqStatic() { return m_cpuFreqStatic; }
   std::string& getCPUHardware() { return m_cpuHardware; }
   std::string& getCPURevision() { return m_cpuRevision; }
   std::string& getCPUSerial() { return m_cpuSerial; }
@@ -105,6 +106,7 @@ private:
   XbmcThreads::EndTime m_nextUsedReadTime; 
   std::string  m_cpuModel;
   std::string  m_cpuBogoMips;
+  int        m_cpuFreqStatic;
   std::string  m_cpuHardware;
   std::string  m_cpuRevision;
   std::string  m_cpuSerial;

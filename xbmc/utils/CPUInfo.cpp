@@ -374,6 +374,15 @@ CCPUInfo::CCPUInfo(void)
           }
         }
       }
+      else if (strncmp(buffer, "cpu MHz", strlen("cpu MHz"))==0)
+      {
+        char *needle = strstr(buffer, ":");
+        if (needle && strlen(needle)>3)
+        {
+           needle+=2;
+	    sscanf(needle, "%d", &m_cpuFreqStatic);
+        }
+      }
     }
     fclose(fCPUInfo);
   }
@@ -490,6 +499,12 @@ float CCPUInfo::getCPUFrequency()
   if (sysctlbyname("dev.cpu.0.freq", &hz, &len, NULL, 0) != 0)
     hz = 0;
   return (float)hz;
+#elif defined(TARGET_BOXEE)
+  if (m_cpuFreqStatic)
+  {
+    return m_cpuFreqStatic;
+  }
+  return 0;
 #else
   int value = 0;
   if (m_fCPUFreq)
