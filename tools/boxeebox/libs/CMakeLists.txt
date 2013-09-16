@@ -346,14 +346,23 @@ ExternalProject_Add(
 
 ExternalProject_Add(
         nfs
-        URL https://sites.google.com/site/libnfstarballs/li/libnfs-1.6.0.tar.gz
-        PATCH_COMMAND <SOURCE_DIR>/bootstrap --prefix=${TARGET_DIR} --host=${TARGET} 
+        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.6.0.tar.gz
+        PATCH_COMMAND     <SOURCE_DIR>/bootstrap --prefix=${TARGET_DIR} --host=${TARGET} 
         CONFIGURE_COMMAND ${BASIC_CONF}
-        BUILD_COMMAND make
-        INSTALL_COMMAND make install
-        BUILD_IN_SOURCE 1
+        BUILD_COMMAND     make
+        INSTALL_COMMAND   make install
+        BUILD_IN_SOURCE   1
 )
 
+ExternalProject_Add(
+	rtmpdump
+	GIT_REPOSITORY    git://git.ffmpeg.org/rtmpdump
+	CONFIGURE_COMMAND ""
+        BUILD_COMMAND     make DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
+        INSTALL_COMMAND   make install DESTDIR=${SYSROOT} #XLIBS=-L${TARGET_DIR}/lib INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
+        BUILD_IN_SOURCE   1
+        DEPENDS           zlib openssl
+)
 
 file(WRITE ${CMAKE_BINARY_DIR}/python_configure_helper.sh
 "
