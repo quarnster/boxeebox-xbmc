@@ -344,6 +344,17 @@ ExternalProject_Add(
 	DEPENDS 			util-linux
 )
 
+ExternalProject_Add(
+        nfs
+        URL https://sites.google.com/site/libnfstarballs/li/libnfs-1.6.0.tar.gz
+        PATCH_COMMAND <SOURCE_DIR>/bootstrap --prefix=${TARGET_DIR} --host=${TARGET} 
+        CONFIGURE_COMMAND ${BASIC_CONF}
+        BUILD_COMMAND make
+        INSTALL_COMMAND make install
+        BUILD_IN_SOURCE 1
+)
+
+
 file(WRITE ${CMAKE_BINARY_DIR}/python_configure_helper.sh
 "
 export CC=${TARGET}-gcc
