@@ -359,7 +359,7 @@ ExternalProject_Add(
 	GIT_REPOSITORY    git://git.ffmpeg.org/rtmpdump
 	CONFIGURE_COMMAND ""
         BUILD_COMMAND     make DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
-        INSTALL_COMMAND   make install DESTDIR=${SYSROOT} #XLIBS=-L${TARGET_DIR}/lib INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
+        INSTALL_COMMAND   make install DESTDIR=${SYSROOT}
         BUILD_IN_SOURCE   1
         DEPENDS           zlib openssl
 )
