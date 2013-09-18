@@ -206,19 +206,119 @@ bool CEGLNativeTypeBoxee::GetNativeResolution(RESOLUTION_INFO *res) const
 
 bool CEGLNativeTypeBoxee::SetNativeResolution(const RESOLUTION_INFO &res)
 {
-/*
   CLog::Log(LOGNOTICE,"Setting resolution: %s\n",res.strMode.c_str());
+
+
+  gdl_pixel_format_t pixelFormat = GDL_PF_ARGB_32;
+  gdl_color_space_t colorSpace = GDL_COLOR_SPACE_RGB;
+  gdl_rectangle_t srcRect;
+  gdl_rectangle_t dstRect;
+  gdl_ret_t rc = GDL_SUCCESS;
+  gdl_boolean_t hdmiEnabled = GDL_FALSE;
+
+  gdl_plane_id_t m_gdlPlane = GDL_GRAPHICS_PLANE;
+
   gdl_display_info_t   display_info;
   memset(&display_info, 0, sizeof(display_info));
   RESOLUTION_INFO_to_tvmode(res, &display_info.tvmode);
-  gdl_ret_t ret = gdl_set_display_info(&display_info);
-  printf("ret: %d\n", GDL_SUCCESS);
-  RESOLUTION_INFO check;
-  GetNativeResolution(&check);
-  printf("current resolution: %s\n", check.strMode.c_str());
-  return ret == GDL_SUCCESS;
-*/
-  return false;
+  display_info.id          = GDL_DISPLAY_ID_0;
+  display_info.flags       = 0;
+  display_info.bg_color    = 0;
+  display_info.color_space = GDL_COLOR_SPACE_RGB;
+  display_info.gamma       = GDL_GAMMA_LINEAR;
+
+  rc = gdl_set_display_info(&display_info);
+
+  if ( rc != GDL_SUCCESS)
+    {
+      CLog::Log(LOGERROR, "Could not set display mode for display 0");
+      return false;
+    }
+
+  // Setup composite output to NTSC. In order to support PAL we need to use 720x576i50.
+  display_info.id           = GDL_DISPLAY_ID_1;
+  display_info.flags        = 0;
+  display_info.bg_color     = 0;
+  display_info.color_space  = GDL_COLOR_SPACE_RGB;
+  display_info.gamma        = GDL_GAMMA_LINEAR;
+  display_info.tvmode.width      = 720;
+  display_info.tvmode.height     = 480;
+  display_info.tvmode.refresh    = GDL_REFRESH_59_94;
+  display_info.tvmode.interlaced = GDL_TRUE;
+
+  rc = gdl_set_display_info(&display_info);
+
+  dstRect.origin.x = 0;
+  dstRect.origin.y = 0;
+  dstRect.width = res.iWidth;
+  dstRect.height = res.iHeight;
+
+  srcRect.origin.x = 0;
+  srcRect.origin.y = 0;
+  srcRect.width = res.iWidth;
+  srcRect.height = res.iHeight;
+
+  if (gdl_port_set_attr(GDL_PD_ID_HDMI, GDL_PD_ATTR_ID_HDCP, &hdmiEnabled) != GDL_SUCCESS)
+    {
+      CLog::Log(LOGWARNING, "Could not disable HDCP");
+    }
+
+  if (GDL_SUCCESS == rc)
+    {
+      rc = gdl_plane_config_begin(m_gdlPlane);
+    }
+
+  rc = gdl_plane_reset(m_gdlPlane);
+  if (GDL_SUCCESS == rc)
+    {
+      rc = gdl_plane_config_begin(m_gdlPlane);
+    }
+
+  if (GDL_SUCCESS == rc)
+    {
+      rc = gdl_plane_set_attr(GDL_PLANE_SRC_COLOR_SPACE, &colorSpace);
+    }
+
+  if (GDL_SUCCESS == rc)
+    {
+      rc = gdl_plane_set_attr(GDL_PLANE_PIXEL_FORMAT, &pixelFormat);
+    }
+
+  if (GDL_SUCCESS == rc)
+    {
+      rc = gdl_plane_set_attr(GDL_PLANE_DST_RECT, &dstRect);
+    }
+
+  if (GDL_SUCCESS == rc)
+    {
+      rc = gdl_plane_set_attr(GDL_PLANE_SRC_RECT, &srcRect);
+    }
+
+  if(GDL_SUCCESS == rc)
+    {
+      gdl_boolean_t scalineEnabled = GDL_FALSE;
+      rc = gdl_plane_set_attr(GDL_PLANE_UPSCALE, &scalineEnabled);
+    }
+
+  if (GDL_SUCCESS == rc)
+    {
+      rc = gdl_plane_config_end(GDL_FALSE);
+    }
+  else
+    {
+      gdl_plane_config_end(GDL_TRUE);
+    }
+
+  if (GDL_SUCCESS != rc)
+    {
+      CLog::Log(LOGERROR, "GDL configuration failed! GDL error code is 0x%x\n", rc);
+      return false;
+    }
+
+  CLog::Log(LOGINFO, "GDL plane setup complete");
+
+
+  return true;
 }
 
 bool CEGLNativeTypeBoxee::ProbeResolutions(std::vector<RESOLUTION_INFO> &resolutions)
