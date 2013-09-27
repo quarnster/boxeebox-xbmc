@@ -364,6 +364,36 @@ ExternalProject_Add(
         DEPENDS           zlib openssl
 )
 
+ExternalProject_Add(
+        dbus_expat
+        URL http://downloads.sourceforge.net/expat/expat-2.1.0.tar.gz
+        URL_MD5 dd7dab7a5fea97d2a6a43f511449b7cd
+        CONFIGURE_COMMAND ${BASIC_CONF} CC=${TARGET}-gcc
+        BUILD_COMMAND make
+        INSTALL_COMMAND make install
+)
+
+file(WRITE ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh
+"
+export CC=${TARGET}-gcc
+export CXX=${TARGET}-g++
+export CFLAGS=-I${TARGET_DIR}/include
+export LIBS=\"-lpthread -lrt\"
+${CMAKE_BINARY_DIR}/dbus-prefix/src/dbus/configure --prefix=${TARGET_DIR} --host=${TARGET} --without-x --disable-xml-docs --disable-doxygen-docs ac_cv_have_abstract_sockets=yes
+")
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh)
+
+ExternalProject_Add(
+        dbus
+        URL               http://dbus.freedesktop.org/releases/dbus/dbus-1.6.14.tar.gz
+        URL_MD5           1c22aebdf952e92908800f1ec2aeb0c4
+        CONFIGURE_COMMAND ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh  
+        BUILD_COMMAND     make
+        INSTALL_COMMAND   make install
+        BUILD_IN_SOURCE   1
+        DEPENDS           dbus_expat
+)
+
 file(WRITE ${CMAKE_BINARY_DIR}/python_configure_helper.sh
 "
 export CC=${TARGET}-gcc

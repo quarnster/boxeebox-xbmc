@@ -115,6 +115,7 @@ set(libs
 	libsmbclient.so.0
         libnfs.so.1
         librtmp.so.0
+        libdbus-1.so
 	libtdb.so.1
 	libtalloc.so.2
 	libtevent.so.0
