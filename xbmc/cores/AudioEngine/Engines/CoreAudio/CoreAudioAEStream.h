@@ -22,13 +22,14 @@
 #include <samplerate.h>
 #include <list>
 
-#include "CoreAudioRingBuffer.h"
 #include "ICoreAudioSource.h"
-#include "cores/AudioEngine/AEAudioFormat.h"
+#include "cores/AudioEngine/Utils/AEAudioFormat.h"
 #include "cores/AudioEngine/Interfaces/AEStream.h"
 #include "cores/AudioEngine/Utils/AEConvert.h"
 #include "cores/AudioEngine/Utils/AERemap.h"
 #include "cores/AudioEngine/Utils/AELimiter.h"
+#include "cores/AudioEngine/Utils/AERingBuffer.h"
+#include "cores/AudioEngine/Utils/AEBuffer.h"
 
 #if defined(TARGET_DARWIN_IOS)
 # include "CoreAudioAEHALIOS.h"
@@ -36,13 +37,15 @@
 # include "CoreAudioAEHALOSX.h"
 #endif
 
+class AERingBuffer;
 class CoreAudioRingBuffer;
+class IAEEncoder;
 
 class CCoreAudioAEStream : public IAEStream, public ICoreAudioSource
 {
 protected:
   friend class CCoreAudioAE;
-  CCoreAudioAEStream(enum AEDataFormat format, unsigned int sampleRate, unsigned int encodedSamplerate, CAEChannelInfo channelLayout, unsigned int options);
+  CCoreAudioAEStream(enum AEDataFormat format, unsigned int sampleRate, unsigned int encodedSamplerate, CAEChannelInfo channelLayout, unsigned int options, bool transcode);
   virtual ~CCoreAudioAEStream();
 
   CAUOutputDevice    *m_outputUnit;
@@ -110,6 +113,8 @@ public:
 
 private:
   void InternalFlush();
+  void ResetEncoder();
+  bool SetupEncoder();
 
   OSStatus OnRender(AudioUnitRenderActionFlags *ioActionFlags, 
     const AudioTimeStamp *inTimeStamp, 
@@ -117,7 +122,8 @@ private:
     UInt32 inNumberFrames, 
     AudioBufferList *ioData);
 
-  AEDataFormat            m_rawDataFormat;
+  AEDataFormat            m_rawDataFormat;          /* the format we're output if we're outputting in raw mode */
+  AEDataFormat            m_incomingFormat;         /* the format of the stream being sent to us */
 
   AEAudioFormat           m_OutputFormat;
   unsigned int            m_chLayoutCountOutput;
@@ -128,6 +134,7 @@ private:
 
   //bool                    m_forceResample; /* true if we are to force resample even when the rates match */
   //bool                    m_resample;      /* true if the audio needs to be resampled  */
+  bool                    m_transcode;     /* true if we need to transcode to ac3 */
   bool                    m_convert;       /* true if the bitspersample needs converting */
   bool                    m_valid;         /* true if the stream is valid */
   bool                    m_delete;        /* true if CCoreAudioAE is to free this object */
@@ -139,7 +146,7 @@ private:
 
   CAEConvert::AEConvertToFn m_convertFn;
 
-  CoreAudioRingBuffer    *m_Buffer;
+  AERingBuffer           *m_Buffer;
   float                  *m_convertBuffer;      /* buffer for converted data */
   int                     m_convertBufferSize;
   //float                  *m_resampleBuffer;     /* buffer for resample data */
@@ -172,5 +179,11 @@ private:
   bool              m_doRemap;
   void              Upmix(void *input, unsigned int channelsInput, void *output, unsigned int channelsOutput, unsigned int frames, AEDataFormat dataFormat);
   bool              m_firstInput;
+  bool              m_flushRequested;
+  
+  /* the encoder */
+  AEAudioFormat     m_encoderFormat;
+  IAEEncoder       *m_encoder;
+  CAEBuffer         m_unencodedBuffer;          /* this spools up the data before we encode it */
 };
 

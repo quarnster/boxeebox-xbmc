@@ -100,7 +100,7 @@ bool CRenderSystemDX::InitRenderSystem()
 {
   m_bVSync = true;
 
-  m_useD3D9Ex = (g_advancedSettings.m_AllowD3D9Ex && g_sysinfo.IsWindowsVersionAtLeast(CSysInfo::WindowsVersionVista) && LoadD3D9Ex());
+  m_useD3D9Ex = (g_advancedSettings.m_AllowD3D9Ex && LoadD3D9Ex());
   m_pD3D = NULL;
 
   if (m_useD3D9Ex)
@@ -1043,5 +1043,17 @@ bool CRenderSystemDX::SupportsStereo(RENDER_STEREO_MODE mode) const
   }
 }
 
+void CRenderSystemDX::FlushGPU()
+{
+  IDirect3DQuery9* pEvent = NULL;
+
+  m_pD3DDevice->CreateQuery(D3DQUERYTYPE_EVENT, &pEvent);
+  if (pEvent != NULL)
+  {
+    pEvent->Issue(D3DISSUE_END);
+    while (S_FALSE == pEvent->GetData(NULL, 0, D3DGETDATA_FLUSH))
+      Sleep(1);
+  }
+}
 
 #endif

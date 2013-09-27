@@ -118,7 +118,6 @@ void CAdvancedSettings::Initialize()
   m_audioAudiophile = false;
   m_allChannelStereo = false;
   m_streamSilence = false;
-  m_audioSinkBufferDurationMsec = 50;
 
   //default hold time of 25 ms, this allows a 20 hertz sine to pass undistorted
   m_limiterHold = 0.025f;
@@ -161,7 +160,7 @@ void CAdvancedSettings::Initialize()
   m_videoIgnoreSecondsAtStart = 3*60;
   m_videoIgnorePercentAtEnd   = 8.0f;
   m_videoPlayCountMinimumPercent = 90.0f;
-  m_videoVDPAUScaling = false;
+  m_videoVDPAUScaling = -1;
   m_videoNonLinStretchRatio = 0.5f;
   m_videoEnableHighQualityHwScalers = false;
   m_videoAutoScaleMaxFps = 30.0f;
@@ -169,6 +168,8 @@ void CAdvancedSettings::Initialize()
   m_videoAllowMpeg4VAAPI = false;  
   m_videoDisableBackgroundDeinterlace = false;
   m_videoCaptureUseOcclusionQuery = -1; //-1 is auto detect
+  m_videoVDPAUtelecine = false;
+  m_videoVDPAUdeintSkipChromaHD = false;
   m_DXVACheckCompatibility = false;
   m_DXVACheckCompatibilityPresent = false;
   m_DXVAForceProcessorRenderer = true;
@@ -433,6 +434,11 @@ bool CAdvancedSettings::Load()
   for (unsigned int i = 0; i < m_settingsFiles.size(); i++)
     ParseSettingsFile(m_settingsFiles[i]);
   ParseSettingsFile(CProfilesManager::Get().GetUserDataItem("advancedsettings.xml"));
+
+  // Add the list of disc stub extensions (if any) to the list of video extensions
+  if (!m_discStubExtensions.IsEmpty())
+    m_videoExtensions += "|" + m_discStubExtensions;
+
   return true;
 }
 
@@ -495,7 +501,6 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
     XMLUtils::GetBoolean(pElement, "allchannelstereo", m_allChannelStereo);
     XMLUtils::GetBoolean(pElement, "streamsilence", m_streamSilence);
     XMLUtils::GetString(pElement, "transcodeto", m_audioTranscodeTo);
-    XMLUtils::GetInt(pElement, "audiosinkbufferdurationmsec", m_audioSinkBufferDurationMsec);
 
     TiXmlElement* pAudioExcludes = pElement->FirstChildElement("excludefromlisting");
     if (pAudioExcludes)
@@ -594,7 +599,7 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
     XMLUtils::GetString(pElement,"cleandatetime", m_videoCleanDateTimeRegExp);
     XMLUtils::GetString(pElement,"ppffmpegdeinterlacing",m_videoPPFFmpegDeint);
     XMLUtils::GetString(pElement,"ppffmpegpostprocessing",m_videoPPFFmpegPostProc);
-    XMLUtils::GetBoolean(pElement,"vdpauscaling",m_videoVDPAUScaling);
+    XMLUtils::GetInt(pElement,"vdpauscaling",m_videoVDPAUScaling);
     XMLUtils::GetFloat(pElement, "nonlinearstretchratio", m_videoNonLinStretchRatio, 0.01f, 1.0f);
     XMLUtils::GetBoolean(pElement,"enablehighqualityhwscalers", m_videoEnableHighQualityHwScalers);
     XMLUtils::GetFloat(pElement,"autoscalemaxfps",m_videoAutoScaleMaxFps, 0.0f, 1000.0f);
@@ -603,6 +608,8 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
     XMLUtils::GetBoolean(pElement,"allowmpeg4vaapi",m_videoAllowMpeg4VAAPI);    
     XMLUtils::GetBoolean(pElement, "disablebackgrounddeinterlace", m_videoDisableBackgroundDeinterlace);
     XMLUtils::GetInt(pElement, "useocclusionquery", m_videoCaptureUseOcclusionQuery, -1, 1);
+    XMLUtils::GetBoolean(pElement,"vdpauInvTelecine",m_videoVDPAUtelecine);
+    XMLUtils::GetBoolean(pElement,"vdpauHDdeintSkipChroma",m_videoVDPAUdeintSkipChromaHD);
 
     TiXmlElement* pStagefrightElem = pElement->FirstChildElement("stagefright");
     if (pStagefrightElem)
@@ -951,10 +958,6 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
   pExts = pRootElement->FirstChildElement("discstubextensions");
   if (pExts)
     GetCustomExtensions(pExts, m_discStubExtensions);
-
-  // Add the list of disc stub extensions (if any) to the list of video extensions
-  if (!m_discStubExtensions.IsEmpty())
-    m_videoExtensions += "|" + m_discStubExtensions;
 
   m_vecTokens.clear();
   CLangInfo::LoadTokens(pRootElement->FirstChild("sorttokens"),m_vecTokens);

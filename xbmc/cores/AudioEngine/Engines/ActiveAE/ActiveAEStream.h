@@ -19,8 +19,8 @@
  *
  */
 
-#include "AEAudioFormat.h"
 #include "Interfaces/AEStream.h"
+#include "Utils/AEAudioFormat.h"
 #include "Utils/AELimiter.h"
 #include "Utils/AEConvert.h"
 
@@ -92,6 +92,8 @@ protected:
   IAEStream *m_streamSlave;
   CAEConvert::AEConvertToFn m_convertFn;
   CCriticalSection m_streamLock;
+  uint8_t *m_leftoverBuffer;
+  int m_leftoverBytes;
 
   // only accessed by engine
   CActiveAEBufferPool *m_inputBuffers;
@@ -113,6 +115,7 @@ protected:
   float m_fadingBase;
   float m_fadingTarget;
   int m_fadingTime;
+  bool m_forceResampler;
 };
 }
 

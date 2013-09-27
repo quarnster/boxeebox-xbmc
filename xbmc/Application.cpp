@@ -92,7 +92,6 @@
 #include "settings/MediaSettings.h"
 #include "settings/MediaSourceSettings.h"
 #include "settings/SkinSettings.h"
-#include "settings/Settings.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/CPUInfo.h"
 #include "utils/RssManager.h"
@@ -316,11 +315,6 @@
 #include "utils/StringUtils.h"
 #include "utils/Weather.h"
 #include "DatabaseManager.h"
-
-#include "settings/DisplaySettings.h"
-#include "settings/MediaSettings.h"
-#include "settings/SkinSettings.h"
-#include "view/ViewStateSettings.h"
 
 #ifdef TARGET_POSIX
 #include "XHandle.h"
@@ -1573,7 +1567,7 @@ void CApplication::OnSettingChanged(const CSetting *setting)
   if (settingId == "lookandfeel.skin" ||
       settingId == "lookandfeel.font" ||
       settingId == "lookandfeel.skincolors")
-    ReloadSkin();
+    CApplicationMessenger::Get().ExecBuiltIn("ReloadSkin");
   else if (settingId == "lookandfeel.skintheme")
   {
     // also set the default color theme
@@ -1588,11 +1582,11 @@ void CApplication::OnSettingChanged(const CSetting *setting)
     if (!StringUtils::EqualsNoCase(colorTheme, CSettings::Get().GetString("lookandfeel.skincolors")))
       CSettings::Get().SetString("lookandfeel.skincolors", colorTheme);
     else
-      ReloadSkin();
+      CApplicationMessenger::Get().ExecBuiltIn("ReloadSkin");
   }
   else if (settingId == "lookandfeel.skinzoom")
     g_windowManager.SendMessage(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_WINDOW_RESIZE);
-  else if (StringUtils::StartsWith(settingId, "audiooutput."))
+  else if (StringUtils::StartsWithNoCase(settingId, "audiooutput."))
   {
     if (settingId == "audiooutput.guisoundmode")
     {
@@ -1774,7 +1768,7 @@ void CApplication::LoadSkin(const SkinPtr& skin)
   if (!skin)
   {
     CLog::Log(LOGERROR, "failed to load requested skin, fallback to \"%s\" skin", defaultSkin.c_str());
-    CSettings::Get().SetString("lookandfeel.skin", defaultSkin);
+    CSettings::Get().GetSetting("lookandfeel.skin")->Reset();
     return ;
   }
 
@@ -1786,8 +1780,7 @@ void CApplication::LoadSkin(const SkinPtr& skin)
     if (strcmpi(skin->ID().c_str(), defaultSkin.c_str()) != 0)
     {
       CLog::Log(LOGERROR, "home.xml doesn't exist in skin: %s, fallback to \"%s\" skin", skin->ID().c_str(), defaultSkin.c_str());
-      CSettings::Get().SetString("lookandfeel.skin", defaultSkin);
-      LoadSkin(defaultSkin);
+      CSettings::Get().GetSetting("lookandfeel.skin")->Reset();
       CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Error, g_localizeStrings.Get(24102), g_localizeStrings.Get(24103));
       return ;
     }
@@ -2231,13 +2224,13 @@ bool CApplication::OnKey(const CKey& key)
   m_idleTimer.StartZero();
   bool processKey = AlwaysProcess(action);
 
-  if (StringUtils::StartsWith(action.GetName(),"CECToggleState") || StringUtils::StartsWith(action.GetName(),"CECStandby"))
+  if (StringUtils::StartsWithNoCase(action.GetName(),"CECToggleState") || StringUtils::StartsWithNoCase(action.GetName(),"CECStandby"))
   {
     bool ret = true;
 
     CLog::Log(LOGDEBUG, "%s: action %s [%d], toggling state of playing device", __FUNCTION__, action.GetName().c_str(), action.GetID());
     // do not wake up the screensaver right after switching off the playing device
-    if (StringUtils::StartsWith(action.GetName(),"CECToggleState"))
+    if (StringUtils::StartsWithNoCase(action.GetName(),"CECToggleState"))
       ret = CApplicationMessenger::Get().CECToggleState();
     else
       ret = CApplicationMessenger::Get().CECStandby();
@@ -3376,9 +3369,6 @@ void CApplication::Stop(int exitCode)
 
     SaveFileState(true);
 
-    // cancel any jobs from the jobmanager
-    CJobManager::GetInstance().CancelJobs();
-
     g_alarmClock.StopThread();
 
     if( m_bSystemScreenSaverEnable )
@@ -3400,6 +3390,9 @@ void CApplication::Stop(int exitCode)
     m_AppFocused = false;
     m_ExitCode = exitCode;
     CLog::Log(LOGNOTICE, "stop all");
+
+    // cancel any jobs from the jobmanager
+    CJobManager::GetInstance().CancelJobs();
 
     // stop scanning before we kill the network and so on
     if (m_musicInfoScanner->IsScanning())

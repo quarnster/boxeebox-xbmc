@@ -628,11 +628,7 @@ bool CGUIWindowVideoBase::ShowIMDB(CFileItem *item, const ScraperPtr &info2)
       if (item->m_bIsFolder)
         list.SetPath(URIUtils::GetParentPath(strPath));
       else
-      {
-        CStdString path;
-        URIUtils::GetDirectory(strPath, path);
-        list.SetPath(path);
-      }
+        list.SetPath(URIUtils::GetDirectory(strPath));
 
       int iString=198;
       if (info->Content() == CONTENT_TVSHOWS)
@@ -995,7 +991,7 @@ bool CGUIWindowVideoBase::OnInfo(int iItem)
       strDir = item->GetVideoInfoTag()->m_strPath;
     }
     else
-      URIUtils::GetDirectory(item->GetPath(),strDir);
+      strDir = URIUtils::GetDirectory(item->GetPath());
 
     SScanSettings settings;
     bool foundDirectly = false;
@@ -1067,9 +1063,15 @@ bool CGUIWindowVideoBase::ShowPlaySelection(CFileItemPtr& item)
   if (item->m_lStartOffset)
     return true;
 
-  if (item->IsBDFile())
+  CStdString path;
+  if (item->IsVideoDb())
+    path = item->GetVideoInfoTag()->m_strFileNameAndPath;
+  else
+    path = item->GetPath();
+
+  if (URIUtils::GetFileName(path) == "index.bdmv")
   {
-    CStdString root = URIUtils::GetParentPath(item->GetPath());
+    CStdString root = URIUtils::GetParentPath(path);
     URIUtils::RemoveSlashAtEnd(root);
     if(URIUtils::GetFileName(root) == "BDMV")
     {
@@ -1079,7 +1081,7 @@ bool CGUIWindowVideoBase::ShowPlaySelection(CFileItemPtr& item)
     }
   }
 
-  if (URIUtils::HasExtension(item->GetPath(), ".iso|.img"))
+  if (URIUtils::HasExtension(path, ".iso|.img"))
   {
     CURL url2("udf://");
     url2.SetHostName(item->GetPath());
@@ -1789,7 +1791,7 @@ bool CGUIWindowVideoBase::CheckFilterAdvanced(CFileItemList &items) const
 
 bool CGUIWindowVideoBase::CanContainFilter(const CStdString &strDirectory) const
 {
-  return StringUtils::StartsWith(strDirectory, "videodb://");
+  return StringUtils::StartsWithNoCase(strDirectory, "videodb://");
 }
 
 void CGUIWindowVideoBase::AddToDatabase(int iItem)
@@ -1943,8 +1945,7 @@ void CGUIWindowVideoBase::OnSearchItemFound(const CFileItem* pSelItem)
   }
   else
   {
-    CStdString strPath;
-    URIUtils::GetDirectory(pSelItem->GetPath(), strPath);
+    CStdString strPath = URIUtils::GetDirectory(pSelItem->GetPath());
 
     Update(strPath);
 

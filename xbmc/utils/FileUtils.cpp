@@ -93,7 +93,7 @@ bool CFileUtils::RenameFile(const CStdString &strFile)
       {
         CStdString filePath(paths[i]);
         URIUtils::RemoveSlashAtEnd(filePath);
-        URIUtils::GetDirectory(filePath, filePath);
+        filePath = URIUtils::GetDirectory(filePath);
         filePath = URIUtils::AddFileToFolder(filePath, strFileName);
         if (CFile::Rename(paths[i], filePath))
           success = true;
@@ -116,27 +116,27 @@ bool CFileUtils::RemoteAccessAllowed(const CStdString &strPath)
   while (URIUtils::IsInArchive(realPath))
     realPath = CURL(realPath).GetHostName();
 
-  if (StringUtils::StartsWith(realPath, "virtualpath://upnproot/"))
+  if (StringUtils::StartsWithNoCase(realPath, "virtualpath://upnproot/"))
     return true;
-  else if (StringUtils::StartsWith(realPath, "musicdb://"))
+  else if (StringUtils::StartsWithNoCase(realPath, "musicdb://"))
     return true;
-  else if (StringUtils::StartsWith(realPath, "videodb://"))
+  else if (StringUtils::StartsWithNoCase(realPath, "videodb://"))
     return true;
-  else if (StringUtils::StartsWith(realPath, "library://video"))
+  else if (StringUtils::StartsWithNoCase(realPath, "library://video"))
     return true;
-  else if (StringUtils::StartsWith(realPath, "sources://video"))
+  else if (StringUtils::StartsWithNoCase(realPath, "sources://video"))
     return true;
-  else if (StringUtils::StartsWith(realPath, "special://musicplaylists"))
+  else if (StringUtils::StartsWithNoCase(realPath, "special://musicplaylists"))
     return true;
-  else if (StringUtils::StartsWith(realPath, "special://profile/playlists"))
+  else if (StringUtils::StartsWithNoCase(realPath, "special://profile/playlists"))
     return true;
-  else if (StringUtils::StartsWith(realPath, "special://videoplaylists"))
+  else if (StringUtils::StartsWithNoCase(realPath, "special://videoplaylists"))
     return true;
-  else if (StringUtils::StartsWith(realPath, "addons://sources"))
+  else if (StringUtils::StartsWithNoCase(realPath, "addons://sources"))
     return true;
-  else if (StringUtils::StartsWith(realPath, "upnp://"))
+  else if (StringUtils::StartsWithNoCase(realPath, "upnp://"))
     return true;
-  else if (StringUtils::StartsWith(realPath, "plugin://"))
+  else if (StringUtils::StartsWithNoCase(realPath, "plugin://"))
     return true;
   bool isSource;
   for (unsigned int index = 0; index < SourcesSize; index++)

@@ -314,7 +314,7 @@ bool CAddon::MeetsVersion(const AddonVersion &version) const
   // if the addon is one of xbmc's extension point definitions (addonid starts with "xbmc.")
   // and the minversion is "0.0.0" i.e. no <backwards-compatibility> tag has been specified
   // we need to assume that the current version is not backwards-compatible and therefore check against the actual version
-  if (StringUtils::StartsWith(m_props.id, "xbmc.") &&
+  if (StringUtils::StartsWithNoCase(m_props.id, "xbmc.") &&
      (strlen(m_props.minversion.c_str()) == 0 || StringUtils::EqualsNoCase(m_props.minversion.c_str(), "0.0.0")))
     return m_props.version == version;
 
@@ -494,10 +494,9 @@ void CAddon::SaveSettings(void)
     return; // no settings to save
 
   // break down the path into directories
-  CStdString strRoot, strAddon;
-  URIUtils::GetDirectory(m_userSettingsPath, strAddon);
+  CStdString strAddon = URIUtils::GetDirectory(m_userSettingsPath);
   URIUtils::RemoveSlashAtEnd(strAddon);
-  URIUtils::GetDirectory(strAddon, strRoot);
+  CStdString strRoot = URIUtils::GetDirectory(strAddon);
   URIUtils::RemoveSlashAtEnd(strRoot);
 
   // create the individual folders
