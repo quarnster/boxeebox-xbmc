@@ -335,8 +335,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	samba
-	URL 				http://ftp.samba.org/pub/samba/samba-3.6.18.tar.gz
-	URL_MD5 			c7eec3e83fe4c4750240a8a0a214bbd4
+	URL 				http://ftp.samba.org/pub/samba/samba-3.6.19.tar.gz
+	URL_MD5 			afe9c7c590f3093555cd6e870d2532e1
 	CONFIGURE_COMMAND	CC=${TARGET}-gcc CFLAGS=-I${SYSROOT}/usr/local/include LDFLAGS=-L${SYSROOT}/usr/local/lib ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 ./configure --prefix=${TARGET_DIR} --host=${TARGET} samba_cv_CC_NEGATIVE_ENUM_VALUES=yes libreplace_cv_HAVE_GETADDRINFO=no ac_cv_file__proc_sys_kernel_core_pattern=yes  samba_cv_HAVE_STAT_ST_FLAGS=no samba_cv_DARWIN_INITGROUPS=no --without-ldap --without-krb5 --without-ads --disable-cups --enable-swat=no --with-winbind=no
 	BUILD_COMMAND 		${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} libsmbclient libtalloc libtevent libtdb
 	INSTALL_COMMAND 	${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} installlibsmbclient installlibtalloc installlibtevent installlibtdb
@@ -362,6 +362,36 @@ ExternalProject_Add(
         INSTALL_COMMAND   make install DESTDIR=${SYSROOT}
         BUILD_IN_SOURCE   1
         DEPENDS           zlib openssl
+)
+
+ExternalProject_Add(
+        dbus_expat
+        URL http://downloads.sourceforge.net/expat/expat-2.1.0.tar.gz
+        URL_MD5 dd7dab7a5fea97d2a6a43f511449b7cd
+        CONFIGURE_COMMAND ${BASIC_CONF} CC=${TARGET}-gcc
+        BUILD_COMMAND make
+        INSTALL_COMMAND make install
+)
+
+file(WRITE ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh
+"
+export CC=${TARGET}-gcc
+export CXX=${TARGET}-g++
+export CFLAGS=-I${TARGET_DIR}/include
+export LIBS=\"-lpthread -lrt\"
+${CMAKE_BINARY_DIR}/dbus-prefix/src/dbus/configure --prefix=${TARGET_DIR} --host=${TARGET} --without-x --disable-xml-docs --disable-doxygen-docs ac_cv_have_abstract_sockets=yes
+")
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh)
+
+ExternalProject_Add(
+        dbus
+        URL               http://dbus.freedesktop.org/releases/dbus/dbus-1.6.14.tar.gz
+        URL_MD5           1c22aebdf952e92908800f1ec2aeb0c4
+        CONFIGURE_COMMAND ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh  
+        BUILD_COMMAND     make
+        INSTALL_COMMAND   make install
+        BUILD_IN_SOURCE   1
+        DEPENDS           dbus_expat
 )
 
 file(WRITE ${CMAKE_BINARY_DIR}/python_configure_helper.sh
