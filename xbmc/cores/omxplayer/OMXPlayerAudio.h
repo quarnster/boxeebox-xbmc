@@ -55,7 +55,6 @@ protected:
   bool                      m_use_hw_decode;
   bool                      m_hw_decode;
   AEAudioFormat             m_format;
-  CAEChannelInfo            m_channelLayout;
   COMXAudioCodecOMX         *m_pAudioCodec;
   int                       m_speed;
   bool                      m_silence;
@@ -112,6 +111,7 @@ public:
   void SetVolume(float fVolume)                          { m_omxAudio.SetVolume(fVolume); }
   void SetMute(bool bOnOff)                              { m_omxAudio.SetMute(bOnOff); }
   void SetDynamicRangeCompression(long drc)              { m_omxAudio.SetDynamicRangeCompression(drc); }
+  float GetDynamicRangeAmplification()                   { return m_omxAudio.GetDynamicRangeAmplification(); }
   void SetSpeed(int iSpeed);
   int  GetAudioBitrate();
   std::string GetPlayerInfo();

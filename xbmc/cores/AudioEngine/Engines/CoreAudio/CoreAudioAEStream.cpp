@@ -26,6 +26,7 @@
 #include "xbmc/cores/AudioEngine/Interfaces/AE.h"
 #include "xbmc/cores/AudioEngine/AEFactory.h"
 #include "xbmc/cores/AudioEngine/Utils/AEUtil.h"
+#include "xbmc/cores/AudioEngine/Encoders/AEEncoderFFmpeg.h"
 #include "settings/Settings.h"
 #include "threads/SingleLock.h"
 #include "settings/AdvancedSettings.h"
@@ -88,7 +89,7 @@ void CCoreAudioAEStream::Upmix(void *input,
   }
 }
 
-CCoreAudioAEStream::CCoreAudioAEStream(enum AEDataFormat dataFormat, unsigned int sampleRate, unsigned int encodedSamplerate, CAEChannelInfo channelLayout, unsigned int options) :
+CCoreAudioAEStream::CCoreAudioAEStream(enum AEDataFormat dataFormat, unsigned int sampleRate, unsigned int encodedSamplerate, CAEChannelInfo channelLayout, unsigned int options, bool transcode) :
   m_outputUnit      (NULL ),
   m_valid           (false),
   m_delete          (false),
@@ -105,18 +106,45 @@ CCoreAudioAEStream::CCoreAudioAEStream(enum AEDataFormat dataFormat, unsigned in
   m_fadeRunning     (false),
   m_frameSize       (0    ),
   m_doRemap         (true ),
-  m_firstInput      (true )
+  m_firstInput      (true ),
+  m_flushRequested  (false),
+  m_encoder         (NULL )
 {
   m_ssrcData.data_out             = NULL;
+  m_transcode                     = transcode;
 
-  m_rawDataFormat                 = dataFormat;
-  m_StreamFormat.m_dataFormat     = dataFormat;
-  m_StreamFormat.m_sampleRate     = sampleRate;
-  m_StreamFormat.m_encodedRate    = 0;  //we don't support this
-  m_StreamFormat.m_channelLayout  = channelLayout;
+  if (!transcode)
+  {
+    m_rawDataFormat                 = dataFormat;
+    m_StreamFormat.m_dataFormat     = dataFormat;
+    m_StreamFormat.m_sampleRate     = sampleRate;
+    m_StreamFormat.m_encodedRate    = 0;  //we don't support this
+    m_StreamFormat.m_channelLayout  = channelLayout;
+    m_isRaw                         = COREAUDIO_IS_RAW(dataFormat);
+  }
+  else
+  {
+    m_rawDataFormat                 = AE_FMT_AC3;
+    m_StreamFormat.m_dataFormat     = AE_FMT_AC3;
+    m_StreamFormat.m_sampleRate     = 48000;
+    m_StreamFormat.m_encodedRate    = 0;  
+    enum AEChannel ac3Layout[3] = {AE_CH_RAW, AE_CH_RAW, AE_CH_NULL};
+    m_StreamFormat.m_channelLayout  = ac3Layout;
+    m_isRaw                         = true;
+    
+    // setup encoder format
+    m_encoderFormat.m_dataFormat    = dataFormat;
+    m_encoderFormat.m_sampleRate    = sampleRate;
+    m_encoderFormat.m_encodedRate   = 0;
+    m_encoderFormat.m_channelLayout = channelLayout;
+    m_encoderFormat.m_frames        = 0;
+    m_encoderFormat.m_frameSamples  = 0;
+    m_encoderFormat.m_frameSize     = 0;
+  }
+  
+  m_incomingFormat                = dataFormat;
   m_chLayoutCountStream           = m_StreamFormat.m_channelLayout.Count();
-  m_StreamFormat.m_frameSize      = (CAEUtil::DataFormatToBits(dataFormat) >> 3) * m_chLayoutCountStream;
-
+  m_StreamFormat.m_frameSize      = (CAEUtil::DataFormatToBits(m_rawDataFormat) >> 3) * m_chLayoutCountStream;
   m_OutputFormat                  = AE.GetAudioFormat();
   m_chLayoutCountOutput           = m_OutputFormat.m_channelLayout.Count();
 
@@ -130,7 +158,6 @@ CCoreAudioAEStream::CCoreAudioAEStream(enum AEDataFormat dataFormat, unsigned in
   m_remapBuffer                   = (uint8_t *)_aligned_malloc(m_remapBufferSize,16);
   m_vizRemapBuffer                = (uint8_t *)_aligned_malloc(m_vizRemapBufferSize,16);
 
-  m_isRaw                         = COREAUDIO_IS_RAW(dataFormat);
   m_limiter.SetSamplerate(AE.GetSampleRate());
 }
 
@@ -151,6 +178,12 @@ CCoreAudioAEStream::~CCoreAudioAEStream()
 
   delete m_Buffer; m_Buffer = NULL;
 
+  delete m_encoder;
+  m_encoder = NULL;
+  ResetEncoder();
+  
+  m_unencodedBuffer.DeAlloc();
+  
   /*
   if (m_resample)
   {
@@ -230,9 +263,9 @@ void CCoreAudioAEStream::Initialize()
   else
     m_OutputBytesPerSample = (CAEUtil::DataFormatToBits(m_OutputFormat.m_dataFormat) >> 3);
 
-  if (m_isRaw)
+  if (m_isRaw || m_transcode)
   {
-    // we are raw, which means we need to work in the output format
+    // we are raw or transcode, which means we need to work in the output format
     if (m_rawDataFormat != AE_FMT_LPCM)
     {
       m_StreamFormat = AE.GetAudioFormat();
@@ -265,10 +298,7 @@ void CCoreAudioAEStream::Initialize()
     }
 
     m_doRemap  = m_chLayoutCountStream != 2;
-  }
 
-  if (!m_isRaw)
-  {
     if (!m_vizRemap.Initialize(m_OutputFormat.m_channelLayout, CAEChannelInfo(AE_CH_LAYOUT_2_0), false, true))
     {
       m_valid = false;
@@ -276,7 +306,13 @@ void CCoreAudioAEStream::Initialize()
     }
   }
 
-  m_convert = m_StreamFormat.m_dataFormat != AE_FMT_FLOAT && !m_isRaw;
+  // only try to convert if we're not in AE_FMT_FLOAT and (we're not raw or we are transcoding)
+  m_convert =
+    (m_StreamFormat.m_dataFormat != AE_FMT_FLOAT && !m_isRaw)
+    ||
+    (m_incomingFormat != AE_FMT_FLOAT && m_transcode);
+  
+  
   //m_resample = false; //(m_StreamFormat.m_sampleRate != m_OutputFormat.m_sampleRate) && !m_isRaw;
 
   // if we need to convert, set it up
@@ -284,10 +320,23 @@ void CCoreAudioAEStream::Initialize()
   {
     // get the conversion function and allocate a buffer for the data
     CLog::Log(LOGDEBUG, "CCoreAudioAEStream::CCoreAudioAEStream - Converting from %s to AE_FMT_FLOAT", CAEUtil::DataFormatToStr(m_StreamFormat.m_dataFormat));
-    m_convertFn = CAEConvert::ToFloat(m_StreamFormat.m_dataFormat);
+    
+    if (!m_transcode)
+      m_convertFn = CAEConvert::ToFloat(m_StreamFormat.m_dataFormat);
+    else
+      m_convertFn = CAEConvert::ToFloat(m_incomingFormat);
 
     if (!m_convertFn)
       m_valid = false;
+  }
+  
+  // if we need to transcode, set it up
+  if (m_transcode)
+  {    
+    m_unencodedBuffer.Empty();
+
+    if (!m_encoder || !m_encoder->IsCompatible(m_encoderFormat))
+      SetupEncoder();
   }
 
   // if we need to resample, set it up
@@ -307,7 +356,7 @@ void CCoreAudioAEStream::Initialize()
   m_AvgBytesPerSec = m_OutputFormat.m_frameSize * m_OutputFormat.m_sampleRate;
 
   delete m_Buffer;
-  m_Buffer = new CoreAudioRingBuffer(m_AvgBytesPerSec);
+  m_Buffer = new AERingBuffer(m_AvgBytesPerSec);
 
   m_fadeRunning = false;
 
@@ -331,7 +380,7 @@ unsigned int CCoreAudioAEStream::AddData(void *data, unsigned int size)
   unsigned int addsize  = size;
   unsigned int channelsInBuffer = m_chLayoutCountStream;
 
-  if (!m_valid || size == 0 || data == NULL || !m_Buffer)
+  if (!m_valid || size == 0 || data == NULL || !m_Buffer || m_flushRequested)
     return 0;
 
   // if the stream is draining
@@ -363,6 +412,35 @@ unsigned int CCoreAudioAEStream::AddData(void *data, unsigned int size)
 
   if (samples == 0)
     return 0;
+
+  // transcode if we need to
+  if (m_transcode && m_encoder)
+  {
+    // put adddata in the unencodedBuffer
+    if (m_unencodedBuffer.Free() < addsize)
+      m_unencodedBuffer.ReAlloc(m_unencodedBuffer.Used() + addsize);
+    
+    m_unencodedBuffer.Push(adddata, addsize);
+    
+    unsigned int block = m_encoderFormat.m_frames * m_encoderFormat.m_frameSize;
+    
+    // only try to encode if we have enough data
+    if (m_unencodedBuffer.Used() >= block)
+    {
+        frames = m_encoder->Encode((float *)m_unencodedBuffer.Raw(block), m_encoderFormat.m_frames);
+        m_unencodedBuffer.Shift(NULL, frames * m_encoderFormat.m_frameSize);
+        addsize = m_encoder->GetData(&adddata);
+        samples = addsize / m_OutputBytesPerSample;
+    }
+    else
+      // return size here or whoever calling us will block if we return 0
+      // we have essentially been successful, because we add the audio to our buffer to encode
+      return size;
+  }
+
+  if (samples == 0)
+    return 0;
+
 
   // resample it if we need to
   /*
@@ -436,14 +514,23 @@ unsigned int CCoreAudioAEStream::AddData(void *data, unsigned int size)
   else
     m_Buffer->Write(adddata, addsize);
 
+  // still only return size to indicate success
+  // we likely wrote something !size to m_Buffer, but our called doesn't realy care
   return size;
 }
 
+// this is only called on the context of the coreaudio thread!
 unsigned int CCoreAudioAEStream::GetFrames(uint8_t *buffer, unsigned int size)
 {
   // if we have been deleted
   if (!m_valid || m_delete || !m_Buffer || m_paused)
     return 0;
+  
+  if (m_flushRequested)
+  {
+    InternalFlush();
+    return 0;
+  }
 
   unsigned int readsize = std::min(m_Buffer->GetReadSize(), size);
   m_Buffer->Read(buffer, readsize);
@@ -541,23 +628,31 @@ double CCoreAudioAEStream::GetDelay()
   if (m_delete || !m_Buffer)
     return 0.0f;
 
-  double delay = (double)(m_Buffer->GetReadSize()) / (double)m_AvgBytesPerSec;
-  delay += AE.GetDelay();
-
-  return delay;
+  double delayBuffer = (double)(m_Buffer->GetReadSize()) / (double)m_AvgBytesPerSec;
+  double delayTranscoder = 0.0;
+  
+  if (m_transcode)
+    delayTranscoder = (double)(m_unencodedBuffer.Used()) / (double)(m_encoderFormat.m_frameSize * m_encoderFormat.m_sampleRate);
+    
+  return AE.GetDelay() + delayBuffer + delayTranscoder;
 }
 
 bool CCoreAudioAEStream::IsBuffering()
 {
-  return m_Buffer->GetReadSize() == 0;
+  return (m_Buffer->GetReadSize() == 0 && m_unencodedBuffer.Used() == 0);
 }
 
 double CCoreAudioAEStream::GetCacheTime()
 {
   if (m_delete || !m_Buffer)
     return 0.0f;
-
-  return (double)(m_Buffer->GetReadSize()) / (double)m_AvgBytesPerSec;
+  double delayBuffer = (double)(m_Buffer->GetReadSize()) / (double)m_AvgBytesPerSec;
+  double delayTranscoder = 0.0;
+  
+  if (m_transcode)
+    delayTranscoder = (double)(m_unencodedBuffer.Used()) / (double)(m_encoderFormat.m_frameSize * m_encoderFormat.m_sampleRate);
+  
+  return AE.GetDelay() + delayBuffer + delayTranscoder;
 }
 
 double CCoreAudioAEStream::GetCacheTotal()
@@ -610,12 +705,13 @@ void CCoreAudioAEStream::Drain(bool wait)
 
 bool CCoreAudioAEStream::IsDrained()
 {
-  return m_Buffer->GetReadSize() <= 0;
+  return m_Buffer->GetReadSize() == 0;
 }
 
 void CCoreAudioAEStream::Flush()
 {
-  InternalFlush();
+  if (m_Buffer)
+    m_flushRequested = true;
 }
 
 float CCoreAudioAEStream::GetVolume()
@@ -668,6 +764,7 @@ void CCoreAudioAEStream::InternalFlush()
     }
   }
 
+  m_flushRequested = false;
   //if (m_Buffer)
   //  m_Buffer->Reset();
 }
@@ -793,4 +890,29 @@ OSStatus CCoreAudioAEStream::OnRender(AudioUnitRenderActionFlags *ioActionFlags,
     *ioActionFlags |= kAudioUnitRenderAction_OutputIsSilence;
 
   return noErr;
+}
+
+void CCoreAudioAEStream::ResetEncoder()
+{
+  if (m_encoder)
+    m_encoder->Reset();
+  m_unencodedBuffer.Empty();
+}
+
+bool CCoreAudioAEStream::SetupEncoder()
+{
+  ResetEncoder();
+  delete m_encoder;
+  m_encoder = NULL;
+  
+  if (!m_transcode)
+    return false;
+  
+  m_encoder = new CAEEncoderFFmpeg();
+  if (m_encoder && m_encoder->Initialize(m_encoderFormat))
+    return true;
+  
+  delete m_encoder;
+  m_encoder = NULL;
+  return false;
 }

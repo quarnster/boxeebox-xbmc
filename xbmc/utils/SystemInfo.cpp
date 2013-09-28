@@ -367,17 +367,10 @@ CStdString CSysInfo::GetCPUSerial()
 bool CSysInfo::IsAeroDisabled()
 {
 #ifdef TARGET_WINDOWS
-  if (IsWindowsVersionAtLeast(CSysInfo::WindowsVersionVista))
-  {
-    BOOL aeroEnabled = FALSE;
-    HRESULT res = DwmIsCompositionEnabled(&aeroEnabled);
-    if (SUCCEEDED(res))
-      return !aeroEnabled;
-  }
-  else
-  {
-    return true;
-  }
+  BOOL aeroEnabled = FALSE;
+  HRESULT res = DwmIsCompositionEnabled(&aeroEnabled);
+  if (SUCCEEDED(res))
+    return !aeroEnabled;
 #endif
   return false;
 }
@@ -450,7 +443,9 @@ bool CSysInfo::IsOS64bit()
 
 CStdString CSysInfo::GetKernelVersion()
 {
-#if defined (TARGET_POSIX)
+#if defined(TARGET_DARWIN)
+  return g_sysinfo.GetUnameVersion();
+#elif defined (TARGET_POSIX)
   struct utsname un;
   if (uname(&un)==0)
   {
