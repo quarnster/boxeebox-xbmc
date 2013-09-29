@@ -22,7 +22,7 @@
 namespace JSONRPC
 {
   const char* const JSONRPC_SERVICE_ID          = "http://xbmc.org/jsonrpc/ServiceDescription.json";
-  const char* const JSONRPC_SERVICE_VERSION     = "6.6.0";
+  const char* const JSONRPC_SERVICE_VERSION     = "6.6.2";
   const char* const JSONRPC_SERVICE_DESCRIPTION = "JSON-RPC API of XBMC";
 
   const char* const JSONRPC_SERVICE_TYPES[] = {  
@@ -174,7 +174,7 @@ namespace JSONRPC
     "\"Playlist.Item\": {"
       "\"type\": ["
         "{ \"type\": \"object\", \"properties\": { \"file\": { \"type\": \"string\", \"description\": \"Path to a file (not a directory) to be added to the playlist\", \"required\": true } }, \"additionalProperties\": false },"
-        "{ \"type\": \"object\", \"properties\": { \"directory\": { \"type\": \"string\", \"required\": true }, \"recursive\": { \"type\": \"boolean\", \"default\": false }, \"media\": { \"$ref\": \"Files.Media\" } }, \"additionalProperties\": false },"
+        "{ \"type\": \"object\", \"properties\": { \"directory\": { \"type\": \"string\", \"required\": true }, \"recursive\": { \"type\": \"boolean\", \"default\": false }, \"media\": { \"$ref\": \"Files.Media\", \"default\": \"files\" } }, \"additionalProperties\": false },"
         "{ \"type\": \"object\", \"properties\": { \"movieid\": { \"$ref\": \"Library.Id\", \"required\": true } }, \"additionalProperties\": false },"
         "{ \"type\": \"object\", \"properties\": { \"episodeid\": { \"$ref\": \"Library.Id\", \"required\": true } }, \"additionalProperties\": false },"
         "{ \"type\": \"object\", \"properties\": { \"musicvideoid\": { \"$ref\": \"Library.Id\", \"required\": true } }, \"additionalProperties\": false },"
@@ -818,14 +818,14 @@ namespace JSONRPC
       "\"extends\": \"Item.Fields.Base\","
       "\"items\": { \"type\": \"string\", \"enum\": [ \"thumbnail\", \"lockmode\" ] }"
     "}",
-	  "\"Profiles.Details.Profile\": {"
+    "\"Profiles.Details.Profile\": {"
       "\"extends\": \"Item.Details.Base\","
       "\"properties\": {"
         "\"thumbnail\": { \"type\": \"string\" },"
         "\"lockmode\": { \"type\": \"integer\" }"
       "}"
     "}",
-	  "\"List.Filter.Rule\": {"
+    "\"List.Filter.Rule\": {"
       "\"type\": \"object\","
       "\"properties\": {"
         "\"operator\": { \"$ref\": \"List.Filter.Operators\", \"required\": true },"
@@ -2967,7 +2967,7 @@ namespace JSONRPC
         "\"properties\": {"
           "\"limits\": { \"$ref\": \"List.LimitsReturned\", \"required\": true },"
           "\"profiles\": { \"type\": \"array\", \"required\": true,"
-           "\"items\": { \"$ref\": \"Profiles.Details.Profile\" }"
+            "\"items\": { \"$ref\": \"Profiles.Details.Profile\" }"
           "}"
         "}"
       "}"

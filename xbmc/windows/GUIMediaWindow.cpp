@@ -396,9 +396,7 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
         else if (newItem)
         { // need to remove the disc cache
           CFileItemList items;
-          CStdString path;
-          URIUtils::GetDirectory(newItem->GetPath(), path);
-          items.SetPath(path);
+          items.SetPath(URIUtils::GetDirectory(newItem->GetPath()));
           items.RemoveDiscCache(GetID());
         }
       }
@@ -546,7 +544,7 @@ void CGUIMediaWindow::UpdateButtons()
     m_viewControl.SetCurrentView(m_guiState->GetViewAsControl());
 
     // Update sort by button
-    if (m_guiState->GetSortMethod().sortBy == SortByNone)
+    if (!m_guiState->HasMultipleSortMethods())
       CONTROL_DISABLE(CONTROL_BTNSORTBY);
     else
       CONTROL_ENABLE(CONTROL_BTNSORTBY);

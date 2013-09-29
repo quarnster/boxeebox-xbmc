@@ -86,6 +86,7 @@ public:
   void OnDatabaseUpdated(const std::string &database);
   void OnDatabaseScanStarted(const std::string &database);
   void OnAbortRequested(const CStdString &ID="");
+  void OnNotification(const std::string &sender, const std::string &method, const std::string &data);
 
   virtual void Process();
   virtual void Uninitialize();
@@ -98,13 +99,6 @@ public:
 
   void PulseGlobalEvent();
   bool WaitForEvent(CEvent& hEvent, unsigned int milliseconds);
-
-  // inject xbmc stuff into the interpreter.
-  // should be called for every new interpreter
-  void InitializeInterpreter(ADDON::AddonPtr addon);
-
-  // remove modules and references when interpreter done
-  void DeInitializeInterpreter();
 
   void RegisterExtensionLib(LibraryLoader *pLib);
   void UnregisterExtensionLib(LibraryLoader *pLib);

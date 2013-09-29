@@ -22,7 +22,7 @@
 #include "DllAvUtil.h"
 #include "DllSwResample.h"
 #include "Utils/AEChannelInfo.h"
-#include "AEAudioFormat.h"
+#include "Utils/AEAudioFormat.h"
 #include "ActiveAEBuffer.h"
 #include "Interfaces/AE.h"
 
@@ -34,8 +34,8 @@ class CActiveAEResample
 public:
   CActiveAEResample();
   virtual ~CActiveAEResample();
-  bool Init(uint64_t dst_chan_layout, int dst_channels, int dst_rate, AVSampleFormat dst_fmt, int dst_bits, uint64_t src_chan_layout, int src_channels, int src_rate, AVSampleFormat src_fmt, int src_bits, CAEChannelInfo *remapLayout, AEQuality quality);
-  int Resample(uint8_t **dst_buffer, int dst_samples, uint8_t **src_buffer, int src_samples);
+  bool Init(uint64_t dst_chan_layout, int dst_channels, int dst_rate, AVSampleFormat dst_fmt, int dst_bits, uint64_t src_chan_layout, int src_channels, int src_rate, AVSampleFormat src_fmt, int src_bits, bool upmix, CAEChannelInfo *remapLayout, AEQuality quality);
+  int Resample(uint8_t **dst_buffer, int dst_samples, uint8_t **src_buffer, int src_samples, double ratio);
   int64_t GetDelay(int64_t base);
   int GetBufferedSamples();
   int CalcDstSampleCount(int src_samples, int dst_rate, int src_rate);

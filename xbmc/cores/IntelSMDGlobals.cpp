@@ -22,7 +22,7 @@
  */
 
 #include "xbmc/settings/Settings.h"
-#include "AudioEngine/AEAudioFormat.h"
+#include "AudioEngine/Utils/AEAudioFormat.h"
 #include "AudioEngine/Utils/AEDeviceInfo.h"  // for AE_DEVTYPE_*
 #include "IntelSMDGlobals.h"
 #include <ismd_vidpproc.h>

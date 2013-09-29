@@ -419,6 +419,22 @@ void CLinuxRendererGLES::Reset()
   }
 }
 
+void CLinuxRendererGLES::Flush()
+{
+  if (!m_bValidated)
+    return;
+
+  glFinish();
+
+  for (int i = 0 ; i < m_NumYV12Buffers ; i++)
+    (this->*m_textureDelete)(i);
+
+  glFinish();
+  m_bValidated = false;
+  m_fbo.Cleanup();
+  m_iYV12RenderBuffer = 0;
+}
+
 void CLinuxRendererGLES::Update()
 {
   if (!m_bConfigured) return;
@@ -795,6 +811,17 @@ inline void CLinuxRendererGLES::ReorderDrawPoints()
   }
 }
 
+void CLinuxRendererGLES::ReleaseBuffer(int idx)
+{
+#ifdef HAVE_VIDEOTOOLBOXDECODER
+  YUVBUFFER &buf = m_buffers[idx];
+
+  if (buf.cvBufferRef)
+    CVBufferRelease(buf.cvBufferRef);
+  buf.cvBufferRef = NULL;
+#endif
+}
+
 void CLinuxRendererGLES::Render(DWORD flags, int index)
 {
   // If rendered directly by the hardware
@@ -1169,10 +1196,7 @@ void CLinuxRendererGLES::RenderSoftware(int index, int field)
   GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
   GLfloat ver[4][4];
   GLfloat tex[4][2];
-  float col[4][3];
-
-  for (int index = 0;index < 4;++index)
-    col[index][0] = col[index][1] = col[index][2] = 1.0;
+  GLfloat col[3] = {1.0f, 1.0f, 1.0f};
 
   GLint   posLoc = g_Windowing.GUIShaderGetPos();
   GLint   texLoc = g_Windowing.GUIShaderGetCoord0();
@@ -1232,12 +1256,7 @@ void CLinuxRendererGLES::RenderOpenMax(int index, int field)
   GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
   GLfloat ver[4][4];
   GLfloat tex[4][2];
-  float col[4][3];
-
-  for (int index = 0;index < 4;++index)
-  {
-    col[index][0] = col[index][1] = col[index][2] = 1.0;
-  }
+  GLfloat col[3] = {1.0f, 1.0f, 1.0f};
 
   GLint   posLoc = g_Windowing.GUIShaderGetPos();
   GLint   texLoc = g_Windowing.GUIShaderGetCoord0();
@@ -1300,12 +1319,7 @@ void CLinuxRendererGLES::RenderEglImage(int index, int field)
   GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
   GLfloat ver[4][4];
   GLfloat tex[4][2];
-  float col[4][3];
-
-  for (int i = 0;i < 4;++i)
-  {
-    col[i][0] = col[i][1] = col[i][2] = 1.0;
-  }
+  GLfloat col[3] = {1.0f, 1.0f, 1.0f};
 
   GLint   posLoc = g_Windowing.GUIShaderGetPos();
   GLint   texLoc = g_Windowing.GUIShaderGetCoord0();
@@ -1368,12 +1382,7 @@ void CLinuxRendererGLES::RenderCoreVideoRef(int index, int field)
   GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
   GLfloat ver[4][4];
   GLfloat tex[4][2];
-  float col[4][3];
-
-  for (int index = 0;index < 4;++index)
-  {
-    col[index][0] = col[index][1] = col[index][2] = 1.0;
-  }
+  GLfloat col[3] = {1.0f, 1.0f, 1.0f};
 
   GLint   posLoc = g_Windowing.GUIShaderGetPos();
   GLint   texLoc = g_Windowing.GUIShaderGetCoord0();
@@ -1420,6 +1429,14 @@ bool CLinuxRendererGLES::RenderCapture(CRenderCapture* capture)
 {
   if (!m_bValidated)
     return false;
+
+  // If rendered directly by the hardware
+  if (m_renderMethod & RENDER_BYPASS)
+  {
+    capture->BeginRender();
+    capture->EndRender();
+    return true;
+  }
 
   // save current video rect
   CRect saveSize = m_destRect;

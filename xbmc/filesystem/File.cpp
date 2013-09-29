@@ -95,8 +95,7 @@ bool CFile::Cache(const CStdString& strFileName, const CStdString& strDest, XFIL
     if (URIUtils::IsHD(strDest)) // create possible missing dirs
     {
       vector<CStdString> tokens;
-      CStdString strDirectory;
-      URIUtils::GetDirectory(strDest,strDirectory);
+      CStdString strDirectory = URIUtils::GetDirectory(strDest);
       URIUtils::RemoveSlashAtEnd(strDirectory);  // for the test below
       if (!(strDirectory.size() == 2 && strDirectory[1] == ':'))
       {
@@ -339,7 +338,7 @@ bool CFile::OpenForWrite(const CStdString& strFileName, bool bOverWrite)
 
 bool CFile::Exists(const CStdString& strFileName, bool bUseCache /* = true */)
 {
-  CURL url = URIUtils::SubstitutePath(strFileName);;
+  CURL url = URIUtils::SubstitutePath(strFileName);
   
   try
   {
@@ -349,7 +348,7 @@ bool CFile::Exists(const CStdString& strFileName, bool bUseCache /* = true */)
     if (bUseCache)
     {
       bool bPathInCache;
-      if (g_directoryCache.FileExists(url.Get(), bPathInCache) )
+      if (g_directoryCache.FileExists(url.Get(), bPathInCache))
         return true;
       if (bPathInCache)
         return false;
@@ -372,20 +371,23 @@ bool CFile::Exists(const CStdString& strFileName, bool bUseCache /* = true */)
       auto_ptr<IFile> pImp(pRedirectEx->m_pNewFileImp);
       auto_ptr<CURL> pNewUrl(pRedirectEx->m_pNewUrl);
       delete pRedirectEx;
-        
-      if (pNewUrl.get())
+
+      if (pImp.get())
       {
-        if (pImp.get() && !pImp->Exists(*pNewUrl))
+        if (pNewUrl.get())
         {
-          return false;
+          if (bUseCache)
+          {
+            bool bPathInCache;
+            if (g_directoryCache.FileExists(pNewUrl->Get(), bPathInCache))
+              return true;
+            if (bPathInCache)
+              return false;
+          }
+          return pImp->Exists(*pNewUrl);
         }
-      }
-      else     
-      {
-        if (pImp.get() && !pImp->Exists(url))
-        {
-          return false;
-        }
+        else
+          return pImp->Exists(url);
       }
     }
   }

@@ -27,7 +27,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "cores/AudioEngine/AEAudioFormat.h"
+#include "cores/AudioEngine/Utils/AEAudioFormat.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
 #include "cores/AudioEngine/Utils/AERemap.h"
 #include "cores/IAudioCallback.h"
@@ -60,7 +60,7 @@ public:
   float GetCacheTime();
   float GetCacheTotal();
   COMXAudio();
-  bool Initialize(AEAudioFormat format, std::string& device, OMXClock *clock, CDVDStreamInfo &hints, bool bUsePassthrough, bool bUseHWDecode);
+  bool Initialize(AEAudioFormat format, OMXClock *clock, CDVDStreamInfo &hints, bool bUsePassthrough, bool bUseHWDecode);
   bool PortSettingsChanged();
   ~COMXAudio();
 
@@ -72,6 +72,7 @@ public:
   void SetVolume(float nVolume);
   void SetMute(bool bOnOff);
   void SetDynamicRangeCompression(long drc);
+  float GetDynamicRangeAmplification() { return 20.0f * log10f(m_amplification * m_attenuation); }
   bool ApplyVolume();
   int SetPlaySpeed(int iSpeed);
   void SubmitEOS();
@@ -94,6 +95,7 @@ public:
 
   bool BadState() { return !m_Initialized; };
   unsigned int GetAudioRenderingLatency();
+  float GetMaxLevel(double &pts);
   void VizPacket(const void* data, unsigned int len, double pts);
 
 private:
@@ -109,6 +111,10 @@ private:
   unsigned int  m_ChunkLen;
   unsigned int  m_OutputChannels;
   unsigned int  m_BitsPerSample;
+  float         m_maxLevel;
+  float         m_amplification;
+  float         m_attenuation;
+  float         m_desired_attenuation;
   COMXCoreComponent *m_omx_clock;
   OMXClock       *m_av_clock;
   bool          m_settings_changed;
@@ -118,7 +124,6 @@ private:
   OMX_AUDIO_CODINGTYPE m_eEncoding;
   uint8_t       *m_extradata;
   int           m_extrasize;
-  std::string   m_deviceuse;
   // stuff for visualisation
   double        m_last_pts;
   int           m_vizBufferSize;
@@ -127,6 +132,7 @@ private:
   uint8_t       *m_vizRemapBuffer;
   CAERemap      m_vizRemap;
   bool          m_submitted_eos;
+  bool          m_failed_eos;
   typedef struct {
     int num_samples;
     float samples[VIS_PACKET_SIZE];
@@ -140,12 +146,17 @@ private:
   WAVEFORMATEXTENSIBLE        m_wave_header;
   AEAudioFormat m_format;
 protected:
-  COMXCoreComponent m_omx_render;
+  COMXCoreComponent m_omx_render_analog;
+  COMXCoreComponent m_omx_render_hdmi;
+  COMXCoreComponent m_omx_splitter;
   COMXCoreComponent m_omx_mixer;
   COMXCoreComponent m_omx_decoder;
-  COMXCoreTunel     m_omx_tunnel_clock;
+  COMXCoreTunel     m_omx_tunnel_clock_analog;
+  COMXCoreTunel     m_omx_tunnel_clock_hdmi;
   COMXCoreTunel     m_omx_tunnel_mixer;
   COMXCoreTunel     m_omx_tunnel_decoder;
+  COMXCoreTunel     m_omx_tunnel_splitter_analog;
+  COMXCoreTunel     m_omx_tunnel_splitter_hdmi;
   DllAvUtil         m_dllAvUtil;
 
   OMX_AUDIO_CHANNELTYPE m_input_channels[OMX_AUDIO_MAXCHANNELS];

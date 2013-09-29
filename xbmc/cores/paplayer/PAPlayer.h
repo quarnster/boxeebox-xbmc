@@ -120,6 +120,7 @@ private:
     float             m_volume;              /* the initial volume level to set the stream to on creation */
 
     bool              m_isSlaved;            /* true if the stream has been slaved to another */
+    bool              m_waitOnDrain;         /* wait for stream being drained in AE */
   } StreamInfo;
 
   typedef std::list<StreamInfo*> StreamList;
@@ -142,6 +143,7 @@ private:
   StreamList          m_finishing;           /* finishing streams */
   int                 m_jobCounter;
   CEvent              m_jobEvent;
+  bool                m_continueStream;
 
   bool QueueNextFileEx(const CFileItem &file, bool fadeIn = true, bool job = false);
   void SoftStart(bool wait = false);

@@ -20,11 +20,14 @@
 
 #include "DVDSubtitlesLibass.h"
 #include "DVDClock.h"
+#include "filesystem/File.h"
 #include "filesystem/SpecialProtocol.h"
 #include "settings/Settings.h"
 #include "utils/log.h"
+#include "utils/URIUtils.h"
 #include "threads/SingleLock.h"
 #include "threads/Atomics.h"
+#include "guilib/GraphicContext.h"
 
 using namespace std;
 
@@ -76,8 +79,9 @@ CDVDSubtitlesLibass::CDVDSubtitlesLibass()
     return;
 
   //Setting default font to the Arial in \media\fonts (used if FontConfig fails)
-  strPath = "special://xbmc/media/Fonts/";
-  strPath += CSettings::Get().GetString("subtitles.font");
+  strPath = URIUtils::AddFileToFolder("special://home/media/Fonts/", CSettings::Get().GetString("subtitles.font"));
+  if (!XFILE::CFile::Exists(strPath))
+    strPath = URIUtils::AddFileToFolder("special://xbmc/media/Fonts/", CSettings::Get().GetString("subtitles.font"));
   int fc = !CSettings::Get().GetBool("subtitles.overrideassfonts");
 
   m_dll.ass_set_margins(m_renderer, 0, 0, 0, 0);
@@ -159,7 +163,9 @@ ASS_Image* CDVDSubtitlesLibass::RenderImage(int imageWidth, int imageHeight, dou
     return NULL;
   }
 
+  double storage_aspact = (double)imageWidth / imageHeight;
   m_dll.ass_set_frame_size(m_renderer, imageWidth, imageHeight);
+  m_dll.ass_set_aspect_ratio(m_renderer, storage_aspact / g_graphicsContext.GetResInfo().fPixelRatio, storage_aspact);
   return m_dll.ass_render_frame(m_renderer, m_track, DVD_TIME_TO_MSEC(pts), changes);
 }
 
