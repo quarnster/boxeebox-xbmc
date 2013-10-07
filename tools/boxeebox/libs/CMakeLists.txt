@@ -347,7 +347,7 @@ ExternalProject_Add(
 ExternalProject_Add(
         nfs
         URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.6.0.tar.gz
-        PATCH_COMMAND     <SOURCE_DIR>/bootstrap --prefix=${TARGET_DIR} --host=${TARGET} 
+        PATCH_COMMAND     <SOURCE_DIR>/bootstrap --prefix=${TARGET_DIR} --host=${TARGET}
         CONFIGURE_COMMAND ${BASIC_CONF}
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
@@ -388,7 +388,7 @@ ExternalProject_Add(
         dbus
         URL               http://dbus.freedesktop.org/releases/dbus/dbus-1.6.14.tar.gz
         URL_MD5           1c22aebdf952e92908800f1ec2aeb0c4
-        CONFIGURE_COMMAND ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh  
+        CONFIGURE_COMMAND ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
         BUILD_IN_SOURCE   1
@@ -470,9 +470,9 @@ endif()
 
 if(NOT EXISTS "${TARGET_DIR}/include/GLES2/gl2.h")
 	message("Downloading gles2 headers")
-	file(DOWNLOAD "http://www.khronos.org/registry/gles/api/2.0/gl2.h" ${TARGET_DIR}/include/GLES2/gl2.h)
-	file(DOWNLOAD "http://www.khronos.org/registry/gles/api/2.0/gl2ext.h" ${TARGET_DIR}/include/GLES2/gl2ext.h)
-	file(DOWNLOAD "http://www.khronos.org/registry/gles/api/2.0/gl2platform.h" ${TARGET_DIR}/include/GLES2/gl2platform.h)
+	file(DOWNLOAD "http://www.khronos.org/registry/gles/api/GLES2/gl2.h" ${TARGET_DIR}/include/GLES2/gl2.h)
+	file(DOWNLOAD "http://www.khronos.org/registry/gles/api/GLES2/gl2ext.h" ${TARGET_DIR}/include/GLES2/gl2ext.h)
+	file(DOWNLOAD "http://www.khronos.org/registry/gles/api/GLES2/gl2platform.h" ${TARGET_DIR}/include/GLES2/gl2platform.h)
 endif()
 
 add_custom_command(OUTPUT ${TARGET_DIR}/lib/libEGL.so
