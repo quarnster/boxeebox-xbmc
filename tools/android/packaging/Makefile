@@ -22,8 +22,9 @@ ARMOVERRIDES=XBMC_OVERRIDE_HOST=arm-linux-androideabi XBMC_OVERRIDE_TOOLCHAIN=$(
 #this fixes a android ndk fuckup where the pathes to 
 #prebuilt stuff follow different name shemes for
 #arm and x86
-ifeq ($(findstring x86,$$(CPU)),x86)
+ifeq ($(findstring i686,$(CPU)),i686)
 ARCH=x86
+CPU=x86
 endif
 ifeq ($(findstring arm,$(CPU)),arm)
 ARCH=arm
@@ -68,11 +69,12 @@ package: extras
 
 extras: libs
 	rm -rf xbmc/assets/python2.6/lib/
-	mkdir -p xbmc/assets xbmc/res xbmc/assets/python2.6/lib/
+	mkdir -p xbmc/assets xbmc/res xbmc/res/raw xbmc/assets/python2.6/lib/
 	cp -rfp $(PREFIX)/share/xbmc/* ./xbmc/assets
 	find `pwd`/xbmc/assets/ -depth -name ".git" -exec rm -rf {} \;
 	find `pwd`/xbmc/assets/system/ -name "*.so" -exec rm {} \;
 	find `pwd`/xbmc/assets/addons/skin.*/media/* -depth -not -iname "Textures.xbt" -exec rm -rf {} \;
+	@echo "native_arch=$(ARCH)" > xbmc/res/raw/xbmc.properties
 	cd xbmc/assets/addons; rm -rf $(EXCLUDED_ADDONS)
 	cp -rfp $(PREFIX)/lib/python2.6 xbmc/assets/python2.6/lib/
 	cp -rfp $(XBMCROOT)/media/Splash.png xbmc/res/drawable/splash.png

@@ -81,6 +81,8 @@ static const ActionMapping actions[] =
         {"stepback"          , ACTION_STEP_BACK},
         {"bigstepforward"    , ACTION_BIG_STEP_FORWARD},
         {"bigstepback"       , ACTION_BIG_STEP_BACK},
+        {"chapterorbigstepforward", ACTION_CHAPTER_OR_BIG_STEP_FORWARD},
+        {"chapterorbigstepback"   , ACTION_CHAPTER_OR_BIG_STEP_BACK},
         {"osd"               , ACTION_SHOW_OSD},
         {"showsubtitles"     , ACTION_SHOW_SUBTITLES},
         {"nextsubtitle"      , ACTION_NEXT_SUBTITLE},
@@ -1114,7 +1116,7 @@ void CButtonTranslator::MapWindowActions(TiXmlNode *pWindow, int windowID)
       }
 
       // add our map to our table
-      if (map.size() > 0)
+      if (!map.empty())
         m_translatorMap.insert(pair<int, buttonMap>( windowID, map));
     }
   }
@@ -1189,7 +1191,7 @@ int CButtonTranslator::TranslateWindow(const CStdString &window)
     strWindow = strWindow.Mid(0, strWindow.GetLength() - 4);
 
   // window12345, for custom window to be keymapped
-  if (strWindow.length() > 6 && strWindow.Left(6).Equals("window"))
+  if (strWindow.length() > 6 && StringUtils::StartsWithNoCase(strWindow, "window"))
     strWindow = strWindow.Mid(6);
   if (strWindow.Left(2) == "my")  // drop "my" prefix
     strWindow = strWindow.Mid(2);
@@ -1552,7 +1554,7 @@ void CButtonTranslator::MapTouchActions(int windowID, TiXmlNode *pTouch)
   }
 
   // add the modified touch map with the window ID
-  if (map.size() > 0)
+  if (!map.empty())
     m_touchMap.insert(std::pair<int, buttonMap>(windowID, map));
 }
 

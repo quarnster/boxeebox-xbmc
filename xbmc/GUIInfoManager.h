@@ -275,6 +275,7 @@ namespace INFO
 #define VIDEOPLAYER_VOTES             309
 #define VIDEOPLAYER_IS_STEREOSCOPIC   310
 #define VIDEOPLAYER_STEREOSCOPIC_MODE 311
+#define VIDEOPLAYER_SUBTITLES_LANG    312
 
 #define CONTAINER_CAN_FILTER         342
 #define CONTAINER_CAN_FILTERADVANCED 343
@@ -385,6 +386,7 @@ namespace INFO
 #define SYSTEM_IDLE_TIME            715
 #define SYSTEM_FRIENDLY_NAME        716
 #define SYSTEM_SCREENSAVER_ACTIVE   717
+#define SYSTEM_ADDON_VERSION        718
 
 #define LIBRARY_HAS_MUSIC           720
 #define LIBRARY_HAS_VIDEO           721
@@ -490,7 +492,7 @@ namespace INFO
 
 #define VERSION_MAJOR               13
 #define VERSION_MINOR               0
-#define VERSION_TAG                 "-ALPHA8"
+#define VERSION_TAG                 "-ALPHA9"
 
 #define LISTITEM_START              35000
 #define LISTITEM_THUMB              (LISTITEM_START)

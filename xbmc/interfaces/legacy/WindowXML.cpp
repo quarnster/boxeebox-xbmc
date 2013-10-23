@@ -91,32 +91,12 @@ namespace XBMCAddon
 
     };
 
+    WindowXML::~WindowXML() { TRACE; deallocating();  }
+
     WindowXML::WindowXML(const String& xmlFilename,
                          const String& scriptPath,
                          const String& defaultSkin,
-                         const String& defaultRes) throw(WindowException) :
-      Window("WindowXML")
-    {
-      initialize(xmlFilename,scriptPath,defaultSkin,defaultRes);
-    }
-
-    WindowXML::WindowXML(const char* classname, 
-                         const String& xmlFilename,
-                         const String& scriptPath,
-                         const String& defaultSkin,
-                         const String& defaultRes) throw(WindowException) :
-      Window(classname)
-    {
-      TRACE;
-      initialize(xmlFilename,scriptPath,defaultSkin,defaultRes);
-    }
-
-    WindowXML::~WindowXML() { TRACE; deallocating();  }
-
-    void WindowXML::initialize(const String& xmlFilename,
-                         const String& scriptPath,
-                         const String& defaultSkin,
-                         const String& defaultRes)
+                         const String& defaultRes) throw(WindowException)
     {
       TRACE;
       RESOLUTION_INFO res;
@@ -172,21 +152,14 @@ namespace XBMCAddon
       return getNextAvailalbeWindowId();
     }
 
-    void WindowXML::addItem(const String& item, int pos)
-    {
-      TRACE;
-      AddonClass::Ref<ListItem> ritem(ListItem::fromString(item));
-      addListItem(ritem.get(),pos);
-    }
-
-    void WindowXML::addListItem(ListItem* item, int pos)
+    void WindowXML::addItem(const Alternative<String, const ListItem*>& item, int position)
     {
       TRACE;
       // item could be deleted if the reference count is 0.
       //   so I MAY need to check prior to using a Ref just in
       //   case this object is managed by Python. I'm not sure
       //   though.
-      AddonClass::Ref<ListItem> ritem(item);
+      AddonClass::Ref<ListItem> ritem = item.which() == XBMCAddon::first ? ListItem::fromString(item.former()) : AddonClass::Ref<ListItem>(item.later());
 
       // Tells the window to add the item to FileItem vector
       {
@@ -197,17 +170,17 @@ namespace XBMCAddon
         //AddItem(ritem->item, pos);
         {
           CFileItemPtr& fileItem = ritem->item;
-          if (pos == INT_MAX || pos > A(m_vecItems)->Size())
+          if (position == INT_MAX || position > A(m_vecItems)->Size())
           {
             A(m_vecItems)->Add(fileItem);
           }
-          else if (pos <  -1 &&  !(pos*-1 < A(m_vecItems)->Size()))
+          else if (position <  -1 &&  !(position*-1 < A(m_vecItems)->Size()))
           {
             A(m_vecItems)->AddFront(fileItem,0);
           }
           else
           {
-            A(m_vecItems)->AddFront(fileItem,pos);
+            A(m_vecItems)->AddFront(fileItem,position);
           }
           A(m_viewControl).SetItems(*(A(m_vecItems)));
           A(UpdateButtons());
@@ -421,8 +394,6 @@ namespace XBMCAddon
     void WindowXML::FreeResources(bool forceUnLoad /*= FALSE */)
     {
       TRACE;
-      // Unload temporary language strings
-      ClearScriptStrings();
 
       ref(window)->FreeResources(forceUnLoad);
     }
@@ -467,8 +438,6 @@ namespace XBMCAddon
         CLog::Log(LOGERROR, "%s: Unable to load skin file %s", __FUNCTION__, strPath.c_str());
         return false;
       }
-      // load the strings in
-      unsigned int offset = LoadScriptStrings();
 
       CStdString xml;
       char *buffer = new char[(unsigned int)file.GetLength()+1];
@@ -479,22 +448,6 @@ namespace XBMCAddon
       {
         buffer[size] = 0;
         xml = buffer;
-        if (offset)
-        {
-          // replace the occurences of SCRIPT### with offset+###
-          // not particularly efficient, but it works
-          int pos = xml.Find("SCRIPT");
-          while (pos != (int)CStdString::npos)
-          {
-            CStdString num = xml.Mid(pos + 6, 4);
-            int number = atol(num.c_str());
-            CStdString oldNumber, newNumber;
-            oldNumber.Format("SCRIPT%d", number);
-            newNumber.Format("%lu", offset + number);
-            xml.Replace(oldNumber, newNumber);
-            pos = xml.Find("SCRIPT", pos + 6);
-          }
-        }
       }
       delete[] buffer;
 
@@ -505,25 +458,6 @@ namespace XBMCAddon
         return false;
 
       return interceptor->Load(xmlDoc.RootElement());
-    }
-
-    unsigned int WindowXML::LoadScriptStrings()
-    {
-      TRACE;
-      // Path where the language strings reside
-      CStdString pathToLanguageFile = URIUtils::AddFileToFolder(m_scriptPath, "resources");
-      pathToLanguageFile = URIUtils::AddFileToFolder(pathToLanguageFile, "language");
-      URIUtils::AddSlashAtEnd(pathToLanguageFile);
-
-      // allocate a bunch of strings
-      return g_localizeStrings.LoadBlock(m_scriptPath, pathToLanguageFile, CSettings::Get().GetString("locale.language"));
-    }
-
-    void WindowXML::ClearScriptStrings()
-    {
-      TRACE;
-      // Unload temporary language strings
-      g_localizeStrings.ClearBlock(m_scriptPath);
     }
 
     void WindowXML::SetupShares()
@@ -541,7 +475,7 @@ namespace XBMCAddon
     WindowXMLDialog::WindowXMLDialog(const String& xmlFilename, const String& scriptPath,
                                      const String& defaultSkin,
                                      const String& defaultRes) throw(WindowException) :
-      WindowXML("WindowXMLDialog",xmlFilename, scriptPath, defaultSkin, defaultRes),
+      WindowXML(xmlFilename, scriptPath, defaultSkin, defaultRes),
       WindowDialogMixin(this)
     { TRACE; }
 

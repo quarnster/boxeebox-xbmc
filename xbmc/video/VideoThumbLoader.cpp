@@ -35,6 +35,7 @@
 #include "cores/dvdplayer/DVDFileInfo.h"
 #include "video/VideoInfoScanner.h"
 #include "music/MusicDatabase.h"
+#include "utils/StringUtils.h"
 
 using namespace XFILE;
 using namespace std;
@@ -143,7 +144,7 @@ bool CThumbExtractor::DoWork()
 }
 
 CVideoThumbLoader::CVideoThumbLoader() :
-  CThumbLoader(), CJobQueue(true)
+  CThumbLoader(), CJobQueue(true, 1, CJob::PRIORITY_LOW_PAUSABLE)
 {
   m_videoDatabase = new CVideoDatabase();
 }
@@ -326,7 +327,7 @@ bool CVideoThumbLoader::LoadItemLookup(CFileItem* pItem)
   {
     // An auto-generated thumb may have been cached on a different device - check we have it here
     CStdString url = pItem->GetArt("thumb");
-    if (url.compare(0, 14, "image://video@") == 0 && !CTextureCache::Get().HasCachedImage(url))
+    if (StringUtils::StartsWith(url, "image://video@") && !CTextureCache::Get().HasCachedImage(url))
       pItem->SetArt("thumb", "");
 
     if (!pItem->HasArt("thumb"))

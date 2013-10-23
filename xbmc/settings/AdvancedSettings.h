@@ -43,6 +43,11 @@ public:
     user.clear();
     pass.clear();
     name.clear();
+    key.clear();
+    cert.clear();
+    ca.clear();
+    capath.clear();
+    ciphers.clear();
   };
   CStdString type;
   CStdString host;
@@ -50,6 +55,11 @@ public:
   CStdString user;
   CStdString pass;
   CStdString name;
+  CStdString key;
+  CStdString cert;
+  CStdString ca;
+  CStdString capath;
+  CStdString ciphers;
 };
 
 struct TVShowRegexp
@@ -397,6 +407,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     CStdString m_musicExtensions;
     CStdString m_videoExtensions;
     CStdString m_discStubExtensions;
+    CStdString m_subtitlesExtensions;
 
     CStdString m_stereoscopicflags_sbs;
     CStdString m_stereoscopicflags_tab;

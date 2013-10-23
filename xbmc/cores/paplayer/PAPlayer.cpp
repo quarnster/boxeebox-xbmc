@@ -307,7 +307,7 @@ bool PAPlayer::QueueNextFile(const CFileItem &file)
     CExclusiveLock lock(m_streamsLock);
     m_jobCounter++;
   }
-  CJobManager::GetInstance().AddJob(new CQueueNextFileJob(file, *this), this);
+  CJobManager::GetInstance().AddJob(new CQueueNextFileJob(file, *this), this, CJob::PRIORITY_NORMAL);
   return true;
 }
 
@@ -674,7 +674,7 @@ inline void PAPlayer::ProcessStreams(double &delay, double &buffer)
     }
 
     /* it is time to start playing the next stream? */
-    if (si->m_playNextAtFrame > 0 && !si->m_playNextTriggered && si->m_framesSent >= si->m_playNextAtFrame)
+    if (si->m_playNextAtFrame > 0 && !si->m_playNextTriggered && !m_continueStream && si->m_framesSent >= si->m_playNextAtFrame)
     {
       if (!si->m_prepareTriggered)
       {
@@ -970,7 +970,7 @@ bool PAPlayer::CanSeek()
   return m_playerGUIData.m_canSeek;
 }
 
-void PAPlayer::Seek(bool bPlus, bool bLargeStep)
+void PAPlayer::Seek(bool bPlus, bool bLargeStep, bool bChapterOverride)
 {
   if (!CanSeek()) return;
 

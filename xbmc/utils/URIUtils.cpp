@@ -130,6 +130,7 @@ void URIUtils::RemoveExtension(CStdString& strFileName)
     strFileMask = g_advancedSettings.m_pictureExtensions;
     strFileMask += "|" + g_advancedSettings.m_musicExtensions;
     strFileMask += "|" + g_advancedSettings.m_videoExtensions;
+    strFileMask += "|" + g_advancedSettings.m_subtitlesExtensions;
 #if defined(TARGET_DARWIN)
     strFileMask += "|.py|.xml|.milk|.xpr|.xbt|.cdg|.app|.applescript|.workflow";
 #else
@@ -302,14 +303,14 @@ bool URIUtils::GetParentPath(const CStdString& strPath, CStdString& strParent)
     CFileItemList items;
     dir.GetDirectory(strPath,items);
     items[0]->m_strDVDLabel = GetDirectory(items[0]->GetPath());
-    if (items[0]->m_strDVDLabel.Mid(0,6).Equals("rar://") || items[0]->m_strDVDLabel.Mid(0,6).Equals("zip://"))
+    if (StringUtils::StartsWithNoCase(items[0]->m_strDVDLabel, "rar://") || StringUtils::StartsWithNoCase(items[0]->m_strDVDLabel, "zip://"))
       GetParentPath(items[0]->m_strDVDLabel, strParent);
     else
       strParent = items[0]->m_strDVDLabel;
     for( int i=1;i<items.Size();++i)
     {
       items[i]->m_strDVDLabel = GetDirectory(items[i]->GetPath());
-      if (items[0]->m_strDVDLabel.Mid(0,6).Equals("rar://") || items[0]->m_strDVDLabel.Mid(0,6).Equals("zip://"))
+      if (StringUtils::StartsWithNoCase(items[0]->m_strDVDLabel, "rar://") || StringUtils::StartsWithNoCase(items[0]->m_strDVDLabel, "zip://"))
         items[i]->SetPath(GetParentPath(items[i]->m_strDVDLabel));
       else
         items[i]->SetPath(items[i]->m_strDVDLabel);
@@ -494,6 +495,19 @@ bool URIUtils::IsOnLAN(const CStdString& strPath)
     return false;
 
   CStdString host = url.GetHostName();
+
+  return IsHostOnLAN(host);
+}
+
+static bool addr_match(uint32_t addr, const char* target, const char* submask)
+{
+  uint32_t addr2 = ntohl(inet_addr(target));
+  uint32_t mask = ntohl(inet_addr(submask));
+  return (addr & mask) == (addr2 & mask);
+}
+
+bool URIUtils::IsHostOnLAN(const CStdString& host, bool offLineCheck)
+{
   if(host.length() == 0)
     return false;
 
@@ -502,7 +516,7 @@ bool URIUtils::IsOnLAN(const CStdString& strPath)
   if(host.find('.') == string::npos)
     return true;
 
-  unsigned long address = ntohl(inet_addr(host.c_str()));
+  uint32_t address = ntohl(inet_addr(host.c_str()));
   if(address == INADDR_NONE)
   {
     CStdString ip;
@@ -512,6 +526,15 @@ bool URIUtils::IsOnLAN(const CStdString& strPath)
 
   if(address != INADDR_NONE)
   {
+    if (offLineCheck) // check if in private range, ref https://en.wikipedia.org/wiki/Private_network
+    {
+      if (
+        addr_match(address, "192.168.0.0", "255.255.0.0") ||
+        addr_match(address, "10.0.0.0", "255.0.0.0") ||
+        addr_match(address, "172.16.0.0", "255.240.0.0")
+        )
+        return true;
+    }
     // check if we are on the local subnet
     if (!g_application.getNetwork().GetFirstConnectedInterface())
       return false;
@@ -525,7 +548,7 @@ bool URIUtils::IsOnLAN(const CStdString& strPath)
 
 bool URIUtils::IsMultiPath(const CStdString& strPath)
 {
-  return strPath.Left(10).Equals("multipath:");
+  return StringUtils::StartsWithNoCase(strPath, "multipath:");
 }
 
 bool URIUtils::IsHD(const CStdString& strFileName)
@@ -552,7 +575,7 @@ bool URIUtils::IsDVD(const CStdString& strFile)
     return true;
 
 #if defined(TARGET_WINDOWS)
-  if (strFile.Left(6).Equals("dvd://"))
+  if (StringUtils::StartsWithNoCase(strFile, "dvd://"))
     return true;
 
   if(strFile.Mid(1) != ":\\"
@@ -571,7 +594,7 @@ bool URIUtils::IsDVD(const CStdString& strFile)
 
 bool URIUtils::IsStack(const CStdString& strFile)
 {
-  return strFile.Left(6).Equals("stack:");
+  return StringUtils::StartsWithNoCase(strFile, "stack:");
 }
 
 bool URIUtils::IsRAR(const CStdString& strFile)
@@ -638,7 +661,7 @@ bool URIUtils::IsSpecial(const CStdString& strFile)
   if (IsStack(strFile))
     strFile2 = CStackDirectory::GetFirstStackedFile(strFile);
 
-  return strFile2.Left(8).Equals("special:");
+  return StringUtils::StartsWithNoCase(strFile2, "special:");
 }
 
 bool URIUtils::IsPlugin(const CStdString& strFile)
@@ -667,12 +690,12 @@ bool URIUtils::IsSourcesPath(const CStdString& strPath)
 
 bool URIUtils::IsCDDA(const CStdString& strFile)
 {
-  return strFile.Left(5).Equals("cdda:");
+  return StringUtils::StartsWithNoCase(strFile, "cdda:");
 }
 
 bool URIUtils::IsISO9660(const CStdString& strFile)
 {
-  return strFile.Left(8).Equals("iso9660:");
+  return StringUtils::StartsWithNoCase(strFile, "iso9660:");
 }
 
 bool URIUtils::IsSmb(const CStdString& strFile)
@@ -682,7 +705,7 @@ bool URIUtils::IsSmb(const CStdString& strFile)
   if (IsStack(strFile))
     strFile2 = CStackDirectory::GetFirstStackedFile(strFile);
 
-  return strFile2.Left(4).Equals("smb:");
+  return StringUtils::StartsWithNoCase(strFile2, "smb:");
 }
 
 bool URIUtils::IsURL(const CStdString& strFile)
@@ -697,8 +720,8 @@ bool URIUtils::IsFTP(const CStdString& strFile)
   if (IsStack(strFile))
     strFile2 = CStackDirectory::GetFirstStackedFile(strFile);
 
-  return strFile2.Left(4).Equals("ftp:")  ||
-         strFile2.Left(5).Equals("ftps:");
+  return StringUtils::StartsWithNoCase(strFile2, "ftp:")  ||
+         StringUtils::StartsWithNoCase(strFile2, "ftps:");
 }
 
 bool URIUtils::IsDAV(const CStdString& strFile)
@@ -708,8 +731,8 @@ bool URIUtils::IsDAV(const CStdString& strFile)
   if (IsStack(strFile))
     strFile2 = CStackDirectory::GetFirstStackedFile(strFile);
 
-  return strFile2.Left(4).Equals("dav:")  ||
-         strFile2.Left(5).Equals("davs:");
+  return StringUtils::StartsWithNoCase(strFile2, "dav:")  ||
+         StringUtils::StartsWithNoCase(strFile2, "davs:");
 }
 
 bool URIUtils::IsInternetStream(const CURL& url, bool bStrictCheck /* = false */)
@@ -745,42 +768,42 @@ bool URIUtils::IsInternetStream(const CURL& url, bool bStrictCheck /* = false */
 
 bool URIUtils::IsDAAP(const CStdString& strFile)
 {
-  return strFile.Left(5).Equals("daap:");
+  return StringUtils::StartsWithNoCase(strFile, "daap:");
 }
 
 bool URIUtils::IsUPnP(const CStdString& strFile)
 {
-  return strFile.Left(5).Equals("upnp:");
+  return StringUtils::StartsWithNoCase(strFile, "upnp:");
 }
 
 bool URIUtils::IsTuxBox(const CStdString& strFile)
 {
-  return strFile.Left(7).Equals("tuxbox:");
+  return StringUtils::StartsWithNoCase(strFile, "tuxbox:");
 }
 
 bool URIUtils::IsMythTV(const CStdString& strFile)
 {
-  return strFile.Left(5).Equals("myth:");
+  return StringUtils::StartsWithNoCase(strFile, "myth:");
 }
 
 bool URIUtils::IsHDHomeRun(const CStdString& strFile)
 {
-  return strFile.Left(10).Equals("hdhomerun:");
+  return StringUtils::StartsWithNoCase(strFile, "hdhomerun:");
 }
 
 bool URIUtils::IsSlingbox(const CStdString& strFile)
 {
-  return strFile.Left(6).Equals("sling:");
+  return StringUtils::StartsWithNoCase(strFile, "sling:");
 }
 
 bool URIUtils::IsVTP(const CStdString& strFile)
 {
-  return strFile.Left(4).Equals("vtp:");
+  return StringUtils::StartsWithNoCase(strFile, "vtp:");
 }
 
 bool URIUtils::IsHTSP(const CStdString& strFile)
 {
-  return strFile.Left(5).Equals("htsp:");
+  return StringUtils::StartsWithNoCase(strFile, "htsp:");
 }
 
 bool URIUtils::IsLiveTV(const CStdString& strFile)
@@ -793,8 +816,8 @@ bool URIUtils::IsLiveTV(const CStdString& strFile)
   || IsHDHomeRun(strFile)
   || IsSlingbox(strFile)
   || IsHTSP(strFile)
-  || strFile.Left(4).Equals("sap:")
-  ||(strFileWithoutSlash.Right(4).Equals(".pvr") && !strFileWithoutSlash.Left(16).Equals("pvr://recordings")))
+  || StringUtils::StartsWithNoCase(strFile, "sap:")
+  ||(StringUtils::EndsWithNoCase(strFileWithoutSlash, ".pvr") && !StringUtils::StartsWithNoCase(strFileWithoutSlash, "pvr://recordings")))
     return true;
 
   if (IsMythTV(strFile) && CMythDirectory::IsLiveTV(strFile))
@@ -808,13 +831,13 @@ bool URIUtils::IsPVRRecording(const CStdString& strFile)
   CStdString strFileWithoutSlash(strFile);
   RemoveSlashAtEnd(strFileWithoutSlash);
 
-  return strFileWithoutSlash.Right(4).Equals(".pvr") &&
-         strFile.Left(16).Equals("pvr://recordings");
+  return StringUtils::EndsWithNoCase(strFileWithoutSlash, ".pvr") &&
+         StringUtils::StartsWithNoCase(strFile, "pvr://recordings");
 }
 
 bool URIUtils::IsMusicDb(const CStdString& strFile)
 {
-  return strFile.Left(8).Equals("musicdb:");
+  return StringUtils::StartsWithNoCase(strFile, "musicdb:");
 }
 
 bool URIUtils::IsNfs(const CStdString& strFile)
@@ -824,7 +847,7 @@ bool URIUtils::IsNfs(const CStdString& strFile)
   if (IsStack(strFile))
     strFile2 = CStackDirectory::GetFirstStackedFile(strFile);
   
-  return strFile2.Left(4).Equals("nfs:");
+  return StringUtils::StartsWithNoCase(strFile2, "nfs:");
 }
 
 bool URIUtils::IsAfp(const CStdString& strFile)
@@ -834,23 +857,23 @@ bool URIUtils::IsAfp(const CStdString& strFile)
   if (IsStack(strFile))
     strFile2 = CStackDirectory::GetFirstStackedFile(strFile);
   
-  return strFile2.Left(4).Equals("afp:");
+  return StringUtils::StartsWithNoCase(strFile2, "afp:");
 }
 
 
 bool URIUtils::IsVideoDb(const CStdString& strFile)
 {
-  return strFile.Left(8).Equals("videodb:");
+  return StringUtils::StartsWithNoCase(strFile, "videodb:");
 }
 
 bool URIUtils::IsBluray(const CStdString& strFile)
 {
-  return strFile.Left(7).Equals("bluray:");
+  return StringUtils::StartsWithNoCase(strFile, "bluray:");
 }
 
 bool URIUtils::IsAndroidApp(const CStdString &path)
 {
-  return path.Left(11).Equals("androidapp:");
+  return StringUtils::StartsWithNoCase(path, "androidapp:");
 }
 
 bool URIUtils::IsLibraryFolder(const CStdString& strFile)
@@ -871,13 +894,13 @@ bool URIUtils::IsDOSPath(const CStdString &path)
   return false;
 }
 
-void URIUtils::AddSlashAtEnd(CStdString& strFolder)
+void URIUtils::AddSlashAtEnd(std::string& strFolder)
 {
   if (IsURL(strFolder))
   {
     CURL url(strFolder);
-    CStdString file = url.GetFileName();
-    if(!file.IsEmpty() && file != strFolder)
+    std::string file = url.GetFileName();
+    if(!file.empty() && file != strFolder)
     {
       AddSlashAtEnd(file);
       url.SetFileName(file);
@@ -895,9 +918,9 @@ void URIUtils::AddSlashAtEnd(CStdString& strFolder)
   }
 }
 
-bool URIUtils::HasSlashAtEnd(const CStdString& strFile, bool checkURL /* = false */)
+bool URIUtils::HasSlashAtEnd(const std::string& strFile, bool checkURL /* = false */)
 {
-  if (strFile.size() == 0) return false;
+  if (strFile.empty()) return false;
   if (checkURL && IsURL(strFile))
   {
     CURL url(strFile);
@@ -912,13 +935,13 @@ bool URIUtils::HasSlashAtEnd(const CStdString& strFile, bool checkURL /* = false
   return false;
 }
 
-void URIUtils::RemoveSlashAtEnd(CStdString& strFolder)
+void URIUtils::RemoveSlashAtEnd(std::string& strFolder)
 {
   if (IsURL(strFolder))
   {
     CURL url(strFolder);
-    CStdString file = url.GetFileName();
-    if (!file.IsEmpty() && file != strFolder)
+    std::string file = url.GetFileName();
+    if (!file.empty() && file != strFolder)
     {
       RemoveSlashAtEnd(file);
       url.SetFileName(file);
@@ -930,7 +953,7 @@ void URIUtils::RemoveSlashAtEnd(CStdString& strFolder)
   }
 
   while (HasSlashAtEnd(strFolder))
-    strFolder.Delete(strFolder.size() - 1);
+    strFolder.erase(strFolder.size()-1, 1);
 }
 
 bool URIUtils::CompareWithoutSlashAtEnd(const CStdString& strPath1, const CStdString& strPath2)
@@ -940,6 +963,37 @@ bool URIUtils::CompareWithoutSlashAtEnd(const CStdString& strPath1, const CStdSt
   RemoveSlashAtEnd(strc2);
   return strc1.Equals(strc2);
 }
+
+
+std::string URIUtils::FixSlashesAndDups(const std::string& path, const char slashCharacter /* = '/' */, const size_t startFrom /*= 0*/)
+{
+  const size_t len = path.length();
+  if (startFrom >= len)
+    return path;
+
+  std::string result(path, 0, startFrom);
+  result.reserve(len);
+
+  const char* const str = path.c_str();
+  size_t pos = startFrom;
+  do
+  {
+    if (str[pos] == '\\' || str[pos] == '/')
+    {
+      result.push_back(slashCharacter);  // append one slash
+      pos++;
+      // skip any following slashes
+      while (str[pos] == '\\' || str[pos] == '/') // str is null-terminated, no need to check for buffer overrun
+        pos++;
+    }
+    else
+      result.push_back(str[pos++]);   // append current char and advance pos to next char
+
+  } while (pos < len);
+
+  return result;
+}
+
 
 CStdString URIUtils::AddFileToFolder(const CStdString& strFolder, 
                                 const CStdString& strFile)

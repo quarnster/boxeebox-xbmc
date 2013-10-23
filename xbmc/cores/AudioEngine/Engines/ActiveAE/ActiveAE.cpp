@@ -322,7 +322,7 @@ void CActiveAE::StateMachine(int signal, Protocol *port, Message *msg)
         {
         case CActiveAEControlProtocol::INIT:
           m_extError = false;
-          m_sink.EnumerateSinkList();
+          m_sink.EnumerateSinkList(false);
           LoadSettings();
           Configure();
           msg->Reply(CActiveAEControlProtocol::ACC);
@@ -589,7 +589,7 @@ void CActiveAE::StateMachine(int signal, Protocol *port, Message *msg)
           m_extError = false;
           if (!displayReset)
           {
-            m_sink.EnumerateSinkList();
+            m_sink.EnumerateSinkList(true);
             LoadSettings();
           }
           Configure();
@@ -607,6 +607,22 @@ void CActiveAE::StateMachine(int signal, Protocol *port, Message *msg)
           }
           m_stats.SetSuspended(false);
           m_extDeferData = false;
+          return;
+        default:
+          break;
+        }
+      }
+      else if (&m_sink.m_dataPort)
+      {
+        switch (signal)
+        {
+        case CSinkDataProtocol::RETURNSAMPLE:
+          CSampleBuffer **buffer;
+          buffer = (CSampleBuffer**)msg->data;
+          if (buffer)
+          {
+            (*buffer)->Return();
+          }
           return;
         default:
           break;
@@ -1571,6 +1587,7 @@ bool CActiveAE::RunStages()
           allStreamsReady = false;
       }
 
+      bool needClamp = false;
       for (it = m_streams.begin(); it != m_streams.end() && allStreamsReady; ++it)
       {
         if ((*it)->m_paused || !(*it)->m_resampleBuffers)
@@ -1638,7 +1655,9 @@ bool CActiveAE::RunStages()
 #else
                 float* fbuffer = (float*) out->pkt->data[j]+i*nb_floats;
                 for (int k = 0; k < nb_floats; ++k)
-                  *fbuffer++ *= m_muted ? 0.0 : volume;
+                {
+                  fbuffer[k] *= m_muted ? 0.0 : volume;
+                }
 #endif
               }
             }
@@ -1701,15 +1720,37 @@ bool CActiveAE::RunStages()
                 float *src = (float*)mix->pkt->data[j]+i*nb_floats;
 #ifdef __SSE__
                 CAEUtil::SSEMulAddArray(dst, src, m_muted ? 0.0 : volume, nb_floats);
+                for (int k = 0; k < nb_floats; ++k)
+                {
+                  if (fabs(dst[k]) > 1.0f)
+                  {
+                    needClamp = true;
+                    break;
+                  }
+                }
 #else
                 for (int k = 0; k < nb_floats; ++k)
-                  *dst++ += *src++ * m_muted ? 0.0 : volume;
+                {
+                  dst[k] += src[k] * m_muted ? 0.0 : volume;
+                  if (fabs(dst[k]) > 1.0f)
+                    needClamp = true;
+                }
 #endif
               }
             }
             mix->Return();
           }
           busy = true;
+        }
+      }// for
+
+      // finally clamp samples
+      if(out && needClamp)
+      {
+        int nb_floats = out->pkt->nb_samples * out->pkt->config.channels / out->pkt->planes;
+        for(int i=0; i<out->pkt->planes; i++)
+        {
+          CAEUtil::ClampArray((float*)out->pkt->data[i], nb_floats);
         }
       }
 
@@ -2168,7 +2209,10 @@ IAESound *CActiveAE::MakeSound(const std::string& file)
 
   sound = new CActiveAESound(file);
   if (!sound->Prepare())
+  {
+    delete sound;
     return NULL;
+  }
   int fileSize = sound->GetFileSize();
 
   fmt_ctx = m_dllAvFormat.avformat_alloc_context();

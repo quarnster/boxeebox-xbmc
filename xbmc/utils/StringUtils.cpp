@@ -99,6 +99,7 @@ string StringUtils::FormatV(const char *fmt, va_list args)
     cstr = new_cstr;
   }
 
+  free(cstr);
   return "";
 }
 
@@ -124,13 +125,12 @@ bool StringUtils::EqualsNoCase(const std::string &str1, const char *s2)
 
 bool StringUtils::EqualsNoCase(const char *s1, const char *s2)
 {
-  int c1, c2; // Yes, because the return type of tolower() is int.
-              // To make these chars would be to introduce an unnecesary extra bitmask/zero-extend (effectively caller-narowing) into the binary.
+  char c2; // we need only one char outside the loop
   do
   {
-    c1 = ::tolower(*s1++);
-    c2 = ::tolower(*s2++);
-    if (c1 != c2) // This includes the possibility that one of the characters is the null-terminator, which implies a string mismatch.
+    const char c1 = *s1++; // const local variable should help compiler to optimize
+    c2 = *s2++;
+    if (c1 != c2 && ::tolower(c1) != ::tolower(c2)) // This includes the possibility that one of the characters is the null-terminator, which implies a string mismatch.
       return false;
   } while (c2 != '\0'); // At this point, we know c1 == c2, so there's no need to test them both.
   return true;
@@ -167,15 +167,22 @@ std::string& StringUtils::Trim(std::string &str)
   return TrimRight(str);
 }
 
+// hack to ensure that std::string::iterator will be dereferenced as _unsigned_ char
+// without this hack "TrimX" functions failed on Win32 with UTF-8 strings
+static int isspace_c(char c)
+{
+  return ::isspace((unsigned char)c);
+}
+
 std::string& StringUtils::TrimLeft(std::string &str)
 {
-  str.erase(str.begin(), ::find_if(str.begin(), str.end(), ::not1(::ptr_fun<int, int>(::isspace))));
+  str.erase(str.begin(), ::find_if(str.begin(), str.end(), ::not1(::ptr_fun(isspace_c))));
   return str;
 }
 
 std::string& StringUtils::TrimRight(std::string &str)
 {
-  str.erase(::find_if(str.rbegin(), str.rend(), ::not1(::ptr_fun<int, int>(::isspace))).base(), str.end());
+  str.erase(::find_if(str.rbegin(), str.rend(), ::not1(::ptr_fun(isspace_c))).base(), str.end());
   return str;
 }
 
@@ -536,7 +543,7 @@ long StringUtils::TimeStringToSeconds(const CStdString &timeString)
   CStdString strCopy(timeString);
   strCopy.TrimLeft(" \n\r\t");
   strCopy.TrimRight(" \n\r\t");
-  if(strCopy.Right(4).Equals(" min"))
+  if(StringUtils::EndsWithNoCase(strCopy, " min"))
   {
     // this is imdb format of "XXX min"
     return 60 * atoi(strCopy.c_str());
@@ -858,4 +865,23 @@ std::string StringUtils::Paramify(const std::string &param)
 
   // add double quotes around the whole string
   return "\"" + result + "\"";
+}
+
+void StringUtils::Tokenize(const std::string& input, std::vector<std::string>& tokens, const std::string& delimiters)
+{
+  // Tokenize ripped from http://www.linuxselfhelp.com/HOWTO/C++Programming-HOWTO-7.html
+  // Skip delimiters at beginning.
+  string::size_type lastPos = input.find_first_not_of(delimiters, 0);
+  // Find first "non-delimiter".
+  string::size_type pos = input.find_first_of(delimiters, lastPos);
+
+  while (string::npos != pos || string::npos != lastPos)
+  {
+    // Found a token, add it to the vector.
+    tokens.push_back(input.substr(lastPos, pos - lastPos));
+    // Skip delimiters.  Note the "not_of"
+    lastPos = input.find_first_not_of(delimiters, pos);
+    // Find next "non-delimiter"
+    pos = input.find_first_of(delimiters, lastPos);
+  }
 }
