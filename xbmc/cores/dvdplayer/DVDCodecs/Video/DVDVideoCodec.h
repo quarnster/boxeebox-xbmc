@@ -79,9 +79,14 @@ struct DVDVideoPicture
       CStageFrightVideo* stf;
       EGLImageKHR eglimg;
     };
+    
     struct {
       CISMDBuffer *ismdbuf;
     };
+    
+     struct {
+      CDVDMediaCodecInfo *mediacodec;
+    };   
   };
 
   unsigned int iFlags;
