@@ -45,6 +45,7 @@
 #endif
 #if defined(HAS_INTEL_SMD)
 #include "Video/DVDVideoCodecSMD.h"
+#endif
 #if defined(TARGET_ANDROID)
 #include "Video/DVDVideoCodecAndroidMediaCodec.h"
 #endif
