@@ -40,6 +40,8 @@ class COpenMaxVideo;
 struct OpenMaxVideoBuffer;
 class CStageFrightVideo;
 class CISMDBuffer;
+class CDVDMediaCodecInfo;
+
 typedef void* EGLImageKHR;
 
 // should be entirely filled by all codecs
