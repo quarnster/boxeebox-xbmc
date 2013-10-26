@@ -111,7 +111,7 @@ set(libs
 	libavformat.so.54
 	libavutil.so.52
 	libswscale.so.2
-	libjpeg.so.62
+	libturbojpeg.so.0
 	libsmbclient.so.0
         libnfs.so.1
         librtmp.so.0
