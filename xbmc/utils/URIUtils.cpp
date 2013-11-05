@@ -87,7 +87,7 @@ bool URIUtils::HasExtension(const CStdString& strFileName, const CStdString& str
   {
     // Iterate backwards over strFileName untill we hit a '.' or a mismatch
     for (CStdString::const_reverse_iterator itFileName = strFileName.rbegin();
-         itFileName != strFileName.rend(), itExtensions != strExtensions.rend(),
+         itFileName != strFileName.rend() && itExtensions != strExtensions.rend() &&
          tolower(*itFileName) == *itExtensions;
          ++itFileName, ++itExtensions)
     {
@@ -195,6 +195,15 @@ const CStdString URIUtils::GetFileName(const CStdString& strFileNameAndPath)
 void URIUtils::Split(const CStdString& strFileNameAndPath,
                      CStdString& strPath, CStdString& strFileName)
 {
+  std::string strPathT, strFileNameT;
+  Split(strFileNameAndPath, strPathT, strFileNameT);
+  strPath = strPathT;
+  strFileName = strFileNameT;
+}
+
+void URIUtils::Split(const std::string& strFileNameAndPath,
+                     std::string& strPath, std::string& strFileName)
+{
   //Splits a full filename in path and file.
   //ex. smb://computer/share/directory/filename.ext -> strPath:smb://computer/share/directory/ and strFileName:filename.ext
   //Trailing slash will be preserved
@@ -211,8 +220,10 @@ void URIUtils::Split(const CStdString& strFileNameAndPath,
   if (i == 0)
     i--;
 
-  strPath = strFileNameAndPath.Left(i + 1);
-  strFileName = strFileNameAndPath.Right(strFileNameAndPath.size() - i - 1);
+  // take left including the directory separator
+  strPath = strFileNameAndPath.substr(0, i+1);
+  // everything to the right of the directory separator
+  strFileName = strFileNameAndPath.substr(i+1);
 }
 
 CStdStringArray URIUtils::SplitPath(const CStdString& strPath)

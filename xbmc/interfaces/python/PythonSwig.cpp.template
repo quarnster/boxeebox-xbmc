@@ -152,7 +152,7 @@ void doMethod(Node method, MethodType methodType)
                    if (doAsMappingIndex) { %>, PyObject* py${params[0].@name}<% }
                    else if (methodType != MethodType.destructor) { %> , PyObject *args, PyObject *kwds <%} %> )
   {
-    TRACE;
+    XBMC_TRACE;
 <%  if (numParams > 0)
     { 
       if (useKeywordParsing && !doAsMappingIndex)
@@ -827,7 +827,7 @@ namespace PythonBindings
    // constants
    PyModule_AddStringConstant(module, (char*)"__author__", (char*)"Team XBMC <http://xbmc.org>");
    PyModule_AddStringConstant(module, (char*)"__date__", (char*)"${new Date().toString()}");
-   PyModule_AddStringConstant(module, (char*)"__version__", (char*)"2.12.0");
+   PyModule_AddStringConstant(module, (char*)"__version__", (char*)"2.13.0");
    PyModule_AddStringConstant(module, (char*)"__credits__", (char*)"Team XBMC");
    PyModule_AddStringConstant(module, (char*)"__platform__", (char*)"ALL");
 

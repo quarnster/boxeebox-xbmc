@@ -445,7 +445,7 @@ bool CDVDPlayer::OpenFile(const CFileItem& file, const CPlayerOptions &options)
 {
   try
   {
-    CLog::Log(LOGNOTICE, "DVDPlayer: Opening: %s", file.GetPath().c_str());
+    CLog::Log(LOGNOTICE, "DVDPlayer: Opening: %s", CURL::GetRedacted(file.GetPath()).c_str());
 
     // if playing a file close it first
     // this has to be changed so we won't have to close it.
@@ -471,7 +471,7 @@ bool CDVDPlayer::OpenFile(const CFileItem& file, const CPlayerOptions &options)
 #endif
 
     Create();
-    if(!m_ready.WaitMSec(100))
+    if(!m_ready.WaitMSec(g_advancedSettings.m_videoBusyDialogDelay_ms))
     {
       CGUIDialogBusy* dialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
       if(dialog)
@@ -2751,6 +2751,7 @@ int CDVDPlayer::GetAudioStream()
 
 void CDVDPlayer::SetAudioStream(int iStream)
 {
+  CMediaSettings::Get().GetCurrentVideoSettings().m_AudioStream = iStream;
   m_messenger.Put(new CDVDMsgPlayerSetAudioStream(iStream));
   SynchronizeDemuxer(100);
 }
@@ -2871,7 +2872,7 @@ bool CDVDPlayer::OpenAudioStream(int iStream, int source, bool reset)
 
   /* audio normally won't consume full cpu, so let it have prio */
   m_dvdPlayerAudio.SetPriority(GetPriority()+1);
-
+  CMediaSettings::Get().GetCurrentVideoSettings().m_AudioStream =  m_SelectionStreams.IndexOf(STREAM_AUDIO, source, iStream);
   return true;
 }
 
@@ -3840,7 +3841,11 @@ void CDVDPlayer::GetAudioStreamInfo(int index, SPlayerAudioStreamInfo &info)
   if (index == GetAudioStream())
     info.bitrate = m_dvdPlayerAudio.GetAudioBitrate();
   else
-    info.bitrate = m_pDemuxer->GetStreamFromAudioId(index)->iBitRate;
+  {
+    CDemuxStreamAudio* stream = m_pDemuxer->GetStreamFromAudioId(index);
+    if (stream)
+      info.bitrate = stream->iBitRate;
+  }
 
   SelectionStream& s = m_SelectionStreams.Get(STREAM_AUDIO, index);
   if(s.language.length() > 0)

@@ -417,13 +417,13 @@ namespace XBMCAddon
         sscanf(_colorDiffuse, "%x", &colorDiffuse);
     }
 
-    void ControlImage::setImage(const char* imageFilename) throw (UnimplementedException)
+    void ControlImage::setImage(const char* imageFilename, const bool useCache) throw (UnimplementedException)
     {
       strFileName = imageFilename;
 
       LOCKGUI;
       if (pGUIControl)
-        ((CGUIImage*)pGUIControl)->SetFileName(strFileName);
+        ((CGUIImage*)pGUIControl)->SetFileName(strFileName, false, useCache);
     }
 
     void ControlImage::setColorDiffuse(const char* cColorDiffuse) throw (UnimplementedException)
@@ -1198,7 +1198,7 @@ namespace XBMCAddon
 
     void ControlList::addItem(const Alternative<String, const XBMCAddon::xbmcgui::ListItem* > & item, bool sendMessage)
     {
-      TRACE;
+      XBMC_TRACE;
 
       if (item.which() == first)
         internAddListItem(ListItem::fromString(item.former()),sendMessage);
@@ -1208,7 +1208,7 @@ namespace XBMCAddon
 
     void ControlList::addItems(const std::vector<Alternative<String, const XBMCAddon::xbmcgui::ListItem* > > & items)
     {
-      TRACE;
+      XBMC_TRACE;
 
       for (std::vector<Alternative<String, const XBMCAddon::xbmcgui::ListItem* > >::const_iterator iter = items.begin(); iter != items.end(); ++iter)
         addItem(*iter,false);

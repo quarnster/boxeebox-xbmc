@@ -25,12 +25,13 @@
 
 #include "ISetting.h"
 #include "ISettingCallback.h"
+#include "ISettingControlCreator.h"
 #include "ISettingCreator.h"
 #include "ISettingsHandler.h"
 #include "ISubSettings.h"
 #include "SettingConditions.h"
 #include "SettingDependency.h"
-#include "threads/CriticalSection.h"
+#include "threads/SharedSection.h"
 
 class CSettingSection;
 class CSettingUpdate;
@@ -46,7 +47,8 @@ typedef void (*StringSettingOptionsFiller)(const CSetting *setting, std::vector<
  \brief Settings manager responsible for initializing, loading and handling
  all settings.
  */
-class CSettingsManager : public ISettingCreator, private ISettingCallback,
+class CSettingsManager : public ISettingCreator, public ISettingControlCreator,
+                         private ISettingCallback,
                          private ISettingsHandler, private ISubSettings
 {
 public:
@@ -58,6 +60,9 @@ public:
 
   // implementation of ISettingCreator
   virtual CSetting* CreateSetting(const std::string &settingType, const std::string &settingId, CSettingsManager *settingsManager = NULL) const;
+
+  // implementation of ISettingControlCreator
+  virtual ISettingControl* CreateControl(const std::string &controlType) const;
 
   /*!
    \brief Initializes the settings manager using the setting definitions
@@ -152,6 +157,19 @@ public:
    \param settingCreator ISettingCreator implementation
    */
   void RegisterSettingType(const std::string &settingType, ISettingCreator *settingCreator);
+
+  /*!
+   \brief Registers a custom setting control type and its
+   ISettingControlCreator implementation
+
+   When a setting control definition for a registered custom setting control
+   type is found its ISettingControlCreator implementation is called to create
+   and deserialize the setting control definition.
+   
+   \param controlType String representation of the custom setting control type
+   \param settingControlCreator ISettingControlCreator implementation
+   */
+  void RegisterSettingControl(const std::string &controlType, ISettingControlCreator *settingControlCreator);
 
   /*!
    \brief Registers the given ISettingsHandler implementation.
@@ -395,8 +413,11 @@ private:
   typedef std::map<std::string, ISettingCreator*> SettingCreatorMap;
   SettingCreatorMap m_settingCreators;
 
+  typedef std::map<std::string, ISettingControlCreator*> SettingControlCreatorMap;
+  SettingControlCreatorMap m_settingControlCreators;
+
   std::set<ISubSettings*> m_subSettings;
-  typedef std::set<ISettingsHandler*> SettingsHandlers;
+  typedef std::vector<ISettingsHandler*> SettingsHandlers;
   SettingsHandlers m_settingsHandlers;
 
   CSettingConditionsManager m_conditions;
@@ -408,5 +429,6 @@ private:
   typedef std::map<std::string, SettingOptionsFiller> SettingOptionsFillerMap;
   SettingOptionsFillerMap m_optionsFillers;
 
-  CCriticalSection m_critical;
+  CSharedSection m_critical;
+  CSharedSection m_settingsCritical;
 };

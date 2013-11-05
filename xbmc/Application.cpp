@@ -988,13 +988,11 @@ bool CApplication::InitWindow()
   }
   // set GUI res and force the clear of the screen
   g_graphicsContext.SetVideoResolution(CDisplaySettings::Get().GetCurrentResolution());
-  g_fontManager.ReloadTTFFonts();
   return true;
 }
 
 bool CApplication::DestroyWindow()
 {
-  g_fontManager.UnloadTTFFonts();
   return g_Windowing.DestroyWindow();
 }
 
@@ -1610,7 +1608,7 @@ void CApplication::OnSettingChanged(const CSetting *setting)
     }
     // this tells player whether to open an audio stream passthrough or PCM
     // if this is changed, audio stream has to be reopened
-    else if (settingId == "audiooutput.mode")
+    else if (settingId == "audiooutput.passthrough")
     {
       CApplicationMessenger::Get().MediaRestart(false);
       return;
@@ -2764,13 +2762,8 @@ bool CApplication::OnAction(const CAction &action)
 
   if (action.GetID() == ACTION_TOGGLE_DIGITAL_ANALOG)
   {
-    // TODO
-    // revisit after new audio settings page have been implemented
-    // makes no sense toggling a mode when you have three different settings
-    int mode = CSettings::Get().GetInt("audiooutput.mode");
-    if (++mode == 3)
-      mode = 0;
-    CSettings::Get().SetInt("audiooutput.mode", mode);
+    bool passthrough = CSettings::Get().GetBool("audiooutput.passthrough");
+    CSettings::Get().SetBool("audiooutput.passthrough", !passthrough);
 
     if (g_windowManager.GetActiveWindow() == WINDOW_SETTINGS_SYSTEM)
     {
@@ -3101,7 +3094,7 @@ bool CApplication::ProcessEventServer(float frameTime)
           m_lastAxisMap[joystickName].erase(wKeyID);
       }
 
-      return ProcessJoystickEvent(joystickName, wKeyID, isAxis, fAmount);
+      return ProcessJoystickEvent(joystickName, wKeyID, isAxis ? JACTIVE_AXIS : JACTIVE_BUTTON, fAmount);
     }
     else
     {
@@ -3145,7 +3138,7 @@ bool CApplication::ProcessEventServer(float frameTime)
     for (map<std::string, map<int, float> >::iterator iter = m_lastAxisMap.begin(); iter != m_lastAxisMap.end(); ++iter)
     {
       for (map<int, float>::iterator iterAxis = (*iter).second.begin(); iterAxis != (*iter).second.end(); ++iterAxis)
-        ProcessJoystickEvent((*iter).first, (*iterAxis).first, true, (*iterAxis).second);
+        ProcessJoystickEvent((*iter).first, (*iterAxis).first, JACTIVE_AXIS, (*iterAxis).second);
     }
   }
 
@@ -3169,7 +3162,7 @@ bool CApplication::ProcessEventServer(float frameTime)
   return false;
 }
 
-bool CApplication::ProcessJoystickEvent(const std::string& joystickName, int wKeyID, bool isAxis, float fAmount, unsigned int holdTime /*=0*/)
+bool CApplication::ProcessJoystickEvent(const std::string& joystickName, int wKeyID, short inputType, float fAmount, unsigned int holdTime /*=0*/)
 {
 #if defined(HAS_EVENT_SERVER)
   m_idleTimer.StartZero();
@@ -3190,7 +3183,7 @@ bool CApplication::ProcessJoystickEvent(const std::string& joystickName, int wKe
    bool fullRange = false;
 
    // Translate using regular joystick translator.
-   if (CButtonTranslator::GetInstance().TranslateJoystickString(iWin, joystickName.c_str(), wKeyID, isAxis ? JACTIVE_AXIS : JACTIVE_BUTTON, actionID, actionName, fullRange))
+   if (CButtonTranslator::GetInstance().TranslateJoystickString(iWin, joystickName.c_str(), wKeyID, inputType, actionID, actionName, fullRange))
      return ExecuteInputAction( CAction(actionID, fAmount, 0.0f, actionName, holdTime) );
    else
      CLog::Log(LOGDEBUG, "ERROR mapping joystick action. Joystick: %s %i",joystickName.c_str(), wKeyID);
@@ -4902,10 +4895,13 @@ bool CApplication::OnMessage(CGUIMessage& message)
 bool CApplication::ExecuteXBMCAction(std::string actionStr)
 {
   // see if it is a user set string
-  CLog::Log(LOGDEBUG,"%s : Translating %s", __FUNCTION__, actionStr.c_str());
+
+  //We don't know if there is unsecure information in this yet, so we
+  //postpone any logging
+  const std::string in_actionStr(actionStr);
+  CLog::Log(LOGDEBUG,"%s : Translating action string", __FUNCTION__);
   CGUIInfoLabel info(actionStr, "");
   actionStr = info.GetLabel(0);
-  CLog::Log(LOGDEBUG,"%s : To %s", __FUNCTION__, actionStr.c_str());
 
   // user has asked for something to be executed
   if (CBuiltins::HasCommand(actionStr))
@@ -4932,7 +4928,12 @@ bool CApplication::ExecuteXBMCAction(std::string actionStr)
       PlayFile(item);
     }
     else
+    {
+      //At this point we have given up to translate, so even though
+      //there may be insecure information, we log it.
+      CLog::Log(LOGDEBUG,"%s : Tried translating, but failed to understand %s", __FUNCTION__, in_actionStr.c_str());
       return false;
+    }
   }
   return true;
 }

@@ -27,6 +27,7 @@
 #include "settings/AdvancedSettings.h"
 #include "RenderSystemGLES.h"
 #include "guilib/MatrixGLES.h"
+#include "windowing/WindowingFactory.h"
 #include "utils/log.h"
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
@@ -558,6 +559,15 @@ void CRenderSystemGLES::InitialiseGUIShader()
     m_pGUIshader = new CGUIShader*[SM_ESHADERCOUNT];
     for (int i = 0; i < SM_ESHADERCOUNT; i++)
     {
+      if (i == SM_TEXTURE_RGBA_OES)
+      {
+        if (!g_Windowing.IsExtSupported("GL_OES_EGL_image_external"))
+        {
+          m_pGUIshader[i] = NULL;
+          continue;
+        }
+      }
+
       m_pGUIshader[i] = new CGUIShader( ShaderNames[i] );
 
       if (!m_pGUIshader[i]->CompileAndLink())

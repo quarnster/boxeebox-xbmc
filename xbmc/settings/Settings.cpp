@@ -69,6 +69,7 @@
 #include "settings/MediaSettings.h"
 #include "settings/MediaSourceSettings.h"
 #include "settings/SettingAddon.h"
+#include "settings/SettingControl.h"
 #include "settings/SettingsManager.h"
 #include "settings/SettingPath.h"
 #include "settings/SkinSettings.h"
@@ -252,6 +253,22 @@ CSetting* CSettings::CreateSetting(const std::string &settingType, const std::st
   return NULL;
 }
 
+ISettingControl* CSettings::CreateControl(const std::string &controlType) const
+{
+  if (StringUtils::EqualsNoCase(controlType, "toggle"))
+    return new CSettingControlCheckmark();
+  else if (StringUtils::EqualsNoCase(controlType, "spinner"))
+    return new CSettingControlSpinner();
+  else if (StringUtils::EqualsNoCase(controlType, "edit"))
+    return new CSettingControlEdit();
+  else if (StringUtils::EqualsNoCase(controlType, "button"))
+    return new CSettingControlButton();
+  else if (StringUtils::EqualsNoCase(controlType, "list"))
+    return new CSettingControlList();
+
+  return NULL;
+}
+
 bool CSettings::Initialize()
 {
   CSingleLock lock(m_critical);
@@ -260,6 +277,8 @@ bool CSettings::Initialize()
 
   // register custom setting types
   InitializeSettingTypes();
+  // register custom setting controls
+  InitializeControls();
 
   // option fillers and conditions need to be
   // initialized before the setting definitions
@@ -372,7 +391,7 @@ void CSettings::Uninitialize()
   m_settingsManager->UnregisterSettingOptionsFiller("aequalitylevels");
   m_settingsManager->UnregisterSettingOptionsFiller("audiodevices");
   m_settingsManager->UnregisterSettingOptionsFiller("audiodevicespassthrough");
-  m_settingsManager->UnregisterSettingOptionsFiller("audiooutputmodes");
+  m_settingsManager->UnregisterSettingOptionsFiller("audiostreamsilence");
   m_settingsManager->UnregisterSettingOptionsFiller("charsets");
   m_settingsManager->UnregisterSettingOptionsFiller("epgguideviews");
   m_settingsManager->UnregisterSettingOptionsFiller("fontheights");
@@ -609,6 +628,15 @@ void CSettings::InitializeSettingTypes()
   m_settingsManager->RegisterSettingType("path", this);
 }
 
+void CSettings::InitializeControls()
+{
+  m_settingsManager->RegisterSettingControl("toggle", this);
+  m_settingsManager->RegisterSettingControl("spinner", this);
+  m_settingsManager->RegisterSettingControl("edit", this);
+  m_settingsManager->RegisterSettingControl("button", this);
+  m_settingsManager->RegisterSettingControl("list", this);
+}
+
 void CSettings::InitializeVisibility()
 {
   // hide some settings if necessary
@@ -687,7 +715,7 @@ void CSettings::InitializeOptionFillers()
   m_settingsManager->RegisterSettingOptionsFiller("aequalitylevels", CAEFactory::SettingOptionsAudioQualityLevelsFiller);
   m_settingsManager->RegisterSettingOptionsFiller("audiodevices", CAEFactory::SettingOptionsAudioDevicesFiller);
   m_settingsManager->RegisterSettingOptionsFiller("audiodevicespassthrough", CAEFactory::SettingOptionsAudioDevicesPassthroughFiller);
-  m_settingsManager->RegisterSettingOptionsFiller("audiooutputmodes", CAEFactory::SettingOptionsAudioOutputModesFiller);
+  m_settingsManager->RegisterSettingOptionsFiller("audiostreamsilence", CAEFactory::SettingOptionsAudioStreamsilenceFiller);
   m_settingsManager->RegisterSettingOptionsFiller("charsets", CCharsetConverter::SettingOptionsCharsetsFiller);
   m_settingsManager->RegisterSettingOptionsFiller("epgguideviews", PVR::CGUIWindowPVRGuide::SettingOptionsEpgGuideViewFiller);
   m_settingsManager->RegisterSettingOptionsFiller("fonts", GUIFontManager::SettingOptionsFontsFiller);
@@ -797,9 +825,6 @@ void CSettings::InitializeConditions()
   if (g_application.IsStandAlone())
     m_settingsManager->AddCondition("isstandalone");
 
-  if (CAEFactory::SupportsDrain())
-    m_settingsManager->AddCondition("audiosupportsdrain");
-
   if(CAEFactory::SupportsQualitySetting())
     m_settingsManager->AddCondition("has_ae_quality_levels");
 
@@ -824,21 +849,24 @@ void CSettings::InitializeConditions()
   m_settingsManager->AddCondition("profilehassettingslocked", ProfileHasSettingsLocked);
   m_settingsManager->AddCondition("profilehasvideoslocked", ProfileHasVideosLocked);
   m_settingsManager->AddCondition("profilelockmode", ProfileLockMode);
+  m_settingsManager->AddCondition("aesettingvisible", CAEFactory::IsSettingVisible);
 }
 
 void CSettings::InitializeISettingsHandlers()
 {
   // register ISettingsHandler implementations
-  m_settingsManager->RegisterSettingsHandler(&g_application);
-  m_settingsManager->RegisterSettingsHandler(&CProfilesManager::Get());
+  // The order of these matters! Handlers are processed in the order they were registered.
   m_settingsManager->RegisterSettingsHandler(&g_advancedSettings);
   m_settingsManager->RegisterSettingsHandler(&CMediaSourceSettings::Get());
   m_settingsManager->RegisterSettingsHandler(&CPlayerCoreFactory::Get());
-  m_settingsManager->RegisterSettingsHandler(&CRssManager::Get());
+  m_settingsManager->RegisterSettingsHandler(&CProfilesManager::Get());
 #ifdef HAS_UPNP
   m_settingsManager->RegisterSettingsHandler(&CUPnPSettings::Get());
 #endif
   m_settingsManager->RegisterSettingsHandler(&CWakeOnAccess::Get());
+  m_settingsManager->RegisterSettingsHandler(&CRssManager::Get());
+  m_settingsManager->RegisterSettingsHandler(&CWakeOnAccess::Get());
+  m_settingsManager->RegisterSettingsHandler(&g_application);
 }
 
 void CSettings::InitializeISubSettings()
@@ -887,7 +915,9 @@ void CSettings::InitializeISettingCallbacks()
   m_settingsManager->RegisterCallback(&CStereoscopicsManager::Get(), settingSet);
 
   settingSet.clear();
-  settingSet.insert("audiooutput.mode");
+  settingSet.insert("audiooutput.config");
+  settingSet.insert("audiooutput.samplerate");
+  settingSet.insert("audiooutput.passthrough");
   settingSet.insert("audiooutput.channels");
   settingSet.insert("audiooutput.processquality");
   settingSet.insert("audiooutput.guisoundmode");
@@ -895,13 +925,12 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert("audiooutput.ac3passthrough");
   settingSet.insert("audiooutput.eac3passthrough");
   settingSet.insert("audiooutput.dtspassthrough");
-  settingSet.insert("audiooutput.passthroughaac");
   settingSet.insert("audiooutput.truehdpassthrough");
   settingSet.insert("audiooutput.dtshdpassthrough");
-  settingSet.insert("audiooutput.multichannellpcm");
   settingSet.insert("audiooutput.audiodevice");
   settingSet.insert("audiooutput.passthroughdevice");
   settingSet.insert("audiooutput.streamsilence");
+  settingSet.insert("audiooutput.normalizelevels");
   settingSet.insert("lookandfeel.skin");
   settingSet.insert("lookandfeel.skinsettings");
   settingSet.insert("lookandfeel.font");
