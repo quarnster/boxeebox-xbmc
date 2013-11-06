@@ -23,6 +23,7 @@
 #include "Util.h"
 #include "utils/Variant.h"
 #include "utils/CharsetConverter.h"
+#include "utils/StringUtils.h"
 
 using namespace std;
 
@@ -269,9 +270,9 @@ void CPictureInfoTag::Serialize(CVariant& value) const
   value["imagetype"] = CStdString(m_iptcInfo.ImageType);
 }
 
-void CPictureInfoTag::ToSortable(SortItem& sortable)
+void CPictureInfoTag::ToSortable(SortItem& sortable, Field field) const
 {
-  if (m_dateTimeTaken.IsValid())
+  if (field == FieldDateTaken && m_dateTimeTaken.IsValid())
     sortable[FieldDateTaken] = m_dateTimeTaken.GetAsDBDateTime();
 }
 
@@ -610,8 +611,8 @@ void CPictureInfoTag::SetInfo(int info, const CStdString& value)
   {
   case SLIDE_RESOLUTION:
     {
-      vector<CStdString> dimension;
-      CUtil::Tokenize(value, dimension, ",");
+      vector<std::string> dimension;
+      StringUtils::Tokenize(value, dimension, ",");
       if (dimension.size() == 2)
       {
         m_exifInfo.Width = atoi(dimension[0].c_str());

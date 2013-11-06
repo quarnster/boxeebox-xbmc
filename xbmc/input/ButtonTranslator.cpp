@@ -41,6 +41,8 @@
 #include "SDLJoystick.h"
 #endif
 
+#define JOYSTICK_DEFAULT_MAP "_xbmc_"
+
 using namespace std;
 using namespace XFILE;
 
@@ -81,6 +83,8 @@ static const ActionMapping actions[] =
         {"stepback"          , ACTION_STEP_BACK},
         {"bigstepforward"    , ACTION_BIG_STEP_FORWARD},
         {"bigstepback"       , ACTION_BIG_STEP_BACK},
+        {"chapterorbigstepforward", ACTION_CHAPTER_OR_BIG_STEP_FORWARD},
+        {"chapterorbigstepback"   , ACTION_CHAPTER_OR_BIG_STEP_BACK},
         {"osd"               , ACTION_SHOW_OSD},
         {"showsubtitles"     , ACTION_SHOW_SUBTITLES},
         {"nextsubtitle"      , ACTION_NEXT_SUBTITLE},
@@ -739,7 +743,7 @@ int CButtonTranslator::TranslateLircRemoteString(const char* szDevice, const cha
 #if defined(HAS_SDL_JOYSTICK) || defined(HAS_EVENT_SERVER)
 void CButtonTranslator::MapJoystickActions(int windowID, TiXmlNode *pJoystick)
 {
-  string joyname = "_xbmc_"; // default global map name
+  string joyname = JOYSTICK_DEFAULT_MAP; // default global map name
   vector<string> joynames;
   map<int, string> buttonMap;
   map<int, string> axisMap;
@@ -859,7 +863,11 @@ bool CButtonTranslator::TranslateJoystickString(int window, const char* szDevice
 
   map<string, JoystickMap>::iterator it = jmap->find(szDevice);
   if (it==jmap->end())
-    return false;
+  {
+    it = jmap->find(JOYSTICK_DEFAULT_MAP); // default global map name
+    if (it==jmap->end())
+      return false;
+  }
 
   JoystickMap wmap = it->second;
 
@@ -1114,7 +1122,7 @@ void CButtonTranslator::MapWindowActions(TiXmlNode *pWindow, int windowID)
       }
 
       // add our map to our table
-      if (map.size() > 0)
+      if (!map.empty())
         m_translatorMap.insert(pair<int, buttonMap>( windowID, map));
     }
   }
@@ -1189,7 +1197,7 @@ int CButtonTranslator::TranslateWindow(const CStdString &window)
     strWindow = strWindow.Mid(0, strWindow.GetLength() - 4);
 
   // window12345, for custom window to be keymapped
-  if (strWindow.length() > 6 && strWindow.Left(6).Equals("window"))
+  if (strWindow.length() > 6 && StringUtils::StartsWithNoCase(strWindow, "window"))
     strWindow = strWindow.Mid(6);
   if (strWindow.Left(2) == "my")  // drop "my" prefix
     strWindow = strWindow.Mid(2);
@@ -1552,7 +1560,7 @@ void CButtonTranslator::MapTouchActions(int windowID, TiXmlNode *pTouch)
   }
 
   // add the modified touch map with the window ID
-  if (map.size() > 0)
+  if (!map.empty())
     m_touchMap.insert(std::pair<int, buttonMap>(windowID, map));
 }
 

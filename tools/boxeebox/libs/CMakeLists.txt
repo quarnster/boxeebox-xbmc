@@ -198,15 +198,13 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-	libjpeg
-	URL 				http://sourceforge.net/projects/libjpeg/files/libjpeg/6b/jpegsrc.v6b.tar.gz/download
-	URL_MD5 			dbd5f3b47ed13132f04c685d608a7547
-	PATCH_COMMAND 		sed -e "s/-fforce-mem//g" -e "s,ltmain.sh$,ltmain.sh ${TARGET},g" -i configure
-	CONFIGURE_COMMAND 	ac_cv_c_const=yes RANLIB=${TARGET}-ranlib CC=${TARGET}-gcc <SOURCE_DIR>/configure -host=${TARGET} --prefix=${TARGET_DIR} --enable-shared --disable-static
-	BUILD_COMMAND 		""
-	INSTALL_COMMAND		mkdir -p ${TARGET_DIR}/man/man1/
-		COMMAND 		make ${PARALLEL} install-lib
-	BUILD_IN_SOURCE 	1
+	libjpeg-turbo
+	URL 				http://sourceforge.net/projects/libjpeg-turbo/files/1.3.0/libjpeg-turbo-1.3.0.tar.gz/download
+	URL_MD5 			e1e65cc711a1ade1322c06ad4a647741
+    CONFIGURE_COMMAND   ${BASIC_CONF}
+    BUILD_COMMAND       make
+    INSTALL_COMMAND     make install
+    BUILD_IN_SOURCE     1
 )
 
 ExternalProject_Add(

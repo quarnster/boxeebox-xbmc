@@ -208,6 +208,7 @@ const infomap player_labels[] =  {{ "hasmedia",         PLAYER_HAS_MEDIA },     
                                   { "starrating",       PLAYER_STAR_RATING },
                                   { "folderpath",       PLAYER_PATH },
                                   { "filenameandpath",  PLAYER_FILEPATH },
+                                  { "filename",         PLAYER_FILENAME },
                                   { "isinternetstream", PLAYER_ISINTERNETSTREAM },
                                   { "pauseenabled",     PLAYER_CAN_PAUSE },
                                   { "seekenabled",      PLAYER_CAN_SEEK }};
@@ -299,7 +300,6 @@ const infomap network_labels[] = {{ "isdhcp",            NETWORK_IS_DHCP },
                                   { "ipaddress",         NETWORK_IP_ADDRESS }, //labels from here
                                   { "linkstate",         NETWORK_LINK_STATE },
                                   { "macaddress",        NETWORK_MAC_ADDRESS },
-                                  { "subnetaddress",     NETWORK_SUBNET_MASK }, //subnetaddress is misleading/wrong. should be deprecated. use subnetmask in stead
                                   { "subnetmask",        NETWORK_SUBNET_MASK },
                                   { "gatewayaddress",    NETWORK_GATEWAY_ADDRESS },
                                   { "dns1address",       NETWORK_DNS1_ADDRESS },
@@ -382,11 +382,13 @@ const infomap videoplayer[] =    {{ "title",            VIDEOPLAYER_TITLE },
                                   { "videoaspect",      VIDEOPLAYER_VIDEO_ASPECT },
                                   { "audiocodec",       VIDEOPLAYER_AUDIO_CODEC },
                                   { "audiochannels",    VIDEOPLAYER_AUDIO_CHANNELS },
+                                  { "audiolanguage",    VIDEOPLAYER_AUDIO_LANG },
                                   { "hasteletext",      VIDEOPLAYER_HASTELETEXT },
                                   { "lastplayed",       VIDEOPLAYER_LASTPLAYED },
                                   { "playcount",        VIDEOPLAYER_PLAYCOUNT },
                                   { "hassubtitles",     VIDEOPLAYER_HASSUBTITLES },
                                   { "subtitlesenabled", VIDEOPLAYER_SUBTITLESENABLED },
+                                  { "subtitleslanguage",VIDEOPLAYER_SUBTITLES_LANG },
                                   { "endtime",          VIDEOPLAYER_ENDTIME },
                                   { "nexttitle",        VIDEOPLAYER_NEXT_TITLE },
                                   { "nextgenre",        VIDEOPLAYER_NEXT_GENRE },
@@ -929,6 +931,14 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
           CStdString label = CGUIInfoLabel::GetLabel(param).ToLower();
           return AddMultiInfo(GUIInfo(SYSTEM_ADDON_ICON, ConditionalStringParameter(label), 1));
         }
+        else if (prop.name == "addonversion")
+        {
+          int infoLabel = TranslateSingleString(param);
+          if (infoLabel > 0)
+            return AddMultiInfo(GUIInfo(SYSTEM_ADDON_VERSION, infoLabel, 0));
+          CStdString label = CGUIInfoLabel::GetLabel(param).ToLower();
+          return AddMultiInfo(GUIInfo(SYSTEM_ADDON_VERSION, ConditionalStringParameter(label), 1));
+        }
         else if (prop.name == "idletime")
           return AddMultiInfo(GUIInfo(SYSTEM_IDLE_TIME, atoi(param.c_str())));
       }
@@ -1175,12 +1185,20 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
       }
     }
   }
-  else if (info.size() == 3)
+  else if (info.size() == 3 || info.size() == 4)
   {
     if (info[0].name == "system" && info[1].name == "platform")
     { // TODO: replace with a single system.platform
       CStdString platform = info[2].name;
-      if (platform == "linux") return SYSTEM_PLATFORM_LINUX;
+      if (platform == "linux")
+      {
+        if (info.size() == 4)
+        {
+          CStdString device = info[3].name;
+          if (device == "raspberrypi") return SYSTEM_PLATFORM_LINUX_RASPBERRY_PI;
+        }
+        else return SYSTEM_PLATFORM_LINUX;
+      }
       else if (platform == "windows") return SYSTEM_PLATFORM_WINDOWS;
       else if (platform == "darwin")  return SYSTEM_PLATFORM_DARWIN;
       else if (platform == "osx")  return SYSTEM_PLATFORM_DARWIN_OSX;
@@ -1396,6 +1414,7 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
       strLabel = GetDuration(TIME_FORMAT_HH_MM);
     break;
   case PLAYER_PATH:
+  case PLAYER_FILENAME:
   case PLAYER_FILEPATH:
     if (m_currentFile)
     {
@@ -1414,6 +1433,8 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
         strLabel = URIUtils::GetParentPath(strLabel);
       strLabel = URIUtils::GetParentPath(strLabel);
     }
+    else if (info == PLAYER_FILENAME)
+      strLabel = URIUtils::GetFileName(strLabel);
     break;
   case PLAYER_TITLE:
     {
@@ -1548,11 +1569,33 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
       strLabel.Format("%i", m_audioInfo.channels);
     }
     break;
+  case VIDEOPLAYER_AUDIO_LANG:
+    if(g_application.m_pPlayer->IsPlaying())
+    {
+      SPlayerAudioStreamInfo info;
+      g_application.m_pPlayer->GetAudioStreamInfo(CMediaSettings::Get().GetCurrentVideoSettings().m_AudioStream, info);
+      strLabel = info.language;
+    }
+    break;
   case VIDEOPLAYER_STEREOSCOPIC_MODE:
     if(g_application.m_pPlayer->IsPlaying())
     {
       UpdateAVInfo();
       strLabel = m_videoInfo.stereoMode;
+    }
+    break;
+  case VIDEOPLAYER_SUBTITLES_LANG:
+    // use g_settings.m_currentVideoSettings.m_SubtitleOn and g_settings.m_currentVideoSettings.m_SubtitleStream
+    // instead of g_application.m_pPlayer->GetSubtitleVisible and g_application.m_pPlayer->GetSubtitle()
+    // because when we switch subtitles there is few frames when weird things happen on subtitles switch with latter:
+    //  - when we switch from one sub to another, for few frames (time to handle message, close old and open new subs)
+    //    g_application.m_pPlayer->GetSubtitle() will return last of sub streams (that's how CSelectionStreams::IndexOf work for -1 index)
+    //  - when we toggle disable/enable subs there will be few frames before message will be handled
+    if(g_application.m_pPlayer && g_application.m_pPlayer->IsPlaying() && CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn)
+    {
+      SPlayerSubtitleStreamInfo info;
+      g_application.m_pPlayer->GetSubtitleStreamInfo(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream, info);
+      strLabel = info.language;
     }
     break;
   case PLAYLIST_LENGTH:
@@ -2172,6 +2215,12 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
 #endif
   else if (condition == SYSTEM_PLATFORM_ANDROID)
 #if defined(TARGET_ANDROID)
+    bReturn = true;
+#else
+    bReturn = false;
+#endif
+  else if (condition == SYSTEM_PLATFORM_LINUX_RASPBERRY_PI)
+#if defined(TARGET_RASPBERRY_PI)
     bReturn = true;
 #else
     bReturn = false;
@@ -3149,7 +3198,8 @@ CStdString CGUIInfoManager::GetMultiInfoLabel(const GUIInfo &info, int contextWi
       return window->GetProperty(m_stringParameters[info.GetData2()]).asString();
   }
   else if (info.m_info == SYSTEM_ADDON_TITLE ||
-           info.m_info == SYSTEM_ADDON_ICON)
+           info.m_info == SYSTEM_ADDON_ICON ||
+           info.m_info == SYSTEM_ADDON_VERSION)
   {
     // This logic does not check/care whether an addon has been disabled/marked as broken,
     // it simply retrieves it's name or icon that means if an addon is placed on the home screen it
@@ -3164,6 +3214,8 @@ CStdString CGUIInfoManager::GetMultiInfoLabel(const GUIInfo &info, int contextWi
       return addon->Name();
     if (addon && info.m_info == SYSTEM_ADDON_ICON)
       return addon->Icon();
+    if (addon && info.m_info == SYSTEM_ADDON_VERSION)
+      return addon->Version().c_str();
   }
 
   return StringUtils::EmptyString;
@@ -3940,7 +3992,7 @@ void CGUIInfoManager::SetCurrentSong(CFileItem &item)
 
 void CGUIInfoManager::SetCurrentMovie(CFileItem &item)
 {
-  CLog::Log(LOGDEBUG,"CGUIInfoManager::SetCurrentMovie(%s)",item.GetPath().c_str());
+  CLog::Log(LOGDEBUG,"CGUIInfoManager::SetCurrentMovie(%s)", CURL::GetRedacted(item.GetPath()).c_str());
   *m_currentFile = item;
 
   /* also call GetMovieInfo() when a VideoInfoTag is already present or additional info won't be present in the tag */

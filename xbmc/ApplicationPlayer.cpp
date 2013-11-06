@@ -20,6 +20,7 @@
 
 #include "ApplicationPlayer.h"
 #include "cores/IPlayer.h"
+#include "Application.h"
 
 #define VOLUME_MINIMUM 0.0f        // -60dB
 #define VOLUME_MAXIMUM 1.0f        // 0dB
@@ -222,11 +223,11 @@ void CApplicationPlayer::SetVolume(float volume)
     player->SetVolume(volume);
 }
 
-void CApplicationPlayer::Seek(bool bPlus, bool bLargeStep)
+void CApplicationPlayer::Seek(bool bPlus, bool bLargeStep, bool bChapterOverride)
 {
   boost::shared_ptr<IPlayer> player = GetInternal();
   if (player)
-    player->Seek(bPlus, bLargeStep);
+    player->Seek(bPlus, bLargeStep, bChapterOverride);
 }
 
 void CApplicationPlayer::SeekPercentage(float fPercent)
@@ -693,7 +694,7 @@ void CApplicationPlayer::SetPlaySpeed(int iSpeed, bool bApplicationMuted)
   {
     if (m_iPlaySpeed == 1)
     { // restore volume
-      player->SetVolume(VOLUME_MAXIMUM);
+      player->SetVolume(g_application.GetVolume(false));
     }
     else
     { // mute volume

@@ -363,6 +363,16 @@
     },
     "additionalProperties": { "$ref": "Global.String.NotEmpty" }
   },
+  "Media.Artwork.Set": {
+    "type": "object",
+    "properties": {
+      "thumb": { "type": [ "null", { "$ref": "Global.String.NotEmpty", "required": true } ], "default": "" },
+      "poster": { "type": [ "null", { "$ref": "Global.String.NotEmpty", "required": true } ], "default": "" },
+      "banner": { "type": [ "null", { "$ref": "Global.String.NotEmpty", "required": true } ], "default": "" },
+      "fanart": { "type": [ "null", { "$ref": "Global.String.NotEmpty", "required": true } ], "default": "" }
+    },
+    "additionalProperties": { "type": [ "null", { "$ref": "Global.String.NotEmpty", "required": true } ] }
+  },
   "Library.Fields.Genre": {
     "extends": "Item.Fields.Base",
     "items": { "type": "string", "enum": [ "title", "thumbnail" ] }
@@ -690,6 +700,7 @@
   "Video.Details.Season": {
     "extends": "Video.Details.Base",
     "properties": {
+      "seasonid": { "$ref": "Library.Id", "required": true },
       "season": { "type": "integer", "required": true },
       "showtitle": { "type": "string" },
       "episode": { "type": "integer" },
@@ -780,6 +791,67 @@
       }
     }
   },
+  "PVR.Fields.Broadcast": {
+    "extends": "Item.Fields.Base",
+    "items": { "type": "string",
+      "enum": [ "title", "plot", "plotoutline", "starttime",
+                "endtime", "runtime", "progress", "progresspercentage",
+                "genre", "episodename", "episodenum", "episodepart",
+                "firstaired", "hastimer", "isactive", "parentalrating",
+                "wasactive", "thumbnail" ]
+    }
+  },
+  "PVR.Details.Broadcast": {
+    "extends": "Item.Details.Base",
+    "properties": {
+      "broadcastid": { "$ref": "Library.Id", "required": true },
+      "title": { "type": "string" },
+      "plot": { "type": "string" },
+      "plotoutline": { "type": "string" },
+      "starttime": { "type": "string" },
+      "endtime": { "type": "string" },
+      "runtime": { "type": "integer" },
+      "progress": { "type": "integer" },
+      "progresspercentage": { "type": "number" },
+      "genre": { "type": "string" },
+      "episodename": { "type": "string" },
+      "episodenum": { "type": "integer" },
+      "episodepart": { "type": "integer" },
+      "firstaired": { "type": "string" },
+      "hastimer": { "type": "boolean" },
+      "isactive": { "type": "boolean" },
+      "rating": { "type": "integer" },
+      "wasactive": { "type": "boolean" },
+      "thumbnail": { "type": "string" }
+    }
+  },
+  "Textures.Details.Size": {
+    "type": "object",
+    "properties": {
+      "size": { "type": "integer", "description": "Size of the texture (1 == largest)" },
+      "width": { "type": "integer", "description": "Width of texture" },
+      "height": { "type": "integer", "description": "Height of texture" },
+      "usecount": { "type": "integer", "description": "Number of uses" },
+      "lastused": { "type": "string", "description": "Date of last use" }
+    }
+  },
+  "Textures.Fields.Texture": {
+    "extends": "Item.Fields.Base",
+    "items": { "type": "string",
+      "enum": [ "url", "cachedurl", "lasthashcheck", "imagehash", "sizes" ]
+    }
+  },
+  "Textures.Details.Texture": {
+    "type": "object",
+    "properties": {
+      "textureid": { "$ref": "Library.Id", "required": "true" },
+      "url": { "type": "string", "description": "Original source URL" },
+      "cachedurl": { "type": "string", "description": "Cached URL on disk" },
+      "lasthashcheck": { "type": "string", "description": "Last time source was checked for changes" },
+      "imagehash": { "type": "string", "description": "Hash of image" },
+      "sizes": { "type": "array", "items": { "$ref": "Textures.Details.Size" } }
+    }
+  },
   "Profiles.Password": {
     "type": "object",
     "properties": {
@@ -850,6 +922,12 @@
     "extends": "List.Filter.Rule",
     "properties": {
       "field": { "$ref": "List.Filter.Fields.Songs", "required": true }
+    }
+  },
+  "List.Filter.Rule.Textures": {
+    "extends": "List.Filter.Rule",
+    "properties": {
+      "field": { "$ref": "List.Filter.Fields.Textures", "required": true }
     }
   },
   "List.Filter.Movies": {
@@ -997,6 +1075,27 @@
         }
       },
       { "$ref": "List.Filter.Rule.Songs" }
+    ]
+  },
+  "List.Filter.Textures": {
+    "type": [
+      { "type": "object",
+        "properties": {
+          "and": { "type": "array",
+            "items": { "$ref": "List.Filter.Textures" },
+            "minItems": 1, "required": true
+          }
+        }
+      },
+      { "type": "object",
+        "properties": {
+          "or": { "type": "array",
+            "items": { "$ref": "List.Filter.Textures" },
+            "minItems": 1, "required": true
+          }
+        }
+      },
+      { "$ref": "List.Filter.Rule.Textures" }
     ]
   },
   "List.Item.Base": {
@@ -1175,7 +1274,7 @@
   },
   "GUI.Property.Name": {
     "type": "string",
-    "enum": [ "currentwindow", "currentcontrol", "skin", "fullscreen" ]
+    "enum": [ "currentwindow", "currentcontrol", "skin", "fullscreen", "stereoscopicmode" ]
   },
   "GUI.Property.Value": {
     "type": "object",
@@ -1197,7 +1296,15 @@
           "name": { "type": "string" }
         }
       },
-      "fullscreen": { "type": "boolean" }
+      "fullscreen": { "type": "boolean" },
+      "stereoscopicmode": { "$ref": "GUI.Stereoscopy.Mode" }
+    }
+  },
+  "GUI.Stereoscopy.Mode": {
+    "type": "object",
+    "properties": {
+      "mode": { "type": "string", "required": true, "enum": [ "off", "split_vertical", "split_horizontal", "row_interleaved", "hardware_based", "anaglyph_cyan_red", "anaglyph_green_magenta", "monoscopic" ] },
+      "label": { "type": "string", "required": true }
     }
   },
   "System.Property.Name": {
@@ -1244,17 +1351,15 @@
     "enum": [ "media", "window", "script", "unknown" ]
   },
   "Favourite.Details.Favourite": {
-    "type": "array",
-    "items": { "type": "object",
-      "properties": {
-        "title": { "type": "string", "required": true },
-        "type": { "$ref": "Favourite.Type", "required": true },
-        "path": { "type": "string" },
-        "window": { "type": "string" },
-        "windowparameter": { "type": "string" },
-        "thumbnail": { "type": "string" }
-      },
-      "additionalProperties": false
-    }
+    "type": "object",
+    "properties": {
+      "title": { "type": "string", "required": true },
+      "type": { "$ref": "Favourite.Type", "required": true },
+      "path": { "type": "string" },
+      "window": { "type": "string" },
+      "windowparameter": { "type": "string" },
+      "thumbnail": { "type": "string" }
+    },
+    "additionalProperties": false
   }
 }

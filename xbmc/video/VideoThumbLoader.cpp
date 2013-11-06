@@ -35,6 +35,7 @@
 #include "cores/dvdplayer/DVDFileInfo.h"
 #include "video/VideoInfoScanner.h"
 #include "music/MusicDatabase.h"
+#include "utils/StringUtils.h"
 
 using namespace XFILE;
 using namespace std;
@@ -92,7 +93,7 @@ bool CThumbExtractor::DoWork()
   bool result=false;
   if (m_thumb)
   {
-    CLog::Log(LOGDEBUG,"%s - trying to extract thumb from video file %s", __FUNCTION__, m_item.GetPath().c_str());
+    CLog::Log(LOGDEBUG,"%s - trying to extract thumb from video file %s", __FUNCTION__, CURL::GetRedacted(m_item.GetPath()).c_str());
     // construct the thumb cache file
     CTextureDetails details;
     details.file = CTextureCache::GetCacheFile(m_target) + ".jpg";
@@ -119,7 +120,7 @@ bool CThumbExtractor::DoWork()
   else if (!m_item.HasVideoInfoTag() || !m_item.GetVideoInfoTag()->HasStreamDetails())
   {
     // No tag or no details set, so extract them
-    CLog::Log(LOGDEBUG,"%s - trying to extract filestream details from video file %s", __FUNCTION__, m_item.GetPath().c_str());
+    CLog::Log(LOGDEBUG,"%s - trying to extract filestream details from video file %s", __FUNCTION__, CURL::GetRedacted(m_item.GetPath()).c_str());
     result = CDVDFileInfo::GetFileStreamDetails(&m_item);
   }
 
@@ -143,7 +144,7 @@ bool CThumbExtractor::DoWork()
 }
 
 CVideoThumbLoader::CVideoThumbLoader() :
-  CThumbLoader(), CJobQueue(true)
+  CThumbLoader(), CJobQueue(true, 1, CJob::PRIORITY_LOW_PAUSABLE)
 {
   m_videoDatabase = new CVideoDatabase();
 }
@@ -326,7 +327,7 @@ bool CVideoThumbLoader::LoadItemLookup(CFileItem* pItem)
   {
     // An auto-generated thumb may have been cached on a different device - check we have it here
     CStdString url = pItem->GetArt("thumb");
-    if (url.compare(0, 14, "image://video@") == 0 && !CTextureCache::Get().HasCachedImage(url))
+    if (StringUtils::StartsWith(url, "image://video@") && !CTextureCache::Get().HasCachedImage(url))
       pItem->SetArt("thumb", "");
 
     if (!pItem->HasArt("thumb"))
@@ -499,7 +500,7 @@ CStdString CVideoThumbLoader::GetEmbeddedThumbURL(const CFileItem &item)
   if (URIUtils::IsStack(path))
     path = CStackDirectory::GetFirstStackedFile(path);
 
-  return CTextureCache::GetWrappedImageURL(path, "video");
+  return CTextureUtils::GetWrappedImageURL(path, "video");
 }
 
 void CVideoThumbLoader::OnJobComplete(unsigned int jobID, bool success, CJob* job)

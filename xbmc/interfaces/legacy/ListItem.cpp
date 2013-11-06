@@ -39,7 +39,7 @@ namespace XBMCAddon
                        const String& label2,
                        const String& iconImage,
                        const String& thumbnailImage,
-                       const String& path) : AddonClass("ListItem")
+                       const String& path)
     {
       item.reset();
 
@@ -463,7 +463,7 @@ namespace XBMCAddon
           else
           {
             const CStdString& exifkey = key;
-            if (!exifkey.Left(5).Equals("exif:") || exifkey.length() < 6) continue;
+            if (!StringUtils::StartsWithNoCase(exifkey, "exif:") || exifkey.length() < 6) continue;
             int info = CPictureInfoTag::TranslateString(exifkey.Mid(5));
             item->GetPictureInfoTag()->SetInfo(info, value);
           }

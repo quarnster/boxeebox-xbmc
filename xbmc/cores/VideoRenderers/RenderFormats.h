@@ -37,6 +37,7 @@ enum ERenderFormat {
   RENDER_FMT_BYPASS,
   RENDER_FMT_EGLIMG,
   RENDER_FMT_ISMD,
+  RENDER_FMT_MEDIACODEC,
 };
 
 #endif

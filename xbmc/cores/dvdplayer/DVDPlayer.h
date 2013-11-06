@@ -39,6 +39,8 @@
 #include "Edl.h"
 #include "FileItem.h"
 #include "threads/SingleLock.h"
+#include "utils/StreamDetails.h"
+#include "threads/SystemClock.h"
 
 
 class CDVDInputStream;
@@ -179,7 +181,7 @@ public:
   virtual bool HasAudio() const;
   virtual bool IsPassthrough() const;
   virtual bool CanSeek();
-  virtual void Seek(bool bPlus, bool bLargeStep);
+  virtual void Seek(bool bPlus, bool bLargeStep, bool bChapterOverride);
   virtual bool SeekScene(bool bPlus = true);
   virtual void SeekPercentage(float iPercent);
   virtual float GetPercentage();
@@ -339,7 +341,7 @@ protected:
   std::string  m_mimetype;  // hold a hint to what content file contains (mime type)
   ECacheState  m_caching;
   CFileItem    m_item;
-  unsigned int m_iChannelEntryTimeOut;
+  XbmcThreads::EndTime m_ChannelEntryTimeOut;
 
 
   CCurrentStream m_CurrentAudio;

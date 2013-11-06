@@ -36,6 +36,7 @@
 #include "utils/TimeUtils.h"
 #include "threads/SingleLock.h"
 #include "log.h"
+#include "utils/FileUtils.h"
 
 #define RSS_COLOR_BODY      0
 #define RSS_COLOR_HEADLINE  1
@@ -148,11 +149,10 @@ void CRssReader::Process()
       strXML = "<rss><item><title>"+g_localizeStrings.Get(15301)+"</title></item></rss>";
     else
     {
-      unsigned int starttime = XbmcThreads::SystemClockMillis();
+      XbmcThreads::EndTime timeout(15000);
       while (!m_bStop && nRetries > 0)
       {
-        unsigned int currenttimer = XbmcThreads::SystemClockMillis() - starttime;
-        if (currenttimer > 15000)
+        if (timeout.IsTimePast())
         {
           CLog::Log(LOGERROR, "Timeout whilst retrieving %s", strUrl.c_str());
           http.Cancel();
@@ -162,14 +162,12 @@ void CRssReader::Process()
 
         if (url.GetProtocol() != "http" && url.GetProtocol() != "https")
         {
-          CFile file;
-          if (file.Open(strUrl))
+          void* bufferPtr;
+          const unsigned int fsize = CFileUtils::LoadFile(strUrl, bufferPtr);
+          if (fsize != 0)
           {
-            char *yo = new char[(int)file.GetLength() + 1];
-            file.Read(yo, file.GetLength());
-            yo[file.GetLength()] = '\0';
-            strXML = yo;
-            delete[] yo;
+            strXML.assign((const char*)bufferPtr, fsize);
+            free(bufferPtr);
             break;
           }
         }
@@ -198,6 +196,7 @@ void CRssReader::Process()
         iStart = strXML.Find("<content:encoded>");
       }
 
+      // TODO: Use server reported charset
       if (Parse((LPSTR)strXML.c_str(), iFeed))
         CLog::Log(LOGDEBUG, "Parsed rss feed: %s", strUrl.c_str());
     }
@@ -328,17 +327,10 @@ void CRssReader::fromRSSToUTF16(const CStdStringA& strSource, CStdStringW& strDe
 bool CRssReader::Parse(LPSTR szBuffer, int iFeed)
 {
   m_xml.Clear();
-  m_xml.Parse((LPCSTR)szBuffer, 0, TIXML_ENCODING_LEGACY);
+  m_xml.Parse((LPCSTR)szBuffer);
+  m_encoding = "UTF-8"; // TODO: remove member variable
 
-  m_encoding = "UTF-8";
-  if (m_xml.RootElement())
-  {
-    TiXmlDeclaration *tiXmlDeclaration = m_xml.RootElement()->Parent()->FirstChild()->ToDeclaration();
-    if (tiXmlDeclaration != NULL && strlen(tiXmlDeclaration->Encoding()) > 0)
-      m_encoding = tiXmlDeclaration->Encoding();
-  }
-
-  CLog::Log(LOGDEBUG, "RSS feed encoding: %s", m_encoding.c_str());
+  CLog::Log(LOGDEBUG, "RSS feed encoding: %s", m_xml.GetUsedCharset().c_str());
 
   return Parse(iFeed);
 }

@@ -54,7 +54,6 @@ namespace XBMCAddon
     ControlFadeLabel::ControlFadeLabel(long x, long y, long width, long height, 
                                        const char* font, const char* _textColor, 
                                        long _alignment) : 
-      Control("ControlFadeLabel"),
       strFont("font13"), textColor(0xffffffff), align(_alignment)
     {
       dwPosX = x;
@@ -117,7 +116,6 @@ namespace XBMCAddon
     // ============================================================
     ControlTextBox::ControlTextBox(long x, long y, long width, long height, 
                                    const char* font, const char* _textColor) : 
-      Control("ControlTextBox"),
       strFont("font13"), textColor(0xffffffff)
     {
       dwPosX = x;
@@ -182,7 +180,7 @@ namespace XBMCAddon
                                  long alignment, const char* font, const char* _textColor,
                                  const char* _disabledColor, long angle,
                                  const char* _shadowColor, const char* _focusedColor) :
-      Control("ControlButton"), textOffsetX(_textOffsetX), textOffsetY(_textOffsetY),
+      textOffsetX(_textOffsetX), textOffsetY(_textOffsetY),
       align(alignment), strFont("font13"), textColor(0xffffffff), disabledColor(0x60ffffff),
       iAngle(angle), shadowColor(0), focusedColor(0xffffffff)
     {
@@ -299,7 +297,7 @@ namespace XBMCAddon
                                        long _checkWidth, long _checkHeight,
                                        long _alignment, const char* font, 
                                        const char* _textColor, const char* _disabledColor) :
-      Control("ControlCheckMark"), strFont("font13"), checkWidth(_checkWidth), checkHeight(_checkHeight),
+      strFont("font13"), checkWidth(_checkWidth), checkHeight(_checkHeight),
       align(_alignment), textColor(0xffffffff), disabledColor(0x60ffffff)
     {
       dwPosX = x;
@@ -406,7 +404,7 @@ namespace XBMCAddon
     ControlImage::ControlImage(long x, long y, long width, long height, 
                                const char* filename, long aspectRatio,
                                const char* _colorDiffuse):
-      Control("ControlImage"), colorDiffuse(0)
+      colorDiffuse(0)
     {
       dwPosX = x;
       dwPosY = y;
@@ -419,13 +417,13 @@ namespace XBMCAddon
         sscanf(_colorDiffuse, "%x", &colorDiffuse);
     }
 
-    void ControlImage::setImage(const char* imageFilename) throw (UnimplementedException)
+    void ControlImage::setImage(const char* imageFilename, const bool useCache) throw (UnimplementedException)
     {
       strFileName = imageFilename;
 
       LOCKGUI;
       if (pGUIControl)
-        ((CGUIImage*)pGUIControl)->SetFileName(strFileName);
+        ((CGUIImage*)pGUIControl)->SetFileName(strFileName, false, useCache);
     }
 
     void ControlImage::setColorDiffuse(const char* cColorDiffuse) throw (UnimplementedException)
@@ -462,8 +460,7 @@ namespace XBMCAddon
                                      const char* textureleft,
                                      const char* texturemid,
                                      const char* textureright,
-                                     const char* textureoverlay):
-      Control("ControlProgress")
+                                     const char* textureoverlay)
     {
       dwPosX = x;
       dwPosY = y;
@@ -516,8 +513,7 @@ namespace XBMCAddon
     ControlSlider::ControlSlider(long x, long y, long width, long height, 
                                  const char* textureback, 
                                  const char* texture,
-                                 const char* texturefocus) :
-      Control("ControlSlider")
+                                 const char* texturefocus)
     {
       dwPosX = x;
       dwPosY = y;
@@ -558,8 +554,7 @@ namespace XBMCAddon
 
     // ============================================================
     // ============================================================
-    ControlGroup::ControlGroup(long x, long y, long width, long height):
-      Control("ControlCheckMark")
+    ControlGroup::ControlGroup(long x, long y, long width, long height)
     {
       dwPosX = x;
       dwPosY = y;
@@ -583,13 +578,15 @@ namespace XBMCAddon
     // ============================================================
     // ============================================================
     ControlRadioButton::ControlRadioButton(long x, long y, long width, long height, const String& label,
-                                           const char* focusTexture, const char* noFocusTexture, 
+                                           const char* focusOnTexture,  const char* noFocusOnTexture,
+                                           const char* focusOffTexture, const char* noFocusOffTexture,
+                                           const char* focusTexture,    const char* noFocusTexture, 
                                            long _textOffsetX, long _textOffsetY, 
                                            long alignment, const char* font, const char* _textColor,
                                            const char* _disabledColor, long angle,
                                            const char* _shadowColor, const char* _focusedColor,
                                            const char* TextureRadioFocus, const char* TextureRadioNoFocus) :
-      Control("ControlRadioButton"), strFont("font13"), textColor(0xffffffff), disabledColor(0x60ffffff), 
+      strFont("font13"), textColor(0xffffffff), disabledColor(0x60ffffff), 
       textOffsetX(_textOffsetX), textOffsetY(_textOffsetY), align(alignment), iAngle(angle), 
       shadowColor(0), focusedColor(0xffffffff)
     {
@@ -605,11 +602,29 @@ namespace XBMCAddon
         XBMCAddonUtils::getDefaultImage((char*)"button", (char*)"texturefocus", (char*)"button-focus.png");
       strTextureNoFocus = noFocusTexture ? noFocusTexture :
         XBMCAddonUtils::getDefaultImage((char*)"button", (char*)"texturenofocus", (char*)"button-nofocus.jpg");
-      strTextureRadioFocus = TextureRadioFocus ? TextureRadioFocus :
-        XBMCAddonUtils::getDefaultImage((char*)"radiobutton", (char*)"textureradiofocus", (char*)"radiobutton-focus.png");
-      strTextureRadioNoFocus = TextureRadioNoFocus ? TextureRadioNoFocus :
-        XBMCAddonUtils::getDefaultImage((char*)"radiobutton", (char*)"textureradionofocus", (char*)"radiobutton-nofocus.jpg");
-      
+
+      if (focusOnTexture && noFocusOnTexture)
+      {
+        strTextureRadioOnFocus = focusOnTexture;
+        strTextureRadioOnNoFocus = noFocusOnTexture;
+      }
+      else
+      {
+        strTextureRadioOnFocus = strTextureRadioOnNoFocus = focusTexture ? focusTexture :
+          XBMCAddonUtils::getDefaultImage((char*)"radiobutton", (char*)"textureradiofocus", (char*)"radiobutton-focus.png");
+      }
+
+      if (focusOffTexture && noFocusOffTexture)
+      {
+        strTextureRadioOffFocus = focusOffTexture;
+        strTextureRadioOffNoFocus = noFocusOffTexture;
+      }
+      else
+      {
+        strTextureRadioOffFocus = strTextureRadioOffNoFocus = noFocusTexture ? noFocusTexture :
+          XBMCAddonUtils::getDefaultImage((char*)"radiobutton", (char*)"textureradiofocus", (char*)"radiobutton-focus.png");
+      }
+
       if (font) strFont = font;
       if (_textColor) sscanf( _textColor, "%x", &textColor );
       if (_disabledColor) sscanf( _disabledColor, "%x", &disabledColor );
@@ -697,8 +712,10 @@ namespace XBMCAddon
         (CStdString)strTextureFocus,
         (CStdString)strTextureNoFocus,
         label,
-        (CStdString)strTextureRadioFocus,
-        (CStdString)strTextureRadioNoFocus);
+        (CStdString)strTextureRadioOnFocus,
+        (CStdString)strTextureRadioOnNoFocus,
+        (CStdString)strTextureRadioOffFocus,
+        (CStdString)strTextureRadioOffNoFocus);
 
       CGUIRadioButtonControl* pGuiButtonControl =
         (CGUIRadioButtonControl*)pGUIControl;
@@ -907,7 +924,7 @@ namespace XBMCAddon
     // ============================================================
     //  ControlSpin
     // ============================================================
-    ControlSpin::ControlSpin() : Control("ControlSpin")
+    ControlSpin::ControlSpin()
     {
       // default values for spin control
       color = 0xffffffff;
@@ -953,7 +970,7 @@ namespace XBMCAddon
                                const char* p_disabledColor,
                                long p_alignment, 
                                bool hasPath, long angle) :
-      Control("ControlLabel"), strFont("font13"), 
+      strFont("font13"), 
       textColor(0xffffffff), disabledColor(0x60ffffff),
       align(p_alignment), bHasPath(hasPath), iAngle(angle)
     {
@@ -1024,7 +1041,7 @@ namespace XBMCAddon
                              const char* _disabledColor,
                              long _alignment, const char* focusTexture,
                              const char* noFocusTexture, bool isPassword) :
-      Control("ControlEdit"), strFont("font13"), textColor(0xffffffff), disabledColor(0x60ffffff),
+      strFont("font13"), textColor(0xffffffff), disabledColor(0x60ffffff),
       align(_alignment), bIsPassword(isPassword)
 
     {
@@ -1108,7 +1125,6 @@ namespace XBMCAddon
                              const char* cselectedColor,
                              long _imageWidth, long _imageHeight, long _itemTextXOffset,
                              long _itemTextYOffset, long _itemHeight, long _space, long _alignmentY) :
-      Control("ControlList"),
       strFont("font13"), 
       textColor(0xe0f0f0f0), selectedColor(0xffffffff),
       imageHeight(_imageHeight), imageWidth(_imageWidth),
@@ -1180,14 +1196,23 @@ namespace XBMCAddon
       return pGUIControl;
     }
 
-    void ControlList::addItemStream(const String& fileOrUrl, bool sendMessage) throw(UnimplementedException,WindowException)
+    void ControlList::addItem(const Alternative<String, const XBMCAddon::xbmcgui::ListItem* > & item, bool sendMessage)
     {
-      internAddListItem(ListItem::fromString(fileOrUrl),sendMessage);
+      XBMC_TRACE;
+
+      if (item.which() == first)
+        internAddListItem(ListItem::fromString(item.former()),sendMessage);
+      else
+        internAddListItem(item.later(),sendMessage);
     }
 
-    void ControlList::addListItem(const XBMCAddon::xbmcgui::ListItem* pListItem, bool sendMessage) throw(UnimplementedException,WindowException)
+    void ControlList::addItems(const std::vector<Alternative<String, const XBMCAddon::xbmcgui::ListItem* > > & items)
     {
-      internAddListItem(pListItem,sendMessage);
+      XBMC_TRACE;
+
+      for (std::vector<Alternative<String, const XBMCAddon::xbmcgui::ListItem* > >::const_iterator iter = items.begin(); iter != items.end(); ++iter)
+        addItem(*iter,false);
+      sendLabelBind(items.size());
     }
 
     void ControlList::internAddListItem(AddonClass::Ref<ListItem> pListItem, bool sendMessage) throw (WindowException)

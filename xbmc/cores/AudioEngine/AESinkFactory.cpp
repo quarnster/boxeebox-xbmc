@@ -105,8 +105,7 @@ IAESink *CAESinkFactory::Create(std::string &device, AEAudioFormat &desiredForma
 
 
 #if defined(TARGET_WINDOWS)
-  if ((driver.empty() ||
-    driver == "WASAPI") && !g_advancedSettings.m_audioForceDirectSound)
+  if (driver == "WASAPI")
     TRY_SINK(WASAPI)
   else
     TRY_SINK(DirectSound) // always fall back to DirectSound
@@ -149,8 +148,7 @@ void CAESinkFactory::EnumerateEx(AESinkInfoList &list, bool force)
 {
 #if defined(TARGET_WINDOWS)
   ENUMERATE_SINK(DirectSound, force);
-  if (!g_advancedSettings.m_audioForceDirectSound)
-    ENUMERATE_SINK(WASAPI, force);
+  ENUMERATE_SINK(WASAPI, force);
 #elif defined(TARGET_ANDROID)
     ENUMERATE_SINK(AUDIOTRACK, force);
 #elif defined(TARGET_BOXEE)
