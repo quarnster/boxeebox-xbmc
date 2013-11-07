@@ -573,8 +573,6 @@ bool CGUIControlFactory::GetInfoLabelFromElement(const TiXmlElement *element, CG
   CStdString fallback = element->Attribute("fallback");
   if (StringUtils::IsNaturalNumber(label))
     label = g_localizeStrings.Get(atoi(label));
-  else // we assume the skin xml's aren't encoded as UTF-8
-    g_charsetConverter.unknownToUTF8(label);
   if (StringUtils::IsNaturalNumber(fallback))
     fallback = g_localizeStrings.Get(atoi(fallback));
   else
@@ -645,8 +643,6 @@ bool CGUIControlFactory::GetString(const TiXmlNode* pRootNode, const char *strTa
     text.Empty();
   if (StringUtils::IsNaturalNumber(text))
     text = g_localizeStrings.Get(atoi(text.c_str()));
-  else
-    g_charsetConverter.unknownToUTF8(text);
   return true;
 }
 
@@ -711,6 +707,7 @@ CGUIControl* CGUIControlFactory::Create(int parentID, const CRect &rect, TiXmlEl
   CTextureInfo textureRadioOnFocus, textureRadioOnNoFocus;
   CTextureInfo textureRadioOffFocus, textureRadioOffNoFocus;
   CTextureInfo imageNoFocus, imageFocus;
+  CTextureInfo textureProgressIndicator;
   CGUIInfoLabel texturePath;
   CRect borderSize;
 
@@ -993,6 +990,7 @@ CGUIControl* CGUIControlFactory::Create(int parentID, const CRect &rect, TiXmlEl
   XMLUtils::GetBoolean(pControlNode,"pulseonselect", bPulse);
   XMLUtils::GetInt(pControlNode, "timeblocks", timeBlocks);
   XMLUtils::GetInt(pControlNode, "rulerunit", rulerUnit);
+  GetTexture(pControlNode, "progresstexture", textureProgressIndicator);
 
   GetInfoTexture(pControlNode, "imagepath", texture, texturePath, parentID);
 
@@ -1337,7 +1335,7 @@ CGUIControl* CGUIControlFactory::Create(int parentID, const CRect &rect, TiXmlEl
   }
   else if (type == CGUIControl::GUICONTAINER_EPGGRID)
   {
-    control = new CGUIEPGGridContainer(parentID, id, posX, posY, width, height, orientation, scrollTime, preloadItems, timeBlocks, rulerUnit);
+    control = new CGUIEPGGridContainer(parentID, id, posX, posY, width, height, orientation, scrollTime, preloadItems, timeBlocks, rulerUnit, textureProgressIndicator);
     ((CGUIEPGGridContainer *)control)->LoadLayout(pControlNode);
     ((CGUIEPGGridContainer *)control)->SetRenderOffset(offset);
     ((CGUIEPGGridContainer *)control)->SetType(viewType, viewLabel);

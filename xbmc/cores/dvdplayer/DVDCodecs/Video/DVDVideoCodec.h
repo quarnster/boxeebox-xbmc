@@ -38,7 +38,7 @@ namespace VDPAU { class CVdpauRenderPicture; }
 class COpenMax;
 class COpenMaxVideo;
 struct OpenMaxVideoBuffer;
-class CStageFrightVideo;
+class CDVDVideoCodecStageFright;
 class CISMDBuffer;
 class CDVDMediaCodecInfo;
 
@@ -76,7 +76,7 @@ struct DVDVideoPicture
     };
 
     struct {
-      CStageFrightVideo* stf;
+      CDVDVideoCodecStageFright* stf;
       EGLImageKHR eglimg;
     };
     

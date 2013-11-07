@@ -17,22 +17,17 @@
           <updates>
             <update type="change" />
           </updates>
+          <control type="toggle" />
         </setting>
-      </group>
-    </category>
-    <category id="videoplayer">
-      <group id="2">
         <setting id="videoplayer.usestagefright" type="boolean" label="13436" help="36260">
           <requirement>HAVE_LIBSTAGEFRIGHTDECODER</requirement>
           <level>2</level>
           <default>true</default>
+          <updates>
+            <update type="change" />
+          </updates>
+          <control type="toggle" />
         </setting>
-      </group>
-    </category>
-  </section>
-  <section id="videos">
-    <category id="videoplayer">
-      <group id="2">
         <setting id="videoplayer.usemediacodec" type="boolean" label="13439" help="36544">
           <visible>HAS_MEDIACODEC</visible>
           <level>2</level>
@@ -40,6 +35,7 @@
           <updates>
             <update type="change" />
           </updates>
+          <control type="toggle" />
         </setting>
       </group>
     </category>

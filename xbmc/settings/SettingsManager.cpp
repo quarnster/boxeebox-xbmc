@@ -328,7 +328,7 @@ void CSettingsManager::RegisterSettingsHandler(ISettingsHandler *settingsHandler
     return;
 
   CExclusiveLock lock(m_critical);
-  if (find(m_settingsHandlers.begin(), m_settingsHandlers.end(), settingsHandler) >= m_settingsHandlers.end())
+  if (find(m_settingsHandlers.begin(), m_settingsHandlers.end(), settingsHandler) == m_settingsHandlers.end())
     m_settingsHandlers.push_back(settingsHandler);
 }
 
@@ -338,7 +338,9 @@ void CSettingsManager::UnregisterSettingsHandler(ISettingsHandler *settingsHandl
     return;
 
   CExclusiveLock lock(m_critical);
-  m_settingsHandlers.erase(find(m_settingsHandlers.begin(), m_settingsHandlers.end(), settingsHandler));
+  SettingsHandlers::iterator it = find(m_settingsHandlers.begin(), m_settingsHandlers.end(), settingsHandler);
+  if (it != m_settingsHandlers.end())
+    m_settingsHandlers.erase(it);
 }
 
 void CSettingsManager::RegisterSubSettings(ISubSettings *subSettings)

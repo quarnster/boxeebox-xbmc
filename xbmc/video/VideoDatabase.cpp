@@ -295,7 +295,7 @@ bool CVideoDatabase::CreateTables()
     CLog::Log(LOGINFO, "create streaminfo table");
     m_pDS->exec("CREATE TABLE streamdetails (idFile integer, iStreamType integer, "
       "strVideoCodec text, fVideoAspect float, iVideoWidth integer, iVideoHeight integer, "
-      "strAudioCodec text, iAudioChannels integer, strAudioLanguage text, strSubtitleLanguage text, iVideoDuration integer)");
+      "strAudioCodec text, iAudioChannels integer, strAudioLanguage text, strSubtitleLanguage text, iVideoDuration integer, strStereoMode text)");
     m_pDS->exec("CREATE INDEX ix_streamdetails ON streamdetails (idFile)");
 
    CLog::Log(LOGINFO, "create sets table");
@@ -2019,7 +2019,7 @@ int CVideoDatabase::SetDetailsForMovie(const CStdString& strFilenameAndPath, con
       idMovie = AddMovie(strFilenameAndPath);
       if (idMovie < 0)
       {
-        CommitTransaction();
+        RollbackTransaction();
         return idMovie;
       }
     }
@@ -2108,6 +2108,7 @@ int CVideoDatabase::SetDetailsForMovie(const CStdString& strFilenameAndPath, con
   {
     CLog::Log(LOGERROR, "%s (%s) failed", __FUNCTION__, strFilenameAndPath.c_str());
   }
+  RollbackTransaction();
   return -1;
 }
 
@@ -2168,7 +2169,7 @@ int CVideoDatabase::SetDetailsForTvShow(const CStdString& strPath, const CVideoI
       idTvShow = AddTvShow(strPath);
       if (idTvShow < 0)
       {
-        CommitTransaction();
+        RollbackTransaction();
         return idTvShow;
       }
     }
@@ -2221,7 +2222,7 @@ int CVideoDatabase::SetDetailsForTvShow(const CStdString& strPath, const CVideoI
   {
     CLog::Log(LOGERROR, "%s (%s) failed", __FUNCTION__, strPath.c_str());
   }
-
+  RollbackTransaction();
   return -1;
 }
 
@@ -2238,7 +2239,7 @@ int CVideoDatabase::SetDetailsForSeason(const CVideoInfoTag& details, const std:
       idSeason = AddSeason(idShow, details.m_iSeason);
       if (idSeason < 0)
       {
-        CommitTransaction();
+        RollbackTransaction();
         return -1;
       }
     }
@@ -2278,7 +2279,7 @@ int CVideoDatabase::SetDetailsForEpisode(const CStdString& strFilenameAndPath, c
       idEpisode = AddEpisode(idShow,strFilenameAndPath);
       if (idEpisode < 0)
       {
-        CommitTransaction();
+        RollbackTransaction();
         return -1;
       }
     }
@@ -2344,6 +2345,7 @@ int CVideoDatabase::SetDetailsForEpisode(const CStdString& strFilenameAndPath, c
   {
     CLog::Log(LOGERROR, "%s (%s) failed", __FUNCTION__, strFilenameAndPath.c_str());
   }
+  RollbackTransaction();
   return -1;
 }
 
@@ -2386,7 +2388,7 @@ int CVideoDatabase::SetDetailsForMusicVideo(const CStdString& strFilenameAndPath
       idMVideo = AddMusicVideo(strFilenameAndPath);
       if (idMVideo < 0)
       {
-        CommitTransaction();
+        RollbackTransaction();
         return -1;
       }
     }
@@ -2449,6 +2451,7 @@ int CVideoDatabase::SetDetailsForMusicVideo(const CStdString& strFilenameAndPath
   {
     CLog::Log(LOGERROR, "%s (%s) failed", __FUNCTION__, strFilenameAndPath.c_str());
   }
+  RollbackTransaction();
   return -1;
 }
 
@@ -2474,11 +2477,12 @@ void CVideoDatabase::SetStreamDetailsForFileId(const CStreamDetails& details, in
     for (int i=1; i<=details.GetVideoStreamCount(); i++)
     {
       m_pDS->exec(PrepareSQL("INSERT INTO streamdetails "
-        "(idFile, iStreamType, strVideoCodec, fVideoAspect, iVideoWidth, iVideoHeight, iVideoDuration) "
-        "VALUES (%i,%i,'%s',%f,%i,%i,%i)",
+        "(idFile, iStreamType, strVideoCodec, fVideoAspect, iVideoWidth, iVideoHeight, iVideoDuration, strStereoMode) "
+        "VALUES (%i,%i,'%s',%f,%i,%i,%i,'%s')",
         idFile, (int)CStreamDetail::VIDEO,
         details.GetVideoCodec(i).c_str(), details.GetVideoAspect(i),
-        details.GetVideoWidth(i), details.GetVideoHeight(i), details.GetVideoDuration(i)));
+        details.GetVideoWidth(i), details.GetVideoHeight(i), details.GetVideoDuration(i),
+        details.GetStereoMode(i).c_str()));
     }
     for (int i=1; i<=details.GetAudioStreamCount(); i++)
     {
@@ -2914,6 +2918,7 @@ void CVideoDatabase::DeleteMovie(const CStdString& strFilenameAndPath, bool bKee
   catch (...)
   {
     CLog::Log(LOGERROR, "%s failed", __FUNCTION__);
+    RollbackTransaction();
   }
 }
 
@@ -2985,6 +2990,7 @@ void CVideoDatabase::DeleteTvShow(const CStdString& strPath, bool bKeepId /* = f
   catch (...)
   {
     CLog::Log(LOGERROR, "%s (%s) failed", __FUNCTION__, strPath.c_str());
+    RollbackTransaction();
   }
 }
 
@@ -3111,6 +3117,7 @@ void CVideoDatabase::DeleteMusicVideo(const CStdString& strFilenameAndPath, bool
   catch (...)
   {
     CLog::Log(LOGERROR, "%s failed", __FUNCTION__);
+    RollbackTransaction();
   }
 }
 
@@ -3292,6 +3299,7 @@ bool CVideoDatabase::GetStreamDetails(CVideoInfoTag& tag) const
           p->m_iWidth = pDS->fv(4).get_asInt();
           p->m_iHeight = pDS->fv(5).get_asInt();
           p->m_iDuration = pDS->fv(10).get_asInt();
+          p->m_strStereoMode = pDS->fv(11).get_asString();
           details.AddStream(p);
           retVal = true;
           break;
@@ -4532,6 +4540,9 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
     m_pDS->exec("ALTER TABLE settings ADD StereoMode integer");
     m_pDS->exec("ALTER TABLE settings ADD StereoInvert bool");
   }
+  if (iVersion < 77)
+    m_pDS->exec("ALTER TABLE streamdetails ADD strStereoMode text");
+
   // always recreate the view after any table change
   CreateViews();
   return true;
@@ -4539,7 +4550,7 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
 
 int CVideoDatabase::GetMinVersion() const
 {
-  return 76;
+  return 77;
 }
 
 bool CVideoDatabase::LookupByFolders(const CStdString &path, bool shows)
@@ -8400,6 +8411,7 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const se
   catch (...)
   {
     CLog::Log(LOGERROR, "%s failed", __FUNCTION__);
+    RollbackTransaction();
   }
   if (progress)
     progress->Close();
@@ -9050,6 +9062,7 @@ void CVideoDatabase::ImportFromXML(const CStdString &path)
     XMLUtils::GetInt(root, "version", iVersion);
 
     CLog::Log(LOGDEBUG, "%s: Starting import (export version = %i)", __FUNCTION__, iVersion);
+    BeginTransaction();
 
     TiXmlElement *movie = root->FirstChildElement();
     int current = 0;
@@ -9188,10 +9201,13 @@ void CVideoDatabase::ImportFromXML(const CStdString &path)
         }
       }
     }
+
+    CommitTransaction();
   }
   catch (...)
   {
     CLog::Log(LOGERROR, "%s failed", __FUNCTION__);
+    RollbackTransaction();
   }
   if (progress)
     progress->Close();

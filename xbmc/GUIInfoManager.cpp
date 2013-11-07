@@ -51,6 +51,7 @@
 #include "settings/Settings.h"
 #include "settings/SkinSettings.h"
 #include "guilib/LocalizeStrings.h"
+#include "guilib/StereoscopicsManager.h"
 #include "utils/CharsetConverter.h"
 #include "utils/CPUInfo.h"
 #include "utils/StringUtils.h"
@@ -403,7 +404,7 @@ const infomap videoplayer[] =    {{ "title",            VIDEOPLAYER_TITLE },
                                   { "hasepg",           VIDEOPLAYER_HAS_EPG },
                                   { "parentalrating",   VIDEOPLAYER_PARENTAL_RATING },
                                   { "isstereoscopic",   VIDEOPLAYER_IS_STEREOSCOPIC },
-                                  { "stereoscopicmode", VIDEOPLAYER_STEREOSCOPIC_MODE },
+                                  { "stereoscopicmode", VIDEOPLAYER_STEREOSCOPIC_MODE }
 };
 
 const infomap mediacontainer[] = {{ "hasfiles",         CONTAINER_HASFILES },
@@ -581,7 +582,9 @@ const infomap listitem_labels[]= {{ "thumb",            LISTITEM_THUMB },
                                   { "progress",         LISTITEM_PROGRESS },
                                   { "dateadded",        LISTITEM_DATE_ADDED },
                                   { "dbtype",           LISTITEM_DBTYPE },
-                                  { "dbid",             LISTITEM_DBID }};
+                                  { "dbid",             LISTITEM_DBID },
+                                  { "stereoscopicmode", LISTITEM_STEREOSCOPIC_MODE },
+                                  { "isstereoscopic",   LISTITEM_IS_STEREOSCOPIC }};
 
 const infomap visualisation[] =  {{ "locked",           VISUALISATION_LOCKED },
                                   { "preset",           VISUALISATION_PRESET },
@@ -1070,7 +1073,7 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
     {
       int offset = atoi(cat.param().c_str());
       int ret = TranslateListItem(prop);
-      if (offset || ret == LISTITEM_ISSELECTED || ret == LISTITEM_ISPLAYING || ret == LISTITEM_IS_FOLDER)
+      if (offset)
         return AddMultiInfo(GUIInfo(ret, 0, offset, INFOFLAG_LISTITEM_WRAP));
       return ret;
     }
@@ -1078,7 +1081,7 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
     {
       int offset = atoi(cat.param().c_str());
       int ret = TranslateListItem(prop);
-      if (offset || ret == LISTITEM_ISSELECTED || ret == LISTITEM_ISPLAYING || ret == LISTITEM_IS_FOLDER)
+      if (offset)
         return AddMultiInfo(GUIInfo(ret, 0, offset, INFOFLAG_LISTITEM_POSITION));
       return ret;
     }
@@ -1086,7 +1089,7 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
     {
       int offset = atoi(cat.param().c_str());
       int ret = TranslateListItem(prop);
-      if (offset || ret == LISTITEM_ISSELECTED || ret == LISTITEM_ISPLAYING || ret == LISTITEM_IS_FOLDER)
+      if (offset)
         return AddMultiInfo(GUIInfo(ret, 0, offset));
       return ret;
     }
@@ -2142,8 +2145,20 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
   bool bReturn = false;
   int condition = abs(condition1);
 
-  if (item && condition >= LISTITEM_START && condition < LISTITEM_END)
-    bReturn = GetItemBool(item, condition);
+  if (condition >= LISTITEM_START && condition < LISTITEM_END)
+  {
+    if (item)
+      bReturn = GetItemBool(item, condition);
+    else
+    {
+      CGUIWindow *window = GetWindowWithCondition(contextWindow, WINDOW_CONDITION_HAS_LIST_ITEMS); // true for has list items
+      if (window)
+      {
+        CFileItemPtr item = window->GetCurrentListItem();
+        bReturn = GetItemBool(item.get(), condition);
+      }
+    }
+  }
   // Ethernet Link state checking
   // Will check if system has a Ethernet Link connection! [Cable in!]
   // This can used for the skinner to switch off Network or Inter required functions
@@ -4950,6 +4965,13 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, CStdSt
         return dbid;
       }
     break;
+  case LISTITEM_STEREOSCOPIC_MODE:
+    {
+      std::string stereoMode = item->GetProperty("stereomode").asString();
+      if (stereoMode.empty() && item->HasVideoInfoTag())
+        stereoMode = CStereoscopicsManager::Get().NormalizeStereoMode(item->GetVideoInfoTag()->m_streamDetails.GetStereoMode());
+      return stereoMode;
+    }
   }
   return "";
 }
@@ -5082,6 +5104,14 @@ bool CGUIInfoManager::GetItemBool(const CGUIListItem *item, int condition) const
       {
         return pItem->GetEPGInfoTag()->ChannelTag()->IsEncrypted();
       }
+    }
+    else if (condition == LISTITEM_IS_STEREOSCOPIC)
+    {
+      std::string stereoMode = pItem->GetProperty("stereomode").asString();
+      if (stereoMode.empty() && pItem->HasVideoInfoTag())
+          stereoMode = CStereoscopicsManager::Get().NormalizeStereoMode(pItem->GetVideoInfoTag()->m_streamDetails.GetStereoMode());
+      if (!stereoMode.empty() && stereoMode != "mono")
+        return true;
     }
   }
 

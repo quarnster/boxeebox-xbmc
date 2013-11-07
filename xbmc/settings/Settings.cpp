@@ -446,6 +446,9 @@ void CSettings::Uninitialize()
   m_settingsManager->UnregisterCallback(&XBMCHelper::GetInstance());
 #endif
 
+  // cleanup the settings manager
+  m_settingsManager->Clear();
+
   // unregister ISubSettings implementations
   m_settingsManager->UnregisterSubSettings(&g_application);
   m_settingsManager->UnregisterSubSettings(&CDisplaySettings::Get());
@@ -455,19 +458,16 @@ void CSettings::Uninitialize()
   m_settingsManager->UnregisterSubSettings(&CViewStateSettings::Get());
 
   // unregister ISettingsHandler implementations
-  m_settingsManager->UnregisterSettingsHandler(&CWakeOnAccess::Get());
   m_settingsManager->UnregisterSettingsHandler(&g_advancedSettings);
   m_settingsManager->UnregisterSettingsHandler(&CMediaSourceSettings::Get());
   m_settingsManager->UnregisterSettingsHandler(&CPlayerCoreFactory::Get());
-  m_settingsManager->UnregisterSettingsHandler(&CRssManager::Get());
+  m_settingsManager->UnregisterSettingsHandler(&CProfilesManager::Get());
 #ifdef HAS_UPNP
   m_settingsManager->UnregisterSettingsHandler(&CUPnPSettings::Get());
 #endif
-  m_settingsManager->UnregisterSettingsHandler(&CProfilesManager::Get());
+  m_settingsManager->UnregisterSettingsHandler(&CWakeOnAccess::Get());
+  m_settingsManager->UnregisterSettingsHandler(&CRssManager::Get());
   m_settingsManager->UnregisterSettingsHandler(&g_application);
-
-  // cleanup the settings manager
-  m_settingsManager->Clear();
 
   m_initialized = false;
 }
@@ -811,7 +811,8 @@ void CSettings::InitializeConditions()
     m_settingsManager->AddCondition("have_amcodec");
 #endif
 #ifdef HAS_LIBSTAGEFRIGHT
-  m_settingsManager->AddCondition("have_libstagefrightdecoder");
+  if (CAndroidFeatures::GetVersion() < 19)
+    m_settingsManager->AddCondition("have_libstagefrightdecoder");
 #endif
 #ifdef TARGET_DARWIN_IOS_ATV2
   if (g_sysinfo.IsAppleTV2())
@@ -865,7 +866,6 @@ void CSettings::InitializeISettingsHandlers()
 #endif
   m_settingsManager->RegisterSettingsHandler(&CWakeOnAccess::Get());
   m_settingsManager->RegisterSettingsHandler(&CRssManager::Get());
-  m_settingsManager->RegisterSettingsHandler(&CWakeOnAccess::Get());
   m_settingsManager->RegisterSettingsHandler(&g_application);
 }
 
