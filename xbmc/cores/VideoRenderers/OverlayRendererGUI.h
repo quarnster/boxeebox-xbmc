@@ -1,7 +1,6 @@
-#pragma once
 /*
- *      Copyright (C) 2013 Team XBMC
- *      http://xbmc.org
+ *  Copyright (C) 2005-2013 Team XBMC
+ *  http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,24 +18,37 @@
  *
  */
 
-#include "Setting.h"
-#include "addons/IAddon.h"
+#pragma once
 
-class CSettingAddon : public CSettingString
+#include "OverlayRenderer.h"
+#include <string>
+
+enum SubtitleAlign
+{
+  SUBTITLE_ALIGN_MANUAL         = 0,
+  SUBTITLE_ALIGN_BOTTOM_INSIDE,
+  SUBTITLE_ALIGN_BOTTOM_OUTSIDE,
+  SUBTITLE_ALIGN_TOP_INSIDE,
+  SUBTITLE_ALIGN_TOP_OUTSIDE
+};
+
+class CGUITextLayout;
+class CDVDOverlayText;
+
+namespace OVERLAY {
+
+class COverlayText
+: public COverlay
 {
 public:
-  CSettingAddon(const std::string &id, CSettingsManager *settingsManager = NULL);
-  CSettingAddon(const std::string &id, const CSettingAddon &setting);
-  virtual ~CSettingAddon() { }
+  COverlayText() {}
+  COverlayText(CDVDOverlayText* src);
+  virtual ~COverlayText();
+  virtual void Render(SRenderState& state);
 
-  virtual CSetting* Clone(const std::string &id) const;
-
-  virtual bool Deserialize(const TiXmlNode *node, bool update = false);
-
-  ADDON::TYPE GetAddonType() const { return m_addonType; }
-
-private:
-  void copy(const CSettingAddon &setting);
-
-  ADDON::TYPE m_addonType;
+  CGUITextLayout* m_layout;
+  std::string     m_text;
+  int             m_subalign;
 };
+
+}
