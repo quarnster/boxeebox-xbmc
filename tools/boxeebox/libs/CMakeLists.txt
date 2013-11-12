@@ -333,8 +333,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	samba
-	URL 				http://ftp.samba.org/pub/samba/samba-3.6.19.tar.gz
-	URL_MD5 			afe9c7c590f3093555cd6e870d2532e1
+	URL 				http://ftp.samba.org/pub/samba/samba-3.6.20.tar.gz
+	URL_MD5 			3f1b60c681845ce6828a1abe5aacf671
 	CONFIGURE_COMMAND	CC=${TARGET}-gcc CFLAGS=-I${SYSROOT}/usr/local/include LDFLAGS=-L${SYSROOT}/usr/local/lib ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 ./configure --prefix=${TARGET_DIR} --host=${TARGET} samba_cv_CC_NEGATIVE_ENUM_VALUES=yes libreplace_cv_HAVE_GETADDRINFO=no ac_cv_file__proc_sys_kernel_core_pattern=yes  samba_cv_HAVE_STAT_ST_FLAGS=no samba_cv_DARWIN_INITGROUPS=no --without-ldap --without-krb5 --without-ads --disable-cups --enable-swat=no --with-winbind=no
 	BUILD_COMMAND 		${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} libsmbclient libtalloc libtevent libtdb
 	INSTALL_COMMAND 	${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} installlibsmbclient installlibtalloc installlibtevent installlibtdb
@@ -345,6 +345,7 @@ ExternalProject_Add(
 ExternalProject_Add(
         nfs
         URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.6.0.tar.gz
+        URL_MD5           14a422a227745fa841f78a29f01492a4  
         PATCH_COMMAND     <SOURCE_DIR>/bootstrap --prefix=${TARGET_DIR} --host=${TARGET}
         CONFIGURE_COMMAND ${BASIC_CONF}
         BUILD_COMMAND     make
