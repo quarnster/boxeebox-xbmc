@@ -307,6 +307,9 @@
     <Filter Include="cores\AudioEngine\Engines\ActiveAE">
       <UniqueIdentifier>{27f2c647-7b5f-4c49-b2e7-22bf360e58ab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="listproviders">
+      <UniqueIdentifier>{1dfaf73b-2e8d-49d2-87c1-07b1ac203ba0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\xbmc\win32\pch.cpp">
@@ -1597,6 +1600,9 @@
     <ClCompile Include="..\..\xbmc\video\dialogs\GUIDialogFullScreenInfo.cpp">
       <Filter>video\dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\xbmc\video\dialogs\GUIDialogSubtitles.cpp">
+      <Filter>video\dialogs</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\xbmc\video\dialogs\GUIDialogTeletext.cpp">
       <Filter>video\dialogs</Filter>
     </ClCompile>
@@ -2842,7 +2848,7 @@
     <ClCompile Include="..\..\xbmc\test\TestFileItem.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\test\TestTextureCache.cpp">
+    <ClCompile Include="..\..\xbmc\test\TestTextureUtils.cpp">
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\interfaces\json-rpc\PVROperations.cpp">
@@ -3085,6 +3091,15 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\interfaces\json-rpc\SettingsOperations.cpp">
       <Filter>interfaces\json-rpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\listproviders\IListProvider.cpp">
+      <Filter>listproviders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\listproviders\DirectoryProvider.cpp">
+      <Filter>listproviders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\listproviders\StaticProvider.cpp">
+      <Filter>listproviders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -4620,6 +4635,9 @@
     <ClInclude Include="..\..\xbmc\video\dialogs\GUIDialogFullScreenInfo.h">
       <Filter>video\dialogs</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\xbmc\video\dialogs\GUIDialogSubtitles.h">
+      <Filter>video\dialogs</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\xbmc\video\dialogs\GUIDialogTeletext.h">
       <Filter>video\dialogs</Filter>
     </ClInclude>
@@ -6066,6 +6084,15 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\interfaces\json-rpc\SettingsOperations.h">
       <Filter>interfaces\json-rpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\listproviders\IListProvider.h">
+      <Filter>listproviders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\listproviders\DirectoryProvider.h">
+      <Filter>listproviders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\listproviders\StaticProvider.h">
+      <Filter>listproviders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

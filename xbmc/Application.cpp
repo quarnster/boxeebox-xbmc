@@ -273,6 +273,7 @@
 #include "dialogs/GUIDialogCache.h"
 #include "dialogs/GUIDialogPlayEject.h"
 #include "dialogs/GUIDialogMediaFilter.h"
+#include "video/dialogs/GUIDialogSubtitles.h"
 #include "utils/XMLUtils.h"
 #include "addons/AddonInstaller.h"
 
@@ -1346,6 +1347,7 @@ bool CApplication::Initialize()
     g_windowManager.Add(new CGUIDialogPeripheralSettings);
     
     g_windowManager.Add(new CGUIDialogMediaFilter);
+    g_windowManager.Add(new CGUIDialogSubtitles);
 
     g_windowManager.Add(new CGUIWindowMusicPlayList);
     g_windowManager.Add(new CGUIWindowMusicSongs);
@@ -1582,7 +1584,7 @@ void CApplication::OnSettingChanged(const CSetting *setting)
     else
     {
       std::string builtin("ReloadSkin");
-      if (!m_skinReverting)
+      if (settingId == "lookandfeel.skin" && !m_skinReverting)
         builtin += "(confirm)";
       CApplicationMessenger::Get().ExecBuiltIn(builtin);
     }
@@ -2100,6 +2102,7 @@ bool CApplication::RenderNoPresent()
   // dont show GUI when playing full screen video
   if (g_graphicsContext.IsFullScreenVideo())
   {
+    g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetVideoResolution(), false);
     g_renderManager.Render(true, 0, 255);
 
     // close window overlays
@@ -3317,6 +3320,7 @@ bool CApplication::Cleanup()
     g_windowManager.Delete(WINDOW_DIALOG_ACCESS_POINTS);
     g_windowManager.Delete(WINDOW_DIALOG_SLIDER);
     g_windowManager.Delete(WINDOW_DIALOG_MEDIA_FILTER);
+    g_windowManager.Delete(WINDOW_DIALOG_SUBTITLES);
 
     /* Delete PVR related windows and dialogs */
     g_windowManager.Delete(WINDOW_PVR);

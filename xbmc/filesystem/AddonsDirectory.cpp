@@ -217,7 +217,9 @@ void CAddonsDirectory::GenerateListing(CURL &path, VECADDONS& addons, CFileItemL
     else if (CAddonMgr::Get().IsAddonDisabled(addon->ID()))
       pItem->SetProperty("Addon.Status",g_localizeStrings.Get(24023));
 
-    if (!addon->Props().broken.IsEmpty())
+    if (addon->Props().broken == "DEPSNOTMET")
+      pItem->SetProperty("Addon.Status",g_localizeStrings.Get(24049));
+    else if (!addon->Props().broken.empty())
       pItem->SetProperty("Addon.Status",g_localizeStrings.Get(24098));
     if (addon2 && addon2->Version() < addon->Version())
     {
@@ -229,7 +231,7 @@ void CAddonsDirectory::GenerateListing(CURL &path, VECADDONS& addons, CFileItemL
   }
 }
 
-CFileItemPtr CAddonsDirectory::FileItemFromAddon(AddonPtr &addon, const CStdString &basePath, bool folder)
+CFileItemPtr CAddonsDirectory::FileItemFromAddon(const AddonPtr &addon, const CStdString &basePath, bool folder)
 {
   if (!addon)
     return CFileItemPtr();
