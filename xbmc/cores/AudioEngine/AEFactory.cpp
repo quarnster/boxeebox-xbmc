@@ -24,7 +24,7 @@
 
 #if defined(TARGET_DARWIN)
   #include "Engines/CoreAudio/CoreAudioAE.h"
-  #include "settings/SettingsManager.h"
+  #include "settings/lib/SettingsManager.h"
 #else
   #include "Engines/ActiveAE/ActiveAE.h"
 #endif
@@ -38,7 +38,7 @@
 #endif
 
 #include "guilib/LocalizeStrings.h"
-#include "settings/Setting.h"
+#include "settings/lib/Setting.h"
 #include "settings/Settings.h"
 #include "utils/StringUtils.h"
 
@@ -407,11 +407,7 @@ void CAEFactory::SettingOptionsAudioDevicesFillerGeneral(const CSetting *setting
       if (sink == sinkList.begin())
         firstDevice = sink->second;
 
-#if defined(TARGET_DARWIN)
-      list.push_back(std::make_pair(sink->first, sink->first));
-#else
       list.push_back(std::make_pair(sink->first, sink->second));
-#endif
 
       if (StringUtils::EqualsNoCase(current, sink->second))
         foundValue = true;
