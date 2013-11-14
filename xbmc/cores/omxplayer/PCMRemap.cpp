@@ -31,6 +31,7 @@
 //#include "MathUtils.h"
 #include "PCMRemap.h"
 #include "utils/log.h"
+#include "utils/StringUtils.h"
 #include "settings/Settings.h"
 #include "settings/AdvancedSettings.h"
 #ifdef _WIN32
@@ -416,7 +417,7 @@ void CPCMRemap::BuildMap()
         dst->copy  = false;
       }
 
-      f.Format("%s(%f%s) ",  PCMChannelStr(dst->channel).c_str(), dst->level, dst->copy ? "*" : "");
+      f = StringUtils::Format("%s(%f%s) ",  PCMChannelStr(dst->channel).c_str(), dst->level, dst->copy ? "*" : "");
       s += f;
     }
     CLog::Log(LOGDEBUG, "CPCMRemap: %s = %s\n", PCMChannelStr(m_outMap[out_ch]).c_str(), s.c_str());
@@ -446,7 +447,7 @@ void CPCMRemap::Reset()
 }
 
 /* sets the input format, and returns the requested channel layout */
-enum PCMChannels *CPCMRemap::SetInputFormat(unsigned int channels, enum PCMChannels *channelMap, unsigned int sampleSize, unsigned int sampleRate)
+enum PCMChannels *CPCMRemap::SetInputFormat(unsigned int channels, enum PCMChannels *channelMap, unsigned int sampleSize, unsigned int sampleRate, PCMLayout layout)
 {
   m_inChannels   = channels;
   m_inSampleSize = sampleSize;
@@ -456,7 +457,7 @@ enum PCMChannels *CPCMRemap::SetInputFormat(unsigned int channels, enum PCMChann
     memcpy(m_inMap, channelMap, sizeof(enum PCMChannels) * channels);
 
   /* get the audio layout, and count the channels in it */
-  m_channelLayout  = (enum PCMLayout)std::max(0, CSettings::Get().GetInt("audiooutput.channels")-1);
+  m_channelLayout  = layout;
   if (m_channelLayout >= PCM_MAX_LAYOUT) m_channelLayout = PCM_LAYOUT_2_0;
 
 
@@ -759,7 +760,7 @@ CStdString CPCMRemap::PCMChannelStr(enum PCMChannels ename)
   CStdString namestr;
 
   if (namepos < 0 || namepos >= (int)(sizeof(PCMChannelName) / sizeof(const char*)))
-    namestr.Format("UNKNOWN CHANNEL:%i", namepos);
+    namestr = StringUtils::Format("UNKNOWN CHANNEL:%i", namepos);
   else
     namestr = PCMChannelName[namepos];
 
