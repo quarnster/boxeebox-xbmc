@@ -24,7 +24,7 @@
 #include "cores/IntelSMDGlobals.h"
 #include "utils/log.h"
 #include <math.h>
-
+#include "utils/StringUtils.h"
 CEGLNativeTypeBoxee::CEGLNativeTypeBoxee()
 {
 }
@@ -154,7 +154,7 @@ static void tvmode_to_RESOLUTION_INFO(gdl_tvmode_t tvmode, RESOLUTION_INFO *res)
   res->fPixelRatio   = 1.0f;
   res->iScreenWidth  = res->iWidth;
   res->iScreenHeight = res->iHeight;
-  res->strMode.Format("%dx%d @ %.2f%s - Full Screen", res->iScreenWidth, res->iScreenHeight, res->fRefreshRate,
+  res->strMode       = StringUtils::Format("%dx%d @ %.2f%s - Full Screen", res->iScreenWidth, res->iScreenHeight, res->fRefreshRate,
   res->dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "");
 }
 
