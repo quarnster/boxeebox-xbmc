@@ -355,7 +355,7 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	rtmpdump
-	GIT_REPOSITORY    git://git.ffmpeg.org/rtmpdump
+	URL                   http://rtmpdump.mplayerhq.hu/download/rtmpdump-2.3.tgz
 	CONFIGURE_COMMAND ""
         BUILD_COMMAND     make DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
         INSTALL_COMMAND   make install DESTDIR=${SYSROOT}
