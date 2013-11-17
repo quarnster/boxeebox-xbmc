@@ -114,7 +114,7 @@ set(libs
 	libturbojpeg.so.0
 	libsmbclient.so.0
         libnfs.so.1
-        librtmp.so.0
+        librtmp.so.1
         libdbus-1.so
 	libtdb.so.1
 	libtalloc.so.2
