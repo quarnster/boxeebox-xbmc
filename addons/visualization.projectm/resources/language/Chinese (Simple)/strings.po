@@ -38,7 +38,7 @@ msgstr "最大"
 
 msgctxt "#30005"
 msgid "Shuffle Mode"
-msgstr "随机播放模式"
+msgstr "乱序播放模式"
 
 msgctxt "#30006"
 msgid "Smooth Preset Duration"

@@ -16,6 +16,10 @@ msgstr ""
 "Language: az\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgctxt "#31008"
+msgid "Full screen"
+msgstr "Tam ekran"
+
 msgctxt "#31200"
 msgid "Shortcuts"
 msgstr "Qısayollar"
