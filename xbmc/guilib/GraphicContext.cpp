@@ -53,15 +53,13 @@ CGraphicContext::CGraphicContext(void) :
   m_bCalibrating(false),
   m_Resolution(RES_INVALID),
   /*m_windowResolution,*/
-  m_guiScaleX(1.0f),
-  m_guiScaleY(1.0f)
   /*,m_cameras, */
   /*m_origins, */
   /*m_clipRegions,*/
   /*m_guiTransform,*/
   /*m_finalTransform, */
   /*m_groupTransform*/
-  , m_stereoView(RENDER_STEREO_VIEW_OFF)
+  m_stereoView(RENDER_STEREO_VIEW_OFF)
   , m_stereoMode(RENDER_STEREO_MODE_OFF)
   , m_nextStereoMode(RENDER_STEREO_MODE_OFF)
 {
@@ -738,31 +736,18 @@ void CGraphicContext::SetResInfo(RESOLUTION res, const RESOLUTION_INFO& info)
   }
 }
 
-
-void CGraphicContext::SetScalingResolution(const RESOLUTION_INFO &res, bool needsScaling)
+void CGraphicContext::GetGUIScaling(const RESOLUTION_INFO &res, float &scaleX, float &scaleY, TransformMatrix *matrix /* = NULL */)
 {
-  Lock();
-  m_windowResolution = res;
-  if (needsScaling && m_Resolution != RES_INVALID)
+  if (m_Resolution != RES_INVALID)
   {
     // calculate necessary scalings
-    float fFromWidth;
-    float fFromHeight;
-    float fToPosX;
-    float fToPosY;
-    float fToWidth;
-    float fToHeight;
-
     RESOLUTION_INFO info = GetResInfo();
-
-    {
-      fFromWidth  = (float)res.iWidth;
-      fFromHeight = (float)res.iHeight;
-      fToPosX     = (float)info.Overscan.left;
-      fToPosY     = (float)info.Overscan.top;
-      fToWidth    = (float)info.Overscan.right  - fToPosX;
-      fToHeight   = (float)info.Overscan.bottom - fToPosY;
-    }
+    float fFromWidth  = (float)res.iWidth;
+    float fFromHeight = (float)res.iHeight;
+    float fToPosX     = (float)info.Overscan.left;
+    float fToPosY     = (float)info.Overscan.top;
+    float fToWidth    = (float)info.Overscan.right  - fToPosX;
+    float fToHeight   = (float)info.Overscan.bottom - fToPosY;
 
     if(!g_guiSkinzoom) // lookup gui setting if we didn't have it already
       g_guiSkinzoom = (CSettingInt*)CSettings::Get().GetSetting("lookandfeel.skinzoom");
@@ -781,17 +766,32 @@ void CGraphicContext::SetScalingResolution(const RESOLUTION_INFO &res, bool need
     fToPosY -= fToHeight * fZoom * 0.5f;
     fToHeight *= fZoom + 1.0f;
 
-    m_guiScaleX = fFromWidth / fToWidth;
-    m_guiScaleY = fFromHeight / fToHeight;
-    TransformMatrix guiScaler = TransformMatrix::CreateScaler(fToWidth / fFromWidth, fToHeight / fFromHeight, fToHeight / fFromHeight);
-    TransformMatrix guiOffset = TransformMatrix::CreateTranslation(fToPosX, fToPosY);
-    m_guiTransform = guiOffset * guiScaler;
+    scaleX = fFromWidth / fToWidth;
+    scaleY = fFromHeight / fToHeight;
+    if (matrix)
+    {
+      TransformMatrix guiScaler = TransformMatrix::CreateScaler(fToWidth / fFromWidth, fToHeight / fFromHeight, fToHeight / fFromHeight);
+      TransformMatrix guiOffset = TransformMatrix::CreateTranslation(fToPosX, fToPosY);
+      *matrix = guiOffset * guiScaler;
+    }
   }
   else
   {
+    scaleX = scaleY = 1.0f;
+    if (matrix)
+      matrix->Reset();
+  }
+}
+
+void CGraphicContext::SetScalingResolution(const RESOLUTION_INFO &res, bool needsScaling)
+{
+  Lock();
+  m_windowResolution = res;
+  if (needsScaling && m_Resolution != RES_INVALID)
+    GetGUIScaling(res, m_guiTransform.scaleX, m_guiTransform.scaleY, &m_guiTransform.matrix);
+  else
+  {
     m_guiTransform.Reset();
-    m_guiScaleX = 1.0f;
-    m_guiScaleY = 1.0f;
   }
 
   // reset our origin and camera
@@ -803,7 +803,7 @@ void CGraphicContext::SetScalingResolution(const RESOLUTION_INFO &res, bool need
   m_cameras.push(CPoint(0.5f*m_iScreenWidth, 0.5f*m_iScreenHeight));
 
   // and reset the final transform
-  UpdateFinalTransform(m_guiTransform);
+  m_finalTransform = m_guiTransform;
   Unlock();
 }
 
@@ -813,15 +813,6 @@ void CGraphicContext::SetRenderingResolution(const RESOLUTION_INFO &res, bool ne
   SetScalingResolution(res, needsScaling);
   UpdateCameraPosition(m_cameras.top());
   Unlock();
-}
-
-void CGraphicContext::UpdateFinalTransform(const TransformMatrix &matrix)
-{
-  // We could set the world transform here to GPU-ize the animation system.
-  // trouble is that we require the resulting x,y coords to be rounded to
-  // the nearest pixel (vertex shader perhaps?)
-  m_finalTransform.Reset();
-  m_finalTransform *= matrix;
 }
 
 void CGraphicContext::SetStereoView(RENDER_STEREO_VIEW view)
@@ -843,14 +834,14 @@ void CGraphicContext::SetStereoView(RENDER_STEREO_VIEW view)
 
 void CGraphicContext::InvertFinalCoords(float &x, float &y) const
 {
-  m_finalTransform.InverseTransformPosition(x, y);
+  m_finalTransform.matrix.InverseTransformPosition(x, y);
 }
 
 float CGraphicContext::GetScalingPixelRatio() const
 {
   // assume the resolutions are different - we want to return the aspect ratio of the video resolution
   // but only once it's been corrected for the skin -> screen coordinates scaling
-  return GetResInfo().fPixelRatio * (m_guiScaleY / m_guiScaleX);
+  return GetResInfo().fPixelRatio * (m_finalTransform.scaleY / m_finalTransform.scaleX);
 }
 
 void CGraphicContext::SetCameraPosition(const CPoint &camera)
@@ -922,9 +913,9 @@ void CGraphicContext::UpdateCameraPosition(const CPoint &camera)
 
 bool CGraphicContext::RectIsAngled(float x1, float y1, float x2, float y2) const
 { // need only test 3 points, as they must be co-planer
-  if (m_finalTransform.TransformZCoord(x1, y1, 0)) return true;
-  if (m_finalTransform.TransformZCoord(x2, y2, 0)) return true;
-  if (m_finalTransform.TransformZCoord(x1, y2, 0)) return true;
+  if (m_finalTransform.matrix.TransformZCoord(x1, y1, 0)) return true;
+  if (m_finalTransform.matrix.TransformZCoord(x2, y2, 0)) return true;
+  if (m_finalTransform.matrix.TransformZCoord(x1, y2, 0)) return true;
   return false;
 }
 
@@ -1009,7 +1000,7 @@ void CGraphicContext::Flip(const CDirtyRegionList& dirty)
 
 void CGraphicContext::ApplyHardwareTransform()
 {
-  g_Windowing.ApplyHardwareTransform(m_finalTransform);
+  g_Windowing.ApplyHardwareTransform(m_finalTransform.matrix);
 }
 
 void CGraphicContext::RestoreHardwareTransform()
