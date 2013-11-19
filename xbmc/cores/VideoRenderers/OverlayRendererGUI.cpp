@@ -151,8 +151,7 @@ void COverlayText::Render(OVERLAY::SRenderState &state)
   if(m_layout == NULL)
     return;
 
-  CRect rs, rd;
-  g_renderManager.GetVideoRect(rs, rd);
+  CRect rd = g_graphicsContext.GetViewWindow();
   RESOLUTION_INFO res = g_graphicsContext.GetResInfo();
 
   /* our coordinates are in screen coordinates constrained to rd, but the font is sized suitably for fullscreen,
@@ -163,8 +162,8 @@ void COverlayText::Render(OVERLAY::SRenderState &state)
   float scale = rd.Width() / (res.Overscan.right - res.Overscan.left);
   TransformMatrix mat;
   mat.m[0][0] = mat.m[1][1] = scale;
-  mat.m[3][0] = rd.x1;
-  mat.m[3][1] = rd.y1;
+  mat.m[0][3] = rd.x1;
+  mat.m[1][3] = rd.y1;
 
   float x = state.x, y = state.y;
   mat.InverseTransformPosition(x, y);
@@ -179,9 +178,7 @@ void COverlayText::Render(OVERLAY::SRenderState &state)
   if (m_subalign == SUBTITLE_ALIGN_MANUAL
   ||  m_subalign == SUBTITLE_ALIGN_TOP_OUTSIDE
   ||  m_subalign == SUBTITLE_ALIGN_BOTTOM_INSIDE)
-    y = state.y - height;
-  else
-    y = state.y;
+    y -= height;
 
   // clamp inside screen
   y = std::max(y, (float) res.Overscan.top);
