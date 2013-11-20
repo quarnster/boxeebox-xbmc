@@ -347,6 +347,7 @@ ExternalProject_Add(
         URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.6.0.tar.gz
         URL_MD5           14a422a227745fa841f78a29f01492a4
         PATCH_COMMAND     <SOURCE_DIR>/bootstrap --prefix=${TARGET_DIR} --host=${TARGET}
+	     COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
         CONFIGURE_COMMAND ${BASIC_CONF}
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
