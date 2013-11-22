@@ -8,7 +8,6 @@ SRCS+= EGLNativeTypeRaspberryPI.cpp
 SRCS+= EGLNativeTypeWayland.cpp
 SRCS+= EGLWrapper.cpp
 
-
 # Wayland specific detail
 ifeq (,1)
 SRCS+= wayland/Callback.cpp \
