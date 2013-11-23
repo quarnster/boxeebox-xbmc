@@ -719,7 +719,12 @@ bool CSettings::InitializeDefinitions()
 #endif
 #endif
 #endif
-
+  
+#if defined(TARGET_BOXEE)
+  if (CFile::Exists(SETTINGS_XML_FOLDER "boxeebox.xml") && !Initialize(SETTINGS_XML_FOLDER "boxeebox.xml"))
+    CLog::Log(LOGFATAL, "Unable to load boxeebox-specific settings definitions");
+#endif
+  
   // load any custom visibility and default values before loading the special
   // appliance.xml so that appliances are able to overwrite even those values
   InitializeVisibility();

@@ -25,6 +25,7 @@
 #include "utils/log.h"
 #include <math.h>
 #include "utils/StringUtils.h"
+
 CEGLNativeTypeBoxee::CEGLNativeTypeBoxee()
 {
 }
