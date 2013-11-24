@@ -264,7 +264,7 @@ ExternalProject_Add(
 	libao
 	URL 				http://downloads.xiph.org/releases/ao/libao-1.1.0.tar.gz
 	URL_MD5 			2b2508c29bc97e4dc218fa162cf883c8
-	CONFIGURE_COMMAND 	${BASIC_CONF}
+	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-pulse
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
