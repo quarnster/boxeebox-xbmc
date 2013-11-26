@@ -136,7 +136,7 @@ ExternalProject_Add(
 	pcre
 	URL 				http://sourceforge.net/projects/pcre/files/pcre/8.33/pcre-8.33.tar.bz2/download
 	URL_MD5 			21514018448ac10062ece7a668fca949
-	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-cpp --disable-stack-for-recursion --enable-pcre8 --disable-pcre16 --disable-pcre32 --enable-jit --enable-utf --enable-unicode-properties --enable-newline-is-anycrlf
+	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-stack-for-recursion --enable-pcre8 --disable-pcre16 --disable-pcre32 --enable-jit --enable-utf --enable-unicode-properties --enable-newline-is-anycrlf
 )
 
 ExternalProject_Add(
