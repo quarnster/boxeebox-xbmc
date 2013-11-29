@@ -248,7 +248,8 @@ bool CRepositoryUpdateJob::DoWork()
     AddonPtr addon;
     CAddonMgr::Get().GetAddon(addons[i]->ID(),addon);
     if (addon && addons[i]->Version() > addon->Version() &&
-        !database.IsAddonBlacklisted(addons[i]->ID(),addons[i]->Version().c_str()))
+        !database.IsAddonBlacklisted(addons[i]->ID(),addons[i]->Version().c_str()) &&
+        addons[i]->Props().broken != "DEPSNOTMET")
     {
       if (CSettings::Get().GetBool("general.addonautoupdate") || addon->Type() >= ADDON_VIZ_LIBRARY)
       {
