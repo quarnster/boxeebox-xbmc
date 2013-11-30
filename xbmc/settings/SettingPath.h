@@ -21,7 +21,7 @@
 
 #include <vector>
 
-#include "Setting.h"
+#include "settings/lib/Setting.h"
 
 class CSettingPath : public CSettingString
 {
@@ -29,6 +29,8 @@ public:
   CSettingPath(const std::string &id, CSettingsManager *settingsManager = NULL);
   CSettingPath(const std::string &id, const CSettingPath &setting);
   virtual ~CSettingPath() { }
+
+  virtual CSetting* Clone(const std::string &id) const;
 
   virtual bool Deserialize(const TiXmlNode *node, bool update = false);
   virtual bool SetValue(const std::string &value);

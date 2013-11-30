@@ -19,7 +19,7 @@
  */
 
 #include "SettingPath.h"
-#include "settings/SettingsManager.h"
+#include "settings/lib/SettingsManager.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/XBMCTinyXML.h"
@@ -37,6 +37,11 @@ CSettingPath::CSettingPath(const std::string &id, const CSettingPath &setting)
   : CSettingString(id, setting)
 {
   copy(setting);
+}
+
+CSetting* CSettingPath::Clone(const std::string &id) const
+{
+  return new CSettingPath(id, *this);
 }
 
 bool CSettingPath::Deserialize(const TiXmlNode *node, bool update /* = false */)

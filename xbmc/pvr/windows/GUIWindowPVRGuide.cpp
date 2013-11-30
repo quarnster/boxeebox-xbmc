@@ -358,10 +358,10 @@ bool CGUIWindowPVRGuide::OnClickList(CGUIMessage &message)
     bReturn = true;
     if (iAction == ACTION_SELECT_ITEM || iAction == ACTION_MOUSE_LEFT_CLICK)
     {
-      if (g_advancedSettings.m_bPVRShowEpgInfoOnEpgItemSelect)
-        ShowEPGInfo(pItem.get());
-      else
+      if (!g_advancedSettings.m_bPVRShowEpgInfoOnEpgItemSelect && pItem->GetEPGInfoTag()->StartAsLocalTime() <= CDateTime::GetCurrentDateTime())
         PlayEpgItem(pItem.get());
+      else
+        ShowEPGInfo(pItem.get());
     }
     else if (iAction == ACTION_SHOW_INFO)
       ShowEPGInfo(pItem.get());
@@ -432,11 +432,11 @@ bool CGUIWindowPVRGuide::PlayEpgItem(CFileItem *item)
 
   CLog::Log(LOGDEBUG, "play channel '%s'", channel->ChannelName().c_str());
   CFileItem channelItem = CFileItem(*channel);
+  g_application.SwitchToFullScreen();
   bool bReturn = PlayFile(&channelItem);
   if (!bReturn)
   {
-    CStdString msg;
-    msg.Format(g_localizeStrings.Get(19035).c_str(), channel->ChannelName().c_str()); // CHANNELNAME could not be played. Check the log for details.
+    CStdString msg = StringUtils::Format(g_localizeStrings.Get(19035).c_str(), channel->ChannelName().c_str()); // CHANNELNAME could not be played. Check the log for details.
     CGUIDialogOK::ShowAndGetInput(19033, 0, msg, 0);
   }
 

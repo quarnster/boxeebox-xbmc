@@ -87,7 +87,7 @@ bool CGUIDialogAddonInfo::OnMessage(CGUIMessage& message)
           OnInstall();
           return true;
         }
-        else if (CGUIDialogYesNo::ShowAndGetInput(24037, 750, 0, 0))
+        else
         {
           OnUninstall();
           return true;
@@ -143,7 +143,7 @@ void CGUIDialogAddonInfo::UpdateControls()
 {
   CStdString xbmcPath = CSpecialProtocol::TranslatePath("special://xbmc/addons");
   bool isInstalled = NULL != m_localAddon.get();
-  bool isSystem = isInstalled && m_localAddon->Path().Left(xbmcPath.size()).Equals(xbmcPath);
+  bool isSystem = isInstalled && StringUtils::StartsWith(m_localAddon->Path(), xbmcPath);
   bool isEnabled = isInstalled && m_item->GetProperty("Addon.Enabled").asBoolean();
   bool isUpdatable = isInstalled && m_item->GetProperty("Addon.UpdateAvail").asBoolean();
   if (isInstalled)
@@ -169,8 +169,7 @@ void CGUIDialogAddonInfo::UpdateControls()
 
 void CGUIDialogAddonInfo::OnUpdate()
 {
-  CStdString referer;
-  referer.Format("Referer=%s-%s.zip",m_localAddon->ID().c_str(),m_localAddon->Version().c_str());
+  CStdString referer = StringUtils::Format("Referer=%s-%s.zip",m_localAddon->ID().c_str(),m_localAddon->Version().c_str());
   CAddonInstaller::Get().Install(m_addon->ID(), true, referer); // force install
   Close();
 }
@@ -181,30 +180,44 @@ void CGUIDialogAddonInfo::OnInstall()
   Close();
 }
 
+bool CGUIDialogAddonInfo::PromptIfDependency(int heading, int line2)
+{
+  if (!m_localAddon)
+    return false;
+
+  VECADDONS addons;
+  vector<string> deps;
+  CAddonMgr::Get().GetAllAddons(addons);
+  for (VECADDONS::const_iterator it  = addons.begin();
+       it != addons.end();++it)
+  {
+    ADDONDEPS::const_iterator i = (*it)->GetDeps().find(m_localAddon->ID());
+    if (i != (*it)->GetDeps().end() && !i->second.second) // non-optional dependency
+      deps.push_back((*it)->Name());
+  }
+
+  if (!deps.empty())
+  {
+    string line0 = StringUtils::Format(g_localizeStrings.Get(24046), m_localAddon->Name().c_str());
+    string line1 = StringUtils::Join(deps, ", ");
+    CGUIDialogOK::ShowAndGetInput(heading, line0, line1, line2);
+    return true;
+  }
+  return false;
+}
+
 void CGUIDialogAddonInfo::OnUninstall()
 {
   if (!m_localAddon.get())
     return;
 
   // ensure the addon is not a dependency of other installed addons
-  VECADDONS addons;
-  CStdStringArray deps;
-  CAddonMgr::Get().GetAllAddons(addons);
-  for (VECADDONS::iterator it  = addons.begin();
-                           it != addons.end();++it)
-  {
-    if ((*it)->GetDeps().find(m_localAddon->ID()) != (*it)->GetDeps().end())
-      deps.push_back((*it)->Name());
-  }
-
-  if (!CAddonInstaller::Get().CheckDependencies(m_localAddon) && deps.size())
-  {
-    CStdString strLine0, strLine1;
-    StringUtils::JoinString(deps, ", ", strLine1);
-    strLine0.Format(g_localizeStrings.Get(24046), m_localAddon->Name().c_str());
-    CGUIDialogOK::ShowAndGetInput(24037, strLine0, strLine1, 24047);
+  if (PromptIfDependency(24037, 24047))
     return;
-  }
+
+  // prompt user to be sure
+  if (!CGUIDialogYesNo::ShowAndGetInput(24037, 750, 0, 0))
+    return;
 
   // ensure the addon isn't disabled in our database
   CAddonMgr::Get().DisableAddon(m_localAddon->ID(), false);
@@ -218,6 +231,9 @@ void CGUIDialogAddonInfo::OnUninstall()
 void CGUIDialogAddonInfo::OnEnable(bool enable)
 {
   if (!m_localAddon.get())
+    return;
+
+  if (!enable && PromptIfDependency(24075, 24091))
     return;
 
   CAddonMgr::Get().DisableAddon(m_localAddon->ID(), !enable);

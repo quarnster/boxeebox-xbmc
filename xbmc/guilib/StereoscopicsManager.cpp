@@ -37,8 +37,8 @@
 #include "guilib/Key.h"
 #include "guilib/GUIWindowManager.h"
 #include "settings/AdvancedSettings.h"
-#include "settings/ISettingCallback.h"
-#include "settings/Setting.h"
+#include "settings/lib/ISettingCallback.h"
+#include "settings/lib/Setting.h"
 #include "settings/Settings.h"
 #include "rendering/RenderSystem.h"
 #include "utils/log.h"
@@ -151,7 +151,7 @@ std::string CStereoscopicsManager::DetectStereoModeByString(const std::string &n
   StringUtils::ToUpper(searchString);
 
   CStdString tag( g_advancedSettings.m_stereoscopicflags_sbs );
-  if (stereoMode.empty() && !tag.IsEmpty())
+  if (stereoMode.empty() && !tag.empty())
   {
     StringUtils::ToUpper(tag);
     StringUtils::SplitString(tag, "|", tags);
@@ -160,7 +160,7 @@ std::string CStereoscopicsManager::DetectStereoModeByString(const std::string &n
   }
 
   tag = g_advancedSettings.m_stereoscopicflags_tab;
-  if (stereoMode.empty() && !tag.IsEmpty())
+  if (stereoMode.empty() && !tag.empty())
   {
     StringUtils::ToUpper(tag);
     StringUtils::SplitString(tag, "|", tags);
@@ -170,8 +170,9 @@ std::string CStereoscopicsManager::DetectStereoModeByString(const std::string &n
 
   if (stereoMode.empty())
     stereoMode = "mono";
+  else
+    CLog::Log(LOGDEBUG, "StereoscopicsManager: Detected stereo mode in string '%s' is '%s'", CURL::GetRedacted(needle).c_str(), stereoMode.c_str());
 
-  CLog::Log(LOGDEBUG, "StereoscopicsManager: Detected stereo mode in string '%s' is '%s'", CURL::GetRedacted(needle).c_str(), stereoMode.c_str());
   return stereoMode;
 }
 
@@ -184,7 +185,7 @@ RENDER_STEREO_MODE CStereoscopicsManager::GetStereoModeByUserChoice(const CStdSt
 
   CGUIDialogSelect* pDlgSelect = (CGUIDialogSelect*)g_windowManager.GetWindow(WINDOW_DIALOG_SELECT);
   pDlgSelect->Reset();
-  if (heading.IsEmpty())
+  if (heading.empty())
     pDlgSelect->SetHeading(g_localizeStrings.Get(36528).c_str());
   else
     pDlgSelect->SetHeading(heading.c_str());
@@ -220,7 +221,7 @@ RENDER_STEREO_MODE CStereoscopicsManager::GetStereoModeOfPlayingVideo(void)
   RENDER_STEREO_MODE mode = RENDER_STEREO_MODE_OFF;
 
   CStdString playerMode = g_infoManager.GetLabel(VIDEOPLAYER_STEREOSCOPIC_MODE);
-  if (!playerMode.IsEmpty())
+  if (!playerMode.empty())
   {
     int convertedMode = ConvertVideoToGuiStereoMode(playerMode);
     if (convertedMode > -1)
@@ -288,6 +289,19 @@ const char* CStereoscopicsManager::ConvertGuiStereoModeToString(const RENDER_STE
     i++;
   }
   return "";
+}
+
+std::string CStereoscopicsManager::NormalizeStereoMode(const std::string &mode)
+{
+  if (!mode.empty() && mode != "mono")
+  {
+    int guiMode = ConvertStringToGuiStereoMode(mode);
+    if (guiMode > -1)
+      return ConvertGuiStereoModeToString((RENDER_STEREO_MODE) guiMode);
+    else
+      return mode;
+  }
+  return "mono";
 }
 
 CAction CStereoscopicsManager::ConvertActionCommandToAction(const std::string &command, const std::string &parameter)

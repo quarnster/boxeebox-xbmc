@@ -159,7 +159,7 @@ string CRepository::GetAddonHash(const AddonPtr& addon) const
 
 #define SET_IF_NOT_EMPTY(x,y) \
   { \
-    if (!x.IsEmpty()) \
+    if (!x.empty()) \
        x = y; \
   }
 
@@ -237,7 +237,7 @@ bool CRepositoryUpdateJob::DoWork()
       break;
 
     if (!CAddonInstaller::Get().CheckDependencies(addons[i]))
-      addons[i]->Props().broken = g_localizeStrings.Get(24044);
+      addons[i]->Props().broken = "DEPSNOTMET";
 
     // invalidate the art associated with this item
     if (!addons[i]->Props().fanart.empty())
@@ -248,7 +248,8 @@ bool CRepositoryUpdateJob::DoWork()
     AddonPtr addon;
     CAddonMgr::Get().GetAddon(addons[i]->ID(),addon);
     if (addon && addons[i]->Version() > addon->Version() &&
-        !database.IsAddonBlacklisted(addons[i]->ID(),addons[i]->Version().c_str()))
+        !database.IsAddonBlacklisted(addons[i]->ID(),addons[i]->Version().c_str()) &&
+        addons[i]->Props().broken != "DEPSNOTMET")
     {
       if (CSettings::Get().GetBool("general.addonautoupdate") || addon->Type() >= ADDON_VIZ_LIBRARY)
       {
@@ -269,12 +270,15 @@ bool CRepositoryUpdateJob::DoWork()
                                               addon->Name(),TOAST_DISPLAY_TIME,false,TOAST_DISPLAY_TIME);
       }
     }
-    if (!addons[i]->Props().broken.IsEmpty())
+    if (!addons[i]->Props().broken.empty())
     {
-      if (database.IsAddonBroken(addons[i]->ID()).IsEmpty())
+      if (database.IsAddonBroken(addons[i]->ID()).empty())
       {
+        std::string line = g_localizeStrings.Get(24096);
+        if (addons[i]->Props().broken == "DEPSNOTMET")
+          line = g_localizeStrings.Get(24104);
         if (addon && CGUIDialogYesNo::ShowAndGetInput(addons[i]->Name(),
-                                             g_localizeStrings.Get(24096),
+                                             line,
                                              g_localizeStrings.Get(24097),
                                              ""))
           CAddonMgr::Get().DisableAddon(addons[i]->ID());

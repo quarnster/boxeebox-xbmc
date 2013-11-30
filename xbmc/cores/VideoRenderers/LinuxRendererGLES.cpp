@@ -68,7 +68,7 @@
 #include <EGL/eglext.h>
 #include "windowing/egl/EGLWrapper.h"
 #include "android/activity/XBMCApp.h"
-#include "DVDCodecs/Video/StageFrightVideo.h"
+#include "DVDCodecs/Video/DVDVideoCodecStageFright.h"
 
 // EGL extension functions
 static PFNEGLCREATEIMAGEKHRPROC eglCreateImageKHR;
@@ -855,17 +855,20 @@ inline void CLinuxRendererGLES::ReorderDrawPoints()
 
 void CLinuxRendererGLES::ReleaseBuffer(int idx)
 {
-#ifdef HAVE_VIDEOTOOLBOXDECODER
   YUVBUFFER &buf = m_buffers[idx];
-
-  if (buf.cvBufferRef)
-    CVBufferRelease(buf.cvBufferRef);
-  buf.cvBufferRef = NULL;
+#ifdef HAVE_VIDEOTOOLBOXDECODER
+  if (m_renderMethod & RENDER_CVREF )
+  {
+    if (buf.cvBufferRef)
+      CVBufferRelease(buf.cvBufferRef);
+    buf.cvBufferRef = NULL;
+  }
 #endif
 #if defined(TARGET_ANDROID)
-  YUVBUFFER &buf = m_buffers[idx];
-
-  SAFE_RELEASE(buf.mediacodec);
+  if ( m_renderMethod & RENDER_MEDIACODEC )
+  {
+    SAFE_RELEASE(buf.mediacodec);
+  }
 #endif
 }
 
@@ -2305,11 +2308,15 @@ void CLinuxRendererGLES::UploadEGLIMGTexture(int index)
 void CLinuxRendererGLES::DeleteEGLIMGTexture(int index)
 {
 #ifdef HAS_LIBSTAGEFRIGHT
-  YUVPLANE &plane = m_buffers[index].fields[0][0];
+  YUVBUFFER &buf = m_buffers[index];
+  YUVPLANE &plane = buf.fields[0][0];
 
   if(plane.id && glIsTexture(plane.id))
     glDeleteTextures(1, &plane.id);
   plane.id = 0;
+
+  buf.stf = NULL;
+  buf.eglimg = EGL_NO_IMAGE_KHR;
 #endif
 }
 bool CLinuxRendererGLES::CreateEGLIMGTexture(int index)
@@ -2605,7 +2612,7 @@ void CLinuxRendererGLES::AddProcessor(struct __CVBuffer *cvBufferRef, int index)
 }
 #endif
 #ifdef HAS_LIBSTAGEFRIGHT
-void CLinuxRendererGLES::AddProcessor(CStageFrightVideo* stf, EGLImageKHR eglimg, int index)
+void CLinuxRendererGLES::AddProcessor(CDVDVideoCodecStageFright* stf, EGLImageKHR eglimg, int index)
 {
 #ifdef DEBUG_VERBOSE
   unsigned int time = XbmcThreads::SystemClockMillis();

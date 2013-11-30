@@ -39,6 +39,7 @@ AC_DEFUN([XB_ADD_CODEC],
   AC_MSG_CHECKING([for $2])
   case $add_codecs in
     *$2*)
+      use_codec_$2="yes"
       AC_SUBST([USE_$1], 1)
       AC_DEFINE([HAS_$1], 1, [using $2])
       AC_MSG_RESULT([enabling $2])
@@ -842,6 +843,7 @@ if test "$host_vendor" = "apple" ; then
     LIBS="$LIBS -framework IOSurface"
     LIBS="$LIBS -framework QuartzCore"
     LIBS="$LIBS -framework SystemConfiguration"
+    LIBS="$LIBS -framework VideoDecodeAcceleration"
   fi
   USE_EXTERNAL_FFMPEG=1
 elif test "$target_platform" = "target_raspberry_pi"; then
@@ -1102,7 +1104,7 @@ if test "$gcrypt_headers_available" = "yes"; then
    AC_CHECK_LIB([gcrypt],[gcry_control],, AC_MSG_ERROR($missing_library))
    AC_DEFINE([HAVE_GCRYPT],[1],[Define if we have gcrypt])
 fi
-PKG_CHECK_MODULES([GNUTLS], [gnutls], [have_gnutls=yes];AC_DEFINE([HAVE_GNUTLS], [1], [Define if we have gnutls])], AC_MSG_WARN("gnutls not found, ffmpeg TLS support disabled"))
+PKG_CHECK_MODULES([GNUTLS], [gnutls], [have_gnutls=yes];AC_DEFINE([HAVE_GNUTLS], [1], [Define if we have gnutls]), AC_MSG_WARN("gnutls not found, ffmpeg TLS support disabled"))
 
 AC_CHECK_LIB([bz2],         [main],, AC_MSG_ERROR($missing_library))
 AC_CHECK_LIB([jpeg],        [main],, AC_MSG_ERROR($missing_library)) # check for cximage
@@ -1966,7 +1968,6 @@ case $add_codecs in
       XB_ADD_CODEC([LIBAMCODEC], [amcodec])
       ;;
   *libstagefright*)
-      LIBS+="-L${prefix}/opt/android-libs -lstdc++ -lutils -lcutils -lstagefright -lbinder -lui -lgui"
       XB_ADD_CODEC([LIBSTAGEFRIGHT], [libstagefright])
       ;;
   *)
@@ -2556,12 +2557,16 @@ OUTPUT_FILES="Makefile \
     xbmc/main/Makefile \
     project/cmake/xbmc-config.cmake"
 
-if $use_wayland = "yes"; then
+if test "$use_wayland" = "yes"; then
 OUTPUT_FILES="$OUTPUT_FILES xbmc/windowing/tests/wayland/Makefile"
 fi
 
 if test "$use_skin_touched" = "yes"; then
 OUTPUT_FILES="$OUTPUT_FILES addons/skin.touched/media/Makefile"
+fi
+
+if test "$use_codec_libstagefright" = "yes"; then
+OUTPUT_FILES="$OUTPUT_FILES xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightICS/Makefile"
 fi
 
 OUTPUT_FILES="$OUTPUT_FILES \

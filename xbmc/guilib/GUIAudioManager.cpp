@@ -22,7 +22,7 @@
 #include "GUIAudioManager.h"
 #include "Key.h"
 #include "input/ButtonTranslator.h"
-#include "settings/Setting.h"
+#include "settings/lib/Setting.h"
 #include "threads/SingleLock.h"
 #include "utils/URIUtils.h"
 #include "utils/XBMCTinyXML.h"
@@ -256,7 +256,7 @@ bool CGUIAudioManager::Load()
       if (pFileNode && pFileNode->FirstChild())
         strFile += pFileNode->FirstChild()->Value();
 
-      if (id > 0 && !strFile.IsEmpty())
+      if (id > 0 && !strFile.empty())
       {
         CStdString filename = URIUtils::AddFileToFolder(m_strMediaDir, strFile);
         IAESound *sound = LoadSound(filename);

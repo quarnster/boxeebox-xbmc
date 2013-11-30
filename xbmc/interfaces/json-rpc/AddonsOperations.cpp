@@ -186,12 +186,17 @@ JSONRPC_STATUS CAddonsOperations::ExecuteAddon(const CStdString &method, ITransp
       argv += StringUtils::Paramify(it->asString());
     }
   }
+  else if (params.isString())
+  {
+    if (!params.empty())
+      argv = StringUtils::Paramify(params.asString());
+  }
   
   CStdString cmd;
   if (params.size() == 0)
-    cmd.Format("RunAddon(%s)", id.c_str());
+    cmd = StringUtils::Format("RunAddon(%s)", id.c_str());
   else
-    cmd.Format("RunAddon(%s, %s)", id.c_str(), argv.c_str());
+    cmd = StringUtils::Format("RunAddon(%s, %s)", id.c_str(), argv.c_str());
   CApplicationMessenger::Get().ExecBuiltIn(cmd, parameterObject["wait"].asBoolean());
   
   return ACK;

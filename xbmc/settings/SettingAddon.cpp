@@ -20,7 +20,7 @@
 
 #include "SettingAddon.h"
 #include "addons/Addon.h"
-#include "settings/SettingsManager.h"
+#include "settings/lib/SettingsManager.h"
 #include "utils/log.h"
 #include "utils/XBMCTinyXML.h"
 #include "utils/XMLUtils.h"
@@ -36,6 +36,11 @@ CSettingAddon::CSettingAddon(const std::string &id, const CSettingAddon &setting
   : CSettingString(id, setting)
 {
   copy(setting);
+}
+
+CSetting* CSettingAddon::Clone(const std::string &id) const
+{
+  return new CSettingAddon(id, *this);
 }
 
 bool CSettingAddon::Deserialize(const TiXmlNode *node, bool update /* = false */)

@@ -65,7 +65,7 @@ CStdString CAlbum::GetGenreString() const
 
 bool CAlbum::operator<(const CAlbum &a) const
 {
-  if (strMusicBrainzAlbumID.IsEmpty() && a.strMusicBrainzAlbumID.IsEmpty())
+  if (strMusicBrainzAlbumID.empty() && a.strMusicBrainzAlbumID.empty())
   {
     if (strAlbum < a.strAlbum) return true;
     if (strAlbum > a.strAlbum) return false;
@@ -156,6 +156,19 @@ bool CAlbum::Load(const TiXmlElement *album, bool append, bool prioritise)
     }
 
     albumArtistCreditsNode = albumArtistCreditsNode->NextSiblingElement("albumArtistCredits");
+  }
+
+  // Support old style <artist></artist> for backwards compatibility
+  // .nfo files should ideally be updated to use the artist credits structure above
+  // or removed entirely in preference for better tags (MusicBrainz?)
+  if (artistCredits.empty() && !artist.empty())
+  {
+    for (vector<string>::const_iterator it = artist.begin(); it != artist.end(); ++it)
+    {
+      CArtistCredit artistCredit(*it, StringUtils::EmptyString,
+                                 it == --artist.end() ? StringUtils::EmptyString : g_advancedSettings.m_musicItemSeparator);
+      artistCredits.push_back(artistCredit);
+    }
   }
 
   const TiXmlElement* node = album->FirstChildElement("track");

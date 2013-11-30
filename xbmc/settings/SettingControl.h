@@ -19,13 +19,14 @@
  *
  */
 
-#include "ISettingControl.h"
+#include "settings/lib/ISettingControl.h"
 
 #define SETTING_XML_ELM_CONTROL_FORMATLABEL  "formatlabel"
 #define SETTING_XML_ELM_CONTROL_HIDDEN       "hidden"
 #define SETTING_XML_ELM_CONTROL_VERIFYNEW    "verifynew"
 #define SETTING_XML_ELM_CONTROL_HEADING      "heading"
 #define SETTING_XML_ELM_CONTROL_HIDEVALUE    "hidevalue"
+#define SETTING_XML_ELM_CONTROL_MULTISELECT  "multiselect"
 
 class CSettingControlCheckmark : public ISettingControl
 {
@@ -125,7 +126,8 @@ class CSettingControlList : public ISettingControl
 {
 public:
   CSettingControlList()
-    : m_heading(-1)
+    : m_heading(-1),
+      m_multiselect(false)
   { }
   virtual ~CSettingControlList() { }
 
@@ -134,9 +136,11 @@ public:
   virtual bool Deserialize(const TiXmlNode *node, bool update = false);
   
   int GetHeading() const { return m_heading; }
+  bool CanMultiSelect() const { return m_multiselect; }
 
 protected:
   virtual bool SetFormat(const std::string &format);
   
   int m_heading;
+  bool m_multiselect;
 };

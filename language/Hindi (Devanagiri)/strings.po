@@ -961,14 +961,6 @@ msgctxt "#336"
 msgid "Framerate conversion"
 msgstr "फ्रेमरेट रूपांतरण"
 
-msgctxt "#337"
-msgid "Audio output"
-msgstr "ऑडियो आउटपुट"
-
-msgctxt "#339"
-msgid "Optical/Coax"
-msgstr "ऑप्टिकल / मनाना"
-
 msgctxt "#340"
 msgid "Various artists"
 msgstr "विभिन्न कलाकारों"
@@ -992,10 +984,6 @@ msgstr "एक्टर्स"
 msgctxt "#345"
 msgid "Year"
 msgstr "वर्ष"
-
-msgctxt "#346"
-msgid "Boost volume level on downmix"
-msgstr "दोव्न्मिक्स पर वॉल्यूम स्तर बूस्ट"
 
 msgctxt "#350"
 msgid "Programs"
@@ -2441,10 +2429,6 @@ msgctxt "#1043"
 msgid "Program Add-ons"
 msgstr "कार्यक्रम परिवर्धन"
 
-msgctxt "#1044"
-msgid "Set plugin thumb"
-msgstr "पप्लगइन अंगूठा सेट करें"
-
 msgctxt "#1045"
 msgid "Add-on settings"
 msgstr "इसके अतिरिक्त सेटिंग्स"
@@ -2629,6 +2613,10 @@ msgctxt "#10025"
 msgid "Videos"
 msgstr "विडियो"
 
+msgctxt "#10037"
+msgid "Standard"
+msgstr "मानक"
+
 msgctxt "#10134"
 msgid "Favourites"
 msgstr "प्रिय"
@@ -2741,6 +2729,10 @@ msgctxt "#13327"
 msgid "Karaoke"
 msgstr "कराओके"
 
+msgctxt "#13340"
+msgid "Leave as is"
+msgstr "मानक"
+
 msgctxt "#13346"
 msgid "Movie information"
 msgstr "मूवी जानकारी"
@@ -2760,6 +2752,10 @@ msgstr "स्वचालित रूप से थंबनेल उत्�
 msgctxt "#13387"
 msgid "Track naming template - right"
 msgstr "ट्रैक नामकरण टेम्पलेट - ठीक है"
+
+msgctxt "#13388"
+msgid "Preset"
+msgstr "मानक"
 
 msgctxt "#13398"
 msgid "Shortcuts"

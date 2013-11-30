@@ -70,9 +70,9 @@
 #include "settings/MediaSourceSettings.h"
 #include "settings/SettingAddon.h"
 #include "settings/SettingControl.h"
-#include "settings/SettingsManager.h"
 #include "settings/SettingPath.h"
 #include "settings/SkinSettings.h"
+#include "settings/lib/SettingsManager.h"
 #include "threads/SingleLock.h"
 #include "utils/CharsetConverter.h"
 #include "utils/log.h"
@@ -446,6 +446,9 @@ void CSettings::Uninitialize()
   m_settingsManager->UnregisterCallback(&XBMCHelper::GetInstance());
 #endif
 
+  // cleanup the settings manager
+  m_settingsManager->Clear();
+
   // unregister ISubSettings implementations
   m_settingsManager->UnregisterSubSettings(&g_application);
   m_settingsManager->UnregisterSubSettings(&CDisplaySettings::Get());
@@ -455,19 +458,16 @@ void CSettings::Uninitialize()
   m_settingsManager->UnregisterSubSettings(&CViewStateSettings::Get());
 
   // unregister ISettingsHandler implementations
-  m_settingsManager->UnregisterSettingsHandler(&CWakeOnAccess::Get());
   m_settingsManager->UnregisterSettingsHandler(&g_advancedSettings);
   m_settingsManager->UnregisterSettingsHandler(&CMediaSourceSettings::Get());
   m_settingsManager->UnregisterSettingsHandler(&CPlayerCoreFactory::Get());
-  m_settingsManager->UnregisterSettingsHandler(&CRssManager::Get());
+  m_settingsManager->UnregisterSettingsHandler(&CProfilesManager::Get());
 #ifdef HAS_UPNP
   m_settingsManager->UnregisterSettingsHandler(&CUPnPSettings::Get());
 #endif
-  m_settingsManager->UnregisterSettingsHandler(&CProfilesManager::Get());
+  m_settingsManager->UnregisterSettingsHandler(&CWakeOnAccess::Get());
+  m_settingsManager->UnregisterSettingsHandler(&CRssManager::Get());
   m_settingsManager->UnregisterSettingsHandler(&g_application);
-
-  // cleanup the settings manager
-  m_settingsManager->Clear();
 
   m_initialized = false;
 }
@@ -489,6 +489,12 @@ CSetting* CSettings::GetSetting(const std::string &id) const
     return NULL;
 
   return m_settingsManager->GetSetting(id);
+}
+
+std::vector<CSettingSection*> CSettings::GetSections() const
+{
+  CSingleLock lock(m_critical);
+  return m_settingsManager->GetSections();
 }
 
 CSettingSection* CSettings::GetSection(const std::string &section) const
@@ -549,9 +555,113 @@ bool CSettings::SetString(const std::string &id, const std::string &value)
   return m_settingsManager->SetString(id, value);
 }
 
+std::vector<CVariant> CSettings::GetList(const std::string &id) const
+{
+  CSetting *setting = m_settingsManager->GetSetting(id);
+  if (setting == NULL || setting->GetType() != SettingTypeList)
+    return std::vector<CVariant>();
+
+  CSettingList *listSetting = static_cast<CSettingList*>(setting);
+  return ListToValues(listSetting, listSetting->GetValue());
+}
+
+bool CSettings::SetList(const std::string &id, const std::vector<CVariant> &value)
+{
+  CSetting *setting = m_settingsManager->GetSetting(id);
+  if (setting == NULL || setting->GetType() != SettingTypeList)
+    return false;
+
+  CSettingList *listSetting = static_cast<CSettingList*>(setting);
+  SettingPtrList newValues;
+  bool ret = true;
+  int index = 0;
+  for (std::vector<CVariant>::const_iterator itValue = value.begin(); itValue != value.end(); ++itValue)
+  {
+    CSetting *settingValue = listSetting->GetDefinition()->Clone(StringUtils::Format("%s.%d", listSetting->GetId().c_str(), index++));
+    if (settingValue == NULL)
+      return false;
+
+    switch (listSetting->GetElementType())
+    {
+      case SettingTypeBool:
+        if (!itValue->isBoolean())
+          return false;
+        ret = static_cast<CSettingBool*>(settingValue)->SetValue(itValue->asBoolean());
+        break;
+
+      case SettingTypeInteger:
+        if (!itValue->isInteger())
+          return false;
+        ret = static_cast<CSettingInt*>(settingValue)->SetValue(itValue->asInteger());
+        break;
+
+      case SettingTypeNumber:
+        if (!itValue->isDouble())
+          return false;
+        ret = static_cast<CSettingNumber*>(settingValue)->SetValue(itValue->asDouble());
+        break;
+
+      case SettingTypeString:
+        if (!itValue->isString())
+          return false;
+        ret = static_cast<CSettingString*>(settingValue)->SetValue(itValue->asString());
+        break;
+
+      default:
+        ret = false;
+        break;
+    }
+
+    if (!ret)
+    {
+      delete settingValue;
+      return false;
+    }
+
+    newValues.push_back(SettingPtr(settingValue));
+  }
+
+  return listSetting->SetValue(newValues);
+}
+
 bool CSettings::LoadSetting(const TiXmlNode *node, const std::string &settingId)
 {
   return m_settingsManager->LoadSetting(node, settingId);
+}
+
+std::vector<CVariant> CSettings::ListToValues(const CSettingList *setting, const std::vector< boost::shared_ptr<CSetting> > &values)
+{
+  std::vector<CVariant> realValues;
+
+  if (setting == NULL)
+    return realValues;
+
+  for (SettingPtrList::const_iterator it = values.begin(); it != values.end(); ++it)
+  {
+    switch (setting->GetElementType())
+    {
+      case SettingTypeBool:
+        realValues.push_back(static_cast<const CSettingBool*>(it->get())->GetValue());
+        break;
+
+      case SettingTypeInteger:
+        realValues.push_back(static_cast<const CSettingInt*>(it->get())->GetValue());
+        break;
+
+      case SettingTypeNumber:
+        realValues.push_back(static_cast<const CSettingNumber*>(it->get())->GetValue());
+        break;
+
+      case SettingTypeString:
+        realValues.push_back(static_cast<const CSettingString*>(it->get())->GetValue());
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  return realValues;
 }
 
 bool CSettings::Initialize(const std::string &file)
@@ -806,6 +916,9 @@ void CSettings::InitializeConditions()
   if (CAndroidFeatures::GetVersion() > 15)
     m_settingsManager->AddCondition("has_mediacodec");
 #endif
+#ifdef HAS_LIBSTAGEFRIGHT
+  m_settingsManager->AddCondition("have_libstagefrightdecoder");
+#endif
 #ifdef HAVE_VIDEOTOOLBOXDECODER
   m_settingsManager->AddCondition("have_videotoolboxdecoder");
   if (g_sysinfo.HasVideoToolBoxDecoder())
@@ -814,9 +927,6 @@ void CSettings::InitializeConditions()
 #ifdef HAS_LIBAMCODEC
   if (aml_present())
     m_settingsManager->AddCondition("have_amcodec");
-#endif
-#ifdef HAS_LIBSTAGEFRIGHT
-  m_settingsManager->AddCondition("have_libstagefrightdecoder");
 #endif
 #ifdef TARGET_DARWIN_IOS_ATV2
   if (g_sysinfo.IsAppleTV2())
@@ -870,7 +980,6 @@ void CSettings::InitializeISettingsHandlers()
 #endif
   m_settingsManager->RegisterSettingsHandler(&CWakeOnAccess::Get());
   m_settingsManager->RegisterSettingsHandler(&CRssManager::Get());
-  m_settingsManager->RegisterSettingsHandler(&CWakeOnAccess::Get());
   m_settingsManager->RegisterSettingsHandler(&g_application);
 }
 

@@ -148,7 +148,7 @@ bool COMXAudio::PortSettingsChanged()
     // round up to power of 2
     m_pcm_output.nChannels = m_OutputChannels > 4 ? 8 : m_OutputChannels > 2 ? 4 : m_OutputChannels;
     /* limit samplerate (through resampling) if requested */
-    m_pcm_output.nSamplingRate = std::min((int)m_pcm_output.nSamplingRate, CSettings::Get().GetInt("audiooutput.samplerate"));
+    m_pcm_output.nSamplingRate = std::min(std::max((int)m_pcm_output.nSamplingRate, 8000), CSettings::Get().GetInt("audiooutput.samplerate"));
 
     m_pcm_output.nPortIndex = m_omx_mixer.GetOutputPort();
     omx_err = m_omx_mixer.SetParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
@@ -215,7 +215,7 @@ bool COMXAudio::PortSettingsChanged()
     m_omx_tunnel_clock_analog.Initialize(m_omx_clock, m_omx_clock->GetInputPort(),
       &m_omx_render_analog, m_omx_render_analog.GetInputPort()+1);
 
-    omx_err = m_omx_tunnel_clock_analog.Establish(false);
+    omx_err = m_omx_tunnel_clock_analog.Establish();
     if(omx_err != OMX_ErrorNone)
     {
       CLog::Log(LOGERROR, "%s::%s - m_omx_tunnel_clock_analog.Establish omx_err(0x%08x)", CLASSNAME, __func__, omx_err);
@@ -228,7 +228,7 @@ bool COMXAudio::PortSettingsChanged()
     m_omx_tunnel_clock_hdmi.Initialize(m_omx_clock, m_omx_clock->GetInputPort() + (m_omx_render_analog.IsInitialized() ? 2 : 0),
       &m_omx_render_hdmi, m_omx_render_hdmi.GetInputPort()+1);
 
-    omx_err = m_omx_tunnel_clock_hdmi.Establish(false);
+    omx_err = m_omx_tunnel_clock_hdmi.Establish();
     if(omx_err != OMX_ErrorNone)
     {
       CLog::Log(LOGERROR, "%s::%s - m_omx_tunnel_clock_hdmi.Establish omx_err(0x%08x)", CLASSNAME, __func__, omx_err);
@@ -292,7 +292,7 @@ bool COMXAudio::PortSettingsChanged()
   if( m_omx_splitter.IsInitialized() )
   {
     m_omx_tunnel_splitter_analog.Initialize(&m_omx_splitter, m_omx_splitter.GetOutputPort(), &m_omx_render_analog, m_omx_render_analog.GetInputPort());
-    omx_err = m_omx_tunnel_splitter_analog.Establish(false);
+    omx_err = m_omx_tunnel_splitter_analog.Establish();
     if(omx_err != OMX_ErrorNone)
     {
       CLog::Log(LOGERROR, "COMXAudio::Initialize - Error m_omx_tunnel_splitter_analog.Establish 0x%08x", omx_err);
@@ -300,7 +300,7 @@ bool COMXAudio::PortSettingsChanged()
     }
 
     m_omx_tunnel_splitter_hdmi.Initialize(&m_omx_splitter, m_omx_splitter.GetOutputPort() + 1, &m_omx_render_hdmi, m_omx_render_hdmi.GetInputPort());
-    omx_err = m_omx_tunnel_splitter_hdmi.Establish(false);
+    omx_err = m_omx_tunnel_splitter_hdmi.Establish();
     if(omx_err != OMX_ErrorNone)
     {
       CLog::Log(LOGERROR, "COMXAudio::Initialize - Error m_omx_tunnel_splitter_hdmi.Establish 0x%08x", omx_err);
@@ -342,7 +342,7 @@ bool COMXAudio::PortSettingsChanged()
             0, 0, 0, 0);
   }
 
-  omx_err = m_omx_tunnel_decoder.Establish(false);
+  omx_err = m_omx_tunnel_decoder.Establish();
   if(omx_err != OMX_ErrorNone)
   {
     CLog::Log(LOGERROR, "%s::%s - m_omx_tunnel_decoder.Establish omx_err(0x%08x)", CLASSNAME, __func__, omx_err);
@@ -360,7 +360,7 @@ bool COMXAudio::PortSettingsChanged()
 
   if( m_omx_mixer.IsInitialized() )
   {
-    omx_err = m_omx_tunnel_mixer.Establish(false);
+    omx_err = m_omx_tunnel_mixer.Establish();
     if(omx_err != OMX_ErrorNone)
     {
       CLog::Log(LOGERROR, "%s::%s - m_omx_tunnel_decoder.Establish omx_err(0x%08x)", CLASSNAME, __func__, omx_err);
@@ -423,7 +423,6 @@ bool COMXAudio::Initialize(AEAudioFormat format, OMXClock *clock, CDVDStreamInfo
 
   m_InputChannels = count_bits(channelMap);
   m_format = format;
-  enum PCMLayout layout = (enum PCMLayout)std::max(0, CSettings::Get().GetInt("audiooutput.channels")-1);
 
   if(m_InputChannels == 0)
     return false;
@@ -470,6 +469,11 @@ bool COMXAudio::Initialize(AEAudioFormat format, OMXClock *clock, CDVDStreamInfo
   {
     enum PCMChannels inLayout[OMX_AUDIO_MAXCHANNELS];
     enum PCMChannels outLayout[OMX_AUDIO_MAXCHANNELS];
+    enum PCMLayout layout = (enum PCMLayout)std::max(0, CSettings::Get().GetInt("audiooutput.channels")-1);
+    // ignore layout setting for analogue
+    if (CSettings::Get().GetBool("audiooutput.dualaudio") || CSettings::Get().GetString("audiooutput.audiodevice") == "Analogue")
+      layout = PCM_LAYOUT_2_0;
+
     // force out layout to stereo if input is not multichannel - it gives the receiver a chance to upmix
     if (channelMap == (AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT) || channelMap == AV_CH_FRONT_CENTER)
       layout = PCM_LAYOUT_2_0;
@@ -477,7 +481,7 @@ bool COMXAudio::Initialize(AEAudioFormat format, OMXClock *clock, CDVDStreamInfo
     m_OutputChannels = BuildChannelMapCEA(outLayout, GetChannelLayout(layout));
     CPCMRemap m_remap;
     m_remap.Reset();
-    /*outLayout = */m_remap.SetInputFormat (m_InputChannels, inLayout, CAEUtil::DataFormatToBits(m_format.m_dataFormat) / 8, m_format.m_sampleRate);
+    /*outLayout = */m_remap.SetInputFormat (m_InputChannels, inLayout, CAEUtil::DataFormatToBits(m_format.m_dataFormat) / 8, m_format.m_sampleRate, layout);
     m_remap.SetOutputFormat(m_OutputChannels, outLayout);
     m_remap.GetDownmixMatrix(m_downmix_matrix);
     m_wave_header.dwChannelMask = channelMap;
@@ -723,15 +727,15 @@ bool COMXAudio::Deinitialize()
 
   m_omx_decoder.FlushInput();
 
-  m_omx_decoder.Deinitialize(true);
+  m_omx_decoder.Deinitialize();
   if ( m_omx_mixer.IsInitialized() )
-    m_omx_mixer.Deinitialize(true);
+    m_omx_mixer.Deinitialize();
   if ( m_omx_splitter.IsInitialized() )
-    m_omx_splitter.Deinitialize(true);
+    m_omx_splitter.Deinitialize();
   if ( m_omx_render_hdmi.IsInitialized() )
-    m_omx_render_hdmi.Deinitialize(true);
+    m_omx_render_hdmi.Deinitialize();
   if ( m_omx_render_analog.IsInitialized() )
-    m_omx_render_analog.Deinitialize(true);
+    m_omx_render_analog.Deinitialize();
 
   m_BytesPerSec = 0;
   m_BufferLen   = 0;
@@ -1014,9 +1018,6 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
     if(m_setStartTime)
     {
       omx_buffer->nFlags = OMX_BUFFERFLAG_STARTTIME;
-      if(pts == DVD_NOPTS_VALUE)
-        omx_buffer->nFlags |= OMX_BUFFERFLAG_TIME_UNKNOWN;
-
       m_last_pts = pts;
 
       CLog::Log(LOGDEBUG, "COMXAudio::Decode ADec : setStartTime %f\n", (float)val / DVD_TIME_BASE);

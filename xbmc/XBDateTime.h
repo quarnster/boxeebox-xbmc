@@ -20,6 +20,7 @@
  *
  */
 
+#include "utils/StdString.h"
 #include "utils/Archive.h"
 
 /*! \brief TIME_FORMAT enum/bitmask used for formatting time strings
@@ -72,6 +73,7 @@ public:
   int GetHours() const;
   int GetMinutes() const;
   int GetSeconds() const;
+  int GetSecondsTotal() const;
 
 private:
   void ToULargeInt(ULARGE_INTEGER& time) const;

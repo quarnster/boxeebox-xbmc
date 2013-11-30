@@ -57,10 +57,10 @@
 				<control type="textbox">
 					<description>Plot Value for TVShow</description>
 					<left>0</left>
-					<top>43</top>
+					<top>50</top>
 					<width>690</width>
-					<height>80</height>
-					<font>font12</font>
+					<height>74</height>
+					<font>font13</font>
 					<align>justify</align>
 					<textcolor>white</textcolor>
 					<shadowcolor>black</shadowcolor>
@@ -365,10 +365,10 @@
 				<control type="textbox">
 					<description>Plot Value for TVShow</description>
 					<left>0</left>
-					<top>43</top>
+					<top>50</top>
 					<width>690</width>
-					<height>80</height>
-					<font>font12</font>
+					<height>74</height>
+					<font>font13</font>
 					<align>justify</align>
 					<textcolor>white</textcolor>
 					<shadowcolor>black</shadowcolor>
@@ -830,7 +830,7 @@
 					<top>270</top>
 					<width>290</width>
 					<height>280</height>
-					<font>font12</font>
+					<font>font13</font>
 					<align>justify</align>
 					<textcolor>white</textcolor>
 					<label>$INFO[Container(13).ListItem.Plot]</label>
@@ -855,6 +855,7 @@
 				<scrolltime>350</scrolltime>
 				<timeblocks>40</timeblocks>
 				<rulerunit>6</rulerunit>
+        <progresstexture border="5">PVR-EpgProgressIndicator.png</progresstexture>
 				<onleft>31</onleft>
 				<onright>31</onright>
 				<onup>10</onup>

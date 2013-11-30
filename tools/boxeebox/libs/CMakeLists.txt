@@ -136,7 +136,7 @@ ExternalProject_Add(
 	pcre
 	URL 				http://sourceforge.net/projects/pcre/files/pcre/8.33/pcre-8.33.tar.bz2/download
 	URL_MD5 			21514018448ac10062ece7a668fca949
-	CONFIGURE_COMMAND 	${BASIC_CONF}
+	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-stack-for-recursion --enable-pcre8 --disable-pcre16 --disable-pcre32 --enable-jit --enable-utf --enable-unicode-properties --enable-newline-is-anycrlf
 )
 
 ExternalProject_Add(
@@ -264,7 +264,7 @@ ExternalProject_Add(
 	libao
 	URL 				http://downloads.xiph.org/releases/ao/libao-1.1.0.tar.gz
 	URL_MD5 			2b2508c29bc97e4dc218fa162cf883c8
-	CONFIGURE_COMMAND 	${BASIC_CONF}
+	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-pulse
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
@@ -339,7 +339,7 @@ ExternalProject_Add(
 	BUILD_COMMAND 		${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} libsmbclient libtalloc libtevent libtdb
 	INSTALL_COMMAND 	${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} installlibsmbclient installlibtalloc installlibtevent installlibtdb
 	BUILD_IN_SOURCE 	1
-	DEPENDS 			util-linux
+	DEPENDS 		util-linux
 )
 
 ExternalProject_Add(
@@ -347,6 +347,7 @@ ExternalProject_Add(
         URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.6.0.tar.gz
         URL_MD5           14a422a227745fa841f78a29f01492a4  
         PATCH_COMMAND     <SOURCE_DIR>/bootstrap --prefix=${TARGET_DIR} --host=${TARGET}
+	     COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
         CONFIGURE_COMMAND ${BASIC_CONF}
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
@@ -490,8 +491,53 @@ add_custom_target(dummylibs ALL DEPENDS DEPENDS ${TARGET_DIR}/lib/libEGL.so ${TA
 
 ExternalProject_Add(
 	ffmpeg
-	URL 				http://ffmpeg.org/releases/ffmpeg-1.2.2.tar.bz2
-	URL_MD5 			4997660dfc077922e37d0583f9322f6b
+	URL 				http://ffmpeg.org/releases/ffmpeg-1.2.4.tar.bz2
+	URL_MD5 			f1cfdbaae308214beeb621746300de16
+	PATCH_COMMAND
+	    COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0001-Support-raw-dvdsub-palette-as-stored-on-normal-dvd-s.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0002-Change-fallthrough-logic-for-read_seek-to-be-based-o.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0003-matroska-Check-return-value-of-avio_seek-and-avoid-m.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0004-asf-hacks.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0005-if-av_read_packet-returns-AVERROR_IO-we-are-done.-ff.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0006-added-Ticket-7187-TV-Teletext-support-for-DVB-EBU-Te.patch
+	        COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0007-Don-t-accept-mpegts-PMT-that-isn-t-current.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0008-Don-t-reparse-PMT-unless-it-s-version-has-changed.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0010-Read-PID-timestamps-as-well-as-PCR-timestamps-to-fin.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0011-Get-stream-durations-using-read_timestamp.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0013-aacenc-add-recognized-profiles-array.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0014-changed-allow-4-second-skew-between-streams-in-mov-b.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0015-fixed-memleak-in-mpegts-demuxer-on-some-malformed-mp.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0016-Speed-up-mpegts-av_find_stream_info.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0017-allow-customizing-shared-library-soname-name-with-ma.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0019-dxva-mpeg2-speed-up-slice-allocation.patch		
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0020-dxva-vc1-Take-BI-into-account-for-forward-and-backwa.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0021-dxva-vc1-Pass-overlapping-transforms-hint.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0022-dxva-h264-Fix-dxva-playback-of-streams-that-don-t-st.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0024-add-public-version-of-ff_read_frame_flush.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0026-Handle-return-value-of-BeginFrame-better.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0028-ffmpeg-1.2-fixed-dvd-still-frames-ended-up-in-intern.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0029-stop-forcing-gas-preprocessor-for-darwin.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0036-backport-register-vdpau-hwaccel-for-mpeg12-fe1f36547d0be963e352de0cde1a6cba59ea2e78.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0037-backport-fix-vdpau-vc1-interlace-modes-b37cc5995b88ec68a68cb8e496a008e1cd467077.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0039-h264-expose-h264-frame-packing-as-stereo_mode-metada.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0040-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-s.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0041-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-i.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0042-ffmpeg-backport-fmtconvert-Add-a-new-method-int32_to.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0043-ffmpeg-backport-dcadec-Use-int32_to_float_fmul_array.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0044-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-i.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0045-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-i.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0046-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-d.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0047-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-f.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0048-ffmpeg-backport-dcadsp-Add-a-new-method-qmf_32_subba.patch		
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0049-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-q.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0050-ffmpeg-backport-arm-Mangle-external-symbols-properly.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0051-ffmpeg-backport-avio-Add-an-internal-function-for-re.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0052-ffmpeg-backport-mpegts-Remove-one-memcpy-per-packet.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0053-ffmpeg-backport-mpegts-Make-discard_pid-faster-for-s.patch		
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0054-ffmpeg-backport-mpegts-Remove-one-64-bit-integer-mod.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0055-ffmpeg-backport-fix-compilation-droid-gcc-4-7.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0056-backport-h264-do-not-discard-NAL_SEI-when-skipping-frames.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0057-backport-swresample-Make-rematrix-maxvalue-user-settable.patch		
 	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --enable-shared --disable-static --disable-programs --enable-gpl
 	BUILD_COMMAND 		make ${PARALLEL}
 )

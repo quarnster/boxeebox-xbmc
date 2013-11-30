@@ -17,14 +17,20 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
+
 #include "system.h"
 #include <EGL/egl.h>
 #include "EGLNativeTypeAndroid.h"
 #include "utils/log.h"
 #include "guilib/gui3d.h"
 #if defined(TARGET_ANDROID)
-#include "android/activity/XBMCApp.h"
+  #include "android/activity/XBMCApp.h"
+  #if defined(HAS_AMLPLAYER) || defined(HAS_LIBAMCODEC)
+    #include "utils/AMLUtils.h"
+  #endif
 #endif
+#include "utils/StringUtils.h"
+
 CEGLNativeTypeAndroid::CEGLNativeTypeAndroid()
 {
 }
@@ -43,10 +49,21 @@ bool CEGLNativeTypeAndroid::CheckCompatibility()
 
 void CEGLNativeTypeAndroid::Initialize()
 {
+#if defined(TARGET_ANDROID) && (defined(HAS_AMLPLAYER) || defined(HAS_LIBAMCODEC))
+  aml_permissions();
+  aml_cpufreq_min(true);
+  aml_cpufreq_max(true);
+#endif
+
   return;
 }
 void CEGLNativeTypeAndroid::Destroy()
 {
+#if defined(TARGET_ANDROID) && (defined(HAS_AMLPLAYER) || defined(HAS_LIBAMCODEC))
+  aml_cpufreq_min(false);
+  aml_cpufreq_max(false);
+#endif
+
   return;
 }
 
@@ -116,7 +133,7 @@ bool CEGLNativeTypeAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
   res->fPixelRatio   = 1.0f;
   res->iScreenWidth  = res->iWidth;
   res->iScreenHeight = res->iHeight;
-  res->strMode.Format("%dx%d @ %.2f%s - Full Screen", res->iScreenWidth, res->iScreenHeight, res->fRefreshRate,
+  res->strMode       = StringUtils::Format("%dx%d @ %.2f%s - Full Screen", res->iScreenWidth, res->iScreenHeight, res->fRefreshRate,
   res->dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "");
   CLog::Log(LOGNOTICE,"Current resolution: %s\n",res->strMode.c_str());
   return true;

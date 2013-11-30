@@ -24,7 +24,7 @@
  */
 
 #include "settings/AdvancedSettings.h"
-#include "settings/Setting.h"
+#include "settings/lib/Setting.h"
 #include "settings/Settings.h"
 #include "guilib/GUIWindowManager.h"
 #include "dialogs/GUIDialogYesNo.h"
@@ -256,16 +256,17 @@ void CPVRChannelGroup::SearchAndSetChannelIcons(bool bUpdateDb /* = false */)
     PVRChannelGroupMember groupMember = m_members.at(ptr);
 
     /* skip if an icon is already set */
-    if (!groupMember.channel->IconPath().IsEmpty())
+    if (!groupMember.channel->IconPath().empty())
       continue;
 
     CStdString strBasePath = CSettings::Get().GetString("pvrmenu.iconpath");
     CStdString strSanitizedChannelName = CUtil::MakeLegalFileName(groupMember.channel->ClientChannelName());
 
     CStdString strIconPath = strBasePath + strSanitizedChannelName;
-    CStdString strIconPathLower = strBasePath + strSanitizedChannelName.ToLower();
+    StringUtils::ToLower(strSanitizedChannelName);
+    CStdString strIconPathLower = strBasePath + strSanitizedChannelName;
     CStdString strIconPathUid;
-    strIconPathUid.Format("%08d", groupMember.channel->UniqueID());
+    strIconPathUid = StringUtils::Format("%08d", groupMember.channel->UniqueID());
     strIconPathUid = URIUtils::AddFileToFolder(strBasePath, strIconPathUid);
 
     SetChannelIconPath(groupMember.channel, strIconPath      + ".tbn") ||

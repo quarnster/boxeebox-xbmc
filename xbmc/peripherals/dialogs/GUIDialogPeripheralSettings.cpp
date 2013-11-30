@@ -21,7 +21,7 @@
 #include "GUIDialogPeripheralSettings.h"
 #include "addons/Skin.h"
 #include "peripherals/Peripherals.h"
-#include "settings/Setting.h"
+#include "settings/lib/Setting.h"
 #include "utils/log.h"
 #include "video/dialogs/GUIDialogVideoSettings.h"
 
@@ -97,12 +97,12 @@ void CGUIDialogPeripheralSettings::CreateSettings()
             CSettingInt *intSetting = (CSettingInt *) setting;
             if (intSetting)
             {
-              if (intSetting->GetControl()->GetFormat() == "integer")
+              if (intSetting->GetOptions().empty())
               {
                 m_intSettings.insert(make_pair(CStdString(intSetting->GetId()), (float) intSetting->GetValue()));
                 AddSlider(m_settingId++, intSetting->GetLabel(), &m_intSettings[intSetting->GetId()], (float)intSetting->GetMinimum(), (float)intSetting->GetStep(), (float)intSetting->GetMaximum(), CGUIDialogVideoSettings::FormatInteger, false);
               }
-              else if (intSetting->GetControl()->GetFormat() == "string")
+              else
               {
                 m_intTextSettings.insert(make_pair(CStdString(intSetting->GetId()), intSetting->GetValue()));
                 vector<pair<int, int> > entries;

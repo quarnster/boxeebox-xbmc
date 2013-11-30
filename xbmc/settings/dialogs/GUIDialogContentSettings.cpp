@@ -92,11 +92,11 @@ bool CGUIDialogContentSettings::OnMessage(CGUIMessage &message)
       g_windowManager.SendMessage(msg);
       int iSelected = msg.GetParam1();
       if (iSelected == m_vecItems->Size() - 1)
-      { // Get More... item.
+      { // Get More... item, path 'addons://more/<content>'
         // This is tricky - ideally we want to completely save the state of this dialog,
         // close it while linking to the addon manager, then reopen it on return.
         // For now, we just close the dialog + send the GetPath() to open the addons window
-        CStdString content = m_vecItems->Get(iSelected)->GetPath().Mid(14);
+        CStdString content = m_vecItems->Get(iSelected)->GetPath().substr(14);
         OnCancel();
         Close();
         CBuiltins::Execute("ActivateWindow(AddonBrowser,addons://all/xbmc.metadata.scraper." + content + ",return)");

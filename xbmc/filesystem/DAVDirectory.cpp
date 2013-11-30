@@ -139,8 +139,9 @@ bool CDAVDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items
   CStdString strResponse;
   dav.ReadData(strResponse);
 
+  std::string fileCharset(dav.GetServerReportedCharset());
   CXBMCTinyXML davResponse;
-  davResponse.Parse(strResponse);
+  davResponse.Parse(strResponse, fileCharset);
 
   if (!davResponse.Parse(strResponse))
   {
@@ -162,7 +163,7 @@ bool CDAVDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items
 
       CStdString itemPath(URIUtils::AddFileToFolder(url2.GetWithoutFilename(), url3.GetFileName()));
 
-      if (item.GetLabel().IsEmpty())
+      if (item.GetLabel().empty())
       {
         CStdString name(itemPath);
         URIUtils::RemoveSlashAtEnd(name);
@@ -174,7 +175,7 @@ bool CDAVDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items
         URIUtils::AddSlashAtEnd(itemPath);
 
       // Add back protocol options
-      if (!url2.GetProtocolOptions().IsEmpty())
+      if (!url2.GetProtocolOptions().empty())
         itemPath += "|" + url2.GetProtocolOptions();
       item.SetPath(itemPath);
 

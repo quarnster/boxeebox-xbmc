@@ -354,6 +354,7 @@ static const ActionMapping windows[] =
         {"karaokelargeselector"     , WINDOW_DIALOG_KARAOKE_SELECTOR},
         {"sliderdialog"             , WINDOW_DIALOG_SLIDER},
         {"addoninformation"         , WINDOW_DIALOG_ADDON_INFO},
+        {"subtitlesearch"           , WINDOW_DIALOG_SUBTITLES},
         {"musicplaylist"            , WINDOW_MUSIC_PLAYLIST},
         {"musicfiles"               , WINDOW_MUSIC_FILES},
         {"musiclibrary"             , WINDOW_MUSIC_NAV},
@@ -1154,7 +1155,7 @@ bool CButtonTranslator::TranslateActionString(const char *szAction, int &action)
 {
   action = ACTION_NONE;
   CStdString strAction = szAction;
-  strAction.ToLower();
+  StringUtils::ToLower(strAction);
   if (CBuiltins::HasCommand(strAction)) 
     action = ACTION_BUILT_IN_FUNCTION;
 
@@ -1189,18 +1190,18 @@ CStdString CButtonTranslator::TranslateWindow(int windowID)
 int CButtonTranslator::TranslateWindow(const CStdString &window)
 {
   CStdString strWindow(window);
-  if (strWindow.IsEmpty()) 
+  if (strWindow.empty()) 
     return WINDOW_INVALID;
-  strWindow.ToLower();
+  StringUtils::ToLower(strWindow);
   // eliminate .xml
-  if (strWindow.Mid(strWindow.GetLength() - 4) == ".xml" )
-    strWindow = strWindow.Mid(0, strWindow.GetLength() - 4);
+  if (StringUtils::EndsWith(strWindow, ".xml"))
+    strWindow = strWindow.substr(0, strWindow.size() - 4);
 
   // window12345, for custom window to be keymapped
   if (strWindow.length() > 6 && StringUtils::StartsWithNoCase(strWindow, "window"))
-    strWindow = strWindow.Mid(6);
-  if (strWindow.Left(2) == "my")  // drop "my" prefix
-    strWindow = strWindow.Mid(2);
+    strWindow = strWindow.substr(6);
+  if (StringUtils::StartsWithNoCase(strWindow, "my"))  // drop "my" prefix
+    strWindow = strWindow.substr(2);
   if (StringUtils::IsNaturalNumber(strWindow))
   {
     // allow a full window id or a delta id
@@ -1227,7 +1228,7 @@ uint32_t CButtonTranslator::TranslateGamepadString(const char *szButton)
     return 0;
   uint32_t buttonCode = 0;
   CStdString strButton = szButton;
-  strButton.ToLower();
+  StringUtils::ToLower(strButton);
   if (strButton.Equals("a")) buttonCode = KEY_BUTTON_A;
   else if (strButton.Equals("b")) buttonCode = KEY_BUTTON_B;
   else if (strButton.Equals("x")) buttonCode = KEY_BUTTON_X;
@@ -1266,7 +1267,7 @@ uint32_t CButtonTranslator::TranslateRemoteString(const char *szButton)
     return 0;
   uint32_t buttonCode = 0;
   CStdString strButton = szButton;
-  strButton.ToLower();
+  StringUtils::ToLower(strButton);
   if (strButton.Equals("left")) buttonCode = XINPUT_IR_REMOTE_LEFT;
   else if (strButton.Equals("right")) buttonCode = XINPUT_IR_REMOTE_RIGHT;
   else if (strButton.Equals("up")) buttonCode = XINPUT_IR_REMOTE_UP;
@@ -1397,14 +1398,14 @@ uint32_t CButtonTranslator::TranslateKeyboardButton(TiXmlElement *pButton)
   CStdString strMod;
   if (pButton->QueryValueAttribute("mod", &strMod) == TIXML_SUCCESS)
   {
-    strMod.ToLower();
+    StringUtils::ToLower(strMod);
 
     CStdStringArray modArray;
     StringUtils::SplitString(strMod, ",", modArray);
     for (unsigned int i = 0; i < modArray.size(); i++)
     {
       CStdString& substr = modArray[i];
-      substr.Trim();
+      StringUtils::Trim(substr);
 
       if (substr == "ctrl" || substr == "control")
         button_id |= CKey::MODIFIER_CTRL;
@@ -1428,7 +1429,7 @@ uint32_t CButtonTranslator::TranslateAppCommand(const char *szButton)
 {
 #ifdef TARGET_WINDOWS
   CStdString strAppCommand = szButton;
-  strAppCommand.ToLower();
+  StringUtils::ToLower(strAppCommand);
 
   for (int i = 0; i < sizeof(appcommands)/sizeof(appcommands[0]); i++)
     if (strAppCommand.Equals(appcommands[i].name))
@@ -1443,7 +1444,7 @@ uint32_t CButtonTranslator::TranslateAppCommand(const char *szButton)
 uint32_t CButtonTranslator::TranslateMouseCommand(const char *szButton)
 {
   CStdString strMouseCommand = szButton;
-  strMouseCommand.ToLower();
+  StringUtils::ToLower(strMouseCommand);
 
   for (unsigned int i = 0; i < sizeof(mousecommands)/sizeof(mousecommands[0]); i++)
     if (strMouseCommand.Equals(mousecommands[i].name))
@@ -1482,7 +1483,7 @@ uint32_t CButtonTranslator::TranslateTouchCommand(TiXmlElement *pButton, CButton
     return ACTION_NONE;
 
   CStdString strTouchCommand = szButton;
-  strTouchCommand.ToLower();
+  StringUtils::ToLower(strTouchCommand);
 
   const char *attrVal = pButton->Attribute("direction");
   if (attrVal != NULL)

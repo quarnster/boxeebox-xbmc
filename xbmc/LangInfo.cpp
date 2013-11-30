@@ -27,7 +27,7 @@
 #include "guilib/LocalizeStrings.h"
 #include "pvr/PVRManager.h"
 #include "settings/AdvancedSettings.h"
-#include "settings/Setting.h"
+#include "settings/lib/Setting.h"
 #include "settings/Settings.h"
 #include "utils/CharsetConverter.h"
 #include "utils/log.h"
@@ -319,7 +319,7 @@ bool CLangInfo::Load(const std::string& strFileName, bool onlyCheckLanguage /*= 
     {
       CRegion region(m_defaultRegion);
       region.m_strName=pRegion->Attribute("name");
-      if (region.m_strName.IsEmpty())
+      if (region.m_strName.empty())
         region.m_strName="N/A";
 
       if (pRegion->Attribute("locale"))
@@ -399,7 +399,7 @@ void CLangInfo::LoadTokens(const TiXmlNode* pTokens, vector<CStdString>& vecToke
         strSep = pToken->Attribute("separators");
       if (pToken->FirstChild() && pToken->FirstChild()->Value())
       {
-        if (strSep.IsEmpty())
+        if (strSep.empty())
           vecTokens.push_back(pToken->FirstChild()->Value());
         else
           for (unsigned int i=0;i<strSep.size();++i)
@@ -483,7 +483,10 @@ const CStdString& CLangInfo::GetAudioLanguage() const
 
 void CLangInfo::SetAudioLanguage(const std::string& language)
 {
-  if (language.empty() || StringUtils::EqualsNoCase(language, "default") || !g_LangCodeExpander.ConvertToThreeCharCode(m_audioLanguage, language))
+  if (language.empty()
+    || StringUtils::EqualsNoCase(language, "default")
+    || StringUtils::EqualsNoCase(language, "original")
+    || !g_LangCodeExpander.ConvertToThreeCharCode(m_audioLanguage, language))
     m_audioLanguage.clear();
 }
 
@@ -498,7 +501,10 @@ const CStdString& CLangInfo::GetSubtitleLanguage() const
 
 void CLangInfo::SetSubtitleLanguage(const std::string& language)
 {
-  if (language.empty() || StringUtils::EqualsNoCase(language, "default") || !g_LangCodeExpander.ConvertToThreeCharCode(m_subtitleLanguage, language))
+  if (language.empty()
+    || StringUtils::EqualsNoCase(language, "default")
+    || StringUtils::EqualsNoCase(language, "original")
+    || !g_LangCodeExpander.ConvertToThreeCharCode(m_subtitleLanguage, language))
     m_subtitleLanguage.clear();
 }
 

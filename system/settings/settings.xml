@@ -235,7 +235,7 @@
     </category>
     <category id="screensaver" label="360" help="36128">
       <group id="1">
-        <setting id="screensaver.mode" type="addon" label="356" help="36129">
+        <setting id="screensaver.mode" type="addon" label="356" help="36130">
           <level>0</level>
           <default>screensaver.xbmc.builtin.dim</default>
           <constraints>
@@ -247,7 +247,7 @@
           </updates>
           <control type="button" format="addon" />
         </setting>
-        <setting id="screensaver.settings" parent="screensaver.mode" type="action" label="21417" help="36130">
+        <setting id="screensaver.settings" parent="screensaver.mode" type="action" label="21417" help="36131">
           <level>0</level>
           <dependencies>
             <dependency type="enable">
@@ -259,14 +259,14 @@
           </dependencies>
           <control type="button" format="action" />
         </setting>
-        <setting id="screensaver.preview" type="action" parent="screensaver.mode" label="1000" help="36131">
+        <setting id="screensaver.preview" type="action" parent="screensaver.mode" label="1000" help="36132">
           <level>0</level>
           <dependencies>
             <dependency type="enable" setting="screensaver.mode" operator="!is"></dependency>
           </dependencies>
           <control type="button" format="action" />
         </setting>
-        <setting id="screensaver.time" type="integer" label="355" help="36132">
+        <setting id="screensaver.time" type="integer" label="355" help="36129">
           <level>0</level>
           <default>3</default>
           <constraints>
@@ -464,6 +464,11 @@
           <requirement>HAS_GL</requirement>
           <level>4</level>
           <default>true</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="videoplayer.useframemtdec" type="boolean" label="13440" help="36423">
+          <level>2</level>
+          <default>false</default>
           <control type="toggle" />
         </setting>
         <setting id="videoplayer.adjustrefreshrate" type="integer" label="170" help="36164">
@@ -731,6 +736,29 @@
         </setting>
       </group>
       <group id="2">
+        <setting id="subtitles.savetomoviefolder" type="boolean" label="24115" help="24106">
+          <level>1</level>
+          <default>true</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="subtitles.pauseonsearch" type="boolean" label="24105" help="">
+          <level>1</level>
+          <default>true</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="subtitles.languages" type="list[string]" label="24111" help="24112">
+          <level>1</level>
+          <default>English</default>
+          <constraints>
+            <options>languages</options>
+            <delimiter>,</delimiter>
+            <minimum>1</minimum>
+            <maximum>3</maximum>
+          </constraints>
+          <control type="list" format="string">
+            <multiselect>true</multiselect>
+          </control>
+        </setting>
         <setting id="subtitles.custompath" type="path" label="21366" help="36191">
           <level>1</level>
           <default></default>
@@ -758,6 +786,11 @@
             </options>
           </constraints>
           <control type="spinner" format="string" />
+        </setting>
+        <setting id="subtitles.preferexternal" type="boolean" label="21600" help="21601">
+          <level>1</level>
+          <default>true</default>
+          <control type="toggle" />
         </setting>
       </group>
     </category>

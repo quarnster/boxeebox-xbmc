@@ -22,6 +22,7 @@
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
 #include "test/TestUtils.h"
+#include "utils/StringUtils.h"
 
 #include "gtest/gtest.h"
 
@@ -36,7 +37,7 @@ protected:
         CXBMCTestUtils::Instance().getAdvancedSettingsFiles();
       std::vector<CStdString> guisettings =
         CXBMCTestUtils::Instance().getGUISettingsFiles();
-      
+
       std::vector<CStdString>::iterator it;
       for (it = guisettings.begin(); it < guisettings.end(); it++)
         CSettings::Get().Load(*it);
@@ -45,7 +46,7 @@ protected:
         g_advancedSettings.ParseSettingsFile(*it);
 
       CSettings::Get().SetLoaded();
-    }    
+    }
   }
 
   ~TestFileFactory()
@@ -88,12 +89,12 @@ TEST_F(TestFileFactory, Read)
     std::cout << "File contents:" << std::endl;
     while ((size = file.Read(buf, sizeof(buf))) > 0)
     {
-      str.Format("  %08X", count);
+      str = StringUtils::Format("  %08X", count);
       std::cout << str << "  ";
       count += size;
       for (i = 0; i < size; i++)
       {
-        str.Format("%02X ", buf[i]);
+        str = StringUtils::Format("%02X ", buf[i]);
         std::cout << str;
       }
       while (i++ < sizeof(buf))
@@ -150,12 +151,12 @@ TEST_F(TestFileFactory, Write)
     std::cout << "File contents:\n";
     while ((size = file.Read(buf, sizeof(buf))) > 0)
     {
-      str.Format("  %08X", count);
+      str = StringUtils::Format("  %08X", count);
       std::cout << str << "  ";
       count += size;
       for (i = 0; i < size; i++)
       {
-        str.Format("%02X ", buf[i]);
+        str = StringUtils::Format("%02X ", buf[i]);
         std::cout << str;
       }
       while (i++ < sizeof(buf))

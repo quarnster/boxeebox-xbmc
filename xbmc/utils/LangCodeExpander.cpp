@@ -22,6 +22,7 @@
 #include "utils/XBMCTinyXML.h"
 #include "LangInfo.h"
 #include "utils/log.h" 
+#include "utils/StringUtils.h"
 
 #define MAKECODE(a, b, c, d)  ((((long)(a))<<24) | (((long)(b))<<16) | (((long)(c))<<8) | (long)(d))
 #define MAKETWOCHARCODE(a, b) ((((long)(a))<<8) | (long)(b)) 
@@ -32,7 +33,7 @@ typedef struct LCENTRY
   const char *name;
 } LCENTRY;
 
-extern const struct LCENTRY g_iso639_1[145];
+extern const struct LCENTRY g_iso639_1[186];
 extern const struct LCENTRY g_iso639_2[538];
 
 struct CharCodeConvertionWithHack
@@ -49,7 +50,7 @@ struct CharCodeConvertion
 };
 
 // declared as extern to allow forward declaration
-extern const CharCodeConvertionWithHack CharCode2To3[184];
+extern const CharCodeConvertionWithHack CharCode2To3[189];
 extern const CharCodeConvertion RegionCode2To3[246];
 
 CLangCodeExpander::CLangCodeExpander(void)
@@ -81,7 +82,7 @@ void CLangCodeExpander::LoadUserCodes(const TiXmlElement* pRootElement)
       {
         sShort = pShort->FirstChild()->Value();
         sLong = pLong->FirstChild()->Value();
-        sShort.ToLower();
+        StringUtils::ToLower(sShort);
         m_mapUser[sShort] = sLong;
       }
       pLangCode = pLangCode->NextSibling();
@@ -95,15 +96,15 @@ bool CLangCodeExpander::Lookup(CStdString& desc, const CStdString& code)
   if (iSplit > 0)
   {
     CStdString strLeft, strRight;
-    const bool bLeft = Lookup(strLeft, code.Left(iSplit));
-    const bool bRight = Lookup(strRight, code.Mid(iSplit + 1));
+    const bool bLeft = Lookup(strLeft, code.substr(0, iSplit));
+    const bool bRight = Lookup(strRight, code.substr(iSplit + 1));
     if (bLeft || bRight)
     {
       desc = "";
       if (strLeft.length() > 0)
         desc = strLeft;
       else
-        desc = code.Left(iSplit);
+        desc = code.substr(0, iSplit);
 
       if (strRight.length() > 0)
       {
@@ -113,7 +114,7 @@ bool CLangCodeExpander::Lookup(CStdString& desc, const CStdString& code)
       else
       {
         desc += " - ";
-        desc += code.Mid(iSplit + 1);
+        desc += code.substr(iSplit + 1);
       }
       return true;
     }
@@ -146,9 +147,8 @@ bool CLangCodeExpander::ConvertTwoToThreeCharCode(CStdString& strThreeCharCode, 
   if ( strTwoCharCode.length() == 2 )
   {
     CStdString strTwoCharCodeLower( strTwoCharCode );
-    strTwoCharCodeLower.MakeLower();
-    strTwoCharCodeLower.TrimLeft();
-    strTwoCharCodeLower.TrimRight();
+    StringUtils::ToLower(strTwoCharCodeLower);
+    StringUtils::Trim(strTwoCharCodeLower);
 
     for (unsigned int index = 0; index < sizeof(CharCode2To3) / sizeof(CharCode2To3[0]); ++index)
     {
@@ -197,7 +197,7 @@ bool CLangCodeExpander::ConvertToThreeCharCode(CStdString& strThreeCharCode, con
   {
     for(unsigned int i = 0; i < sizeof(g_iso639_2) / sizeof(LCENTRY); i++)
     {
-      if (strCharCode.Equals(g_iso639_2[i].name))
+      if (StringUtils::EqualsNoCase(strCharCode, g_iso639_2[i].name))
       {
         CodeToString(g_iso639_2[i].code, strThreeCharCode);
         return true;
@@ -225,9 +225,8 @@ bool CLangCodeExpander::ConvertLinuxToWindowsRegionCodes(const CStdString& strTw
     return false;
 
   CStdString strLower( strTwoCharCode );
-  strLower.MakeLower();
-  strLower.TrimLeft();
-  strLower.TrimRight();
+  StringUtils::ToLower(strLower);
+  StringUtils::Trim(strLower);
   for (unsigned int index = 0; index < sizeof(RegionCode2To3) / sizeof(RegionCode2To3[0]); ++index)
   {
     if (strLower.Equals(RegionCode2To3[index].old))
@@ -246,7 +245,7 @@ bool CLangCodeExpander::ConvertWindowsToGeneralCharCode(const CStdString& strWin
     return false;
 
   CStdString strLower(strWindowsCharCode);
-  strLower.MakeLower();
+  StringUtils::ToLower(strLower);
   for (unsigned int index = 0; index < sizeof(CharCode2To3) / sizeof(CharCode2To3[0]); ++index)
   {
     if ((CharCode2To3[index].win_id && strLower.Equals(CharCode2To3[index].win_id)) ||
@@ -326,7 +325,7 @@ bool CLangCodeExpander::ReverseLookup(const CStdString& desc, CStdString& code)
     return false;
 
   CStdString descTmp(desc);
-  descTmp.Trim();
+  StringUtils::Trim(descTmp);
   STRINGLOOKUPTABLE::iterator it;
   for (it = m_mapUser.begin(); it != m_mapUser.end() ; it++)
   {
@@ -363,9 +362,9 @@ bool CLangCodeExpander::LookupInMap(CStdString& desc, const CStdString& code)
   STRINGLOOKUPTABLE::iterator it;
   //Make sure we convert to lowercase before trying to find it
   CStdString sCode(code);
-  sCode.MakeLower();
-  sCode.TrimLeft();
-  sCode.TrimRight();
+  StringUtils::ToLower(sCode);
+  StringUtils::Trim(sCode);
+
   it = m_mapUser.find(sCode);
   if (it != m_mapUser.end())
   {
@@ -382,9 +381,9 @@ bool CLangCodeExpander::LookupInDb(CStdString& desc, const CStdString& code)
 
   long longcode;
   CStdString sCode(code);
-  sCode.MakeLower();
-  sCode.TrimLeft();
-  sCode.TrimRight();
+  StringUtils::ToLower(sCode);
+  StringUtils::Trim(sCode);
+
   if(sCode.length() == 2)
   {
     longcode = MAKECODE('\0', '\0', sCode[0], sCode[1]);
@@ -414,13 +413,13 @@ bool CLangCodeExpander::LookupInDb(CStdString& desc, const CStdString& code)
 
 void CLangCodeExpander::CodeToString(long code, CStdString& ret)
 {
-  ret.Empty();
+  ret.clear();
   for (unsigned int j = 0 ; j < 4 ; j++)
   {
     char c = (char) code & 0xFF;
     if (c == '\0')
       return;
-    ret.Insert(0, c);
+    ret.insert(0, 1, c);
     code >>= 8;
   }
 }
@@ -498,33 +497,45 @@ CStdString CLangCodeExpander::ConvertToISO6392T(const CStdString& lang)
   return lang;
 }
 
-extern const LCENTRY g_iso639_1[145] =
+extern const LCENTRY g_iso639_1[186] =
 {
   { MAKECODE('\0','\0','c','c'), "Closed Caption" },
   { MAKECODE('\0','\0','a','a'), "Afar" },
-  { MAKECODE('\0','\0','a','b'), "Abkhaz" },
   { MAKECODE('\0','\0','a','b'), "Abkhazian" },
+  { MAKECODE('\0','\0','a','e'), "Avestan" },
   { MAKECODE('\0','\0','a','f'), "Afrikaans" },
+  { MAKECODE('\0','\0','a','k'), "Akan" },
   { MAKECODE('\0','\0','a','m'), "Amharic" },
+  { MAKECODE('\0','\0','a','n'), "Aragonese" },
   { MAKECODE('\0','\0','a','r'), "Arabic" },
   { MAKECODE('\0','\0','a','s'), "Assamese" },
+  { MAKECODE('\0','\0','a','v'), "Avaric" },
   { MAKECODE('\0','\0','a','y'), "Aymara" },
   { MAKECODE('\0','\0','a','z'), "Azerbaijani" },
   { MAKECODE('\0','\0','b','a'), "Bashkir" },
-  { MAKECODE('\0','\0','b','e'), "Byelorussian" },
+  { MAKECODE('\0','\0','b','e'), "Belarusian" },
   { MAKECODE('\0','\0','b','g'), "Bulgarian" },
   { MAKECODE('\0','\0','b','h'), "Bihari" },
   { MAKECODE('\0','\0','b','i'), "Bislama" },
+  { MAKECODE('\0','\0','b','m'), "Bambara" },
   { MAKECODE('\0','\0','b','n'), "Bengali; Bangla" },
   { MAKECODE('\0','\0','b','o'), "Tibetan" },
   { MAKECODE('\0','\0','b','r'), "Breton" },
+  { MAKECODE('\0','\0','b','s'), "Bosnian" },
   { MAKECODE('\0','\0','c','a'), "Catalan" },
+  { MAKECODE('\0','\0','c','e'), "Chechen" },
+  { MAKECODE('\0','\0','c','h'), "Chamorro" },
   { MAKECODE('\0','\0','c','o'), "Corsican" },
+  { MAKECODE('\0','\0','c','r'), "Cree" },
   { MAKECODE('\0','\0','c','s'), "Czech" },
+  { MAKECODE('\0','\0','c','u'), "Church Slavic" },
+  { MAKECODE('\0','\0','c','v'), "Chuvash" },
   { MAKECODE('\0','\0','c','y'), "Welsh" },
   { MAKECODE('\0','\0','d','a'), "Danish" },
   { MAKECODE('\0','\0','d','e'), "German" },
-  { MAKECODE('\0','\0','d','z'), "Bhutani" },
+  { MAKECODE('\0','\0','d','v'), "Dhivehi" },
+  { MAKECODE('\0','\0','d','z'), "Dzongkha" },
+  { MAKECODE('\0','\0','e','e'), "Ewe" },
   { MAKECODE('\0','\0','e','l'), "Greek" },
   { MAKECODE('\0','\0','e','n'), "English" },
   { MAKECODE('\0','\0','e','o'), "Esperanto" },
@@ -532,78 +543,104 @@ extern const LCENTRY g_iso639_1[145] =
   { MAKECODE('\0','\0','e','t'), "Estonian" },
   { MAKECODE('\0','\0','e','u'), "Basque" },
   { MAKECODE('\0','\0','f','a'), "Persian" },
+  { MAKECODE('\0','\0','f','f'), "Fulah" },
   { MAKECODE('\0','\0','f','i'), "Finnish" },
-  { MAKECODE('\0','\0','f','j'), "Fiji" },
+  { MAKECODE('\0','\0','f','j'), "Fijian" },
   { MAKECODE('\0','\0','f','o'), "Faroese" },
   { MAKECODE('\0','\0','f','r'), "French" },
-  { MAKECODE('\0','\0','f','y'), "Frisian" },
+  { MAKECODE('\0','\0','f','y'), "Western Frisian" },
   { MAKECODE('\0','\0','g','a'), "Irish" },
-  { MAKECODE('\0','\0','g','d'), "Scots Gaelic" },
+  { MAKECODE('\0','\0','g','d'), "Scottish Gaelic" },
   { MAKECODE('\0','\0','g','l'), "Galician" },
   { MAKECODE('\0','\0','g','n'), "Guarani" },
   { MAKECODE('\0','\0','g','u'), "Gujarati" },
+  { MAKECODE('\0','\0','g','v'), "Manx" },
   { MAKECODE('\0','\0','h','a'), "Hausa" },
   { MAKECODE('\0','\0','h','e'), "Hebrew" },
   { MAKECODE('\0','\0','h','i'), "Hindi" },
+  { MAKECODE('\0','\0','h','o'), "Hiri Motu" },
   { MAKECODE('\0','\0','h','r'), "Croatian" },
+  { MAKECODE('\0','\0','h','t'), "Haitian" },
   { MAKECODE('\0','\0','h','u'), "Hungarian" },
   { MAKECODE('\0','\0','h','y'), "Armenian" },
+  { MAKECODE('\0','\0','h','z'), "Herero" },
   { MAKECODE('\0','\0','i','a'), "Interlingua" },
   { MAKECODE('\0','\0','i','d'), "Indonesian" },
   { MAKECODE('\0','\0','i','e'), "Interlingue" },
-  { MAKECODE('\0','\0','i','k'), "Inupiak" },
-  { MAKECODE('\0','\0','i','n'), "Indonesian" },
+  { MAKECODE('\0','\0','i','g'), "Igbo" },
+  { MAKECODE('\0','\0','i','i'), "Sichuan Yi" },
+  { MAKECODE('\0','\0','i','k'), "Inupiat" },
+  { MAKECODE('\0','\0','i','o'), "Ido" },
   { MAKECODE('\0','\0','i','s'), "Icelandic" },
   { MAKECODE('\0','\0','i','t'), "Italian" },
   { MAKECODE('\0','\0','i','u'), "Inuktitut" },
-  { MAKECODE('\0','\0','i','w'), "Hebrew" },
   { MAKECODE('\0','\0','j','a'), "Japanese" },
-  { MAKECODE('\0','\0','j','i'), "Yiddish" },
-  { MAKECODE('\0','\0','j','w'), "Javanese" },
+  { MAKECODE('\0','\0','j','v'), "Javanese" },
   { MAKECODE('\0','\0','k','a'), "Georgian" },
+  { MAKECODE('\0','\0','k','g'), "Kongo" },
+  { MAKECODE('\0','\0','k','i'), "Kikuyu" },
+  { MAKECODE('\0','\0','k','j'), "Kuanyama" },
   { MAKECODE('\0','\0','k','k'), "Kazakh" },
-  { MAKECODE('\0','\0','k','l'), "Greenlandic" },
-  { MAKECODE('\0','\0','k','m'), "Cambodian" },
+  { MAKECODE('\0','\0','k','l'), "Kalaallisut" },
+  { MAKECODE('\0','\0','k','m'), "Khmer" },
   { MAKECODE('\0','\0','k','n'), "Kannada" },
   { MAKECODE('\0','\0','k','o'), "Korean" },
+  { MAKECODE('\0','\0','k','r'), "Kanuri" },
   { MAKECODE('\0','\0','k','s'), "Kashmiri" },
   { MAKECODE('\0','\0','k','u'), "Kurdish" },
+  { MAKECODE('\0','\0','k','v'), "Komi" },
+  { MAKECODE('\0','\0','k','w'), "Cornish" },
   { MAKECODE('\0','\0','k','y'), "Kirghiz" },
   { MAKECODE('\0','\0','l','a'), "Latin" },
+  { MAKECODE('\0','\0','l','b'), "Luxembourgish" },
+  { MAKECODE('\0','\0','l','g'), "Ganda" },
+  { MAKECODE('\0','\0','l','i'), "Limburgan" },
   { MAKECODE('\0','\0','l','n'), "Lingala" },
-  { MAKECODE('\0','\0','l','o'), "Laothian" },
+  { MAKECODE('\0','\0','l','o'), "Lao" },
   { MAKECODE('\0','\0','l','t'), "Lithuanian" },
+  { MAKECODE('\0','\0','l','u'), "Luba-Katanga" },
   { MAKECODE('\0','\0','l','v'), "Latvian, Lettish" },
   { MAKECODE('\0','\0','m','g'), "Malagasy" },
+  { MAKECODE('\0','\0','m','h'), "Marshallese" },
   { MAKECODE('\0','\0','m','i'), "Maori" },
   { MAKECODE('\0','\0','m','k'), "Macedonian" },
   { MAKECODE('\0','\0','m','l'), "Malayalam" },
   { MAKECODE('\0','\0','m','n'), "Mongolian" },
-  { MAKECODE('\0','\0','m','o'), "Moldavian" },
   { MAKECODE('\0','\0','m','r'), "Marathi" },
   { MAKECODE('\0','\0','m','s'), "Malay" },
   { MAKECODE('\0','\0','m','t'), "Maltese" },
   { MAKECODE('\0','\0','m','y'), "Burmese" },
   { MAKECODE('\0','\0','n','a'), "Nauru" },
+  { MAKECODE('\0','\0','n','b'), "Bokmål, Norwegian" },
+  { MAKECODE('\0','\0','n','d'), "Ndebele, North" },
   { MAKECODE('\0','\0','n','e'), "Nepali" },
+  { MAKECODE('\0','\0','n','g'), "Ndonga" },
   { MAKECODE('\0','\0','n','l'), "Dutch" },
+  { MAKECODE('\0','\0','n','n'), "Norwegian Nynorsk" },
   { MAKECODE('\0','\0','n','o'), "Norwegian" },
+  { MAKECODE('\0','\0','n','r'), "Ndebele, South" },
+  { MAKECODE('\0','\0','n','v'), "Navajo" },
+  { MAKECODE('\0','\0','n','y'), "Chichewa" },
   { MAKECODE('\0','\0','o','c'), "Occitan" },
-  { MAKECODE('\0','\0','o','s'), "Ossetic" },
-  { MAKECODE('\0','\0','o','m'), "(Afan) Oromo" },
+  { MAKECODE('\0','\0','o','j'), "Ojibwa" },
+  { MAKECODE('\0','\0','o','m'), "Oromo" },
   { MAKECODE('\0','\0','o','r'), "Oriya" },
+  { MAKECODE('\0','\0','o','s'), "Ossetic" },
   { MAKECODE('\0','\0','p','a'), "Punjabi" },
+  { MAKECODE('\0','\0','p','i'), "Pali" },
   { MAKECODE('\0','\0','p','l'), "Polish" },
   { MAKECODE('\0','\0','p','s'), "Pashto, Pushto" },
   { MAKECODE('\0','\0','p','t'), "Portuguese" },
   { MAKECODE('\0','\0','q','u'), "Quechua" },
-  { MAKECODE('\0','\0','r','m'), "Rhaeto-Romance" },
+  { MAKECODE('\0','\0','r','m'), "Romansh" },
   { MAKECODE('\0','\0','r','n'), "Kirundi" },
   { MAKECODE('\0','\0','r','o'), "Romanian" },
   { MAKECODE('\0','\0','r','u'), "Russian" },
   { MAKECODE('\0','\0','r','w'), "Kinyarwanda" },
   { MAKECODE('\0','\0','s','a'), "Sanskrit" },
+  { MAKECODE('\0','\0','s','c'), "Sardinian" },
   { MAKECODE('\0','\0','s','d'), "Sindhi" },
+  { MAKECODE('\0','\0','s','e'), "Northern Sami" },
   { MAKECODE('\0','\0','s','g'), "Sangho" },
   { MAKECODE('\0','\0','s','h'), "Serbo-Croatian" },
   { MAKECODE('\0','\0','s','i'), "Sinhalese" },
@@ -614,7 +651,7 @@ extern const LCENTRY g_iso639_1[145] =
   { MAKECODE('\0','\0','s','o'), "Somali" },
   { MAKECODE('\0','\0','s','q'), "Albanian" },
   { MAKECODE('\0','\0','s','r'), "Serbian" },
-  { MAKECODE('\0','\0','s','s'), "Siswati" },
+  { MAKECODE('\0','\0','s','s'), "Swati" },
   { MAKECODE('\0','\0','s','t'), "Sesotho" },
   { MAKECODE('\0','\0','s','u'), "Sundanese" },
   { MAKECODE('\0','\0','s','v'), "Swedish" },
@@ -626,18 +663,21 @@ extern const LCENTRY g_iso639_1[145] =
   { MAKECODE('\0','\0','t','i'), "Tigrinya" },
   { MAKECODE('\0','\0','t','k'), "Turkmen" },
   { MAKECODE('\0','\0','t','l'), "Tagalog" },
-  { MAKECODE('\0','\0','t','n'), "Setswana" },
+  { MAKECODE('\0','\0','t','n'), "Tswana" },
   { MAKECODE('\0','\0','t','o'), "Tonga" },
   { MAKECODE('\0','\0','t','r'), "Turkish" },
   { MAKECODE('\0','\0','t','s'), "Tsonga" },
   { MAKECODE('\0','\0','t','t'), "Tatar" },
   { MAKECODE('\0','\0','t','w'), "Twi" },
+  { MAKECODE('\0','\0','t','y'), "Tahitian" },
   { MAKECODE('\0','\0','u','g'), "Uighur" },
   { MAKECODE('\0','\0','u','k'), "Ukrainian" },
   { MAKECODE('\0','\0','u','r'), "Urdu" },
   { MAKECODE('\0','\0','u','z'), "Uzbek" },
+  { MAKECODE('\0','\0','v','e'), "Venda" },
   { MAKECODE('\0','\0','v','i'), "Vietnamese" },
   { MAKECODE('\0','\0','v','o'), "Volapuk" },
+  { MAKECODE('\0','\0','w','a'), "Walloon" },
   { MAKECODE('\0','\0','w','o'), "Wolof" },
   { MAKECODE('\0','\0','x','h'), "Xhosa" },
   { MAKECODE('\0','\0','y','i'), "Yiddish" },
@@ -997,6 +1037,7 @@ extern const LCENTRY g_iso639_2[538] =
   { MAKECODE('\0','n','i','c'), "Niger-Kordofanian (Other)" },
   { MAKECODE('\0','s','s','a'), "Nilo-Saharan (Other)" },
   { MAKECODE('\0','n','i','u'), "Niuean" },
+  { MAKECODE('\0','z','x','x'), "No linguistic content" },
   { MAKECODE('\0','n','o','g'), "Nogai" },
   { MAKECODE('\0','n','o','n'), "Norse, Old" },
   { MAKECODE('\0','n','a','i'), "North American Indian (Other)" },
@@ -1187,10 +1228,9 @@ extern const LCENTRY g_iso639_2[538] =
   { MAKECODE('\0','z','h','a'), "Zhuang" },
   { MAKECODE('\0','z','u','l'), "Zulu" },
   { MAKECODE('\0','z','u','n'), "Zuni" },
-  { MAKECODE('\0','u','n','d'), "Undetermined" }, // non-ISO entry for Matroska special language code
 };
 
-const CharCodeConvertionWithHack CharCode2To3[184] =
+const CharCodeConvertionWithHack CharCode2To3[189] =
 {
   { "aa", "aar", NULL },
   { "ab", "abk", NULL },
@@ -1328,6 +1368,7 @@ const CharCodeConvertionWithHack CharCode2To3[184] =
   { "ro", "rum", "ron" },
   { "rn", "run", NULL },
   { "ru", "rus", NULL },
+  { "sh", "scr", NULL },
   { "sg", "sag", NULL },
   { "sa", "san", NULL },
   { "si", "sin", NULL },
@@ -1375,7 +1416,11 @@ const CharCodeConvertionWithHack CharCode2To3[184] =
   { "yo", "yor", NULL },
   { "za", "zha", NULL },
   { "zh", "chi", NULL },
-  { "zu", "zul", NULL }
+  { "zu", "zul", NULL },
+  { "zv", "und", NULL }, // XBMC intern mapping for missing "Undetermined" iso639-1 code
+  { "zx", "zxx", NULL }, // XBMC intern mapping for missing "No linguistic content" iso639-1 code
+  { "zy", "mis", NULL }, // XBMC intern mapping for missing "Miscellaneous languages" iso639-1 code
+  { "zz", "mul", NULL }  // XBMC intern mapping for missing "Multiple languages" iso639-1 code
 };
 
 // Based on ISO 3166

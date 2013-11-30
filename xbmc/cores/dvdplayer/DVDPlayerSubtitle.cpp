@@ -33,6 +33,7 @@
 #include "DVDCodecs/DVDFactoryCodec.h"
 #include "DVDDemuxers/DVDDemuxUtils.h"
 #include "utils/log.h"
+#include "utils/StringUtils.h"
 #include "threads/SingleLock.h"
 #ifdef TARGET_POSIX
 #include "config.h"
@@ -234,37 +235,3 @@ bool CDVDPlayerSubtitle::AcceptsData()
   return m_pOverlayContainer->GetSize() < 5;
 }
 
-void CDVDPlayerSubtitle::GetCurrentSubtitle(CStdString& strSubtitle, double pts)
-{
-  strSubtitle = "";
-
-  Process(pts); // TODO: move to separate thread?
-
-  CSingleLock lock(*m_pOverlayContainer);
-  VecOverlays* pOverlays = m_pOverlayContainer->GetOverlays();
-  if (pOverlays)
-  {
-    for(vector<CDVDOverlay*>::iterator it = pOverlays->begin();it != pOverlays->end();++it)
-    {
-      CDVDOverlay* pOverlay = *it;
-
-      if (pOverlay->IsOverlayType(DVDOVERLAY_TYPE_TEXT)
-      && (pOverlay->iPTSStartTime <= pts)
-      && (pOverlay->iPTSStopTime >= pts || pOverlay->iPTSStopTime == 0LL))
-      {
-        CDVDOverlayText::CElement* e = ((CDVDOverlayText*)pOverlay)->m_pHead;
-        while (e)
-        {
-          if (e->IsElementType(CDVDOverlayText::ELEMENT_TYPE_TEXT))
-          {
-            CDVDOverlayText::CElementText* t = (CDVDOverlayText::CElementText*)e;
-            strSubtitle += t->m_text;
-            strSubtitle += "\n";
-          }
-          e = e->pNext;
-        }
-      }
-    }
-  }
-  strSubtitle.TrimRight('\n');
-}

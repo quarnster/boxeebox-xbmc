@@ -65,7 +65,7 @@ void CScraperUrl::Clear()
 bool CScraperUrl::Parse()
 {
   CStdString strToParse = m_xml;
-  m_xml.Empty();
+  m_xml.clear();
   return ParseString(strToParse);
 }
 
@@ -118,10 +118,9 @@ bool CScraperUrl::ParseElement(const TiXmlElement* element)
 
 bool CScraperUrl::ParseString(CStdString strUrl)
 {
-  if (strUrl.IsEmpty())
+  if (strUrl.empty())
     return false;
 
-  // ok, now parse the xml file
   CXBMCTinyXML doc;
   doc.Parse(strUrl, TIXML_ENCODING_UNKNOWN);
 
@@ -202,20 +201,17 @@ bool CScraperUrl::Get(const SUrlEntry& scrURL, std::string& strHTML, XFILE::CCur
   if (scrURL.m_isgz)
     http.SetContentEncoding("gzip");
 
-  if (!scrURL.m_cache.IsEmpty())
+  if (!scrURL.m_cache.empty())
   {
     strCachePath = URIUtils::AddFileToFolder(g_advancedSettings.m_cachePath,
                               "scrapers/" + cacheContext + "/" + scrURL.m_cache);
     if (XFILE::CFile::Exists(strCachePath))
     {
       XFILE::CFile file;
-      if (file.Open(strCachePath))
+      XFILE::auto_buffer buffer;
+      if (file.LoadFile(strCachePath, buffer))
       {
-        size_t flen = file.GetLength();
-        char* temp = new char[flen];
-        strHTML.assign(temp, file.Read(temp, flen));
-        file.Close();
-        delete[] temp;
+        strHTML.assign(buffer.get(), buffer.length());
         return true;
       }
     }
@@ -237,20 +233,29 @@ bool CScraperUrl::Get(const SUrlEntry& scrURL, std::string& strHTML, XFILE::CCur
       return false;
 
   strHTML = strHTML1;
+  std::string fileCharset(http.GetServerReportedCharset());
 
-  if (scrURL.m_url.Find(".zip") > -1 )
+  if (scrURL.m_url.find(".zip") != std::string::npos)
   {
     XFILE::CZipFile file;
     CStdString strBuffer;
     int iSize = file.UnpackFromMemory(strBuffer,strHTML,scrURL.m_isgz);
     if (iSize)
     {
+      fileCharset.clear();
       strHTML.clear();
       strHTML.append(strBuffer.c_str(),strBuffer.data()+iSize);
     }
   }
 
-  if (!scrURL.m_cache.IsEmpty())
+  if (!fileCharset.empty() && fileCharset != "UTF-8")
+  {
+    std::string converted;
+    if (g_charsetConverter.ToUtf8(fileCharset, strHTML, converted) && !converted.empty())
+      strHTML = converted;
+  }
+
+  if (!scrURL.m_cache.empty())
   {
     CStdString strCachePath = URIUtils::AddFileToFolder(g_advancedSettings.m_cachePath,
                               "scrapers/" + cacheContext + "/" + scrURL.m_cache);
@@ -266,7 +271,7 @@ bool CScraperUrl::Get(const SUrlEntry& scrURL, std::string& strHTML, XFILE::CCur
 // <TAG><url>...</url>...</TAG> (parsed by ParseElement) or <url>...</url> (ditto)
 bool CScraperUrl::ParseEpisodeGuide(CStdString strUrls)
 {
-  if (strUrls.IsEmpty())
+  if (strUrls.empty())
     return false;
 
   // ok, now parse the xml file
@@ -292,7 +297,7 @@ bool CScraperUrl::ParseEpisodeGuide(CStdString strUrls)
 
 CStdString CScraperUrl::GetThumbURL(const CScraperUrl::SUrlEntry &entry)
 {
-  if (entry.m_spoof.IsEmpty())
+  if (entry.m_spoof.empty())
     return entry.m_url;
   CStdString spoof = entry.m_spoof;
   CURL::Encode(spoof);

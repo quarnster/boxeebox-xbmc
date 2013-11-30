@@ -453,6 +453,10 @@ msgctxt "#400"
 msgid "Weather"
 msgstr "آب و هوا"
 
+msgctxt "#409"
+msgid "Defaults"
+msgstr "استاندارد"
+
 msgctxt "#444"
 msgid "Video"
 msgstr "ویدئو"
@@ -637,6 +641,10 @@ msgctxt "#1048"
 msgid "Username"
 msgstr "نام کاربری"
 
+msgctxt "#1210"
+msgid "Remove"
+msgstr "حذف "
+
 msgctxt "#1211"
 msgid "Music"
 msgstr "موسیقی"
@@ -705,6 +713,10 @@ msgctxt "#10025"
 msgid "Videos"
 msgstr "ویدئوها"
 
+msgctxt "#10037"
+msgid "Standard"
+msgstr "استاندارد"
+
 msgctxt "#10134"
 msgid "Favourites"
 msgstr "علاقه‌مندی‌ها"
@@ -769,9 +781,17 @@ msgctxt "#13280"
 msgid "Video"
 msgstr "ویدئو"
 
+msgctxt "#13340"
+msgid "Leave as is"
+msgstr "استاندارد"
+
 msgctxt "#13350"
 msgid "Now playing..."
 msgstr "در حال پخش..."
+
+msgctxt "#13388"
+msgid "Preset"
+msgstr "استاندارد"
 
 msgctxt "#13398"
 msgid "Shortcuts"
@@ -793,6 +813,18 @@ msgctxt "#13611"
 msgid "Standard"
 msgstr "استاندارد"
 
+msgctxt "#14061"
+msgid "Auto"
+msgstr "خودکار"
+
+msgctxt "#14074"
+msgid "Set timezone"
+msgstr "تعیین منطقه زمانی"
+
+msgctxt "#14080"
+msgid "Timezone"
+msgstr "منطقه زمانی"
+
 msgctxt "#14086"
 msgid "Playback"
 msgstr "باز پخش"
@@ -800,6 +832,10 @@ msgstr "باز پخش"
 msgctxt "#14098"
 msgid "Play"
 msgstr "پخش"
+
+msgctxt "#15015"
+msgid "Remove"
+msgstr "حذف "
 
 msgctxt "#15052"
 msgid "Password"
@@ -824,6 +860,14 @@ msgstr "خطا در پخش"
 msgctxt "#16039"
 msgid "Off"
 msgstr "خاموش"
+
+msgctxt "#16040"
+msgid "Auto"
+msgstr "خودکار"
+
+msgctxt "#16316"
+msgid "Auto"
+msgstr "خودکار"
 
 msgctxt "#19020"
 msgid "TV"
@@ -980,3 +1024,7 @@ msgstr "همیشه"
 msgctxt "#36037"
 msgid "TV"
 msgstr "تلوزیون"
+
+msgctxt "#36502"
+msgid "None"
+msgstr "خالی"
