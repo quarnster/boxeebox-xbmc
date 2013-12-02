@@ -287,6 +287,11 @@ ExternalProject_Add(
 	libmpeg2
 	URL 				http://libmpeg2.sourceforge.net/files/libmpeg2-0.5.1.tar.gz
 	URL_MD5 			0f92c7454e58379b4a5a378485bbd8ef
+    PATCH_COMMAND
+	    COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/01-libmpeg2-add-asm-leading-underscores.patch
+		COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/02-neon.patch
+		COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/03-config-fix.patch
+		COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/04-clang-fix.patch
 	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-sdl
 )
 
