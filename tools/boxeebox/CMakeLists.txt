@@ -119,6 +119,7 @@ set(libs
 	libtdb.so.1
 	libtalloc.so.2
 	libtevent.so.0
+	libmpeg2.so.0
 )
 foreach(lib ${libs})
 	if(HAVE_PV)
