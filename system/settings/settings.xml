@@ -759,6 +759,22 @@
             <multiselect>true</multiselect>
           </control>
         </setting>
+        <setting id="subtitles.tv" type="addon" label="24116" help="24117">
+          <level>1</level>
+          <default>-</default>
+          <constraints>
+            <addontype>xbmc.subtitle.module</addontype>
+          </constraints>
+          <control type="button" format="addon" />
+        </setting>
+        <setting id="subtitles.movie" type="addon" label="24118" help="24119">
+          <level>1</level>
+          <default>-</default>
+          <constraints>
+            <addontype>xbmc.subtitle.module</addontype>
+          </constraints>
+          <control type="button" format="addon" />
+        </setting>
         <setting id="subtitles.custompath" type="path" label="21366" help="36191">
           <level>1</level>
           <default></default>
@@ -2111,7 +2127,12 @@
           <control type="button" format="action" />
         </setting>
         <setting id="videoscreen.testpattern" type="action" label="226" help="36358">
-          <requirement>HAS_GL</requirement>
+          <requirement>
+            <or>
+              <condition>HAS_GL</condition>
+              <condition>HAS_DX</condition>
+            </or>
+          </requirement>
           <level>1</level>
           <control type="button" format="action" />
         </setting>

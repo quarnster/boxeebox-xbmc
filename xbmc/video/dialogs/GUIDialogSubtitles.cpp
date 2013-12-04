@@ -41,6 +41,7 @@
 #include "utils/URIUtils.h"
 #include "URL.h"
 #include "Util.h"
+#include "video/VideoDatabase.h"
 
 using namespace ADDON;
 using namespace XFILE;
@@ -189,9 +190,14 @@ void CGUIDialogSubtitles::Process(unsigned int currentTime, CDirtyRegionList &di
       m_updateSubsList = false;
     }
 
-    if (!m_subtitles->IsEmpty() && !GetFocusedControl())
+    if (!m_subtitles->IsEmpty())
     { // set focus to the list
       CGUIMessage msg(GUI_MSG_SETFOCUS, GetID(), CONTROL_SUBLIST);
+      OnMessage(msg);
+    }
+    else
+    { // set focus to the service list if no subs are found
+      CGUIMessage msg(GUI_MSG_SETFOCUS, GetID(), CONTROL_SERVICELIST);
       OnMessage(msg);
     }
   }
@@ -211,18 +217,30 @@ void CGUIDialogSubtitles::FillServices()
     return;
   }
 
+  std::string defaultService;
+  const CFileItem &item = g_application.CurrentFileItem();
+  if (item.GetVideoContentType() == VIDEODB_CONTENT_TVSHOWS ||
+      item.GetVideoContentType() == VIDEODB_CONTENT_EPISODES)
+    // Set default service for tv shows
+    defaultService = CSettings::Get().GetString("subtitles.tv");
+  else
+    // Set default service for filemode and movies
+    defaultService = CSettings::Get().GetString("subtitles.movie");
+  
+  std::string service = addons.front()->ID();
   for (VECADDONS::const_iterator addonIt = addons.begin(); addonIt != addons.end(); addonIt++)
   {
     CFileItemPtr item(CAddonsDirectory::FileItemFromAddon(*addonIt, "plugin://", false));
     m_serviceItems->Add(item);
+    if ((*addonIt)->ID() == defaultService)
+      service = (*addonIt)->ID();
   }
 
   // Bind our services to the UI
   CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), CONTROL_SERVICELIST, 0, 0, m_serviceItems);
   OnMessage(msg);
 
-  // TODO: Default service support will need to check through the items to find the CFileItem in the loop above.
-  SetService(m_serviceItems->Get(0)->GetProperty("Addon.ID").asString());
+  SetService(service);
 }
 
 bool CGUIDialogSubtitles::SetService(const std::string &service)
