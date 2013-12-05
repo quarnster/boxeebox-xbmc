@@ -912,6 +912,15 @@ void CIntelSMDVideo::Reset()
 {
   VERBOSE();
 
+  m_bFlushFlag = true;
+
+  CSingleLock lock(m_bufferLock);
+  if (m_buffer)
+  {
+    delete m_buffer;
+    m_buffer = NULL;
+  }
+
   g_IntelSMDGlobals.FlushVideoDecoder();
   g_IntelSMDGlobals.FlushVideoRender();
 }
@@ -923,14 +932,7 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
   if (m_IsConfigured)
     CloseDecoder();
 
-  m_bFlushFlag = true;
-
-  CSingleLock lock(m_bufferLock);
-  if (m_buffer)
-  {
-    delete m_buffer;
-    m_buffer = NULL;
-  }
+  Reset();
 
   m_codec_type = codec_type;
 
