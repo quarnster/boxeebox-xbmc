@@ -189,14 +189,18 @@ void CGUIDialogSubtitles::Process(unsigned int currentTime, CDirtyRegionList &di
       OnMessage(message);
       m_updateSubsList = false;
     }
-
-    if (!m_subtitles->IsEmpty())
-    { // set focus to the list
-      CGUIMessage msg(GUI_MSG_SETFOCUS, GetID(), CONTROL_SUBLIST);
+    
+    int control = GetFocusedControlID();
+    // nothing has focus
+    if (!control)
+    {
+      CGUIMessage msg(GUI_MSG_SETFOCUS, GetID(), m_subtitles->IsEmpty() ?
+                      CONTROL_SERVICELIST : CONTROL_SUBLIST);
       OnMessage(msg);
     }
-    else
-    { // set focus to the service list if no subs are found
+    // subs list is focused but we have no subs
+    else if (control == CONTROL_SUBLIST && m_subtitles->IsEmpty())
+    {
       CGUIMessage msg(GUI_MSG_SETFOCUS, GetID(), CONTROL_SERVICELIST);
       OnMessage(msg);
     }
@@ -425,6 +429,19 @@ void CGUIDialogSubtitles::OnDownloadComplete(const CFileItemList *items, const s
 
   // and copy the file across
   CFile::Cache(strUrl, strSubPath);
+
+  // for ".sub" subtitles we check if ".idx" counterpart exists and copy that as well
+  if (strSubExt.Equals(".sub"))
+  {
+    strUrl = URIUtils::ReplaceExtension(strUrl, ".idx");
+    if(CFile::Exists(strUrl))
+    {
+      CStdString strSubNameIdx = StringUtils::Format("%s.%s.idx", strFileName.c_str(), strSubLang.c_str());
+      strSubPath = URIUtils::AddFileToFolder(strDestPath, strSubNameIdx);
+      CFile::Cache(strUrl, strSubPath);
+    }
+  }
+
   SetSubtitles(strSubPath);
   // Close the window
   Close();
