@@ -89,6 +89,8 @@ public:
   void SetWidth(unsigned int width) { m_width = m_dwidth = width; }
   void SetHeight(unsigned int height) { m_height = m_dheight = height; }
 
+  bool IsConfigured() const { return m_IsConfigured; }
+
 protected:
   virtual ~CIntelSMDVideo();
 

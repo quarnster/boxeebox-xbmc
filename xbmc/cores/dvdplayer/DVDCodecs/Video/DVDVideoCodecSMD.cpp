@@ -108,6 +108,11 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
     return false;
   }
 
+  if (m_Device->IsConfigured()) {
+    CLog::Log(LOGERROR, "%s: Trying to open up a second SMD codec instance??", __DEBUG_ID__);
+    return false;
+  }
+
   m_Device->SetWidth(hints.width);
   m_Device->SetHeight(hints.height);
 
