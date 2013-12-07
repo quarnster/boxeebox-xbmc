@@ -34,6 +34,9 @@ extern "C"
 #include "xbmc/threads/SingleLock.h"
 #include "dvdplayer/DVDClock.h"
 
+extern char *dbg_id(const char *fmt, ...);
+#define __DEBUG_ID__ dbg_id("%20s::%-32s - %04d", __MODULE_NAME__, __FUNCTION__, __LINE__)
+
 #define GDL_VIDEO_PLANE           GDL_PLANE_ID_UPP_B  // bottom
 #define GDL_GRAPHICS_PLANE        GDL_PLANE_ID_UPP_D  // on top for overlays
 #define GDL_FLASH_GRAPHICS_PLANE  GDL_PLANE_ID_UPP_C  // middle for pages with embedded video

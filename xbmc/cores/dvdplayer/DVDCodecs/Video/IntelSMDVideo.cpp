@@ -35,11 +35,19 @@
 
 #define __MODULE_NAME__ "IntelSMDVideo"
 
-#if 0
-#define VERBOSE() CLog::Log(LOGDEBUG, "%s::%s", __MODULE_NAME__, __FUNCTION__)
+#if 1
+#define VERBOSE() CLog::Log(LOGDEBUG, "%s", __DEBUG_ID__)
 #else
 #define VERBOSE()
 #endif
+
+#if 0
+#define VERBOSE2() CLog::Log(LOGDEBUG, "%s", __DEBUG_ID__)
+#else
+#define VERBOSE2()
+#endif
+
+
 
 void mp_msg(int mod, int lev, const char *format, ... ){}
 #define MSGT_DECVIDEO 0
@@ -154,7 +162,7 @@ bool h264_viddec_parse_codec_priv_data(H264Viddec *viddec, unsigned char *buf, i
     viddec->h264_codec_priv_pushed_data_ptr = (unsigned char*) malloc(size);
     if (!pdata || !viddec->h264_codec_priv_pushed_data_ptr)
     {
-      //printf("Failed to alloc memory!\n");
+      CLog::Log(LOGERROR, "%s: Failed to alloc memory!", __DEBUG_ID__);
       goto end;
     }
 
@@ -170,7 +178,7 @@ bool h264_viddec_parse_codec_priv_data(H264Viddec *viddec, unsigned char *buf, i
 
     if (!numOfSequenceParameterSets)
     {
-      //printf("Num of Sequece Parms end\n");
+      CLog::Log(LOGERROR, "%s: Num of Sequece Parms end", __DEBUG_ID__);
       goto end;
     }
     offset = 6;
@@ -187,7 +195,7 @@ bool h264_viddec_parse_codec_priv_data(H264Viddec *viddec, unsigned char *buf, i
 
       if(pdata + 2 + len > ((uint8_t *)pdata + size))
       {
-        //printf("pdata + 2 + len > ((uint8_t *)pdata + size\n");
+        CLog::Log(LOGERROR, "%s: pdata + 2 + len > ((uint8_t *)pdata + size", __DEBUG_ID__);
         goto end;
       }
 
@@ -205,7 +213,7 @@ bool h264_viddec_parse_codec_priv_data(H264Viddec *viddec, unsigned char *buf, i
 
     if (!numOfSequenceParameterSets)
     {
-      //printf("Num of Sequece Parms end\n");
+      CLog::Log(LOGERROR, "%s: Num of Sequece Parms end", __DEBUG_ID__);
       goto end;
     }
 
@@ -938,19 +946,19 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
 
   if(!g_IntelSMDGlobals.CreateVideoDecoder(m_codec_type))
   {
-    CLog::Log(LOGERROR, "CIntelSMDVideo::OpenDecoder CreateVideoDecoder %d failed.", m_codec_type);
+    CLog::Log(LOGERROR, "%s CreateVideoDecoder %d failed.", __DEBUG_ID__, m_codec_type);
     return false;
   }
 
   if(!g_IntelSMDGlobals.CreateVideoRender(GDL_VIDEO_PLANE))
   {
-    CLog::Log(LOGERROR, "CIntelSMDVideo::OpenDecoder CreateVideoRender failed");
+    CLog::Log(LOGERROR, "%s CreateVideoRender failed", __DEBUG_ID__);
     return false;
   }
 
   if(!g_IntelSMDGlobals.ConnectDecoderToRenderer())
   {
-    CLog::Log(LOGERROR, "CIntelSMDRenderer::Configure ConnectDecoderToRenderer failed");
+    CLog::Log(LOGERROR, "%s ConnectDecoderToRenderer failed", __DEBUG_ID__);
     return false;
   }
 
@@ -963,7 +971,7 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
   }
 
   if (ffmpegCodedId == CODEC_ID_WMV3 &&  extradata_size >= 4){
-    CLog::Log(LOGERROR, "CIntelSMDVideo::OpenDecoder WMV3 stream annex e");
+    CLog::Log(LOGERROR, "%s WMV3 stream annex e", __DEBUG_ID__);
     vc1_viddec_init(&m_vc1_converter);
     vc1_viddec_SPMP_PESpacket_PayloadFormatHeader(&m_vc1_converter,(unsigned char*)extradata,m_width, m_height);
     m_bNeedWMV3Conversion = true;
@@ -971,8 +979,8 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
 
   if (ffmpegCodedId == CODEC_ID_VC1 && extradata_size > 0)
   {
-    CLog::Log(LOGERROR, "CIntelSMDVideo::OpenDecoder VC1 stream annex e");
-    printf("CIntelSMDVideo::OpenDecoder VC1 stream annex e\n");
+    CLog::Log(LOGERROR, "%s VC1 stream annex e", __DEBUG_ID__);
+    printf("%s VC1 stream annex e\n", __DEBUG_ID__);
     vc1_viddec_init(&m_vc1_converter);
     m_vc1_converter.size_AP_Buffer = extradata_size;
     //mp_msg(MSGT_DECVIDEO,MSGL_V,"sequence header size: 0X %x\n",Vc1_converter.size_AP_Buffer);
@@ -989,7 +997,7 @@ bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_
   // we now wait for the first packet to start
   m_bFlushFlag = true;
 
-  CLog::Log(LOGINFO, "%s: codec opened", __MODULE_NAME__);
+  CLog::Log(LOGINFO, "%s: codec opened", __DEBUG_ID__);
 
   return true;
 }
@@ -1014,12 +1022,12 @@ void CIntelSMDVideo::CloseDecoder(void)
 
   SetDefaults();
 
-  CLog::Log(LOGDEBUG, "%s: codec closed", __MODULE_NAME__);
+  CLog::Log(LOGDEBUG, "%s: codec closed", __DEBUG_ID__);
 }
 
 int CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, double pts)
 {
-  VERBOSE();
+  VERBOSE2();
   bool filtered = false;
   unsigned int demuxer_bytes = size;
   uint8_t *demuxer_content = pData;
@@ -1107,14 +1115,14 @@ int CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, doub
     ismd_ret = ismd_buffer_alloc(bufSize, &buffer_handle);
     if (ismd_ret != ISMD_SUCCESS)
     {
-      printf("CIntelSMDVideo::WriteToInputPort ismd_buffer_alloc failed <%d>, %d\n", ismd_ret, bufSize);
+      CLog::Log(LOGERROR, "%s ismd_buffer_alloc failed <%d>, %d", __DEBUG_ID__, ismd_ret, bufSize);
       goto cleanup;
     }
 
     ismd_ret = ismd_buffer_read_desc(buffer_handle, &buffer_desc);
     if (ismd_ret != ISMD_SUCCESS)
     {
-      printf("CIntelSMDVideo::WriteToInputPort ismd_buffer_read_desc failed <%d>\n", ismd_ret);
+      CLog::Log(LOGERROR, "%s ismd_buffer_read_desc failed <%d>", __DEBUG_ID__, ismd_ret);
       goto cleanup;
     }
 
@@ -1136,7 +1144,7 @@ int CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, doub
     ismd_ret = ismd_buffer_update_desc(buffer_handle, &buffer_desc);
     if (ismd_ret != ISMD_SUCCESS)
     {
-      printf("-- ismd_buffer_update_desc failed <%d>\n", ismd_ret);
+      CLog::Log(LOGERROR, "%s ismd_buffer_update_desc failed <%d>", __DEBUG_ID__, ismd_ret);
       goto cleanup;
     }
     m_buffer->m_buffers.push(buffer_handle);
@@ -1198,7 +1206,7 @@ int CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, doub
 
 bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
 {
-  VERBOSE();
+  VERBOSE2();
   CSingleLock lock(m_bufferLock);
   if (m_buffer == NULL || m_buffer->m_buffers.empty())
     return false;
@@ -1263,7 +1271,7 @@ bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
   }
   else
   {
-    CLog::Log(LOGERROR, "CIntelSMDVideo::GetPicture ismd_viddec_get_stream_properties failed %d\n", res);
+    CLog::Log(LOGERROR, "%s ismd_viddec_get_stream_properties failed %d\n", __DEBUG_ID__, res);
     return false;
   }
 

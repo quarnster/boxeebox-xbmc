@@ -34,7 +34,7 @@
 #define __MODULE_NAME__ "DVDVideoCodecSMD"
 
 #if 0
-#define VERBOSE() CLog::Log(LOGDEBUG, "%s::%s", __MODULE_NAME__, __FUNCTION__)
+#define VERBOSE() CLog::Log(LOGDEBUG, "%s", __DEBUG_ID__)
 #else
 #define VERBOSE()
 #endif
@@ -57,8 +57,8 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
   ismd_codec_type_t codec_type;
 
   // found out if video hardware decoding is enforced
-  CLog::Log(LOGDEBUG, "CDVDVideoCodecSMD::Open force hardware %d\n", !hints.software);
-  CLog::Log(LOGDEBUG, "CDVDVideoCodecSMD::Open width %d  height %d type %d\n", hints.width, hints.height, hints.codec);
+  CLog::Log(LOGDEBUG, "%s force hardware %d\n", __DEBUG_ID__, !hints.software);
+  CLog::Log(LOGDEBUG, "%s width %d  height %d type %d\n", __DEBUG_ID__, hints.width, hints.height, hints.codec);
 
   // Run some SD content in software mode
   // since hardware is not always compatible
@@ -104,7 +104,7 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 
   if (!m_Device)
   {
-    CLog::Log(LOGERROR, "%s: Failed to open Intel SMD device", __MODULE_NAME__);
+    CLog::Log(LOGERROR, "%s: Failed to open Intel SMD device", __DEBUG_ID__);
     return false;
   }
 
@@ -113,11 +113,11 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 
   if (m_Device && !m_Device->OpenDecoder(hints.codec, codec_type, hints.extrasize, hints.extradata))
   {
-    CLog::Log(LOGERROR, "%s: Failed to open Intel SMD decoder", __MODULE_NAME__);
+    CLog::Log(LOGERROR, "%s: Failed to open Intel SMD decoder", __DEBUG_ID__);
     return false;
   }
 
-  CLog::Log(LOGINFO, "Opened Intel SMD Codec, %s", m_pFormatName);
+  CLog::Log(LOGINFO, "%s: Opened Intel SMD Codec, %s", __DEBUG_ID__, m_pFormatName);
 
   return true;
 }
