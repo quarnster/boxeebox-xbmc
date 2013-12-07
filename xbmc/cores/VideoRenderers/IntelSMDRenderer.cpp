@@ -146,7 +146,7 @@ void CIntelSMDRenderer::SetDefaults()
 
   m_iYV12RenderBuffer = 0;
   m_NumYV12Buffers = ISMD_NUM_BUFFERS;
-  m_PTS = DVD_NOPTS_VALUE;
+  m_PTS = 0;
   m_bCropping = false;
   m_bFlushFlag = true;
   m_bRunning = false;
@@ -192,7 +192,6 @@ void CIntelSMDRenderer::Flush()
 {
   VERBOSE();
 
-  m_PTS = 0;
   m_bRunning = false;
   m_bFlushFlag = true;
 
@@ -320,7 +319,6 @@ void CIntelSMDRenderer::FlushAndSync(ismd_port_handle_t inputPort, bool flush, d
 
   if (firstpts < 0)
     firstpts = 0;
-
   bool discontinuity = m_bFlushFlag || flush;
   double dvdTime2 = CDVDClock::GetMasterClock()->GetClock();
   if (dvdTime2 < 0)
@@ -332,7 +330,12 @@ void CIntelSMDRenderer::FlushAndSync(ismd_port_handle_t inputPort, bool flush, d
   else
     addPts = g_IntelSMDGlobals.DvdToIsmdPts(-add);
 
-
+  if (!discontinuity && start/90000.0 > (firstpts+2*DVD_TIME_BASE)/(double)DVD_TIME_BASE) {
+    // Mark as a discontinuity to reset the start time at a more sane time.
+    CLog::Log(LOGWARNING, "%s Frame pts is waaay behind the start time and wasn't marked as a discontinuity. Forcing Flush. start: %f, pts: %f", __DEBUG_ID__, start/90000.0, firstpts/DVD_TIME_BASE);
+    Flush();
+    discontinuity = true;
+  }
 
   if(discontinuity || g_IntelSMDGlobals.GetRenderState() != ISMD_DEV_STATE_PLAY)
   {
@@ -374,22 +377,29 @@ void CIntelSMDRenderer::FlushAndSync(ismd_port_handle_t inputPort, bool flush, d
   double diff = expected-actual;
 
   if (start/90000.0 > firstpts/(double)DVD_TIME_BASE && !discontinuity) {
-    CLog::Log(LOGWARNING, "%s - start is %f, firstpts is %f but wasn't marked for discontinuity! Expected: %f, actual: %f, diff: %f", __DEBUG_ID__, start/90000.0, firstpts, expected, actual, diff);
+    CLog::Log(LOGWARNING, "%s - start is %f, firstpts is %f but wasn't marked for discontinuity! Expected: %f, actual: %f, diff: %f", __DEBUG_ID__, start/90000.0, firstpts/DVD_TIME_BASE, expected, actual, diff);
   }
 
   if (lastClockChange != 0)
     lastClockChange--;
-  if (lastClockChange == 0 && fabs(diff) > 0.05 && expected > 0 && current > base)
+  if (lastClockChange == 0 && fabs(diff) > 0.05 && expected > 0)
   {
     lastClockChange = 0;
+    if (fabs(diff) > 2 && (current > base || (current < base && base-current > 2*90000))) {
+      CLog::Log(LOGWARNING, "%s Diff too large, will force a Flush instead of adjusting clock: %f, %f, %f", __DEBUG_ID__, expected, actual, diff);
+      Flush();
+      return;
+    }
     diff = diff*90000;
-    if (current > diff)
+    if (current > diff && current > base)
     {
       ismd_clock_adjust_time(g_IntelSMDGlobals.GetSMDClock(), diff);
       ismd_time_t adj;
       ismd_clock_get_time(g_IntelSMDGlobals.GetSMDClock(), &adj);
 
       CLog::Log(LOGINFO, "%s: Adjusting clock: %.2f -> %.2f, %.2f\n", __DEBUG_ID__, current/90000.0, adj/90000.0, diff/90000.0);
+    } else {
+      CLog::Log(LOGWARNING, "%s Wanted to adjust the clock but couldn't!: %f, %f, %f", __DEBUG_ID__, current/90000.0, diff/90000.0, base/90000.0);
     }
   }
 }
@@ -397,9 +407,6 @@ void CIntelSMDRenderer::FlushAndSync(ismd_port_handle_t inputPort, bool flush, d
 bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
 {
   VERBOSE2();
-  if (picture->format != RENDER_FMT_ISMD)
-    return false;
-
   static int count = 0;
   if (++count % 100 == 0) {
 //     g_IntelSMDGlobals.PrintVideoStreamStats();
@@ -408,8 +415,13 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
 
   if (picture->pts < 0)
     picture->pts = 0;
-  if (picture->ismdbuf->pts < 0)
-    picture->ismdbuf->pts = 0;
+
+  if (picture->format != RENDER_FMT_ISMD) {
+    m_PTS = picture->pts;
+    if (m_PTS < 0)
+      m_PTS = 0;
+    return false;
+  }
 
   ismd_port_handle_t inputPort = g_IntelSMDGlobals.GetVidDecInput();
 
@@ -418,6 +430,10 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
     CLog::Log(LOGERROR, "%s: input port is -1", __DEBUG_ID__);
     return false;
   }
+
+  if (picture->ismdbuf->pts < 0)
+    picture->ismdbuf->pts = 0;
+
   double add = picture->pts - picture->ismdbuf->pts;
   ismd_pts_t addPts;
   if (add > 0)
@@ -464,6 +480,8 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
       goto cleanup;
     }
 
+    static int err_count = 0;
+
     while (m_bRunning && counter < 10)
     {
       ismd_ret = ismd_port_write(inputPort, buffer);
@@ -480,6 +498,13 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
 cleanup:
     if (ismd_ret != ISMD_SUCCESS) {
       ismd_buffer_dereference(buffer);
+      if (counter && err_count++ > 10) {
+        // The video renderer queue is still full?! Force a flush
+        err_count = 0;
+        Flush();
+      }
+    } else {
+      err_count = 0;
     }
   }
 
@@ -538,7 +563,11 @@ void CIntelSMDRenderer::ReleaseImage(int source, bool preserve)
   VERBOSE2();
   if(m_format != RENDER_FMT_ISMD)
   {
-    RenderYUVBUffer(m_YUVMemoryTexture[m_iYV12RenderBuffer]);
+    // If the frame isn't late... 
+    if (m_PTS >= (CDVDClock::GetMasterClock()->GetClock()-0.25*DVD_TIME_BASE)) {
+      // render it
+      RenderYUVBUffer(m_YUVMemoryTexture[m_iYV12RenderBuffer]);
+    }
   }
 
   m_iYV12RenderBuffer = NextYV12Texture();
@@ -581,8 +610,6 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
     CLog::Log(LOGERROR, "%s: invalid plane data", __DEBUG_ID__);
     return;
   }
-
-  m_PTS = 0;
   ismd_pts = g_IntelSMDGlobals.DvdToIsmdPts(m_PTS);
 
   unsigned int destHeight = ROUND_DOWN(m_sourceHeight, 16);
@@ -656,7 +683,7 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
   result = ISMD_ERROR_UNSPECIFIED;
 
   int retry = 0;
-
+  static int err_count = 0;
   while(m_bRunning && retry < 5)
   {
     result = ismd_port_write(video_input_port_proc, renderBuf);
@@ -674,8 +701,15 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
 
   if(result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "%s: failed. %d", __DEBUG_ID__, result);
+    CLog::Log(LOGERROR, "%s: failed. %d %d", __DEBUG_ID__, result, g_IntelSMDGlobals.GetVideoRenderState());
     ismd_buffer_dereference(renderBuf);
+    if (retry && ++err_count > 10) {
+      // The video renderer queue is full?! Force a flush
+      err_count = 0;
+      Flush();
+    }
+  } else {
+    err_count = 0;
   }
 
   return;
