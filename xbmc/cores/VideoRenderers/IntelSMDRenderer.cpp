@@ -431,7 +431,7 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
     return false;
   }
 
-  if (picture->ismdbuf->m_buffers.empty()) {
+  if (picture->ismdbuf == NULL || picture->ismdbuf->m_buffers.empty()) {
     CLog::Log(LOGWARNING, "%s: WTF, no ismd buffers???", __DEBUG_ID__);
     return false;
   }
