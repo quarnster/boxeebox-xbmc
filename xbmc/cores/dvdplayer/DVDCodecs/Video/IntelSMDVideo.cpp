@@ -49,11 +49,11 @@
 
 
 
-void mp_msg(int mod, int lev, const char *format, ... ){}
 #define MSGT_DECVIDEO 0
-#define MSGL_ERR 0
+#define MSGL_ERR 3
 #define MSGL_V 0
 #define MSGL_DBG2 0
+#define mp_msg(a, b, format, ...) if (b == MSGL_ERR) CLog::Log(LOGDEBUG, "%s" format, __DEBUG_ID__, ##__VA_ARGS__)
 
 
 #define USE_FFMPEG_ANNEXB
@@ -1283,6 +1283,7 @@ bool CIntelSMDVideo::ClearPicture(DVDVideoPicture *pDvdVideoPicture)
   if (pDvdVideoPicture->format != RENDER_FMT_ISMD)
     return false;
   delete pDvdVideoPicture->ismdbuf;
+  pDvdVideoPicture->ismdbuf = NULL;
   return true;
 }
 #endif

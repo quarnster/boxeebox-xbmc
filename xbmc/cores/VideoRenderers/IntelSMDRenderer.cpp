@@ -431,6 +431,11 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
     return false;
   }
 
+  if (picture->ismdbuf->m_buffers.empty()) {
+    CLog::Log(LOGWARNING, "%s: WTF, no ismd buffers???", __DEBUG_ID__);
+    return false;
+  }
+
   if (picture->ismdbuf->pts < 0)
     picture->ismdbuf->pts = 0;
 
@@ -564,7 +569,7 @@ void CIntelSMDRenderer::ReleaseImage(int source, bool preserve)
   if(m_format != RENDER_FMT_ISMD)
   {
     // If the frame isn't late... 
-    if (m_PTS >= (CDVDClock::GetMasterClock()->GetClock()-0.25*DVD_TIME_BASE)) {
+    if (m_PTS <= 0 || m_PTS >= (CDVDClock::GetMasterClock()->GetClock()-0.25*DVD_TIME_BASE)) {
       // render it
       RenderYUVBUffer(m_YUVMemoryTexture[m_iYV12RenderBuffer]);
     }
