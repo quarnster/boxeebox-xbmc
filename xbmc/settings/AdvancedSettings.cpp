@@ -328,7 +328,7 @@ void CAdvancedSettings::Initialize()
                                   //with ipv6.
 
   m_fullScreen = m_startFullScreen = false;
-  m_showExitButton = true;
+  m_showExitButton = false;
   m_splashImage = true;
 
   m_playlistRetries = 100;
