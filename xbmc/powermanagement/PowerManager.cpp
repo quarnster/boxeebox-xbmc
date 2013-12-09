@@ -40,6 +40,8 @@
 #include "osx/CocoaPowerSyscall.h"
 #elif defined(TARGET_ANDROID)
 #include "android/AndroidPowerSyscall.h"
+#elif defined(TARGET_BOXEE)
+#include "boxeebox/BoxeeBoxPowerSyscall.h"
 #elif defined(TARGET_POSIX)
 #include "linux/FallbackPowerSyscall.h"
 #if defined(HAS_DBUS)
@@ -76,6 +78,8 @@ void CPowerManager::Initialize()
   m_instance = new CCocoaPowerSyscall();
 #elif defined(TARGET_ANDROID)
   m_instance = new CAndroidPowerSyscall();
+#elif defined(TARGET_BOXEE)
+  m_instance = new CBoxeeBoxPowerSyscall();
 #elif defined(TARGET_POSIX)
 #if defined(HAS_DBUS)
   if (CConsoleUPowerSyscall::HasConsoleKitAndUPower())
