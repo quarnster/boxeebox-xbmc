@@ -30,7 +30,7 @@ CBoxeeBoxPowerSyscall::CBoxeeBoxPowerSyscall()
 bool CBoxeeBoxPowerSyscall::Powerdown()
 {
   CLog::Log(LOGDEBUG, "BoxeeBoxPowerSyscall.Powerdown");
-  return system("powerdown") == 0;
+  return system("poweroff") == 0;
 }
 
 bool CBoxeeBoxPowerSyscall::Reboot()
