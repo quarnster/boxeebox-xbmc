@@ -26,6 +26,7 @@
 #include "threads/Event.h"
 #include "threads/Thread.h"
 #include "utils/JobManager.h"
+#include "utils/Observer.h"
 
 class CGUIDialogProgressBarHandle;
 class CStopWatch;
@@ -83,7 +84,7 @@ namespace PVR
 
   typedef boost::shared_ptr<PVR::CPVRChannelGroup> CPVRChannelGroupPtr;
 
-  class CPVRManager : public ISettingCallback, private CThread
+  class CPVRManager : public ISettingCallback, private CThread, public Observable
   {
     friend class CPVRClients;
 
@@ -632,14 +633,11 @@ namespace PVR
     bool IsJobPending(const char *strJobName) const;
 
     /*!
-     * @brief Adds the job to the list of pending jobs. If bIgnorePending is set
-     * to true the job will be added even if there's an identical job already
-     * queued
-     * @param strJobName the name of the job
-     * @param bIgnorePending whether to ignore previously queued identical jobs
+     * @brief Adds the job to the list of pending jobs unless an identical 
+     * job is already queued
      * @param job the job
      */
-    void QueueJob(const char *strJobName, CJob *job, bool bIgnorePending = false);
+    void QueueJob(CJob *job);
 
     ManagerState GetState(void) const;
 

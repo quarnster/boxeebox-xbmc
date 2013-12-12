@@ -67,10 +67,11 @@ public:
   static std::string Mid(const std::string &str, size_t first, size_t count = std::string::npos);
   static std::string Right(const std::string &str, size_t count);
   static std::string& Trim(std::string &str);
+  static std::string& Trim(std::string &str, const char* const chars);
   static std::string& TrimLeft(std::string &str);
-  static std::string& TrimLeft(std::string &str, const std::string &chars);
+  static std::string& TrimLeft(std::string &str, const char* const chars);
   static std::string& TrimRight(std::string &str);
-  static std::string& TrimRight(std::string &str, const std::string &chars);
+  static std::string& TrimRight(std::string &str, const char* const chars);
   static std::string& RemoveDuplicatedSpacesAndTabs(std::string& str);
   static int Replace(std::string &str, char oldChar, char newChar);
   static int Replace(std::string &str, const std::string &oldStr, const std::string &newStr);
@@ -124,6 +125,32 @@ public:
    \return true if the string is an integer, false otherwise.
    */
   static bool IsInteger(const CStdString& str);
+
+  /* The next several isasciiXX and asciiXXvalue functions are locale independent (US-ASCII only),
+   * as opposed to standard ::isXX (::isalpha, ::isdigit...) which are locale dependent.
+   * Next functions get parameter as char and don't need double cast ((int)(unsigned char) is required for standard functions). */
+  inline static bool isasciidigit(char chr) // locale independent 
+  {
+    return chr >= '0' && chr <= '9'; 
+  }
+  inline static bool isasciixdigit(char chr) // locale independent 
+  {
+    return (chr >= '0' && chr <= '9') || (chr >= 'a' && chr <= 'f') || (chr >= 'A' && chr <= 'F'); 
+  }
+  static int asciidigitvalue(char chr); // locale independent 
+  static int asciixdigitvalue(char chr); // locale independent 
+  inline static bool isasciiuppercaseletter(char chr) // locale independent
+  {
+    return (chr >= 'A' && chr <= 'Z'); 
+  }
+  inline static bool isasciilowercaseletter(char chr) // locale independent
+  {
+    return (chr >= 'a' && chr <= 'z'); 
+  }
+  inline static bool isasciialphanum(char chr) // locale independent
+  {
+    return isasciiuppercaseletter(chr) || isasciilowercaseletter(chr) || isasciidigit(chr); 
+  }
   static CStdString SizeToString(int64_t size);
   static const CStdString EmptyString;
   static const std::string Empty;
