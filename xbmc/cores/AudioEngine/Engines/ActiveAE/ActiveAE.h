@@ -58,6 +58,7 @@ struct AudioSettings
   bool normalizelevels;
   bool passthrough;
   int config;
+  int guisoundmode;
   unsigned int samplerate;
   AEQuality resampleQuality;
 };
@@ -82,7 +83,6 @@ public:
     STREAMRESAMPLERATIO,
     STREAMFADE,
     STOPSOUND,
-    SOUNDMODE,
     GETSTATE,
     DISPLAYLOST,
     DISPLAYRESET,
@@ -250,7 +250,7 @@ protected:
   bool InitSink();
   void DrainSink();
   void UnconfigureSink();
-  bool IsSinkCompatible(const AEAudioFormat format, const std::string &device);
+  bool IsSinkCompatible(const AEAudioFormat &format, const std::string &device);
   void Start();
   void Dispose();
   void LoadSettings();
@@ -327,7 +327,6 @@ protected:
   };
   std::list<SoundState> m_sounds_playing;
   std::vector<CActiveAESound*> m_sounds;
-  int m_soundMode;
 
   float m_volume;
   bool m_muted;
