@@ -68,7 +68,7 @@ export PYTHON_NOVERSIONCHECK=\"y\"
 export PYTHON=\"${local}/bin/python\"
 export PYTHON_CPPFLAGS=\"-I${local}/include/python2.7\"
 export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
-${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --disable-gl --disable-sdl --disable-mysql --disable-x11 --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --with-lirc-device=/var/run/lirc/lircd 
+${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --disable-gl --disable-sdl --disable-mysql --disable-x11 --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --enable-external-ffmpeg --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=yes --enable-libusb --with-lirc-device=/var/run/lirc/lircd 
 "
 )
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh)
@@ -93,10 +93,8 @@ add_custom_target(
 )
 
 set(libs
-	libjasper.so.1
-	libpostproc.so.52
-	libpng16.so.16
-	libswresample.so.0
+	libjasper.so.1	
+	libpng16.so.16	
 	libyajl.so.2
 	libssh.so.4
 	libmicrohttpd.so.10
@@ -106,21 +104,45 @@ set(libs
 	libpcre.so.1
 	libcdio.so.14
 	libtag.so.1
-	libavcodec.so.54
-	libavfilter.so.3
-	libavformat.so.54
 	libavutil.so.52
+	libavcodec.so.54
+	libavformat.so.54
+	libavdevice.so.54
+	libavfilter.so.3
 	libswscale.so.2
+	libswresample.so.0
+	libpostproc.so.52	
 	libturbojpeg.so.0
 	libsmbclient.so.0
-        libnfs.so.1
-        librtmp.so.1
-        libdbus-1.so
+    libnfs.so.1
+    librtmp.so.1
+    libdbus-1.so
+	libexpat.so
 	libtdb.so.1
 	libtalloc.so.2
 	libtevent.so.0
-	libmpeg2.so.0
+	libmpeg2.so.0	
+	libFLAC.so
+	libFLAC++.so
+	libmodplug.so
+	libogg.so
+	libvorbisfile.so
+	libvorbis.so
+	libvorbisenc.so
+	libenca.so
+	libass.so
+	libao.so
+    libsqlite3.so
+	libusb.a
+	libcec.so.2	
+	libfribidi.so
+	libfreetype.so
+	libgcrypt.so
+	libtinyxml.a
+	libcurl.so
+	libfontconfig.so
 )
+
 foreach(lib ${libs})
 	if(HAVE_PV)
 		add_custom_target(
