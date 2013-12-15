@@ -867,11 +867,10 @@ namespace VIDEO
     CStdString strLabel=item->GetPath();
     // URLDecode in case an episode is on a http/https/dav/davs:// source and URL-encoded like foo%201x01%20bar.avi
     CURL::Decode(strLabel);
-    StringUtils::ToLower(strLabel);
 
     for (unsigned int i=0;i<expression.size();++i)
     {
-      CRegExp reg(true, true);
+      CRegExp reg(true, CRegExp::autoUtf8);
       if (!reg.RegComp(expression[i].regexp))
         continue;
 
@@ -940,7 +939,7 @@ namespace VIDEO
       // add what we found by now
       episodeList.push_back(episode);
 
-      CRegExp reg2(true, true);
+      CRegExp reg2(true, CRegExp::autoUtf8);
       // check the remainder of the string for any further episodes.
       if (!byDate && reg2.RegComp(g_advancedSettings.m_tvshowMultiPartEnumRegExp))
       {

@@ -21,6 +21,35 @@ string(REPLACE "\n" "" HOSTMACHINE ${HOSTMACHINE})
 include(ExternalProject)
 
 ExternalProject_Add(
+	enca
+	URL					http://dl.cihar.com/enca/enca-1.13.tar.bz2
+	URL_MD5				762bead5d9a0a5e55024e1102baaa89d
+	CONFIGURE_COMMAND   ${BASIC_CONF}  
+	BUILD_COMMAND       make    	
+    BUILD_IN_SOURCE     1
+)
+
+ExternalProject_Add(
+	libusb
+	URL					http://mirrors.xbmc.org/build-deps/darwin-libs/libusb-0.1.12.tar.gz
+	URL_MD5				caf182cbc7565dac0fd72155919672e6
+	CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET}  --disable-shared --disable-build-docs
+	BUILD_COMMAND       make
+    INSTALL_COMMAND		make install	
+    BUILD_IN_SOURCE     1
+)
+
+ExternalProject_Add(
+	libcec
+	URL 				https://github.com/Pulse-Eight/libcec/archive/libcec-2.1.3.tar.gz
+	URL_MD5				ee2f2c71516cea30ac992ddbe8f7ed1c
+	PATCH_COMMAND       ./bootstrap
+	CONFIGURE_COMMAND 	${BASIC_CONF}
+	BUILD_COMMAND       make
+    INSTALL_COMMAND     make install
+)
+
+ExternalProject_Add(
 	bzip2
 	URL					http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
 	URL_MD5				00b516f4704d4a7cb50a1d97e6e8e15b
@@ -64,8 +93,6 @@ ExternalProject_Add(
 	CONFIGURE_COMMAND	${BASIC_CONF}
 )
 
-
-
 ExternalProject_Add(
 	flex
 	URL 				http://sourceforge.net/projects/flex/files/flex-2.5.37.tar.bz2/download
@@ -106,7 +133,7 @@ ExternalProject_Add(
 	sqlite
 	URL 				http://www.sqlite.org/2013/sqlite-autoconf-3071700.tar.gz
 	URL_MD5 			18c285053e9562b848209cb0ee16d4ab
-	CONFIGURE_COMMAND	${BASIC_CONF}
+	CONFIGURE_COMMAND	${BASIC_CONF} --enable-threadsafe --disable-readline
 )
 
 ExternalProject_Add(
@@ -123,6 +150,7 @@ ExternalProject_Add(
 	PATCH_COMMAND 		sed -e "54,61d" -i taglib/toolkit/taglib.h
 	CONFIGURE_COMMAND	${BASIC_CMAKE}
 )
+
 ExternalProject_Add(
 	libpng
 	URL 				http://sourceforge.net/projects/libpng/files/libpng16/older-releases/1.6.3/libpng-1.6.3.tar.gz/download
@@ -230,7 +258,6 @@ ExternalProject_Add(
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
-
 ExternalProject_Add(
 	libvorbis
 	URL 				http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.3.tar.gz
@@ -275,6 +302,7 @@ ExternalProject_Add(
 	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF}
 	DEPENDS flac
 )
+
 ExternalProject_Add(
 	libass
 	URL 				https://libass.googlecode.com/files/libass-0.10.1.tar.gz
@@ -287,6 +315,11 @@ ExternalProject_Add(
 	libmpeg2
 	URL 				http://libmpeg2.sourceforge.net/files/libmpeg2-0.5.1.tar.gz
 	URL_MD5 			0f92c7454e58379b4a5a378485bbd8ef
+    PATCH_COMMAND
+	    COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/01-libmpeg2-add-asm-leading-underscores.patch
+		COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/02-neon.patch
+		COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/03-config-fix.patch
+		COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/04-clang-fix.patch
 	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-sdl
 )
 
@@ -303,6 +336,7 @@ ExternalProject_Add(
 	URL_MD5 			8f0eb41a344d19ac2aa9bd101dfb9ce6
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 )
+
 ExternalProject_Add(
 	libgcrypt
 	URL 				ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.5.3.tar.bz2
@@ -333,10 +367,10 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	samba
-	URL 				http://ftp.samba.org/pub/samba/stable/samba-3.6.21.tar.gz
-	URL_MD5 			faa67c625508dc495c082357913ccea6
-	CONFIGURE_COMMAND	CC=${TARGET}-gcc CFLAGS=-I${SYSROOT}/usr/local/include LDFLAGS=-L${SYSROOT}/usr/local/lib ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 ./configure --prefix=${TARGET_DIR} --host=${TARGET} samba_cv_CC_NEGATIVE_ENUM_VALUES=yes libreplace_cv_HAVE_GETADDRINFO=no ac_cv_file__proc_sys_kernel_core_pattern=yes  samba_cv_HAVE_STAT_ST_FLAGS=no samba_cv_DARWIN_INITGROUPS=no --without-ldap --without-krb5 --without-ads --disable-cups --enable-swat=no --with-winbind=no
-	BUILD_COMMAND 		${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} libsmbclient libtalloc libtevent libtdb
+	URL                     http://ftp.samba.org/pub/samba/stable/samba-3.6.21.tar.gz
+	URL_MD5                 faa67c625508dc495c082357913ccea6
+	CONFIGURE_COMMAND	CC=${TARGET}-gcc CFLAGS=-I${SYSROOT}/usr/local/include LDFLAGS=-L${SYSROOT}/usr/local/lib ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 ./configure --prefix=${TARGET_DIR} --host=${TARGET} samba_cv_CC_NEGATIVE_ENUM_VALUES=yes libreplace_cv_HAVE_GETADDRINFO=no ac_cv_file__proc_sys_kernel_core_pattern=yes  samba_cv_HAVE_STAT_ST_FLAGS=no samba_cv_DARWIN_INITGROUPS=no --without-ldap --without-krb5 --without-ads --disable-cups --enable-swat=no --with-winbind=no --without-dnsupdate --without-libsmbsharemodes --without-pam --without-pam_smbpass --without-libaddns
+ 	BUILD_COMMAND 		${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} libsmbclient libtalloc libtevent libtdb
 	INSTALL_COMMAND 	${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} installlibsmbclient installlibtalloc installlibtevent installlibtdb
 	BUILD_IN_SOURCE 	1
 	DEPENDS 		util-linux
@@ -345,9 +379,9 @@ ExternalProject_Add(
 ExternalProject_Add(
         nfs
         URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.6.0.tar.gz
-        URL_MD5           14a422a227745fa841f78a29f01492a4  
+        URL_MD5           14a422a227745fa841f78a29f01492a4
         PATCH_COMMAND     <SOURCE_DIR>/bootstrap --prefix=${TARGET_DIR} --host=${TARGET}
-	     COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
+	        COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
         CONFIGURE_COMMAND ${BASIC_CONF}
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
@@ -538,6 +572,8 @@ ExternalProject_Add(
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0055-ffmpeg-backport-fix-compilation-droid-gcc-4-7.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0056-backport-h264-do-not-discard-NAL_SEI-when-skipping-frames.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0057-backport-swresample-Make-rematrix-maxvalue-user-settable.patch		
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0058-backport-fixed-not-keeping-custom-http-headers.patch
+ 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0059-backport-mpegts-do-not-set-pts-for-missing-dts.patch
 	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --enable-shared --disable-static --disable-programs --enable-gpl
 	BUILD_COMMAND 		make ${PARALLEL}
 )

@@ -420,8 +420,6 @@ void CStageFrightVideoPrivate::ReleaseSurfaceTexture()
   delete mSurface;
   delete mSurfTexture;
 
-  if (mVideoTextureId > 0)
-    glDeleteTextures(1, &mVideoTextureId);
 #if defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "%s: <<< ReleaseSurfaceTexture\n", CLASSNAME);
 #endif

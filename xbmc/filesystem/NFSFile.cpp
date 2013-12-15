@@ -82,9 +82,9 @@ void CNfsConnection::resolveHost(const CURL &url)
   CDNSNameCache::Lookup(url.GetHostName(), m_resolvedHostName);
 }
 
-std::list<CStdString> CNfsConnection::GetExportList(const CURL &url)
+std::list<std::string> CNfsConnection::GetExportList(const CURL &url)
 {
-    std::list<CStdString> retList;
+    std::list<std::string> retList;
 
     if(HandleDyLoad())
     {
@@ -94,7 +94,9 @@ std::list<CStdString> CNfsConnection::GetExportList(const CURL &url)
 
       for(tmp = exportlist; tmp!=NULL; tmp=tmp->ex_next)
       {
-        retList.push_back(CStdString(tmp->ex_dir));
+        std::string exportStr = std::string(tmp->ex_dir);
+        
+        retList.push_back(exportStr);
       }      
 
       gNfsConnection.GetImpl()->mount_free_export_list(exportlist);
@@ -225,15 +227,20 @@ int CNfsConnection::getContextForExport(const CStdString &exportname)
 
 bool CNfsConnection::splitUrlIntoExportAndPath(const CURL& url, CStdString &exportPath, CStdString &relativePath)
 {
-    bool ret = false;
-    
-    //refresh exportlist if empty or hostname change
-    if(m_exportList.empty() || !url.GetHostName().Equals(m_hostName,false))
-    {
-      m_exportList = GetExportList(url);
-    }
+  //refresh exportlist if empty or hostname change
+  if(m_exportList.empty() || !StringUtils::EqualsNoCase(url.GetHostName(), m_hostName))
+  {
+    m_exportList = GetExportList(url);
+  }
 
-    if(!m_exportList.empty())
+  return splitUrlIntoExportAndPath(url, exportPath, relativePath, m_exportList);
+}
+
+bool CNfsConnection::splitUrlIntoExportAndPath(const CURL& url,CStdString &exportPath, CStdString &relativePath, std::list<std::string> &exportList)
+{
+    bool ret = false;
+  
+    if(!exportList.empty())
     {
       relativePath = "";
       exportPath = "";
@@ -243,23 +250,32 @@ bool CNfsConnection::splitUrlIntoExportAndPath(const CURL& url, CStdString &expo
       //GetFileName returns path without leading "/"
       //but we need it because the export paths start with "/"
       //and path.Find(*it) wouldn't work else
-      if(!path.empty() && path[0] != '/')
+      if(path[0] != '/')
       {
         path = "/" + path;
       }
       
-      std::list<CStdString>::iterator it;
+      std::list<std::string>::iterator it;
       
-      for(it=m_exportList.begin();it!=m_exportList.end();it++)
+      for(it=exportList.begin();it!=exportList.end();it++)
       {
         //if path starts with the current export path
         if(StringUtils::StartsWith(path, *it))
         {
+          //its possible that StartsWith may not find the correct match first
+          //as an example, if /path/ & and /path/sub/ are exported, but
+          //the user specifies the path /path/subdir/ (from /path/ export).
+          //If the path is longer than the exportpath, make sure / is next.
+          if( (path.length() > (*it).length()) &&
+              (path[(*it).length()] != '/') && (*it) != "/")
+            continue;
           exportPath = *it;
           //handle special case where root is exported
           //in that case we don't want to stripp off to
           //much from the path
-          if( exportPath == "/" )
+          if( exportPath == path )
+            relativePath = "//";
+          else if( exportPath == "/" )
             relativePath = "//" + path.substr(exportPath.length());
           else
             relativePath = "//" + path.substr(exportPath.length()+1);

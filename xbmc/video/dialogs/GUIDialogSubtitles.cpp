@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@
 #include "utils/URIUtils.h"
 #include "URL.h"
 #include "Util.h"
+#include "video/VideoDatabase.h"
 
 using namespace ADDON;
 using namespace XFILE;
@@ -188,10 +189,19 @@ void CGUIDialogSubtitles::Process(unsigned int currentTime, CDirtyRegionList &di
       OnMessage(message);
       m_updateSubsList = false;
     }
-
-    if (!m_subtitles->IsEmpty() && !GetFocusedControl())
-    { // set focus to the list
-      CGUIMessage msg(GUI_MSG_SETFOCUS, GetID(), CONTROL_SUBLIST);
+    
+    int control = GetFocusedControlID();
+    // nothing has focus
+    if (!control)
+    {
+      CGUIMessage msg(GUI_MSG_SETFOCUS, GetID(), m_subtitles->IsEmpty() ?
+                      CONTROL_SERVICELIST : CONTROL_SUBLIST);
+      OnMessage(msg);
+    }
+    // subs list is focused but we have no subs
+    else if (control == CONTROL_SUBLIST && m_subtitles->IsEmpty())
+    {
+      CGUIMessage msg(GUI_MSG_SETFOCUS, GetID(), CONTROL_SERVICELIST);
       OnMessage(msg);
     }
   }
@@ -211,18 +221,30 @@ void CGUIDialogSubtitles::FillServices()
     return;
   }
 
+  std::string defaultService;
+  const CFileItem &item = g_application.CurrentFileItem();
+  if (item.GetVideoContentType() == VIDEODB_CONTENT_TVSHOWS ||
+      item.GetVideoContentType() == VIDEODB_CONTENT_EPISODES)
+    // Set default service for tv shows
+    defaultService = CSettings::Get().GetString("subtitles.tv");
+  else
+    // Set default service for filemode and movies
+    defaultService = CSettings::Get().GetString("subtitles.movie");
+  
+  std::string service = addons.front()->ID();
   for (VECADDONS::const_iterator addonIt = addons.begin(); addonIt != addons.end(); addonIt++)
   {
     CFileItemPtr item(CAddonsDirectory::FileItemFromAddon(*addonIt, "plugin://", false));
     m_serviceItems->Add(item);
+    if ((*addonIt)->ID() == defaultService)
+      service = (*addonIt)->ID();
   }
 
   // Bind our services to the UI
   CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), CONTROL_SERVICELIST, 0, 0, m_serviceItems);
   OnMessage(msg);
 
-  // TODO: Default service support will need to check through the items to find the CFileItem in the loop above.
-  SetService(m_serviceItems->Get(0)->GetProperty("Addon.ID").asString());
+  SetService(service);
 }
 
 bool CGUIDialogSubtitles::SetService(const std::string &service)
@@ -407,6 +429,19 @@ void CGUIDialogSubtitles::OnDownloadComplete(const CFileItemList *items, const s
 
   // and copy the file across
   CFile::Cache(strUrl, strSubPath);
+
+  // for ".sub" subtitles we check if ".idx" counterpart exists and copy that as well
+  if (strSubExt.Equals(".sub"))
+  {
+    strUrl = URIUtils::ReplaceExtension(strUrl, ".idx");
+    if(CFile::Exists(strUrl))
+    {
+      CStdString strSubNameIdx = StringUtils::Format("%s.%s.idx", strFileName.c_str(), strSubLang.c_str());
+      strSubPath = URIUtils::AddFileToFolder(strDestPath, strSubNameIdx);
+      CFile::Cache(strUrl, strSubPath);
+    }
+  }
+
   SetSubtitles(strSubPath);
   // Close the window
   Close();

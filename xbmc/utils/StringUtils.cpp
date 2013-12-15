@@ -248,6 +248,12 @@ std::string& StringUtils::Trim(std::string &str)
   return TrimRight(str);
 }
 
+std::string& StringUtils::Trim(std::string &str, const char* const chars)
+{
+  TrimLeft(str, chars);
+  return TrimRight(str, chars);
+}
+
 // hack to ensure that std::string::iterator will be dereferenced as _unsigned_ char
 // without this hack "TrimX" functions failed on Win32 with UTF-8 strings
 static int isspace_c(char c)
@@ -261,7 +267,7 @@ std::string& StringUtils::TrimLeft(std::string &str)
   return str;
 }
 
-std::string& StringUtils::TrimLeft(std::string &str, const std::string& chars)
+std::string& StringUtils::TrimLeft(std::string &str, const char* const chars)
 {
   size_t nidx = str.find_first_not_of(chars);
   str.erase(0, nidx);
@@ -274,7 +280,7 @@ std::string& StringUtils::TrimRight(std::string &str)
   return str;
 }
 
-std::string& StringUtils::TrimRight(std::string &str, const std::string& chars)
+std::string& StringUtils::TrimRight(std::string &str, const char* const chars)
 {
   size_t nidx = str.find_last_not_of(chars);
   str.erase(str.npos == nidx ? 0 : ++nidx);
@@ -726,6 +732,28 @@ bool StringUtils::IsInteger(const CStdString& str)
     i++;
   return i == str.size() && n > 0;
 }
+
+int StringUtils::asciidigitvalue(char chr)
+{
+  if (!isasciidigit(chr))
+    return -1;
+
+  return chr - '0';
+}
+
+int StringUtils::asciixdigitvalue(char chr)
+{
+  int v = asciidigitvalue(chr);
+  if (v >= 0)
+    return v;
+  if (chr >= 'a' && chr <= 'f')
+    return chr - 'a' + 10;
+  if (chr >= 'A' && chr <= 'F')
+    return chr - 'A' + 10;
+
+  return -1;
+}
+
 
 void StringUtils::RemoveCRLF(CStdString& strLine)
 {

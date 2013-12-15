@@ -26,6 +26,7 @@
 #include "threads/Event.h"
 #include "threads/Thread.h"
 #include "utils/JobManager.h"
+#include "utils/Observer.h"
 
 class CGUIDialogProgressBarHandle;
 class CStopWatch;
@@ -83,7 +84,7 @@ namespace PVR
 
   typedef boost::shared_ptr<PVR::CPVRChannelGroup> CPVRChannelGroupPtr;
 
-  class CPVRManager : public ISettingCallback, private CThread
+  class CPVRManager : public ISettingCallback, private CThread, public Observable
   {
     friend class CPVRClients;
 
@@ -227,7 +228,37 @@ namespace PVR
     /*!
      * @return True while the PVRManager is initialising.
      */
-    bool IsInitialising(void) const;
+    inline bool IsInitialising(void) const
+    {
+      return GetState() == ManagerStateStarting;
+    }
+    
+    /*!
+     * @brief Check whether the PVRManager has fully started.
+     * @return True if started, false otherwise.
+     */
+    inline bool IsStarted(void) const
+    {
+      return GetState() == ManagerStateStarted;
+    }
+    
+    /*!
+     * @brief Check whether the PVRManager is stopping
+     * @return True while the PVRManager is stopping.
+     */
+    inline bool IsStopping(void) const
+    {
+      return GetState() == ManagerStateStopping;
+    }
+    
+    /*!
+     * @brief Check whether the PVRManager has been stopped.
+     * @return True if stopped, false otherwise.
+     */
+    inline bool IsStopped(void) const
+    {
+      return GetState() == ManagerStateStopped;
+    }
 
     /*!
      * @brief Return the channel that is currently playing.
@@ -242,12 +273,6 @@ namespace PVR
      * @return The amount of results that was added or -1 if none.
      */
     int GetCurrentEpg(CFileItemList &results) const;
-
-    /*!
-     * @brief Check whether the PVRManager has fully started.
-     * @return True if started, false otherwise.
-     */
-    bool IsStarted(void) const;
 
     /*!
      * @brief Check whether EPG tags for channels have been created.
@@ -606,6 +631,13 @@ namespace PVR
     void ExecutePendingJobs(void);
 
     bool IsJobPending(const char *strJobName) const;
+
+    /*!
+     * @brief Adds the job to the list of pending jobs unless an identical 
+     * job is already queued
+     * @param job the job
+     */
+    void QueueJob(CJob *job);
 
     ManagerState GetState(void) const;
 

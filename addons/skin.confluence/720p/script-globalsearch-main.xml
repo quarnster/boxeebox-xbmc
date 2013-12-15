@@ -367,7 +367,7 @@
 					<height>20</height>
 					<label>[B]$LOCALIZE[284][/B]</label>
 					<font>font16caps</font>
-					<textcolor>FFFFFFFF</textcolor>
+					<textcolor>white</textcolor>
 					<align>center</align>
 					<aligny>center</aligny>
 				</control>
@@ -391,7 +391,7 @@
 					<height>10</height>
 					<label>-</label>
 					<font>font10</font>
-					<textcolor>FFFFFFFF</textcolor>
+					<textcolor>white</textcolor>
 					<align>center</align>
 					<aligny>center</aligny>
 					<texturefocus border="5">button-focus.png</texturefocus>
@@ -620,7 +620,7 @@
 						</control>
 						<control type="label">
 							<description>number of files/pages in list text label</description>
-							<right>750</right>
+							<left>250</left>
 							<top>530</top>
 							<width>500</width>
 							<height>35</height>
@@ -794,7 +794,7 @@
 						</control>
 						<control type="label">
 							<description>number of files/pages in list text label</description>
-							<right>750</right>
+							<left>250</left>
 							<top>530</top>
 							<width>500</width>
 							<height>35</height>
@@ -925,7 +925,7 @@
 						</control>
 						<control type="label">
 							<description>number of files/pages in list text label</description>
-							<right>750</right>
+							<left>250</left>
 							<top>530</top>
 							<width>500</width>
 							<height>35</height>
@@ -1093,7 +1093,7 @@
 						</control>
 						<control type="label">
 							<description>number of files/pages in list text label</description>
-							<right>750</right>
+							<left>250</left>
 							<top>530</top>
 							<width>500</width>
 							<height>35</height>
@@ -1282,7 +1282,7 @@
 						</control>
 						<control type="label">
 							<description>number of files/pages in list text label</description>
-							<right>750</right>
+							<left>250</left>
 							<top>530</top>
 							<width>500</width>
 							<height>35</height>
@@ -1435,7 +1435,7 @@
 						</control>
 						<control type="label">
 							<description>number of files/pages in list text label</description>
-							<right>750</right>
+							<left>250</left>
 							<top>530</top>
 							<width>500</width>
 							<height>35</height>
@@ -1588,7 +1588,7 @@
 						</control>
 						<control type="label">
 							<description>number of files/pages in list text label</description>
-							<right>750</right>
+							<left>250</left>
 							<top>530</top>
 							<width>500</width>
 							<height>35</height>
@@ -1761,7 +1761,7 @@
 						</control>
 						<control type="label">
 							<description>number of files/pages in list text label</description>
-							<right>750</right>
+							<left>250</left>
 							<top>530</top>
 							<width>500</width>
 							<height>35</height>

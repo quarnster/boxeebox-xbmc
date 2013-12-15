@@ -26,7 +26,6 @@
 #include <math.h>
 #include "utils/StringUtils.h"
 
-
 CEGLNativeTypeBoxee::CEGLNativeTypeBoxee()
 {
 }

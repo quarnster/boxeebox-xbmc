@@ -58,6 +58,7 @@ struct AudioSettings
   bool normalizelevels;
   bool passthrough;
   int config;
+  int guisoundmode;
   unsigned int samplerate;
   AEQuality resampleQuality;
 };
@@ -82,10 +83,10 @@ public:
     STREAMRESAMPLERATIO,
     STREAMFADE,
     STOPSOUND,
-    SOUNDMODE,
     GETSTATE,
     DISPLAYLOST,
     DISPLAYRESET,
+    KEEPCONFIG,
     TIMEOUT,
   };
   enum InSignal
@@ -219,6 +220,7 @@ public:
   virtual bool SupportsSilenceTimeout();
   virtual bool SupportsQualityLevel(enum AEQuality level);
   virtual bool IsSettingVisible(const std::string &settingId);
+  virtual void KeepConfiguration(unsigned int millis);
 
   virtual void RegisterAudioCallback(IAudioCallback* pCallback);
   virtual void UnregisterAudioCallback();
@@ -248,7 +250,7 @@ protected:
   bool InitSink();
   void DrainSink();
   void UnconfigureSink();
-  bool IsSinkCompatible(const AEAudioFormat format, const std::string &device);
+  bool IsSinkCompatible(const AEAudioFormat &format, const std::string &device);
   void Start();
   void Dispose();
   void LoadSettings();
@@ -286,6 +288,7 @@ protected:
   bool m_extError;
   bool m_extDrain;
   XbmcThreads::EndTime m_extDrainTimer;
+  unsigned int m_extKeepConfig;
   bool m_extDeferData;
 
   enum
@@ -324,7 +327,6 @@ protected:
   };
   std::list<SoundState> m_sounds_playing;
   std::vector<CActiveAESound*> m_sounds;
-  int m_soundMode;
 
   float m_volume;
   bool m_muted;

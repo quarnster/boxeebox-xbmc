@@ -47,7 +47,7 @@ using namespace std;
 #define CEC_LIB_SUPPORTED_VERSION 0x2100
 
 /* time in seconds to ignore standby commands from devices after the screensaver has been activated */
-#define SCREENSAVER_TIMEOUT       10
+#define SCREENSAVER_TIMEOUT       20
 #define VOLUME_CHANGE_TIMEOUT     250
 #define VOLUME_REFRESH_TIMEOUT    100
 
@@ -139,7 +139,7 @@ void CPeripheralCecAdapter::ResetMembers(void)
 
   m_currentButton.iButton    = 0;
   m_currentButton.iDuration  = 0;
-  m_screensaverLastActivated.SetValid(false);
+  m_standbySent.SetValid(false);
   m_configuration.Clear();
 }
 
@@ -175,7 +175,6 @@ void CPeripheralCecAdapter::Announce(AnnouncementFlag flag, const char *sender, 
     // Don't put devices to standby if application is currently playing
     if ((!g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused()) && m_configuration.bPowerOffScreensaver == 1)
     {
-      m_screensaverLastActivated = CDateTime::GetCurrentDateTime();
       // only power off when we're the active source
       if (m_cecAdapter->IsLibCECActiveSource())
         StandbyDevices();
@@ -410,6 +409,7 @@ void CPeripheralCecAdapter::Process(void)
       if (!m_configuration.powerOffDevices.IsEmpty())
       {
         CLog::Log(LOGDEBUG, "%s - sending standby commands", __FUNCTION__);
+        m_standbySent = CDateTime::GetCurrentDateTime();
         m_cecAdapter->StandbyDevices();
       }
       else if (m_configuration.bSendInactiveSource == 1)
@@ -453,14 +453,14 @@ void CPeripheralCecAdapter::ProcessVolumeChange(void)
   CecVolumeChange pendingVolumeChange = VOLUME_CHANGE_NONE;
   {
     CSingleLock lock(m_critSection);
-    if (m_volumeChangeQueue.size() > 0)
+    if (!m_volumeChangeQueue.empty())
     {
       /* get the first change from the queue */
       pendingVolumeChange = m_volumeChangeQueue.front();
       m_volumeChangeQueue.pop();
 
       /* remove all dupe entries */
-      while (m_volumeChangeQueue.size() > 0 && m_volumeChangeQueue.front() == pendingVolumeChange)
+      while (!m_volumeChangeQueue.empty() && m_volumeChangeQueue.front() == pendingVolumeChange)
         m_volumeChangeQueue.pop();
 
       /* send another keypress after VOLUME_REFRESH_TIMEOUT ms */
@@ -623,7 +623,7 @@ int CPeripheralCecAdapter::CecCommand(void *cbParam, const cec_command command)
       /* a device was put in standby mode */
       if (command.initiator == CECDEVICE_TV &&
           (adapter->m_configuration.bPowerOffOnStandby == 1 || adapter->m_configuration.bShutdownOnStandby == 1) &&
-          (!adapter->m_screensaverLastActivated.IsValid() || CDateTime::GetCurrentDateTime() - adapter->m_screensaverLastActivated > CDateTimeSpan(0, 0, 0, SCREENSAVER_TIMEOUT)))
+          (!adapter->m_standbySent.IsValid() || CDateTime::GetCurrentDateTime() - adapter->m_standbySent > CDateTimeSpan(0, 0, 0, SCREENSAVER_TIMEOUT)))
       {
         adapter->m_bStarted = false;
         if (adapter->m_configuration.bPowerOffOnStandby == 1)
@@ -705,6 +705,7 @@ int CPeripheralCecAdapter::CecAlert(void *cbParam, const libcec_alert alert, con
     iAlertString = 36027;
     break;
   case CEC_ALERT_CONNECTION_LOST:
+    bReopenConnection = true;
     iAlertString = 36030;
     break;
 #if defined(CEC_ALERT_PERMISSION_ERROR)
@@ -1675,12 +1676,18 @@ void CPeripheralCecAdapter::ProcessStandbyDevices(void)
     CSingleLock lock(m_critSection);
     bStandby = m_bStandbyPending;
     m_bStandbyPending = false;
+    if (bStandby)
+      m_bGoingToStandby = true;
   }
 
   if (bStandby)
   {
-    m_cecAdapter->StandbyDevices(CECDEVICE_BROADCAST);
-    if (m_configuration.bSendInactiveSource == 1)
+    if (!m_configuration.powerOffDevices.IsEmpty())
+    {
+      m_standbySent = CDateTime::GetCurrentDateTime();
+      m_cecAdapter->StandbyDevices(CECDEVICE_BROADCAST);
+    }
+    else if (m_configuration.bSendInactiveSource == 1)
     {
       CLog::Log(LOGDEBUG, "%s - sending inactive source commands", __FUNCTION__);
       m_cecAdapter->SetInactiveView();
@@ -1695,7 +1702,6 @@ bool CPeripheralCecAdapter::ToggleDeviceState(CecStateChange mode /*= STATE_SWIT
   if (m_cecAdapter->IsLibCECActiveSource() && (mode == STATE_SWITCH_TOGGLE || mode == STATE_STANDBY))
   {
     CLog::Log(LOGDEBUG, "%s - putting CEC device on standby...", __FUNCTION__);
-    m_screensaverLastActivated = CDateTime::GetCurrentDateTime();
     StandbyDevices();
     return false;
   }

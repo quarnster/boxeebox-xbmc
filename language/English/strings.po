@@ -6594,9 +6594,25 @@ msgctxt "#14100"
 msgid "Stop ripping CD"
 msgstr ""
 
-#empty strings from id 14101 to 15014
+#empty strings from id 14101 to 15011
+
+#: xbmc/video/VideoDatabase.cpp
+msgctxt "#15012"
+msgid "Unavailable source"
+msgstr ""
+
+#: xbmc/video/VideoDatabase.cpp
+msgctxt "#15013"
+msgid "What would you like to do with media items from"
+msgstr ""
+
+#: xbmc/video/VideoDatabase.cpp
+msgctxt "#15014"
+msgid "Keep"
+msgstr ""
 
 #: xbmc/dialogs/GUIDialogFavourites.cpp
+#: xbmc/video/VideoDatabase.cpp
 msgctxt "#15015"
 msgid "Remove"
 msgstr ""
@@ -7129,7 +7145,12 @@ msgctxt "#16325"
 msgid "VDPAU - Bob"
 msgstr ""
 
-#empty strings from id 16326 to 16399
+#: xbmc/cores/VideoRenderers/BaseRenderer.cpp
+msgctxt "#16326"
+msgid "DXVA-HD"
+msgstr ""
+
+#empty strings from id 16327 to 16399
 
 #: xbmc/video/dialogs/GUIDialogVideoSettings.cpp
 msgctxt "#16400"
@@ -7450,7 +7471,9 @@ msgctxt "#19069"
 msgid "EPG"
 msgstr ""
 
-#empty string with id 19070
+msgctxt "#19070"
+msgid "Go to now"
+msgstr ""
 
 msgctxt "#19071"
 msgid "EPG update interval"
@@ -12046,7 +12069,27 @@ msgctxt "#24115"
 msgid "Save subtitles to movie folder"
 msgstr ""
 
-#empty strings from id 24116 to 24999
+#: system/settings/settings.xml
+msgctxt "#24116"
+msgid "Default TV Service"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#24117"
+msgid "Select service that will be used as default to search for TV Show subtitles"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#24118"
+msgid "Default Movie Service"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#24119"
+msgid "Select service that will be used as default to search for Movie subtitles"
+msgstr ""
+
+#empty strings from id 24120 to 24999
 
 msgctxt "#25000"
 msgid "Notifications"
@@ -14830,7 +14873,17 @@ msgctxt "#36544"
 msgid "Enable hardware decoding of video files."
 msgstr ""
 
-#empty strings from id 36545 to 36999
+#: system/settings/settings.xml
+msgctxt "#36545"
+msgid "Subtitle stereoscopic depth"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#36546"
+msgid "Sets the visual depth of subtitles for stereoscopic videos. The higher the value, the closer the subtitles will appear to the viewer."
+msgstr ""
+
+#empty strings from id 36547 to 36999
 #reserved strings 365XX
 
 #: xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamNavigator.cpp

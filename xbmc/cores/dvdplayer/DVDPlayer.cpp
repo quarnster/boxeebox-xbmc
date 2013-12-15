@@ -590,7 +590,7 @@ bool CDVDPlayer::OpenFile(const CFileItem& file, const CPlayerOptions &options)
   }
 }
 
-bool CDVDPlayer::CloseFile()
+bool CDVDPlayer::CloseFile(bool reopen)
 {
   CLog::Log(LOGNOTICE, "CDVDPlayer::CloseFile()");
 
@@ -800,7 +800,7 @@ void CDVDPlayer::OpenDefaultStreams(bool reset)
   for(SelectionStreams::iterator it = streams.begin(); it != streams.end() && !valid; ++it)
   {
     if(OpenVideoStream(it->id, it->source, reset))
-      valid = true;;
+      valid = true;
   }
   if(!valid)
     CloseVideoStream(true);

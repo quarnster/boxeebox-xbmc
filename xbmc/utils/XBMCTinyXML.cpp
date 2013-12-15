@@ -23,6 +23,7 @@
 #include "utils/StringUtils.h"
 #include "utils/CharsetConverter.h"
 #include "utils/CharsetDetection.h"
+#include "utils/Utf8Utils.h"
 #include "LangInfo.h"
 #include "RegExp.h"
 #include "utils/log.h"
@@ -159,7 +160,7 @@ bool CXBMCTinyXML::Parse(const std::string& data, TiXmlEncoding encoding /*= TIX
     return true;
 
   // check for valid UTF-8
-  if (m_SuggestedCharset != "UTF-8" && detectedCharset != "UTF-8" && g_charsetConverter.isValidUtf8(data) &&
+  if (m_SuggestedCharset != "UTF-8" && detectedCharset != "UTF-8" && CUtf8Utils::isValidUtf8(data) &&
       TryParse(data, "UTF-8"))
       return true;
 
@@ -211,7 +212,7 @@ bool CXBMCTinyXML::InternalParse(const std::string& rawdata, TiXmlEncoding encod
     return (TiXmlDocument::Parse(rawdata.c_str(), NULL, encoding) != NULL); // nothing to fix, process data directly
 
   std::string data(rawdata);
-  CRegExp re(false, false, "^&(amp|lt|gt|quot|apos|#x[a-fA-F0-9]{1,4}|#[0-9]{1,5});.*");
+  CRegExp re(false, CRegExp::asciiOnly, "^&(amp|lt|gt|quot|apos|#x[a-fA-F0-9]{1,4}|#[0-9]{1,5});.*");
   do
   {
     if (re.RegFind(data, pos, MAX_ENTITY_LENGTH) < 0)
