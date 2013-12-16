@@ -574,6 +574,7 @@ ExternalProject_Add(
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0057-backport-swresample-Make-rematrix-maxvalue-user-settable.patch		
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0058-backport-fixed-not-keeping-custom-http-headers.patch
  		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0059-backport-mpegts-do-not-set-pts-for-missing-dts.patch
+ 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0060-mpegts-stop-analyzing-when-pmt-for-all-programs-have.patch
 	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --enable-shared --disable-static --disable-programs --enable-gpl
 	BUILD_COMMAND 		make ${PARALLEL}
 )
