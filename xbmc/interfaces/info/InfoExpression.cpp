@@ -21,6 +21,7 @@
 #include "InfoExpression.h"
 #include <stack>
 #include "utils/log.h"
+#include "utils/StringUtils.h"
 #include "GUIInfoManager.h"
 
 using namespace std;

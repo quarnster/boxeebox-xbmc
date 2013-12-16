@@ -260,6 +260,14 @@ msgctxt "#31136"
 msgid "Home Page Pictures Sub-menu"
 msgstr "主界面图片子菜单"
 
+msgctxt "#31135"
+msgid "Home Page Music Sub-menu"
+msgstr "主界面音乐子菜单"
+
+msgctxt "#31136"
+msgid "Home Page Pictures Sub-menu"
+msgstr "主界面图片子菜单"
+
 msgctxt "#31140"
 msgid "Music OSD"
 msgstr "音乐 OSD"

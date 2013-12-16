@@ -9939,7 +9939,7 @@ msgstr "추가기능의 구조가 바르지 않습니다"
 
 msgctxt "#24046"
 msgid "%s is used by the following installed Add-on(s)"
-msgstr "%s 을(를) 아래 추가기능이 사용합니다."
+msgstr "%s 을(를) 사용하는 추가기능"
 
 msgctxt "#24047"
 msgid "This Add-on cannot be uninstalled"

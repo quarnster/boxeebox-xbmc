@@ -11575,7 +11575,7 @@ msgstr "Nustatyti, ar atlikėjai, kurie rodomi tik ant kompiliacijų turi būti 
 
 msgctxt "#36256"
 msgid "Automatically fetch album and artist information via scrapers during scan."
-msgstr "Automatiškai parsiųsti albumą ir informaciją apie atlikėją naudojant 'Scrapers' nuskaitant."
+msgstr "Automatiškai parsiųsti albumą ir informaciją apie atlikėją naudojant 'scrapers' nuskaitant."
 
 msgctxt "#36257"
 msgid "Select the default album information source"
@@ -11592,6 +11592,14 @@ msgstr "Patikrinti naujus ir pašalinti senus medijos failus paleidžiant XBMC."
 msgctxt "#36260"
 msgid "No info available yet."
 msgstr "Informacijos dar nėra."
+
+msgctxt "#36261"
+msgid "Path where taken screenshots will be stored."
+msgstr "Nurodyti kelią kur bus saugomos ekrano sklandos."
+
+msgctxt "#36262"
+msgid "Export the Music Library database to XML files. This will optionally overwrite your current XML files."
+msgstr "Eksportuoti fonotekos duomenų bazę XML failais. Tai bus perrašyti dabartiniai XML failai."
 
 msgctxt "#36261"
 msgid "Path where taken screenshots will be stored."

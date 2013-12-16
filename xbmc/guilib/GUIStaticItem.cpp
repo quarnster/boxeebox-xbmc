@@ -1,22 +1,22 @@
 /*
- *      Copyright (C) 2005-2013 Team XBMC
- *      http://xbmc.org
- *
- *  This Program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2, or (at your option)
- *  any later version.
- *
- *  This Program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, see
- *  <http://www.gnu.org/licenses/>.
- *
- */
+* Copyright (C) 2005-2013 Team XBMC
+* http://xbmc.org
+*
+* This Program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2, or (at your option)
+* any later version.
+*
+* This Program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with XBMC; see the file COPYING. If not, see
+* <http://www.gnu.org/licenses/>.
+*
+*/
 
 #include "GUIStaticItem.h"
 #include "utils/XMLUtils.h"
@@ -50,10 +50,10 @@ CGUIStaticItem::CGUIStaticItem(const TiXmlElement *item, int parentID) : CFileIt
     SetLabel2(label2.GetLabel(parentID));
     SetArt("thumb", thumb.GetLabel(parentID, true));
     SetIconImage(icon.GetLabel(parentID, true));
-    if (!label.IsConstant())  m_info.push_back(make_pair(label, "label"));
+    if (!label.IsConstant()) m_info.push_back(make_pair(label, "label"));
     if (!label2.IsConstant()) m_info.push_back(make_pair(label2, "label2"));
-    if (!thumb.IsConstant())  m_info.push_back(make_pair(thumb, "thumb"));
-    if (!icon.IsConstant())   m_info.push_back(make_pair(icon, "icon"));
+    if (!thumb.IsConstant()) m_info.push_back(make_pair(thumb, "thumb"));
+    if (!icon.IsConstant()) m_info.push_back(make_pair(icon, "icon"));
     m_iprogramCount = id ? atoi(id) : 0;
     // add any properties
     const TiXmlElement *property = item->FirstChildElement("property");
@@ -73,10 +73,10 @@ CGUIStaticItem::CGUIStaticItem(const TiXmlElement *item, int parentID) : CFileIt
   else
   {
     CStdString label, label2, thumb, icon;
-    label  = item->Attribute("label");  label  = CGUIControlFactory::FilterLabel(label);
+    label = item->Attribute("label"); label = CGUIControlFactory::FilterLabel(label);
     label2 = item->Attribute("label2"); label2 = CGUIControlFactory::FilterLabel(label2);
-    thumb  = item->Attribute("thumb");  thumb  = CGUIControlFactory::FilterLabel(thumb);
-    icon   = item->Attribute("icon");   icon   = CGUIControlFactory::FilterLabel(icon);
+    thumb = item->Attribute("thumb"); thumb = CGUIControlFactory::FilterLabel(thumb);
+    icon = item->Attribute("icon"); icon = CGUIControlFactory::FilterLabel(icon);
     const char *id = item->Attribute("id");
     SetLabel(CGUIInfoLabel::GetLabel(label, parentID));
     SetPath(item->FirstChild()->Value());

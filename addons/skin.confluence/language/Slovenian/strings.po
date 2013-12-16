@@ -247,7 +247,6 @@ msgstr "Skrij grafike v vizualizaciji v celozaslonskem načinu"
 msgctxt "#31132"
 msgid "Lyrics Add-on"
 msgstr "Dodatek besedil pesmi"
-
 msgctxt "#31140"
 msgid "Music OSD"
 msgstr "Glasbeni OSD"

@@ -12087,7 +12087,7 @@ msgstr "Prilagodite ulaz proxy poslužitelja."
 
 msgctxt "#36384"
 msgid "Configure the proxy server username."
-msgstr "Prilagodite korisničko ime proxy poslužitelja."
+msgstr "Podesite koriničko ime proxy poslužitelja."
 
 msgctxt "#36385"
 msgid "Configure the proxy server password."

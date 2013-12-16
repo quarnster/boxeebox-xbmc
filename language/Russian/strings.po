@@ -10139,7 +10139,6 @@ msgstr "В обложке отсутствуют некоторые файлы"
 
 msgctxt "#24104"
 msgid "Add-on is incompatible due to unmet dependencies."
-msgstr "Модуль несовместим из-за несоблюдения зависимостей."
 
 msgctxt "#24105"
 msgid "Pause when searching for subtitles"

@@ -254,6 +254,14 @@ msgstr "Úvodní obrazovka, podnabídka videí"
 
 msgctxt "#31135"
 msgid "Home Page Music Sub-menu"
+msgstr "Úvodní obrazovka, podnabídka Hudba"
+
+msgctxt "#31136"
+msgid "Home Page Pictures Sub-menu"
+msgstr "Úvodní obrazovka, podmenu obrázků"
+
+msgctxt "#31135"
+msgid "Home Page Music Sub-menu"
 msgstr "Úvodní obrazovka, podnabídka hudby"
 
 msgctxt "#31136"

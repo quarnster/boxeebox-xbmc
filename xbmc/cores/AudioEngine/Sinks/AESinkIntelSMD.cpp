@@ -36,7 +36,7 @@ extern "C"
 }
 
 #define __MODULE_NAME__ "AESinkIntelSMD"
-#define VERBOSE2() CLog::Log(LOGDEBUG, "%s::%s", __MODULE_NAME__, __FUNCTION__)
+#define VERBOSE2() CLog::Log(LOGDEBUG, "%s", __DEBUG_ID__)
 
 #if 0
 #define VERBOSE() VERBOSE2()
@@ -95,7 +95,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   audioProcessor = g_IntelSMDGlobals.GetAudioProcessor();
   if(audioProcessor == -1)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::Initialize audioProcessor is not valid");
+    CLog::Log(LOGERROR, "%s audioProcessor is not valid", __DEBUG_ID__);
     return false;
   }
 
@@ -107,7 +107,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   m_audioDevice = g_IntelSMDGlobals.CreateAudioInput(false);
   if(m_audioDevice == -1)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::Initialize failed to create audio input");
+    CLog::Log(LOGERROR, "%s failed to create audio input", __DEBUG_ID__);
     return false;
   }
 
@@ -115,7 +115,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   m_audioDeviceInput = g_IntelSMDGlobals.GetAudioDevicePort(m_audioDevice);
   if(m_audioDeviceInput == -1)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::Initialize failed to create audio input port");
+    CLog::Log(LOGERROR, "%s failed to create audio input port", __DEBUG_ID__);
     return false;
   }
 
@@ -127,7 +127,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
     bHardwareDecoder = false;
 
   int uiBitsPerSample = 16;
-  CLog::Log(LOGINFO, "CAESinkIntelSMD::Initialize ismdAudioInputFormat %d Hardware decoding (non PCM) %d\n",
+  CLog::Log(LOGINFO, "%s ismdAudioInputFormat %d Hardware decoding (non PCM) %d\n", __DEBUG_ID__,
       ismdAudioInputFormat, bHardwareDecoder);
 
   int counter = 0;
@@ -136,7 +136,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
     result = ismd_audio_input_set_data_format(audioProcessor, m_audioDevice, ismdAudioInputFormat);
     if (result != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "ismd_audio_input_set_data_format failed. retrying %d %d", counter, result);
+      CLog::Log(LOGERROR, "%s ismd_audio_input_set_data_format failed. retrying %d %d", __DEBUG_ID__, counter, result);
       counter++;
       usleep(1000);
     }
@@ -148,7 +148,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   result = ismd_audio_input_set_pcm_format(audioProcessor, m_audioDevice, uiBitsPerSample, format.m_sampleRate, inputChannelConfig);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::Initialize - ismd_audio_input_set_pcm_format: %d", result);
+    CLog::Log(LOGERROR, "%s - ismd_audio_input_set_pcm_format: %d", __DEBUG_ID__, result);
     return false;
   }
 
@@ -166,7 +166,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
 //         samplesPerSec, format.m_channelLayout.Count(), ismdAudioInputFormat, bSPDIFPassthrough);
 //     if(!g_IntelSMDGlobals.ConfigureAudioOutput(OutputSPDIF, spdif_output_config))
 //     {
-//       CLog::Log(LOGERROR, "CAESinkIntelSMD::Initialize ConfigureAudioOutput SPDIF failed %d", result);
+//       CLog::Log(LOGERROR, "%s ConfigureAudioOutput SPDIF failed %d", __DEBUG_ID__, result);
 // //      return false;
 //     }
 //     format.m_sampleRate = spdif_output_config.sample_rate;
@@ -181,7 +181,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
       format.m_sampleRate, format.m_channelLayout.Count(), ismdAudioInputFormat, false);
     if(!g_IntelSMDGlobals.ConfigureAudioOutput(OutputHDMI, hdmi_output_config))
     {
-      CLog::Log(LOGERROR, "CAESinkIntelSMD::Initialize ConfigureAudioOutput HDMI failed %d", result);
+      CLog::Log(LOGERROR, "%s ConfigureAudioOutput HDMI failed %d", __DEBUG_ID__, result);
 //      return false;
     }
    format.m_sampleRate = hdmi_output_config.sample_rate;
@@ -189,7 +189,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
 
   // Configure the master clock frequency
 
-  CLog::Log(LOGINFO, "CAESinkIntelSMD::Initialize ConfigureMasterClock %d", format.m_sampleRate);
+  CLog::Log(LOGINFO, "%s ConfigureMasterClock %d", __DEBUG_ID__, format.m_sampleRate);
   g_IntelSMDGlobals.ConfigureMasterClock(format.m_sampleRate);
 
   ismd_audio_input_pass_through_config_t passthrough_config;
@@ -197,32 +197,32 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   result = ismd_audio_input_set_as_primary(audioProcessor, m_audioDevice, passthrough_config);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::Initialize  ismd_audio_input_set_as_primary failed %d", result);
+    CLog::Log(LOGERROR, "%s  ismd_audio_input_set_as_primary failed %d", __DEBUG_ID__, result);
 //      return false;
   }
 
   if(!g_IntelSMDGlobals.EnableAudioInput(m_audioDevice))
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::Initialize  EnableAudioInput");
+    CLog::Log(LOGERROR, "%s  EnableAudioInput", __DEBUG_ID__);
 //    return false;
   }
 
   // enable outputs
   if(!g_IntelSMDGlobals.EnableAudioOutput(g_IntelSMDGlobals.GetHDMIOutput()))
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::Initialize  EnableAudioOutput HDMI failed");
+    CLog::Log(LOGERROR, "%s  EnableAudioOutput HDMI failed", __DEBUG_ID__);
 //      return false;
   }
 
 //   if(!g_IntelSMDGlobals.EnableAudioOutput(g_IntelSMDGlobals.GetSPDIFOutput()))
 //   {
-//     CLog::Log(LOGERROR, "CAESinkIntelSMD::Initialize  EnableAudioOutput SPDIF failed");
+//     CLog::Log(LOGERROR, "%s  EnableAudioOutput SPDIF failed", __DEBUG_ID__);
 // //      return false;
 //   }
 
 //   if(!g_IntelSMDGlobals.EnableAudioOutput(g_IntelSMDGlobals.GetI2SOutput()))
 //   {
-//     CLog::Log(LOGERROR, "CAESinkIntelSMD::Initialize  EnableAudioOutput I2S failed");
+//     CLog::Log(LOGERROR, "%s  EnableAudioOutput I2S failed", __DEBUG_ID__);
 // //      return false;
 //   }
 
@@ -234,7 +234,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   m_bPause = false;
   m_bIsAllocated = true;
 
-  CLog::Log(LOGINFO, "CAESinkIntelSMD::Initialize done");
+  CLog::Log(LOGINFO, "%s done", __DEBUG_ID__);
 
   return true;
 }
@@ -243,7 +243,7 @@ void CAESinkIntelSMD::Deinitialize()
 {
   VERBOSE2();
   CSingleLock lock(m_SMDAudioLock);
-  CLog::Log(LOGINFO, "CAESinkIntelSMD::Deinitialize");
+  CLog::Log(LOGINFO, "%s", __DEBUG_ID__);
 
   if(!m_bIsAllocated)
     return;
@@ -282,7 +282,7 @@ double CAESinkIntelSMD::GetCacheTotal()
 
   if(m_audioDeviceInput == -1)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::GetCacheTotal - inputPort == -1");
+    CLog::Log(LOGERROR, "%s - inputPort == -1", __DEBUG_ID__);
     return 0;
   }
 
@@ -292,7 +292,7 @@ double CAESinkIntelSMD::GetCacheTotal()
 
   if (smd_ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::GetCacheTotal - error getting port status: %d", smd_ret);
+    CLog::Log(LOGERROR, "%s - error getting port status: %d", __DEBUG_ID__, smd_ret);
     return 0;
   }
 
@@ -315,7 +315,7 @@ double CAESinkIntelSMD::GetCacheTime()
 
   if(m_audioDeviceInput == -1)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::GetCacheTime - inputPort == -1");
+    CLog::Log(LOGERROR, "%s - inputPort == -1", __DEBUG_ID__);
     return 0;
   }
 
@@ -325,7 +325,7 @@ double CAESinkIntelSMD::GetCacheTime()
 
   if (smd_ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::GetCacheTime - error getting port status: %d", smd_ret);
+    CLog::Log(LOGERROR, "%s - error getting port status: %d", __DEBUG_ID__, smd_ret);
     return 0;
   }
 
@@ -344,14 +344,14 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
 
   if(m_dwBufferLen < buffer_size)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput data size %d is bigger that smd buffer size %d\n",
+    CLog::Log(LOGERROR, "%s data size %d is bigger that smd buffer size %d\n", __DEBUG_ID__,
         buffer_size, m_dwBufferLen);
     return 0;
   }
 
   if(m_audioDeviceInput == -1)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput - inputPort == -1");
+    CLog::Log(LOGERROR, "%s - inputPort == -1", __DEBUG_ID__);
     return 0;
   }
 
@@ -378,14 +378,14 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
 
   if (smd_ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput - error allocating buffer: %d", smd_ret);
+    CLog::Log(LOGERROR, "%s - error allocating buffer: %d", __DEBUG_ID__, smd_ret);
     return 0;
   }
 
   smd_ret = ismd_buffer_read_desc(ismdBuffer, &ismdBufferDesc);
   if (smd_ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput - error reading descriptor: %d", smd_ret);
+    CLog::Log(LOGERROR, "%s - error reading descriptor: %d", __DEBUG_ID__, smd_ret);
     ismd_buffer_dereference(ismdBuffer);
     return 0;
   }
@@ -393,7 +393,7 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
   short* buf_ptr = (short *) OS_MAP_IO_TO_MEM_NOCACHE(ismdBufferDesc.phys.base, buffer_size);
   if(buf_ptr == NULL)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput - unable to mmap buffer %d", ismdBufferDesc.phys.base);
+    CLog::Log(LOGERROR, "%s - unable to mmap buffer %d", __DEBUG_ID__, ismdBufferDesc.phys.base);
     ismd_buffer_dereference(ismdBuffer);
     return 0;
   }
@@ -406,7 +406,7 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
   smd_ret = ismd_buffer_update_desc(ismdBuffer, &ismdBufferDesc);
   if (smd_ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput - error updating descriptor: %d", smd_ret);
+    CLog::Log(LOGERROR, "%s - error updating descriptor: %d", __DEBUG_ID__, smd_ret);
     ismd_buffer_dereference(ismdBuffer);
     return 0;
   }
@@ -431,7 +431,7 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
   }
   if(smd_ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::SendDataToInput failed to write buffer %d\n", smd_ret);
+    CLog::Log(LOGERROR, "%s failed to write buffer %d\n", __DEBUG_ID__, smd_ret);
     ismd_buffer_dereference(ismdBuffer);
     buffer_size = 0;
   }
@@ -461,7 +461,7 @@ unsigned int CAESinkIntelSMD::AddPackets(uint8_t* data, unsigned int len, bool h
   // What's the maximal write size - either a chunk if provided, or the full buffer
   unsigned int block_size = (m_dwChunkSize ? m_dwChunkSize : m_dwBufferLen);
 
-//  CLog::Log(LOGDEBUG, "CAESinkIntelSMD::AddPackets: %d %d %d %d", len, block_size, m_dwChunkSize, m_dwBufferLen);
+//  CLog::Log(LOGDEBUG, "%s: %d %d %d %d", __DEBUG_ID__, len, block_size, m_dwChunkSize, m_dwBufferLen);
 
   CSingleLock lock(m_SMDAudioLock);
 
@@ -470,7 +470,7 @@ unsigned int CAESinkIntelSMD::AddPackets(uint8_t* data, unsigned int len, bool h
   unsigned int total = 0;
   if (!m_bIsAllocated)
   {
-    CLog::Log(LOGERROR,"CAESinkIntelSMD::AddPackets - sanity failed. no valid play handle!");
+    CLog::Log(LOGERROR,"%s - sanity failed. no valid play handle!", __DEBUG_ID__);
     return len;
   }
 
@@ -486,7 +486,7 @@ unsigned int CAESinkIntelSMD::AddPackets(uint8_t* data, unsigned int len, bool h
 
     if(dataSent != bytes_to_copy)
     {
-      CLog::Log(LOGERROR, "CAESinkIntelSMD::AddPackets SendDataToInput failed. req %d actual %d", len, dataSent);
+      CLog::Log(LOGERROR, "%s SendDataToInput failed. req %d actual %d", __DEBUG_ID__, len, dataSent);
       return 0;
     }
 
@@ -511,14 +511,14 @@ void CAESinkIntelSMD::Drain()
 
   if(m_audioDeviceInput == -1)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::GetSpace - inputPort == -1");
+    CLog::Log(LOGERROR, "%s - inputPort == -1", __DEBUG_ID__);
     return;
   }
 
   ismd_result_t smd_ret = g_IntelSMDGlobals.GetPortStatus(m_audioDeviceInput, curDepth, maxDepth);
   if (smd_ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CAESinkIntelSMD::WaitCompletion - error getting port status: %d", smd_ret);
+    CLog::Log(LOGERROR, "%s - error getting port status: %d", __DEBUG_ID__, smd_ret);
     return;
   }
 
@@ -529,7 +529,7 @@ void CAESinkIntelSMD::Drain()
     ismd_result_t smd_ret = g_IntelSMDGlobals.GetPortStatus(m_audioDeviceInput, curDepth, maxDepth);
     if (smd_ret != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "CAESinkIntelSMD::WaitCompletion - error getting port status: %d", smd_ret);
+      CLog::Log(LOGERROR, "%s - error getting port status: %d", __DEBUG_ID__, smd_ret);
       return;
     }
   }
@@ -619,7 +619,7 @@ ismd_audio_format_t CAESinkIntelSMD::GetISMDFormat(AEDataFormat audioMediaFormat
        ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_DTS;
        break;
      default:
-       CLog::Log(LOGERROR, "CAESinkIntelSMD::GetISMDFormat - unknown audio media format requested: %d", audioMediaFormat);
+       CLog::Log(LOGERROR, "%s - unknown audio media format requested: %d", __DEBUG_ID__, audioMediaFormat);
        return ISMD_AUDIO_MEDIA_FMT_INVALID;
     }
 
@@ -632,7 +632,7 @@ void CAESinkIntelSMD::ConfigureAudioOutputParams(ismd_audio_output_config_t& out
   VERBOSE();
   bool bLPCMMode = false; //TODO(q) g_guiSettings.GetBool("audiooutput.lpcm71passthrough");
 
-  CLog::Log(LOGINFO, "CAESinkIntelSMD::ConfigureAudioOutputParams %s sample size %d sample rate %d channels %d format %d",
+  CLog::Log(LOGINFO, "%s %s sample size %d sample rate %d channels %d format %d", __DEBUG_ID__,
       output == AE_DEVTYPE_HDMI ? "HDMI" : "SPDIF", sampleSize, sampleRate, channels, format);
 
   SetDefaultOutputConfig(output_config);
@@ -676,8 +676,9 @@ void CAESinkIntelSMD::ConfigureAudioOutputParams(ismd_audio_output_config_t& out
       output_config.sample_size = sampleSize;
   } // SPDIF
 
-  CLog::Log(LOGINFO, "CAESinkIntelSMD::ConfigureAudioOutputParams stream_delay %d sample_size %d \
+  CLog::Log(LOGINFO, "%s stream_delay %d sample_size %d \
 ch_config %d out_mode %d sample_rate %d ch_map %d",
+    __DEBUG_ID__,
     output_config.stream_delay, output_config.sample_size, output_config.ch_config,
     output_config.out_mode, output_config.sample_rate, output_config.ch_map);
 }

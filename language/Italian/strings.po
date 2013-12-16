@@ -9824,7 +9824,6 @@ msgstr "Aggiornamenti Disponibili"
 msgctxt "#24045"
 msgid "Add-on does not have the correct structure"
 msgstr "L'Add-on non ha una struttura corretta"
-
 msgctxt "#24048"
 msgid "Rollback"
 msgstr "Regredire versione"
@@ -9948,7 +9947,6 @@ msgstr "(currente)"
 msgctxt "#24095"
 msgid "(blacklisted)"
 msgstr "(in blacklist)"
-
 msgctxt "#24097"
 msgid "Would you like to disable it on your system?"
 msgstr "Vuoi disabilitarlo nel tuo sistema?"
@@ -11248,7 +11246,6 @@ msgstr "La durata della registrazione quando si preme il pulsante di registrazio
 msgctxt "#36239"
 msgid "Display a notification when timers are added, finished or removed by the backend."
 msgstr "Mostra una notifica quando dei timer vengono aggiunti, finiscono o vengono rimossi dal backend."
-
 msgctxt "#36240"
 msgid "No info available yet."
 msgstr "Nessuna informazione disponibile."

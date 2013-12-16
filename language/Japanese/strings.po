@@ -1048,7 +1048,6 @@ msgstr "音声オフセット"
 msgctxt "#298"
 msgid "Bookmarks"
 msgstr "ブックマーク"
-
 msgctxt "#300"
 msgid "MP1 capable receiver"
 msgstr "MP1 対応レシーバー"

@@ -1052,7 +1052,6 @@ msgstr "Corrigir tempo do áudio"
 msgctxt "#298"
 msgid "Bookmarks"
 msgstr "Marcadores de Posição"
-
 msgctxt "#300"
 msgid "MP1 capable receiver"
 msgstr "Receptor compatível com MP1"

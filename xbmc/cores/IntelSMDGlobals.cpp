@@ -48,11 +48,29 @@ extern "C" {
 
 #define __MODULE_NAME__ "IntelSMDGlobals"
 
-#if 0
-#define VERBOSE() CLog::Log(LOGDEBUG, "%s::%s", __MODULE_NAME__, __FUNCTION__)
+
+char *dbg_id(const char *format, ...)
+{
+  static char buf[1024];
+  va_list args;
+  va_start(args, format);
+  vsprintf(buf,format, args);
+  va_end(args);
+  return &buf[0];
+}
+
+#if 1
+#define VERBOSE() CLog::Log(LOGDEBUG, "%s", __DEBUG_ID__)
 #else
 #define VERBOSE()
 #endif
+
+#if 0
+#define VERBOSE2() CLog::Log(LOGDEBUG, "%s", __DEBUG_ID__)
+#else
+#define VERBOSE2()
+#endif
+
 
 #define AUDIO_OUTPUT_DELAY 39 // requested by dolby cert
 
@@ -109,15 +127,14 @@ bool CIntelSMDGlobals::CreateMainClock()
   ret = ismd_clock_alloc(ISMD_CLOCK_TYPE_FIXED, &m_main_clock);
   if (ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR,
-        "ERROR: CIntelSMDGlobals::CreateMainClock CLOCK ALLOC FAIL: %d", ret);
+    CLog::Log(LOGERROR, "%s CLOCK ALLOC FAIL: %d", __DEBUG_ID__, ret);
     return false;
   }
 
   if (!SetClockPrimary())
   {
     CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::CreateMainClock SetClockPrimary failed");
+        "%s SetClockPrimary failed", __DEBUG_ID__);
     return false;
   }
 
@@ -144,18 +161,14 @@ bool CIntelSMDGlobals::SetClockPrimary()
 
   if (m_main_clock == -1)
   {
-    CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::SetClockPrimary  m_main_clock == -1");
+    CLog::Log(LOGERROR, "%s  m_main_clock == -1", __DEBUG_ID__);
     return false;
   }
 
   ret = ismd_clock_make_primary(m_main_clock);
   if (ret != ISMD_SUCCESS)
   {
-    CLog::Log(
-        LOGERROR,
-        "ERROR: CIntelSMDGlobals::SetClockPrimary ismd_clock_make_primary failed %d",
-        ret);
+    CLog::Log(LOGERROR, "%s ismd_clock_make_primary failed %d", __DEBUG_ID__, ret);
     return false;
   }
 
@@ -171,15 +184,14 @@ ismd_time_t CIntelSMDGlobals::GetCurrentTime()
 
   if (m_main_clock == -1)
   {
-    CLog::Log(LOGWARNING, "CIntelSMDGlobals::GetCurrentTime main clock = -1");
+    CLog::Log(LOGWARNING, "%s main clock = -1", __DEBUG_ID__);
     return 0;
   }
 
   ret = ismd_clock_get_time(m_main_clock, &current);
   if (ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::GetCurrentTime ismd_clock_get_time failed %d",
-        ret);
+    CLog::Log(LOGERROR, "%s ismd_clock_get_time failed %d", __DEBUG_ID__, ret);
     return 0;
   }
 
@@ -196,7 +208,7 @@ bool CIntelSMDGlobals::SetCurrentTime(ismd_time_t time)
 
   if (m_main_clock == -1)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::SetCurrentTime main clock = -1");
+    CLog::Log(LOGERROR, "%s main clock = -1", __DEBUG_ID__);
     return false;
   }
 
@@ -204,7 +216,7 @@ bool CIntelSMDGlobals::SetCurrentTime(ismd_time_t time)
   if (ret != ISMD_SUCCESS)
   {
     CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::SetCurrentTime ismd_clock_set_time failed %d", ret);
+        "%s ismd_clock_set_time failed %d", __DEBUG_ID__, ret);
     return false;
   }
 
@@ -256,7 +268,7 @@ bool  CIntelSMDGlobals::BuildAudioOutputs()
   // if (bIsAllOutputs)
   //   bIsHDMI = bIsSPDIF = bIsAnalog = true;
 
-  CLog::Log(LOGINFO, "CIntelSMDGlobals::BuildAudioOutputs: HDMI %d SPDIF %d Analog %d", bIsHDMI, bIsSPDIF, bIsAnalog);
+  CLog::Log(LOGINFO, "%s: HDMI %d SPDIF %d Analog %d", __DEBUG_ID__, bIsHDMI, bIsSPDIF, bIsAnalog);
 
   RemoveAllAudioOutput();
 
@@ -316,7 +328,7 @@ ismd_audio_output_t CIntelSMDGlobals::AddAudioOutput(int output)
   //   name = "I2S0";
   //   break;
   default:
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::AddAudioOutput - Unkown output");
+    CLog::Log(LOGERROR, "%s - Unkown output", __DEBUG_ID__);
     return -1;
   }
 
@@ -324,7 +336,7 @@ ismd_audio_output_t CIntelSMDGlobals::AddAudioOutput(int output)
 
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::AddAudioOutput - error add output %s %d, returning existing: %d", name.c_str(), result, dev);
+    CLog::Log(LOGERROR, "%s - error add output %s %d, returning existing: %d", __DEBUG_ID__, name.c_str(), result, dev);
     return dev;
   }
 
@@ -333,12 +345,12 @@ ismd_audio_output_t CIntelSMDGlobals::AddAudioOutput(int output)
   // {
   //   result = ismd_audio_output_set_delay(m_audioProcessor, hwId, AUDIO_OUTPUT_DELAY);
   //   if (result != ISMD_SUCCESS)
-  //     CLog::Log(LOGWARNING, "CIntelSMDGlobals::AddAudioOutput - ismd_audio_output_set_delay %s %d failed %d", name.c_str(), AUDIO_OUTPUT_DELAY, result);
+  //     CLog::Log(LOGWARNING, "%s - ismd_audio_output_set_delay %s %d failed %d", __DEBUG_ID__, name.c_str(), AUDIO_OUTPUT_DELAY, result);
 
-  //   CLog::Log(LOGINFO, "CIntelSMDGlobals::AddAudioOutput - Output Added %s", name.c_str());
+  //   CLog::Log(LOGINFO, "%s - Output Added %s", __DEBUG_ID__, name.c_str());
   // }
 
-  CLog::Log(LOGINFO, "CIntelSMDGlobals::AddAudioOutput %s", name.c_str());
+  CLog::Log(LOGINFO, "%s %s", __DEBUG_ID__, name.c_str());
 
   return audio_output;
 }
@@ -386,18 +398,18 @@ bool CIntelSMDGlobals::RemoveAudioOutput(ismd_audio_output_t output)
     name = "I2S0";
   else
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::RemoveAudioOutput - Unknown output");
+    CLog::Log(LOGERROR, "%s - Unknown output", __DEBUG_ID__);
     return false;
   }
 
   result = ismd_audio_remove_output(m_audioProcessor, output);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::RemoveAudioOutput - error remove output %s %d",name.c_str(), result);
+    CLog::Log(LOGERROR, "%s - error remove output %s %d", __DEBUG_ID__,name.c_str(), result);
     return false;
   }
 
-  CLog::Log(LOGINFO, "CIntelSMDGlobals::RemoveAudioOutput %s", name.c_str());
+  CLog::Log(LOGINFO, "%s %s", __DEBUG_ID__, name.c_str());
 
   return true;
 }
@@ -422,7 +434,7 @@ ismd_port_handle_t CIntelSMDGlobals::GetAudioDevicePort(ismd_dev_t device)
   result = ismd_audio_input_get_port(m_audioProcessor, device, &input_port);
   if(result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDAudioRenderer::GetAudioDevicePort failed to get audio input port %d", result);
+    CLog::Log(LOGERROR, "%s failed to get audio input port %d", __DEBUG_ID__, result);
     return -1;
   }
 
@@ -441,14 +453,14 @@ ismd_dev_t CIntelSMDGlobals::CreateAudioInput(bool timed)
   result = ismd_audio_add_input_port(m_audioProcessor, timed, &device, &input_port);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::CreateAudioInput failed (timed %d) %d", timed, result);
+    CLog::Log(LOGERROR, "%s failed (timed %d) %d", __DEBUG_ID__, timed, result);
     return -1;
   }
 
   // result = ismd_dev_set_clock(device, m_main_clock);
   // if (result != ISMD_SUCCESS)
   // {
-  //   CLog::Log(LOGERROR, "CIntelSMDGlobals::CreateAudioInput ismd_dev_set_clock failed (timed %d) %d", timed, result);
+  //   CLog::Log(LOGERROR, "%s ismd_dev_set_clock failed (timed %d) %d", __DEBUG_ID__, timed, result);
   //   return -1;
   // }
 
@@ -467,7 +479,7 @@ bool CIntelSMDGlobals::RemoveAudioInput(ismd_dev_t device)
   result = ismd_audio_remove_input(m_audioProcessor, device);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::RemoveAudioInput - error closing device: %d", result);
+    CLog::Log(LOGERROR, "%s - error closing device: %d", __DEBUG_ID__, result);
       return false;
   }
 
@@ -485,7 +497,7 @@ void CIntelSMDGlobals::CreateStartPacket(ismd_pts_t start_pts,
 
   if (buffer_handle == 0)
   {
-    CLog::Log(LOGWARNING, "CIntelSMDGlobals::CreateStartPacket buffer_handle = NULL");
+    CLog::Log(LOGWARNING, "%s buffer_handle = NULL", __DEBUG_ID__);
     return;
   }
 
@@ -500,8 +512,7 @@ void CIntelSMDGlobals::CreateStartPacket(ismd_pts_t start_pts,
   ismd_ret = ismd_tag_set_newsegment_position(buffer_handle, newsegment_data);
   if (ismd_ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::SendStartPacket ismd_tag_set_newsegment failed");
+    CLog::Log(LOGERROR, "%s ismd_tag_set_newsegment failed", __DEBUG_ID__);
     return;
   }
 }
@@ -523,7 +534,7 @@ void CIntelSMDGlobals::SendStartPacket(ismd_pts_t start_pts,
     ismd_ret = ismd_buffer_alloc(0, &buffer_handle);
     if (ismd_ret != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "CIntelSMDGlobals::SendStartPacket ismd_buffer_alloc failed");
+      CLog::Log(LOGERROR, "%s ismd_buffer_alloc failed", __DEBUG_ID__);
       return;
     }
   }
@@ -539,16 +550,14 @@ void CIntelSMDGlobals::SendStartPacket(ismd_pts_t start_pts,
   ismd_ret = ismd_tag_set_newsegment_position(buffer_handle, newsegment_data);
   if (ismd_ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::SendStartPacket ismd_tag_set_newsegment failed");
+    CLog::Log(LOGERROR, "%s ismd_tag_set_newsegment failed", __DEBUG_ID__);
     return;
   }
 
   ismd_ret = ismd_port_write(port, buffer_handle);
   if (ismd_ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::SendStartPacket ismd_port_write failed");
+    CLog::Log(LOGERROR, "%s ismd_port_write failed", __DEBUG_ID__);
     return;
   }
 }
@@ -568,37 +577,35 @@ bool CIntelSMDGlobals::CreateVideoDecoder(ismd_codec_type_t codec_type)
   res = ismd_viddec_open(codec_type, &m_viddec);
   if (res != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "viddec open failed <%d>", res);
+    CLog::Log(LOGERROR, "%s viddec open failed <%d>", __DEBUG_ID__, res);
     return false;
   }
 
   res = ismd_viddec_get_input_port(m_viddec, &m_viddec_input_port);
   if (res != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "viddec get input port failed <%d>", res);
+    CLog::Log(LOGERROR, "%s viddec get input port failed <%d>", __DEBUG_ID__, res);
     return false;
   }
 
   res = ismd_viddec_get_output_port(m_viddec, &m_viddec_output_port);
   if (res != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "viddec get output port failed <%d>", res);
+    CLog::Log(LOGERROR, "%s viddec get output port failed <%d>", __DEBUG_ID__, res);
     return false;
   }
 
   res = ismd_viddec_set_pts_interpolation_policy(m_viddec, ISMD_VIDDEC_INTERPOLATE_MISSING_PTS, 0);
   if (res != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "ismd_viddec_set_pts_interpolation_policy failed <%d>",
-        res);
+    CLog::Log(LOGERROR, "%s ismd_viddec_set_pts_interpolation_policy failed <%d>", __DEBUG_ID__, res);
     return false;
   }
 
   res = ismd_viddec_set_max_frames_to_decode(m_viddec, ISMD_VIDDEC_ALL_FRAMES);
   if (res != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "ismd_viddec_set_max_frames_to_decode failed <%d>",
-        res);
+    CLog::Log(LOGERROR, "%s ismd_viddec_set_max_frames_to_decode failed <%d>", __DEBUG_ID__, res);
     return false;
   }
 
@@ -640,7 +647,7 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
     res = ismd_vidpproc_open(&m_video_proc);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "ismd_vidpproc_open failed. %d", res);
+      CLog::Log(LOGERROR, "%s ismd_vidpproc_open failed. %d", __DEBUG_ID__, res);
       return false;
     }
 
@@ -651,14 +658,14 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
     res = ismd_vidpproc_set_scaling_policy(m_video_proc, SCALE_TO_FIT);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "ismd_vidpproc_set_scaling_policy failed. %d", res);
+      CLog::Log(LOGERROR, "%s ismd_vidpproc_set_scaling_policy failed. %d", __DEBUG_ID__, res);
       return false;
     }
 
     res = ismd_vidpproc_get_input_port(m_video_proc, &m_video_input_port_proc);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "ismd_vidpproc_get_input_port failed. %d", res);
+      CLog::Log(LOGERROR, "%s ismd_vidpproc_get_input_port failed. %d", __DEBUG_ID__, res);
       return false;
     }
 
@@ -666,28 +673,28 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
         &m_video_output_port_proc);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "ismd_vidpproc_get_output_port failed. %d", res);
+      CLog::Log(LOGERROR, "%s ismd_vidpproc_get_output_port failed. %d", __DEBUG_ID__, res);
       return false;
     }
 
     res = ismd_vidpproc_pan_scan_disable(m_video_proc);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "ismd_vidpproc_pan_scan_disable failed. %d", res);
+      CLog::Log(LOGERROR, "%s ismd_vidpproc_pan_scan_disable failed. %d", __DEBUG_ID__, res);
       return false;
     }
 
     res = ismd_vidpproc_gaussian_enable(m_video_proc);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "ismd_vidpproc_gaussian_enable failed. %d", res);
+      CLog::Log(LOGERROR, "%s ismd_vidpproc_gaussian_enable failed. %d", __DEBUG_ID__, res);
       return false;
     }
 
     res = ismd_vidpproc_deringing_enable(m_video_proc);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "ismd_vidpproc_deringing_enable failed. %d", res);
+      CLog::Log(LOGERROR, "%s ismd_vidpproc_deringing_enable failed. %d", __DEBUG_ID__, res);
       return false;
     }
   }
@@ -698,7 +705,7 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
     res = ismd_vidrend_open(&m_video_render);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "ERROR: FAIL TO OPEN VIDEO RENDERER .....");
+      CLog::Log(LOGERROR, "%s FAIL TO OPEN VIDEO RENDERER .....", __DEBUG_ID__);
       return false;
     }
 
@@ -706,28 +713,28 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
         &m_video_input_port_renderer);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "ERROR: FAIL TO GET INPUT PORT FOR RENDERER .....");
+      CLog::Log(LOGERROR, "%s FAIL TO GET INPUT PORT FOR RENDERER .....", __DEBUG_ID__);
       return false;
     }
 
     res = ismd_dev_set_clock(m_video_render, m_main_clock);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "ERROR: FAIL TO SET CLOCK FOR RENDERER .....");
+      CLog::Log(LOGERROR, "%s FAIL TO SET CLOCK FOR RENDERER .....", __DEBUG_ID__);
       return false;
     }
 
     res = ismd_clock_set_vsync_pipe(m_main_clock, 0);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "ERROR: ismd_clock_set_vsync_pipe .....");
+      CLog::Log(LOGERROR, "%s ismd_clock_set_vsync_pipe .....", __DEBUG_ID__);
       return false;
     }
 
     res = ismd_vidrend_set_video_plane(m_video_render, plane);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, " ERROR: FAIL TO SET GDL UPP FOR THIS RENDERER .....");
+      CLog::Log(LOGERROR, "%s  FAIL TO SET GDL UPP FOR THIS RENDERER .....", __DEBUG_ID__);
       return false;
     }
 
@@ -735,8 +742,7 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
         ISMD_VIDREND_FLUSH_POLICY_REPEAT_FRAME);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR,
-          "CIntelSMDGlobals::CreateVideoRender ismd_vidrend_set_flush_policy failed");
+      CLog::Log(LOGERROR, "%s ismd_vidrend_set_flush_policy failed", __DEBUG_ID__);
       return false;
     }
 
@@ -744,23 +750,21 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
         ISMD_VIDREND_STOP_POLICY_DISPLAY_BLACK);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR,
-          "CIntelSMDGlobals::CreateVideoRender ismd_vidrend_set_stop_policy failed");
+      CLog::Log(LOGERROR, "%s ismd_vidrend_set_stop_policy failed", __DEBUG_ID__);
       return false;
     }
 
     res = ismd_vidrend_enable_max_hold_time(m_video_render, 30, 1);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR,
-          "CIntelSMDGlobals::CreateVideoRender ismd_vidrend_enable_max_hold_time failed");
+      CLog::Log(LOGERROR, "%s ismd_vidrend_enable_max_hold_time failed", __DEBUG_ID__);
       return false;
     }
 
     // res = ismd_bufmon_open(&m_bufmon);
     // if (res != ISMD_SUCCESS)
     // {
-    //   CLog::Log(LOGWARNING, "CIntelSMDGlobals::CreateVideoRender ismd_bufmon_open failed, playback will be choppy: %d", res);
+    //   CLog::Log(LOGWARNING, "%s ismd_bufmon_open failed, playback will be choppy: %d", __DEBUG_ID__, res);
     // }
     // else
     // {
@@ -778,14 +782,13 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
         m_video_input_port_renderer);
     if (res != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR,
-          "IntelSMDGlobals::CreateVideoRender ismd_port_connect failed: %d", res);
+      CLog::Log(LOGERROR, "%s ismd_port_connect failed: %d", __DEBUG_ID__, res);
       return false;
     }
   }
   else
   {
-    CLog::Log(LOGERROR, "IntelSMDGlobals::CreateVideoRender failed");
+    CLog::Log(LOGERROR, "%s failed", __DEBUG_ID__);
     return false;
   }
 
@@ -798,14 +801,14 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
 ismd_result_t CIntelSMDGlobals::GetPortStatus(ismd_port_handle_t port,
     unsigned int& curDepth, unsigned int& maxDepth)
 {
-  VERBOSE();
+  VERBOSE2();
   ismd_result_t ret;
   ismd_port_status_t portStatus;
 
   ret = ismd_port_get_status(port, &portStatus);
   if (ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::GetPortStatus ismd_port_get_status failed %d", ret);
+    CLog::Log(LOGERROR, "%s ismd_port_get_status failed %d", __DEBUG_ID__, ret);
     curDepth = -1;
     maxDepth = -1;
     return ret;
@@ -855,14 +858,13 @@ bool CIntelSMDGlobals::ConnectDecoderToRenderer()
     ret = ismd_port_connect(m_viddec_output_port, m_video_input_port_proc);
     if (ret != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR,
-          "IntelSMDGlobals::ConnectDecoderToRenderer ismd_port_connect failed");
+      CLog::Log(LOGERROR, "%s ismd_port_connect failed", __DEBUG_ID__);
       return false;
     }
   }
   else
   {
-    CLog::Log(LOGERROR, "IntelSMDGlobals::ConnectDecoderToRenderer failed");
+    CLog::Log(LOGERROR, "%s failed", __DEBUG_ID__);
     return false;
   }
 
@@ -902,7 +904,7 @@ bool CIntelSMDGlobals::PrintRenderStats()
         stat.frames_dropped, stat.frames_repeated, stat.frames_late,
         stat.frames_out_of_order, stat.frames_out_of_segment, stat.late_flips);
   else
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::PrintRenderStats failed");
+    CLog::Log(LOGERROR, "%s failed", __DEBUG_ID__);
 
   return result == ISMD_SUCCESS;
 }
@@ -919,7 +921,7 @@ bool CIntelSMDGlobals::CreateAudioProcessor()
   result = ismd_audio_open_global_processor(&m_audioProcessor);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDAudioRenderer::Initialize - error open global processor: %d", result);
+    CLog::Log(LOGERROR, "%s - error open global processor: %d", __DEBUG_ID__, result);
     return false;
   }
 
@@ -941,7 +943,7 @@ bool CIntelSMDGlobals::DeleteAudioProcessor()
   result = ismd_audio_close_processor(m_audioProcessor);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::DestroyAudioProcessor - error closing device: %d", result);
+    CLog::Log(LOGERROR, "%s - error closing device: %d", __DEBUG_ID__, result);
     return false;
   }
 
@@ -978,7 +980,7 @@ bool CIntelSMDGlobals::ConfigureMasterClock(unsigned int frequency)
 
   if(clockrate == 0)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::ConfigureMasterClock - unknown frequency %d", frequency);
+    CLog::Log(LOGERROR, "%s - unknown frequency %d", __DEBUG_ID__, frequency);
     return false;
   }
 
@@ -986,7 +988,7 @@ bool CIntelSMDGlobals::ConfigureMasterClock(unsigned int frequency)
 
   if(result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::ConfigureMasterClock - configure_audio_master_clock %d failed (%d)!", clockrate, result);
+    CLog::Log(LOGERROR, "%s - configure_audio_master_clock %d failed (%d)!", __DEBUG_ID__, clockrate, result);
     return false;
   }
 
@@ -1004,7 +1006,7 @@ bool CIntelSMDGlobals::EnableAudioInput(ismd_dev_t audioDev)
   result = ismd_audio_input_enable(m_audioProcessor, audioDev);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::EnableAudioInput failed %d", result);
+    CLog::Log(LOGERROR, "%s failed %d", __DEBUG_ID__, result);
     return false;
   }
 
@@ -1022,7 +1024,7 @@ bool CIntelSMDGlobals::DisableAudioInput(ismd_dev_t audioDev)
   result = ismd_audio_input_disable(m_audioProcessor, audioDev);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::DisableAudioInput failed %d", result);
+    CLog::Log(LOGERROR, "%s failed %d", __DEBUG_ID__, result);
     return false;
   }
 
@@ -1042,7 +1044,7 @@ bool CIntelSMDGlobals::EnableAudioOutput(ismd_audio_output_t audio_output)
 
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::EnableAudioOutput failed - %d", result);
+    CLog::Log(LOGERROR, "%s failed - %d", __DEBUG_ID__, result);
     return false;
   }
 
@@ -1061,7 +1063,7 @@ bool CIntelSMDGlobals::DisableAudioOutput(ismd_audio_output_t audio_output)
 
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::DisableAudioOutput failed - %d", result);
+    CLog::Log(LOGERROR, "%s failed - %d", __DEBUG_ID__, result);
     return false;
   }
 
@@ -1076,35 +1078,35 @@ bool CIntelSMDGlobals::ConfigureAudioOutput(ismd_audio_output_t output, ismd_aud
   result = ismd_audio_output_set_delay(m_audioProcessor, output, output_config.stream_delay);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGWARNING, "CIntelSMDGlobals::ConfigureAudioOutput ismd_audio_output_set_delay failed %d", result);
+    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_delay failed %d", __DEBUG_ID__, result);
 //    return false;
   }
 
   result = ismd_audio_output_set_sample_size(m_audioProcessor, output, output_config.sample_size);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGWARNING, "CIntelSMDGlobals::ConfigureAudioOutput ismd_audio_output_set_sample_size failed %d", result);
+    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_sample_size failed %d", __DEBUG_ID__, result);
 //    return false;
   }
 
   result = ismd_audio_output_set_channel_config(m_audioProcessor, output, output_config.ch_config);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGWARNING, "CIntelSMDGlobals::ConfigureAudioOutput ismd_audio_output_set_sample_size failed %d", result);
+    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_sample_size failed %d", __DEBUG_ID__, result);
 //    return false;
   }
 
   result = ismd_audio_output_set_mode(m_audioProcessor, output, output_config.out_mode);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGWARNING, "CIntelSMDGlobals::ConfigureAudioOutput ismd_audio_output_set_sample_size failed %d", result);
+    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_sample_size failed %d", __DEBUG_ID__, result);
 //    return false;
   }
 
   result = ismd_audio_output_set_sample_rate(m_audioProcessor, output, output_config.sample_rate);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGWARNING, "CIntelSMDGlobals::ConfigureAudioOutput ismd_audio_output_set_sample_size failed %d", result);
+    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_sample_size failed %d", __DEBUG_ID__, result);
 //    return false;
   }
 
@@ -1113,19 +1115,19 @@ bool CIntelSMDGlobals::ConfigureAudioOutput(ismd_audio_output_t output, ismd_aud
 
 bool CIntelSMDGlobals::SetAudioDeviceState(ismd_dev_state_t state, ismd_dev_t device)
 {
-  VERBOSE();
+  VERBOSE2();
   ismd_result_t ret;
 
   if (state == ISMD_DEV_STATE_INVALID)
   {
     CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::SetAudioDeviceState setting device to invalid");
+        "%s setting device to invalid", __DEBUG_ID__);
     return true;
   }
 
   if (device == -1)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::SetAudioDeviceState device = -1");
+    CLog::Log(LOGERROR, "%s device = -1", __DEBUG_ID__);
     return false;
   }
 
@@ -1134,7 +1136,7 @@ bool CIntelSMDGlobals::SetAudioDeviceState(ismd_dev_state_t state, ismd_dev_t de
   ret = ismd_dev_set_state(device, state);
   if (ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGWARNING, "CIntelSMDGlobals::SetAudioDeviceState ismd_dev_set_state %d on audio device %d failed %d",
+    CLog::Log(LOGWARNING, "%s ismd_dev_set_state %d on audio device %d failed %d", __DEBUG_ID__,
         state, device, ret);
   }
 
@@ -1143,8 +1145,7 @@ bool CIntelSMDGlobals::SetAudioDeviceState(ismd_dev_state_t state, ismd_dev_t de
 
 ismd_dev_state_t CIntelSMDGlobals::GetAudioDeviceState(ismd_dev_t audioDev)
 {
-  VERBOSE();
-  //printf("CIntelSMDGlobals::GetAudioDeviceState");
+  VERBOSE2();
 
   CSingleLock lock(m_Lock);
 
@@ -1153,7 +1154,7 @@ ismd_dev_state_t CIntelSMDGlobals::GetAudioDeviceState(ismd_dev_t audioDev)
 
   if (audioDev == -1)
   {
-    //printf("CIntelSMDGlobals::GetAudioDeviceState audioDev = -1");
+    CLog::Log(LOGWARNING, "%s audioDev = -1", __DEBUG_ID__);
     return ISMD_DEV_STATE_INVALID;
   }
 
@@ -1161,7 +1162,7 @@ ismd_dev_state_t CIntelSMDGlobals::GetAudioDeviceState(ismd_dev_t audioDev)
   if (ret != ISMD_SUCCESS)
   {
     CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::GetAudioDeviceState ismd_dev_get_state failed %d",
+        "%s ismd_dev_get_state failed %d", __DEBUG_ID__,
         ret);
     return ISMD_DEV_STATE_INVALID;
   }
@@ -1171,16 +1172,14 @@ ismd_dev_state_t CIntelSMDGlobals::GetAudioDeviceState(ismd_dev_t audioDev)
 
 bool CIntelSMDGlobals::SetVideoDecoderState(ismd_dev_state_t state)
 {
-  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::%s %d", __FUNCTION__, state);
-  //printf("%s Video Decoder State: %d", __FUNCTION__, state);
+  CLog::Log(LOGDEBUG, "%s %d", __DEBUG_ID__, state);
   CSingleLock lock(m_Lock);
 
   ismd_result_t ret;
 
   if (state == ISMD_DEV_STATE_INVALID)
   {
-    CLog::Log(LOGWARNING,
-        "CIntelSMDGlobals::SetVideoDecoderState setting device to invalid");
+    CLog::Log(LOGWARNING, "%s setting device to invalid", __DEBUG_ID__);
     return true;
   }
 
@@ -1189,23 +1188,19 @@ bool CIntelSMDGlobals::SetVideoDecoderState(ismd_dev_state_t state)
     ret = ismd_dev_set_state(m_viddec, state);
     if (ret != ISMD_SUCCESS)
     {
-      CLog::Log(
-          LOGWARNING,
-          "CIntelSMDGlobals::SetVideoDecoderState ismd_dev_set_state on video decoder failed %d",
-          ret);
+      CLog::Log(LOGWARNING, "%s ismd_dev_set_state on video decoder failed %d", __DEBUG_ID__, ret);
       return true;
     }
   }
 
-  CLog::Log(LOGDEBUG, "SetVideoDecoderState state %d ret %d", state, ret);
+  CLog::Log(LOGDEBUG, "%s state %d ret %d", __DEBUG_ID__, state, ret);
 
   return true;
 }
 
 bool CIntelSMDGlobals::SetVideoRenderState(ismd_dev_state_t state)
 {
-  CLog::Log(LOGDEBUG, "CIntelSMDGlobals::%s %d", __FUNCTION__, state);
-  //printf("%s Video Render State: %d", __FUNCTION__, state);
+  CLog::Log(LOGDEBUG, "%s %d", __DEBUG_ID__, state);
 
   CSingleLock lock(m_Lock);
 
@@ -1213,7 +1208,7 @@ bool CIntelSMDGlobals::SetVideoRenderState(ismd_dev_state_t state)
 
   if (state == ISMD_DEV_STATE_INVALID)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::SetVideoRenderState setting device to invalid");
+    CLog::Log(LOGERROR, "%s setting device to invalid", __DEBUG_ID__);
     return true;
   }
 
@@ -1222,7 +1217,7 @@ bool CIntelSMDGlobals::SetVideoRenderState(ismd_dev_state_t state)
     ret = ismd_dev_set_state(m_video_proc, state);
     if (ret != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "CIntelSMDGlobals::SetVideoRenderState ismd_dev_set_state on video proc failed %d", ret);
+      CLog::Log(LOGERROR, "%s ismd_dev_set_state on video proc failed %d", __DEBUG_ID__, ret);
       return false;
     }
   }
@@ -1232,7 +1227,7 @@ bool CIntelSMDGlobals::SetVideoRenderState(ismd_dev_state_t state)
     ret = ismd_dev_set_state(m_video_render, state);
     if (ret != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "CIntelSMDGlobals::SetVideoRenderState ismd_dev_set_state on video render failed %d", ret);
+      CLog::Log(LOGERROR, "%s ismd_dev_set_state on video render failed %d", __DEBUG_ID__, ret);
       return false;
     }
   }
@@ -1241,14 +1236,14 @@ bool CIntelSMDGlobals::SetVideoRenderState(ismd_dev_state_t state)
     ret = ismd_dev_set_state(m_bufmon, state);
     if (ret != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR, "CIntelSMDGlobals::SetVideoRenderState ismd_dev_set_state on bufmon failed %d", ret);
+      CLog::Log(LOGERROR, "%s ismd_dev_set_state on bufmon failed %d", __DEBUG_ID__, ret);
       return false;
     }
   }
 
   m_RenderState = state;
 
-  CLog::Log(LOGDEBUG, "SetRenderrState state %d ret %d", state, ret);
+  CLog::Log(LOGDEBUG, "%s state %d ret %d", __DEBUG_ID__, state, ret);
 
   return true;
 }
@@ -1256,7 +1251,6 @@ bool CIntelSMDGlobals::SetVideoRenderState(ismd_dev_state_t state)
 bool CIntelSMDGlobals::FlushAudioDevice(ismd_dev_t audioDev)
 {
   VERBOSE();
-  //printf("CIntelSMDGlobals::FlushAudioDevice", __FUNCTION__);
 
   CSingleLock lock(m_Lock);
   ismd_result_t ret = ISMD_ERROR_UNSPECIFIED;
@@ -1268,7 +1262,7 @@ bool CIntelSMDGlobals::FlushAudioDevice(ismd_dev_t audioDev)
     ret = ismd_dev_flush(audioDev);
     if (ret != ISMD_SUCCESS)
     {
-      CLog::Log(LOGDEBUG, "CIntelSMDGlobals::FlushAudioDevice ismd_dev_flush timed failed %d", ret);
+      CLog::Log(LOGDEBUG, "%s ismd_dev_flush timed failed %d", __DEBUG_ID__, ret);
       return false;
     }
   }
@@ -1284,7 +1278,7 @@ bool CIntelSMDGlobals::FlushVideoDecoder()
 
   if(m_viddec == -1)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::FlushVideoDecoder m_viddec == -1");
+    CLog::Log(LOGERROR, "%s m_viddec == -1", __DEBUG_ID__);
     return false;
   }
 
@@ -1294,7 +1288,7 @@ bool CIntelSMDGlobals::FlushVideoDecoder()
     ret = ismd_dev_flush(m_viddec);
   if (ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::FlushVideoDecoder ismd_dev_flush failed %d", ret);
+    CLog::Log(LOGERROR, "%s ismd_dev_flush failed %d", __DEBUG_ID__, ret);
     return false;
   }
 
@@ -1304,14 +1298,13 @@ bool CIntelSMDGlobals::FlushVideoDecoder()
 bool CIntelSMDGlobals::FlushVideoRender()
 {
   VERBOSE();
-  //printf("CIntelSMDGlobals::FlushVideoRender");
 
   CSingleLock lock(m_Lock);
   ismd_result_t ret;
 
   if(m_video_render == -1)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::FlushVideoDecoder m_video_render == -1");
+    CLog::Log(LOGERROR, "%s m_video_render == -1", __DEBUG_ID__);
     return false;
   }
 
@@ -1320,8 +1313,7 @@ bool CIntelSMDGlobals::FlushVideoRender()
         ISMD_VIDREND_FLUSH_POLICY_REPEAT_FRAME);
   if (ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::CreateVideoRender ismd_vidrend_set_flush_policy failed after pause");
+    CLog::Log(LOGERROR, "%s ismd_vidrend_set_flush_policy failed after pause", __DEBUG_ID__);
     return false;
   }
 
@@ -1331,9 +1323,7 @@ bool CIntelSMDGlobals::FlushVideoRender()
     ret = ismd_dev_flush(m_video_proc);
   if (ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::FlushVideoRender ismd_dev_flush video proc failed %d",
-        ret);
+    CLog::Log(LOGERROR, "%s ismd_dev_flush video proc failed %d", __DEBUG_ID__, ret);
     return false;
   }
 
@@ -1341,8 +1331,7 @@ bool CIntelSMDGlobals::FlushVideoRender()
     ret = ismd_dev_flush(m_video_render);
   if (ret != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::FlushVideoRender ismd_dev_flush failed %d",
-        ret);
+    CLog::Log(LOGERROR, "%s ismd_dev_flush failed %d", __DEBUG_ID__, ret);
     return false;
   }
 
@@ -1351,8 +1340,7 @@ bool CIntelSMDGlobals::FlushVideoRender()
 
 bool CIntelSMDGlobals::SetVideoRenderBaseTime(ismd_time_t time)
 {
-  //printf("%s", __FUNCTION__);
-  CLog::Log(LOGINFO, "SetVideoRenderBaseTime base time %d ms", DVD_TIME_TO_MSEC(IsmdToDvdPts(time)));
+  CLog::Log(LOGINFO, "%s base time %d ms", __DEBUG_ID__, DVD_TIME_TO_MSEC(IsmdToDvdPts(time)));
 
   ismd_result_t ret;
   ismd_dev_state_t state = ISMD_DEV_STATE_INVALID;
@@ -1361,33 +1349,27 @@ bool CIntelSMDGlobals::SetVideoRenderBaseTime(ismd_time_t time)
 
   if (m_RenderState == ISMD_DEV_STATE_PLAY)
   {
-    //printf("Warning - Trying to set base time on renderer while in play mode. Ignoring");
+    CLog::Log(LOGWARNING, "%s Trying to set base time on renderer while in play mode. Ignoring", __DEBUG_ID__);
     return true;
   }
 
   if (m_video_render != -1)
   {
-//    printf("CIntelSMDGlobals::SetVideoRenderBaseTime current state %d setting time to %.2f", state, IsmdToDvdPts(time) / 1000000.0f);
     ret = ismd_dev_get_state(m_video_render, &state);
     if (ret != ISMD_SUCCESS)
     {
       // Currently SDK always return error when trying to get renderer state
-      //printf("CIntelSMDGlobals::SetVideoRenderBaseTime ismd_dev_get_state failed %d", ret);
     }
     else if (state == ISMD_DEV_STATE_PLAY)
     {
-      CLog::Log(LOGDEBUG, "CIntelSMDGlobals::SetVideoRenderBaseTime device is running/n");
+      CLog::Log(LOGWARNING, "%s device is running", __DEBUG_ID__);
       return true;
     }
-
-    //printf("CIntelSMDGlobals::SetVideoRenderBaseTime current state %d setting time to %.2f", state, IsmdToDvdPts(time) / 1000000.0f);
 
     ret = ismd_dev_set_stream_base_time(m_video_render, time);
     if (ret != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR,
-          "CIntelSMDGlobals::SetVideoRenderBaseTime ismd_dev_set_stream_base_time for video render failed %d",
-          ret);
+      CLog::Log(LOGERROR, "%s ismd_dev_set_stream_base_time for video render failed %d", __DEBUG_ID__, ret);
       return false;
     }
   }
@@ -1401,8 +1383,7 @@ void CIntelSMDGlobals::Mute(bool bMute)
   ismd_audio_processor_t audioProcessor = g_IntelSMDGlobals.GetAudioProcessor();
   if (audioProcessor == -1)
   {
-    CLog::Log(LOGERROR, "CIntelSMDGlobals::%s - audioProcessor == -1",
-        __FUNCTION__);
+    CLog::Log(LOGERROR, "%s - audioProcessor == -1", __DEBUG_ID__);
     return;
   }
   ismd_audio_mute(audioProcessor, bMute);
@@ -1414,8 +1395,7 @@ bool CIntelSMDGlobals::SetMasterVolume(float nVolume)
   ismd_audio_processor_t audioProcessor = g_IntelSMDGlobals.GetAudioProcessor();
   if (audioProcessor == -1)
   {
-    CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::SetMasterVolume - audioProcessor == -1");
+    CLog::Log(LOGERROR, "%s - audioProcessor == -1", __DEBUG_ID__);
     return false;
   }
 
@@ -1423,9 +1403,7 @@ bool CIntelSMDGlobals::SetMasterVolume(float nVolume)
   ismd_result_t result = ismd_audio_is_muted(audioProcessor, &muted);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR,
-        "CIntelSMDGlobals::CIntelSMDGlobals - ismd_audio_is_muted failed.  %d",
-        result);
+    CLog::Log(LOGERROR, "%s - ismd_audio_is_muted failed.  %d", __DEBUG_ID__, result);
     return false;
   }
 
@@ -1450,9 +1428,7 @@ bool CIntelSMDGlobals::SetMasterVolume(float nVolume)
 
     if (result != ISMD_SUCCESS)
     {
-      CLog::Log(LOGERROR,
-          "CIntelSMDAudioRenderer::Resume - ismd_audio_set_master_volume: %d",
-          result);
+      CLog::Log(LOGERROR, "%s - ismd_audio_set_master_volume: %d", __DEBUG_ID__, result);
     }
   }
 

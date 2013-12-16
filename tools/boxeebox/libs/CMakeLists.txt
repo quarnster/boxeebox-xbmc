@@ -534,7 +534,7 @@ ExternalProject_Add(
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0004-asf-hacks.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0005-if-av_read_packet-returns-AVERROR_IO-we-are-done.-ff.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0006-added-Ticket-7187-TV-Teletext-support-for-DVB-EBU-Te.patch
-	    COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0007-Don-t-accept-mpegts-PMT-that-isn-t-current.patch
+	        COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0007-Don-t-accept-mpegts-PMT-that-isn-t-current.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0008-Don-t-reparse-PMT-unless-it-s-version-has-changed.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0010-Read-PID-timestamps-as-well-as-PCR-timestamps-to-fin.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0011-Get-stream-durations-using-read_timestamp.patch
@@ -571,7 +571,7 @@ ExternalProject_Add(
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0054-ffmpeg-backport-mpegts-Remove-one-64-bit-integer-mod.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0055-ffmpeg-backport-fix-compilation-droid-gcc-4-7.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0056-backport-h264-do-not-discard-NAL_SEI-when-skipping-frames.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0057-backport-swresample-Make-rematrix-maxvalue-user-settable.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0057-backport-swresample-Make-rematrix-maxvalue-user-settable.patch		
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0058-backport-fixed-not-keeping-custom-http-headers.patch
  		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0059-backport-mpegts-do-not-set-pts-for-missing-dts.patch
 	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --enable-shared --disable-static --disable-programs --enable-gpl

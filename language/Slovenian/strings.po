@@ -9824,7 +9824,6 @@ msgstr "Na voljo so posodobitve"
 msgctxt "#24045"
 msgid "Add-on does not have the correct structure"
 msgstr "Dodatek nima pravilne strukture"
-
 msgctxt "#24048"
 msgid "Rollback"
 msgstr "Razveljavi posodobitev"

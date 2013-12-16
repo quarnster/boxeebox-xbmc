@@ -42,6 +42,21 @@ namespace ismd {
 #include <ismd_vidpproc.h>
 }
 #include <libgdl.h>
+#include <stdarg.h>
+
+#define __MODULE_NAME__ "CIntelSMDRenderer"
+
+#if 1
+#define VERBOSE() CLog::Log(LOGDEBUG, "%s", __DEBUG_ID__)
+#else
+#define VERBOSE()
+#endif
+
+#if 0
+#define VERBOSE2() CLog::Log(LOGDEBUG, "%s", __DEBUG_ID__)
+#else
+#define VERBOSE2()
+#endif
 
 
 #define ROUND_UP(num, amt) ((num%amt) ? (num+amt) - (num%amt) : num)
@@ -105,21 +120,21 @@ static void cpy_I420_to_NV12(uint8_t *I420_Y, int strid_I420_Y,
 
 CIntelSMDRenderer::CIntelSMDRenderer()
 {
-  printf("%s\n", __FUNCTION__);
+  VERBOSE();
 
   SetDefaults();
 }
 
 CIntelSMDRenderer::~CIntelSMDRenderer()
 {
-  printf("%s\n", __FUNCTION__);
+  VERBOSE();
 
   UnInit();
 }
 
 void CIntelSMDRenderer::SetDefaults()
 {
-  //printf("%s\n", __FUNCTION__);
+  VERBOSE();
 
   m_bConfigured = false;
 
@@ -131,7 +146,7 @@ void CIntelSMDRenderer::SetDefaults()
 
   m_iYV12RenderBuffer = 0;
   m_NumYV12Buffers = ISMD_NUM_BUFFERS;
-  m_PTS = DVD_NOPTS_VALUE;
+  m_PTS = 0;
   m_bCropping = false;
   m_bFlushFlag = true;
   m_bRunning = false;
@@ -150,7 +165,7 @@ void CIntelSMDRenderer::SetDefaults()
 
 unsigned int CIntelSMDRenderer::PreInit()
 {
-  printf("%s\n", __FUNCTION__);
+  VERBOSE();
 
   UnInit();
 
@@ -159,7 +174,7 @@ unsigned int CIntelSMDRenderer::PreInit()
 
 void CIntelSMDRenderer::UnInit()
 {
-  //printf("%s\n", __FUNCTION__);
+  VERBOSE();
 
   if(m_format != RENDER_FMT_ISMD && !m_bNullRendering)
   {
@@ -175,9 +190,8 @@ void CIntelSMDRenderer::UnInit()
 
 void CIntelSMDRenderer::Flush()
 {
-  printf("CIntelSMDRenderer::Flush\n");
+  VERBOSE();
 
-  m_PTS = 0;
   m_bRunning = false;
   m_bFlushFlag = true;
 
@@ -187,7 +201,7 @@ void CIntelSMDRenderer::Flush()
 
 void CIntelSMDRenderer::AllocateYUVBuffers()
 {
-  printf("%s\n", __FUNCTION__);
+  VERBOSE();
 
   ReleaseYUVBuffers();
 
@@ -211,7 +225,7 @@ void CIntelSMDRenderer::AllocateYUVBuffers()
 
 void CIntelSMDRenderer::ReleaseYUVBuffers()
 {
-  printf("%s\n", __FUNCTION__);
+  VERBOSE();
 
   for(int b = 0; b < ISMD_NUM_BUFFERS; b++)
     for (int p = 0; p < MAX_PLANES; p++)
@@ -223,8 +237,8 @@ void CIntelSMDRenderer::ReleaseYUVBuffers()
 
 bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsigned int d_width, unsigned int d_height, float fps, unsigned flags, ERenderFormat format, unsigned extended_format,  unsigned int orientation)
 {
-  CLog::Log(LOGINFO, "CIntelSMDRenderer::Configure width %d height %d d_width %d d_height %d fps %f flags %d\n",
-      width, height, d_width, d_height, fps, flags);
+  CLog::Log(LOGINFO, "%s width %d height %d d_width %d d_height %d fps %f flags %d",
+      __DEBUG_ID__, width, height, d_width, d_height, fps, flags);
 
   if(width == 0 || height == 0 || d_width == 0 || d_height == 0)
     return true;
@@ -236,7 +250,7 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
   int top = res.Overscan.top;
   int right = res.Overscan.right;
   int bottom = res.Overscan.bottom;
-  CLog::Log(LOGINFO, "CIntelSMDRenderer configure overscan values left %d top %d right %d bottom %d", left, top, right, bottom);
+  CLog::Log(LOGINFO, "%s configure overscan values left %d top %d right %d bottom %d", __DEBUG_ID__, left, top, right, bottom);
 
   // if only fps change, no need to reconfigure everything
   if(m_sourceWidth == width &&
@@ -270,11 +284,11 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
   }
 
   if (m_format == RENDER_FMT_ISMD)
-    CLog::Log(LOGINFO, "%s::%s - Video rendering using SMD decoder", "CIntelSMDRenderer", __FUNCTION__);
+    CLog::Log(LOGINFO, "%s - Video rendering using SMD decoder", __DEBUG_ID__);
   else if (m_bNullRendering)
-    CLog::Log(LOGINFO, "%s::%s - Video rendering using NULL renderer", "CIntelSMDRenderer", __FUNCTION__);
+    CLog::Log(LOGINFO, "%s - Video rendering using NULL renderer", __DEBUG_ID__);
   else
-    CLog::Log(LOGINFO, "%s::%s - Video rendering using software decoder", "CIntelSMDRenderer", __FUNCTION__);
+    CLog::Log(LOGINFO, "%s - Video rendering using software decoder", __DEBUG_ID__);
 
   // Calculate the input frame aspect ratio.
   CalculateFrameAspectRatio(d_width, d_height);
@@ -298,13 +312,13 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
 
 void CIntelSMDRenderer::FlushAndSync(ismd_port_handle_t inputPort, bool flush, double firstpts, double add)
 {
+  VERBOSE2();
   static ismd_pts_t start = g_IntelSMDGlobals.DvdToIsmdPts(firstpts);
   static ismd_pts_t base = g_IntelSMDGlobals.GetCurrentTime();
   static int lastClockChange = 0;
 
   if (firstpts < 0)
     firstpts = 0;
-
   bool discontinuity = m_bFlushFlag || flush;
   double dvdTime2 = CDVDClock::GetMasterClock()->GetClock();
   if (dvdTime2 < 0)
@@ -315,6 +329,13 @@ void CIntelSMDRenderer::FlushAndSync(ismd_port_handle_t inputPort, bool flush, d
     addPts = g_IntelSMDGlobals.DvdToIsmdPts(add);
   else
     addPts = g_IntelSMDGlobals.DvdToIsmdPts(-add);
+
+  if (!discontinuity && start/90000.0 > (firstpts+2*DVD_TIME_BASE)/(double)DVD_TIME_BASE) {
+    // Mark as a discontinuity to reset the start time at a more sane time.
+    CLog::Log(LOGWARNING, "%s Frame pts is waaay behind the start time and wasn't marked as a discontinuity. Forcing Flush. start: %f, pts: %f", __DEBUG_ID__, start/90000.0, firstpts/DVD_TIME_BASE);
+    Flush();
+    discontinuity = true;
+  }
 
   if(discontinuity || g_IntelSMDGlobals.GetRenderState() != ISMD_DEV_STATE_PLAY)
   {
@@ -339,7 +360,7 @@ void CIntelSMDRenderer::FlushAndSync(ismd_port_handle_t inputPort, bool flush, d
     }
 
     base = g_IntelSMDGlobals.GetCurrentTime() + start - dvdTime + 90000/2;
-    printf("flushing in AddPicture: %.2f, %.2f\n", start/90000.0, base/90000.0);
+    CLog::Log(LOGINFO, "%s: flushing start: %.2f, base: %.2f", __DEBUG_ID__, start/90000.0, base/90000.0);
     g_IntelSMDGlobals.SetVideoRenderBaseTime(base);
     g_IntelSMDGlobals.SendStartPacket(start, inputPort);
     if (m_format == RENDER_FMT_ISMD)
@@ -354,28 +375,38 @@ void CIntelSMDRenderer::FlushAndSync(ismd_port_handle_t inputPort, bool flush, d
   double expected = dvdTime2/(double)DVD_TIME_BASE;
   double actual = (current - base + start)/90000.0;
   double diff = expected-actual;
+
+  if (start/90000.0 > firstpts/(double)DVD_TIME_BASE && !discontinuity) {
+    CLog::Log(LOGWARNING, "%s - start is %f, firstpts is %f but wasn't marked for discontinuity! Expected: %f, actual: %f, diff: %f", __DEBUG_ID__, start/90000.0, firstpts/DVD_TIME_BASE, expected, actual, diff);
+  }
+
   if (lastClockChange != 0)
     lastClockChange--;
-  if (lastClockChange == 0 && fabs(diff) > 0.05 && expected > 0 && current > base)
+  if (lastClockChange == 0 && fabs(diff) > 0.05 && expected > 0)
   {
     lastClockChange = 0;
+    if (fabs(diff) > 2 && (current > base || (current < base && base-current > 2*90000))) {
+      CLog::Log(LOGWARNING, "%s Diff too large, will force a Flush instead of adjusting clock: %f, %f, %f", __DEBUG_ID__, expected, actual, diff);
+      Flush();
+      return;
+    }
     diff = diff*90000;
-    if (current > diff)
+    if (current > diff && current > base)
     {
       ismd_clock_adjust_time(g_IntelSMDGlobals.GetSMDClock(), diff);
       ismd_time_t adj;
       ismd_clock_get_time(g_IntelSMDGlobals.GetSMDClock(), &adj);
 
-      printf("Adjusting clock: %.2f -> %.2f, %.2f\n", current/90000.0, adj/90000.0, diff/90000.0);
+      CLog::Log(LOGINFO, "%s: Adjusting clock: %.2f -> %.2f, %.2f\n", __DEBUG_ID__, current/90000.0, adj/90000.0, diff/90000.0);
+    } else {
+      CLog::Log(LOGWARNING, "%s Wanted to adjust the clock but couldn't!: %f, %f, %f", __DEBUG_ID__, current/90000.0, diff/90000.0, base/90000.0);
     }
   }
 }
 
 bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
 {
-  if (picture->format != RENDER_FMT_ISMD)
-    return false;
-
+  VERBOSE2();
   static int count = 0;
   if (++count % 100 == 0) {
 //     g_IntelSMDGlobals.PrintVideoStreamStats();
@@ -384,16 +415,30 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
 
   if (picture->pts < 0)
     picture->pts = 0;
-  if (picture->ismdbuf->pts < 0)
-    picture->ismdbuf->pts = 0;
+
+  if (picture->format != RENDER_FMT_ISMD) {
+    m_PTS = picture->pts;
+    if (m_PTS < 0)
+      m_PTS = 0;
+    return false;
+  }
 
   ismd_port_handle_t inputPort = g_IntelSMDGlobals.GetVidDecInput();
 
   if(inputPort == -1)
   {
-    printf("CIntelSMDVideo::WriteToInputPort input port is -1\n");
+    CLog::Log(LOGERROR, "%s: input port is -1", __DEBUG_ID__);
     return false;
   }
+
+  if (picture->ismdbuf == NULL || picture->ismdbuf->m_buffers.empty()) {
+    CLog::Log(LOGWARNING, "%s: WTF, no ismd buffers???", __DEBUG_ID__);
+    return false;
+  }
+
+  if (picture->ismdbuf->pts < 0)
+    picture->ismdbuf->pts = 0;
+
   double add = picture->pts - picture->ismdbuf->pts;
   ismd_pts_t addPts;
   if (add > 0)
@@ -414,7 +459,7 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
     ismd_ret = ismd_buffer_read_desc(buffer, &buffer_desc);
     if (ismd_ret != ISMD_SUCCESS)
     {
-      printf("CIntelSMDVideo::WriteToInputPort ismd_buffer_read_desc failed <%d>\n", ismd_ret);
+      CLog::Log(LOGERROR, "%s: ismd_buffer_read_desc failed <%d>", __DEBUG_ID__, ismd_ret);
       goto cleanup;
     }
 
@@ -436,9 +481,11 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
     ismd_ret = ismd_buffer_update_desc(buffer, &buffer_desc);
     if (ismd_ret != ISMD_SUCCESS)
     {
-      printf("-- ismd_buffer_update_desc failed <%d>\n", ismd_ret);
+      CLog::Log(LOGERROR, "%s: ismd_buffer_update_desc failed <%d>\n", __DEBUG_ID__, ismd_ret);
       goto cleanup;
     }
+
+    static int err_count = 0;
 
     while (m_bRunning && counter < 10)
     {
@@ -456,17 +503,25 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
 cleanup:
     if (ismd_ret != ISMD_SUCCESS) {
       ismd_buffer_dereference(buffer);
+      if (counter && err_count++ > 10) {
+        // The video renderer queue is still full?! Force a flush
+        err_count = 0;
+        Flush();
+      }
+    } else {
+      err_count = 0;
     }
   }
 
   if (ismd_ret != ISMD_SUCCESS)
-    printf("No success.. %d\n", ismd_ret);
+    CLog::Log(LOGERROR, "%s: No success.. %d", __DEBUG_ID__, ismd_ret);
 
   return ismd_ret == ISMD_SUCCESS;
 }
 
 int CIntelSMDRenderer::GetImage(YV12Image *image, /*double pts,*/ int source, bool readonly)
 {
+  VERBOSE2();
   if (!image)
     return -1;
 
@@ -510,9 +565,14 @@ int CIntelSMDRenderer::GetImage(YV12Image *image, /*double pts,*/ int source, bo
 
 void CIntelSMDRenderer::ReleaseImage(int source, bool preserve)
 {
+  VERBOSE2();
   if(m_format != RENDER_FMT_ISMD)
   {
-    RenderYUVBUffer(m_YUVMemoryTexture[m_iYV12RenderBuffer]);
+    // If the frame isn't late... 
+    if (m_PTS <= 0 || m_PTS >= (CDVDClock::GetMasterClock()->GetClock()-0.25*DVD_TIME_BASE)) {
+      // render it
+      RenderYUVBUffer(m_YUVMemoryTexture[m_iYV12RenderBuffer]);
+    }
   }
 
   m_iYV12RenderBuffer = NextYV12Texture();
@@ -520,14 +580,14 @@ void CIntelSMDRenderer::ReleaseImage(int source, bool preserve)
 
 void CIntelSMDRenderer::Reset()
 {
-  //printf("%s\n", __FUNCTION__);
+  VERBOSE();
 
   UnInit();
 }
 
 void CIntelSMDRenderer::Update()
 {
-  //printf("%s\n", __FUNCTION__);
+  VERBOSE();
   if (!m_bConfigured)
     return;
 
@@ -536,6 +596,7 @@ void CIntelSMDRenderer::Update()
 
 void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
 {
+  VERBOSE2();
   ismd_result_t result;
   ismd_pts_t ismd_pts;
   ismd_buffer_handle_t renderBuf = ISMD_ERROR_INVALID_HANDLE;
@@ -545,17 +606,15 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
 
   if(video_input_port_proc == -1)
   {
-    CLog::Log(LOGERROR, "CIntelSMDRenderer::RenderYUVBUffer video_input_port_proc == -1");
+    CLog::Log(LOGERROR, "%s: video_input_port_proc == -1", __DEBUG_ID__);
     return;
   }
 
   if(plane[0] == NULL || plane[1] == NULL || plane[2] == NULL)
   {
-    CLog::Log(LOGERROR, "CIntelSMDRenderer::RenderYUVBUffer invalid plane data");
+    CLog::Log(LOGERROR, "%s: invalid plane data", __DEBUG_ID__);
     return;
   }
-
-  m_PTS = 0;
   ismd_pts = g_IntelSMDGlobals.DvdToIsmdPts(m_PTS);
 
   unsigned int destHeight = ROUND_DOWN(m_sourceHeight, 16);
@@ -566,7 +625,7 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
   result = ismd_frame_buffer_alloc(ROUND_UP(destWidth, CACHE_LINE_SIZE), height_to_alloc, &renderBuf);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "ismd_gst_element: request for downstream allocation: ismd buffer allocation failed");
+    CLog::Log(LOGERROR, "%s: ismd_gst_element: request for downstream allocation: ismd buffer allocation failed", __DEBUG_ID__);
     return;
   }
 
@@ -574,7 +633,7 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
   result = ismd_buffer_read_desc(renderBuf, &desc);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "ismdismd_buffer_read_desc failed");
+    CLog::Log(LOGERROR, "%s: ismdismd_buffer_read_desc failed", __DEBUG_ID__);
     ismd_buffer_dereference(renderBuf);
     return;
   }
@@ -584,7 +643,7 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
 
   if(ptr == NULL)
   {
-    CLog::Log(LOGERROR, "IntelSMDRenderer::RenderYUVBUffer OS_MAP_IO_TO_MEM_NOCACHE return null");
+    CLog::Log(LOGERROR, "%s: OS_MAP_IO_TO_MEM_NOCACHE return null", __DEBUG_ID__);
     return;
   }
 
@@ -619,7 +678,7 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
   result = ismd_buffer_update_desc (renderBuf, &desc);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "failed to update ISMD descriptor!");
+    CLog::Log(LOGERROR, "%s: failed to update ISMD descriptor!", __DEBUG_ID__);
     ismd_buffer_dereference(renderBuf);
     return;
   }
@@ -629,7 +688,7 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
   result = ISMD_ERROR_UNSPECIFIED;
 
   int retry = 0;
-
+  static int err_count = 0;
   while(m_bRunning && retry < 5)
   {
     result = ismd_port_write(video_input_port_proc, renderBuf);
@@ -647,8 +706,15 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
 
   if(result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "CIntelSMDRenderer::RenderYUVBUffer failed. %d", result);
+    CLog::Log(LOGERROR, "%s: failed. %d %d", __DEBUG_ID__, result, g_IntelSMDGlobals.GetVideoRenderState());
     ismd_buffer_dereference(renderBuf);
+    if (retry && ++err_count > 10) {
+      // The video renderer queue is full?! Force a flush
+      err_count = 0;
+      Flush();
+    }
+  } else {
+    err_count = 0;
   }
 
   return;
@@ -656,6 +722,7 @@ void CIntelSMDRenderer::RenderYUVBUffer(YUVMEMORYPLANES plane)
 
 void CIntelSMDRenderer::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
 {
+  VERBOSE2();
   if (!m_bConfigured)
   {
     return;
@@ -702,7 +769,7 @@ int CIntelSMDRenderer::NextYV12Texture()
 
 int CIntelSMDRenderer::ConfigureGDLPlane(gdl_plane_id_t plane)
 {
-  CLog::Log(LOGINFO, "CIntelSMDRenderer::ConfigureGDLPlane %d", plane);
+  CLog::Log(LOGINFO, "%s: %d", __DEBUG_ID__, plane);
 
   gdl_ret_t rc = GDL_SUCCESS;
 
@@ -731,7 +798,7 @@ int CIntelSMDRenderer::ConfigureGDLPlane(gdl_plane_id_t plane)
 
   if (GDL_SUCCESS != rc)
   {
-    fprintf(stderr, "GDL configuration failed! GDL error code is 0x%x\n", rc);
+    CLog::Log(LOGERROR, "%s: GDL configuration failed! GDL error code is 0x%x", __DEBUG_ID__, rc);
   }
 
   return rc;
@@ -739,6 +806,7 @@ int CIntelSMDRenderer::ConfigureGDLPlane(gdl_plane_id_t plane)
 
 int CIntelSMDRenderer::ConfigureVideoFilters()
 {
+  VERBOSE();
   ismd_result_t res;
 
   ismd_dev_t video_proc = g_IntelSMDGlobals.GetVidProc();
@@ -754,7 +822,7 @@ int CIntelSMDRenderer::ConfigureVideoFilters()
 
   if (res != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "ismd_vidpproc_gaussian_enable failed. %d", res);
+    CLog::Log(LOGERROR, "%s: ismd_vidpproc_gaussian_enable failed. %d", __DEBUG_ID__, res);
     return 0;
   }
 
@@ -765,18 +833,19 @@ int CIntelSMDRenderer::ConfigureVideoFilters()
 
   if (res != ISMD_SUCCESS)
   {
-    CLog::Log(LOGERROR, "ismd_vidpproc_gaussian_enable failed. %d", res);
+    CLog::Log(LOGERROR, "%s: ismd_vidpproc_gaussian_enable failed. %d", __DEBUG_ID__, res);
     return 0;
   }
 
-  CLog::Log(LOGINFO, "CIntelSMDRenderer Setting deringing_filter %d\n", deringing_filter);
-  CLog::Log(LOGINFO, "CIntelSMDRenderer Setting gaussian filter %d\n", gaussian_filter);
+  CLog::Log(LOGINFO, "%s: Setting deringing_filter %d\n", __DEBUG_ID__, deringing_filter);
+  CLog::Log(LOGINFO, "%s: Setting gaussian filter %d\n",  __DEBUG_ID__, gaussian_filter);
 
   return 1;
 }
 
 int CIntelSMDRenderer::ConfigureDeinterlace()
 {
+  VERBOSE();
   ismd_result_t ret;
 
   int iResolution = g_graphicsContext.GetVideoResolution();
@@ -816,13 +885,13 @@ int CIntelSMDRenderer::ConfigureDeinterlace()
       smd_policy = ismd::NONE;
   }
 
-  CLog::Log(LOGINFO, "Setting Interlace mode: screen %d user %d smd %d", interlace_display, deinterlace_policy, smd_policy);
+  CLog::Log(LOGINFO, "%s: Setting Interlace mode: screen %d user %d smd %d", __DEBUG_ID__, interlace_display, deinterlace_policy, smd_policy);
 
   ret = ismd::ismd_vidpproc_set_deinterlace_policy(video_proc, smd_policy);
 
   if (ret != ISMD_SUCCESS)
   {
-    printf("ismd_vidpproc_set_deinterlace_policy failed\n");
+    CLog::Log(LOGERROR, "%s: ismd_vidpproc_set_deinterlace_policy failed", __DEBUG_ID__);
   }
 
   return 1;
@@ -830,6 +899,7 @@ int CIntelSMDRenderer::ConfigureDeinterlace()
 
 int CIntelSMDRenderer::ConfigureVideoProc()
 {
+  VERBOSE2();
   ismd_result_t ret = ISMD_ERROR_NO_RESOURCES;
 
   int screenWidth = g_graphicsContext.GetWidth();
@@ -849,7 +919,7 @@ int CIntelSMDRenderer::ConfigureVideoProc()
 
   if(video_proc == -1)
   {
-    CLog::Log(LOGERROR, "CIntelSMDRenderer::ConfigureVideoProc failed to retrieve video proc");
+    CLog::Log(LOGERROR, "%s: failed to retrieve video proc", __DEBUG_ID__);
     return 0;
   }
 
@@ -905,7 +975,7 @@ int CIntelSMDRenderer::ConfigureVideoProc()
                   (unsigned int)croppedHeight);
     if (ret != ISMD_SUCCESS)
     {
-      printf("ismd_vidpproc_set_crop_input failed\n");
+      CLog::Log(LOGERROR, "%s: ismd_vidpproc_set_crop_input failed", __DEBUG_ID__);
       return 0;
     }
 
@@ -939,7 +1009,7 @@ int CIntelSMDRenderer::ConfigureVideoProc()
             (unsigned int)desty);
   if(ret != ISMD_SUCCESS)
   {
-    printf("ismd_vidpproc_set_dest_params2 failed\n");
+    CLog::Log(LOGERROR, "%s: ismd_vidpproc_set_dest_params2 failed", __DEBUG_ID__);
     return 0;
   }
 

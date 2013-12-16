@@ -319,7 +319,6 @@ CArchive& CArchive::operator>>(std::wstring& wstr)
   streamin(p, iLength * sizeof(wchar_t));
   wstr.assign(p, iLength);
   delete[] p;
-
   return *this;
 }
 

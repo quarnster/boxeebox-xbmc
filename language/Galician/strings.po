@@ -1577,6 +1577,10 @@ msgctxt "#440"
 msgid "Hard disk"
 msgstr "Disco duro"
 
+msgctxt "#440"
+msgid "Hard disk"
+msgstr "Disco duro"
+
 msgctxt "#441"
 msgid "UDF"
 msgstr "UDF"
@@ -5688,10 +5692,6 @@ msgstr "Marcar coma non visto"
 msgctxt "#16105"
 msgid "Edit title"
 msgstr "Editar título"
-
-msgctxt "#16106"
-msgid "Manage..."
-msgstr "Xestionar..."
 
 msgctxt "#16107"
 msgid "Edit sort title"

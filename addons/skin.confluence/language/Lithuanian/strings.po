@@ -242,7 +242,7 @@ msgstr "Dainų žodžiai"
 
 msgctxt "#31129"
 msgid "Hide Fanart in full screen visualisation"
-msgstr "Slėpti Fanart visame ekrane vizualizacija"
+msgstr "Slėpti Fan Art visame ekrane vizualizacija"
 
 msgctxt "#31132"
 msgid "Lyrics Add-on"

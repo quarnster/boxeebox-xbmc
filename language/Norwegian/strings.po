@@ -6849,10 +6849,6 @@ msgctxt "#19270"
 msgid "* All recordings"
 msgstr "* Alle opptak"
 
-msgctxt "#19271"
-msgid "No PVR Add-ons could be found"
-msgstr "Ingen PVR-tillegg ble funnet"
-
 msgctxt "#19272"
 msgid "You need a tuner, backend software, and an"
 msgstr "Du trenger en tuner, kulisseklientprogramvare, og et"
@@ -9848,7 +9844,6 @@ msgstr "Tilgjengelige oppdateringer"
 msgctxt "#24045"
 msgid "Add-on does not have the correct structure"
 msgstr "Tillegg har ikke den korrekte strukturen"
-
 msgctxt "#24047"
 msgid "This Add-on cannot be uninstalled"
 msgstr "Dette tillegget kan ikke fjernes"
