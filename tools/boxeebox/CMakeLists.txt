@@ -114,9 +114,9 @@ set(libs
 	libpostproc.so.52	
 	libturbojpeg.so.0
 	libsmbclient.so.0
-    libnfs.so.1
-    librtmp.so.1
-    libdbus-1.so
+	libnfs.so.1
+	librtmp.so.1
+	libdbus-1.so
 	libexpat.so
 	libtdb.so.1
 	libtalloc.so.2
@@ -132,13 +132,11 @@ set(libs
 	libenca.so
 	libass.so
 	libao.so
-    libsqlite3.so
-	libusb.a
+	libsqlite3.so
 	libcec.so.2	
 	libfribidi.so
 	libfreetype.so
 	libgcrypt.so
-	libtinyxml.a
 	libcurl.so
 	libfontconfig.so
 )
