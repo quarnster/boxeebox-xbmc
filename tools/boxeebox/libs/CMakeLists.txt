@@ -21,15 +21,6 @@ string(REPLACE "\n" "" HOSTMACHINE ${HOSTMACHINE})
 include(ExternalProject)
 
 ExternalProject_Add(
-	enca
-	URL					http://dl.cihar.com/enca/enca-1.13.tar.bz2
-	URL_MD5				762bead5d9a0a5e55024e1102baaa89d
-	CONFIGURE_COMMAND   ${BASIC_CONF}  
-	BUILD_COMMAND       make    	
-    BUILD_IN_SOURCE     1
-)
-
-ExternalProject_Add(
 	libusb
 	URL					http://mirrors.xbmc.org/build-deps/darwin-libs/libusb-0.1.12.tar.gz
 	URL_MD5				caf182cbc7565dac0fd72155919672e6
