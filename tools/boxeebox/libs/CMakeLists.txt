@@ -24,8 +24,8 @@ ExternalProject_Add(
 	enca
 	URL					http://dl.cihar.com/enca/enca-1.15.tar.bz2
 	URL_MD5				fef132969d26e649719eae08297a4a52
-	CONFIGURE_COMMAND   ${BASIC_CONF}  
-	BUILD_COMMAND       make    	
+	CONFIGURE_COMMAND   ${BASIC_CONF}
+	BUILD_COMMAND       make
     BUILD_IN_SOURCE     1
 )
 
@@ -35,7 +35,7 @@ ExternalProject_Add(
 	URL_MD5				caf182cbc7565dac0fd72155919672e6
 	CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET}  --disable-shared --disable-build-docs
 	BUILD_COMMAND       make
-    INSTALL_COMMAND		make install	
+    INSTALL_COMMAND		make install
     BUILD_IN_SOURCE     1
 )
 
@@ -44,7 +44,7 @@ ExternalProject_Add(
 	URL 				https://github.com/Pulse-Eight/libcec/archive/libcec-2.1.3.tar.gz
 	URL_MD5				ee2f2c71516cea30ac992ddbe8f7ed1c
 	PATCH_COMMAND       ./bootstrap
-	CONFIGURE_COMMAND 	${BASIC_CONF}
+	CONFIGURE_COMMAND 	${BASIC_CONF} --sysconfdir=/etc
 	BUILD_COMMAND       make
     INSTALL_COMMAND     make install
 )
@@ -389,13 +389,13 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-	rtmpdump
-	GIT_REPOSITORY    git://git.ffmpeg.org/rtmpdump
-	CONFIGURE_COMMAND ""
-        BUILD_COMMAND     make DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
-        INSTALL_COMMAND   make install DESTDIR=${SYSROOT}
-        BUILD_IN_SOURCE   1
-        DEPENDS           zlib openssl
+        rtmpdump
+        GIT_REPOSITORY https://github.com/BurntSushi/rtmpdump-ksv.git
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND make DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
+        INSTALL_COMMAND make install DESTDIR=${SYSROOT}
+        BUILD_IN_SOURCE 1
+        DEPENDS zlib openssl
 )
 
 ExternalProject_Add(
@@ -534,7 +534,7 @@ ExternalProject_Add(
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0004-asf-hacks.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0005-if-av_read_packet-returns-AVERROR_IO-we-are-done.-ff.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0006-added-Ticket-7187-TV-Teletext-support-for-DVB-EBU-Te.patch
-	        COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0007-Don-t-accept-mpegts-PMT-that-isn-t-current.patch
+	    COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0007-Don-t-accept-mpegts-PMT-that-isn-t-current.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0008-Don-t-reparse-PMT-unless-it-s-version-has-changed.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0010-Read-PID-timestamps-as-well-as-PCR-timestamps-to-fin.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0011-Get-stream-durations-using-read_timestamp.patch
@@ -543,7 +543,8 @@ ExternalProject_Add(
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0015-fixed-memleak-in-mpegts-demuxer-on-some-malformed-mp.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0016-Speed-up-mpegts-av_find_stream_info.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0017-allow-customizing-shared-library-soname-name-with-ma.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0019-dxva-mpeg2-speed-up-slice-allocation.patch		
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0018-dxva-mpeg2-Allocate-slices-array-dynamically-fixes-v.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0019-dxva-mpeg2-speed-up-slice-allocation.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0020-dxva-vc1-Take-BI-into-account-for-forward-and-backwa.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0021-dxva-vc1-Pass-overlapping-transforms-hint.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0022-dxva-h264-Fix-dxva-playback-of-streams-that-don-t-st.patch
@@ -562,19 +563,20 @@ ExternalProject_Add(
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0045-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-i.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0046-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-d.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0047-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-f.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0048-ffmpeg-backport-dcadsp-Add-a-new-method-qmf_32_subba.patch		
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0048-ffmpeg-backport-dcadsp-Add-a-new-method-qmf_32_subba.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0049-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-q.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0050-ffmpeg-backport-arm-Mangle-external-symbols-properly.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0051-ffmpeg-backport-avio-Add-an-internal-function-for-re.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0052-ffmpeg-backport-mpegts-Remove-one-memcpy-per-packet.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0053-ffmpeg-backport-mpegts-Make-discard_pid-faster-for-s.patch		
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0053-ffmpeg-backport-mpegts-Make-discard_pid-faster-for-s.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0054-ffmpeg-backport-mpegts-Remove-one-64-bit-integer-mod.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0055-ffmpeg-backport-fix-compilation-droid-gcc-4-7.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0056-backport-h264-do-not-discard-NAL_SEI-when-skipping-frames.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0057-backport-swresample-Make-rematrix-maxvalue-user-settable.patch		
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0057-backport-swresample-Make-rematrix-maxvalue-user-settable.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0058-backport-fixed-not-keeping-custom-http-headers.patch
  		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0059-backport-mpegts-do-not-set-pts-for-missing-dts.patch
- 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0060-mpegts-stop-analyzing-when-pmt-for-all-programs-have.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0060-mpegts-stop-analyzing-when-pmt-for-all-programs-have.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/999-0001-h264_parser-Initialize-the-h264dsp-context-in-the-.patch
 	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --enable-shared --disable-static --disable-programs --enable-gpl
 	BUILD_COMMAND 		make ${PARALLEL}
 )
