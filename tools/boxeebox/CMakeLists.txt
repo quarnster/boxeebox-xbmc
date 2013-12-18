@@ -129,6 +129,7 @@ set(libs
 	libvorbisfile.so
 	libvorbis.so
 	libvorbisenc.so
+	libenca.so
 	libass.so
 	libao.so
 	libsqlite3.so
