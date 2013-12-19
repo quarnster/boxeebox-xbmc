@@ -77,7 +77,7 @@ public:
   static void RemoveInstance(void);
   static CIntelSMDVideo* GetInstance(void);
 
-  bool OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_type, int extradata_size, void *extradata);
+  bool OpenDecoder(AVCodecID ffmpegCodedId, ismd_codec_type_t codec_type, int extradata_size, void *extradata);
   void CloseDecoder(void);
 
   void Reset();
