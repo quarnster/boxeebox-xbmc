@@ -933,7 +933,7 @@ void CIntelSMDVideo::Reset()
   g_IntelSMDGlobals.FlushVideoRender();
 }
 
-bool CIntelSMDVideo::OpenDecoder(CodecID ffmpegCodedId, ismd_codec_type_t codec_type, int extradata_size, void *extradata)
+bool CIntelSMDVideo::OpenDecoder(AVCodecID ffmpegCodedId, ismd_codec_type_t codec_type, int extradata_size, void *extradata)
 {
   VERBOSE();
 
