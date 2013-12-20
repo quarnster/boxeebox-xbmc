@@ -577,6 +577,8 @@ ExternalProject_Add(
  		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0059-backport-mpegts-do-not-set-pts-for-missing-dts.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0060-mpegts-stop-analyzing-when-pmt-for-all-programs-have.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/999-0001-h264_parser-Initialize-the-h264dsp-context-in-the-.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/ffmpeg.git-21a2b97365b566cf9c6e526b5165dde4673b526e.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0060-ffmpeg-backport-avcodec-aacdec-default-to-non-wide-7.patch
 	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --enable-shared --disable-static --disable-programs --enable-gpl
 	BUILD_COMMAND 		make ${PARALLEL}
 )

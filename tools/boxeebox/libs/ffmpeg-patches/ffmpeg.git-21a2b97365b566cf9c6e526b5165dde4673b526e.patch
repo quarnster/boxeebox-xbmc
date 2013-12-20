@@ -1,0 +1,28 @@
+From 21a2b97365b566cf9c6e526b5165dde4673b526e Mon Sep 17 00:00:00 2001
+From: Michael Niedermayer <michaelni@gmx.at>
+Date: Sat, 21 Sep 2013 20:59:30 +0200
+Subject: [PATCH] avformat/hls: do not limit manifest lines to 1024 chars
+
+Fixes Ticket2976
+Debuged-by: jaimeMF
+Signed-off-by: Michael Niedermayer <michaelni@gmx.at>
+---
+ libavformat/hls.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libavformat/hls.c b/libavformat/hls.c
+index 8554b7e..231f630 100644
+--- a/libavformat/hls.c
++++ b/libavformat/hls.c
+@@ -212,7 +212,7 @@ static int parse_playlist(HLSContext *c, const char *url,
+     uint8_t iv[16] = "";
+     int has_iv = 0;
+     char key[MAX_URL_SIZE] = "";
+-    char line[1024];
++    char line[MAX_URL_SIZE];
+     const char *ptr;
+     int close_in = 0;
+ 
+-- 
+1.7.10.4
+
