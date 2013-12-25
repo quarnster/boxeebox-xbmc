@@ -139,6 +139,8 @@ set(libs
 	libgcrypt.so
 	libcurl.so
 	libfontconfig.so
+	libxml2.so
+	libxslt.so
 )
 
 foreach(lib ${libs})
