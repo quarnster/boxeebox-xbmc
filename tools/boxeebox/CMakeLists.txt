@@ -136,7 +136,7 @@ set(libs
 	libcec.so.2	
 	libfribidi.so
 	libfreetype.so
-	libgcrypt.so
+	libgcrypt.so.20
 	libcurl.so
 	libfontconfig.so
 	libxml2.so
