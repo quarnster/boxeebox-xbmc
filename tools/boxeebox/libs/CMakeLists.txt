@@ -21,6 +21,27 @@ string(REPLACE "\n" "" HOSTMACHINE ${HOSTMACHINE})
 include(ExternalProject)
 
 ExternalProject_Add(
+    libxslt
+    URL               ftp://xmlsoft.org/libxslt/libxslt-1.1.28.tar.gz
+	PATCH_COMMAND     sed -ie "s|runtest$$(EXEEXT)||" "libxslt/Makefile.in"
+	   COMMAND        sed -ie "s|testrecurse$$(EXEEXT)||" "libxslt/Makefile.in"
+	   COMMAND        sed -ie "s|xsltproc||" "libxslt/Makefile.in"
+	URL_MD5           9667bf6f9310b957254fdcf6596600b7
+    CONFIGURE_COMMAND ${BASIC_CONF} --without-python --with-debug --with-debugger --with-mem-debug --with-libxml-prefix=${TARGET_DIR} ac_cv_path_LIBGCRYPT_CONFIG=/usr/local/bin/
+    BUILD_COMMAND     make
+    INSTALL_COMMAND   make install
+)
+
+ExternalProject_Add(
+    libxml2
+    URL               http://xmlsoft.org/sources/libxml2-2.9.1.tar.gz
+	URL_MD5           9c0cfef285d5c4a5c80d00904ddab380
+    CONFIGURE_COMMAND ${BASIC_CONF} --without-python --without-iconv
+    BUILD_COMMAND     make
+    INSTALL_COMMAND   make install
+)
+
+ExternalProject_Add(
 	enca
 	URL					http://dl.cihar.com/enca/enca-1.15.tar.bz2
 	URL_MD5				fef132969d26e649719eae08297a4a52
@@ -339,8 +360,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libgcrypt
-	URL 				ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.5.3.tar.bz2
-	URL_MD5 			993159b2924ae7b0e4eaff0743c2db35
+	URL 				ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.6.0.tar.gz
+	URL_MD5 			d698fe863cb7b351316f840fee972512
 	CONFIGURE_COMMAND 	GPG_ERROR_CONFIG=${TARGET_DIR}/bin/gpg-error-config ${BASIC_CONF} --disable-asm
 	DEPENDS libgpg-error
 )
