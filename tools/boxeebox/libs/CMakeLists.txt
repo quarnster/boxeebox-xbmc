@@ -326,8 +326,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libass
-	URL 				https://libass.googlecode.com/files/libass-0.10.1.tar.gz
-	URL_MD5 			6cace482a013a3c4bf3b31a68ac66026
+	URL 				http://libass.googlecode.com/files/libass-0.10.2.tar.gz
+	URL_MD5 			167b784dacded3a65224925c610084cc
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	DEPENDS libpng
 )
