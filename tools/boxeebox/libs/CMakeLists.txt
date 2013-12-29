@@ -152,8 +152,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	sqlite
-	URL 				http://www.sqlite.org/2013/sqlite-autoconf-3071700.tar.gz
-	URL_MD5 			18c285053e9562b848209cb0ee16d4ab
+	URL 				http://www.sqlite.org/2013/sqlite-autoconf-3080200.tar.gz
+	URL_MD5 			f62206713e6a08d4ccbc60b1fd712a1a
 	CONFIGURE_COMMAND	${BASIC_CONF} --enable-threadsafe --disable-readline
 )
 
