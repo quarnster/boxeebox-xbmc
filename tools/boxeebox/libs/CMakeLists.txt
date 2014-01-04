@@ -21,6 +21,30 @@ string(REPLACE "\n" "" HOSTMACHINE ${HOSTMACHINE})
 include(ExternalProject)
 
 ExternalProject_Add(
+	mysql
+	URL 				http://ftp.gwdg.de/pub/misc/mysql/Downloads/MySQL-5.1/mysql-5.1.72.tar.gz
+	URL_MD5 			ed79cd48e3e7402143548917813cdb80
+	PATCH_COMMAND
+	    COMMAND patch -Np1  < ${CMAKE_SOURCE_DIR}/01-mysqlclient-cross-compile.patch
+	CONFIGURE_COMMAND <SOURCE_DIR>/configure CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib --prefix=${TARGET_DIR} --host=${TARGET} ac_cv_c_stack_direction=-1 ac_cv_sys_restartable_syscalls=yes --localstatedir=/storage/.mysql --with-unix-socket-path=/var/tmp/mysql.socket --with-tcp-port=3306 --enable-static --disable-shared --with-low-memory --enable-largefile --with-big-tables --with-mysqld-user=mysqld --with-extra-charsets=all --with-extra-charsets=complex --with-named-thread-libs=-lc --with-named-curses-libs=-lncurses --enable-thread-safe-client --enable-assembler --enable-local-infile --without-debug --without-docs --without-man --with-readline --without-libwrap --without-server --without-embedded-server --without-libedit --with-query-cache --with-pthread --with-named-thread-libs=-lpthread
+    BUILD_COMMAND make -C include my_config.h
+	    COMMAND   make -C mysys libmysys.a
+		COMMAND   make -C strings libmystrings.a
+		COMMAND   make -C vio libvio.a
+		COMMAND   make -C dbug libdbug.a
+		COMMAND   make -C regex libregex.a
+		COMMAND   make -C sql gen_lex_hash
+		COMMAND   make -C mysys libmysys.a
+		COMMAND   make -C scripts comp_sql
+		COMMAND   make -C extra comp_err
+	INSTALL_COMMAND make -C libmysql
+	    COMMAND   make -C libmysql/ install
+		COMMAND   make -C scripts/ install-binSCRIPTS
+		COMMAND   make -C include/ install
+		COMMAND   sudo ln -sf ${SYSROOT}/usr/local/bin/mysql_config /usr/bin/mysql_config
+)
+
+ExternalProject_Add(
     libxslt
     URL               ftp://xmlsoft.org/libxslt/libxslt-1.1.28.tar.gz
 	PATCH_COMMAND     sed -ie "s|runtest$$(EXEEXT)||" "libxslt/Makefile.in"
