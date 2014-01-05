@@ -1377,6 +1377,7 @@ bool CFileItem::IsParentFolder() const
 
 void CFileItem::FillInMimeType(bool lookup /*= true*/)
 {
+  // TODO: adapt this to use CMime::GetMimeType()
   if (m_mimetype.empty())
   {
     if( m_bIsFolder )
@@ -3241,7 +3242,7 @@ CStdString CFileItem::FindTrailer() const
 
   CStdString strDir = URIUtils::GetDirectory(strFile);
   CFileItemList items;
-  CDirectory::GetDirectory(strDir, items, g_advancedSettings.m_videoExtensions, DIR_FLAG_READ_CACHE | DIR_FLAG_NO_FILE_INFO);
+  CDirectory::GetDirectory(strDir, items, g_advancedSettings.m_videoExtensions, DIR_FLAG_READ_CACHE | DIR_FLAG_NO_FILE_INFO | DIR_FLAG_NO_FILE_DIRS);
   URIUtils::RemoveExtension(strFile);
   strFile += "-trailer";
   CStdString strFile3 = URIUtils::AddFileToFolder(strDir, "movie-trailer");

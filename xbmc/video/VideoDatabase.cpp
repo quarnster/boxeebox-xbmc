@@ -799,12 +799,6 @@ bool CVideoDatabase::SetPathHash(const CStdString &path, const CStdString &hash)
     if (NULL == m_pDB.get()) return false;
     if (NULL == m_pDS.get()) return false;
 
-    if (hash.empty())
-    { // this is an empty folder - we need only add it to the path table
-      // if the path actually exists
-      if (!CDirectory::Exists(path))
-        return false;
-    }
     int idPath = AddPath(path);
     if (idPath < 0) return false;
 
@@ -2895,15 +2889,16 @@ void CVideoDatabase::DeleteMovie(const CStdString& strFilenameAndPath, bool bKee
 
       strSQL=PrepareSQL("delete from movielinktvshow where idMovie=%i", idMovie);
       m_pDS->exec(strSQL.c_str());
+
+      CStdString strPath, strFileName;
+      SplitPath(strFilenameAndPath,strPath,strFileName);
+      InvalidatePathHash(strPath);
     }
 
     //TODO: move this below CommitTransaction() once UPnP doesn't rely on this anymore
     if (!bKeepId)
       AnnounceRemove("movie", idMovie);
 
-    CStdString strPath, strFileName;
-    SplitPath(strFilenameAndPath,strPath,strFileName);
-    InvalidatePathHash(strPath);
     CommitTransaction();
 
   }
@@ -2968,13 +2963,13 @@ void CVideoDatabase::DeleteTvShow(const CStdString& strPath, bool bKeepId /* = f
 
       strSQL=PrepareSQL("delete from movielinktvshow where idShow=%i", idTvShow);
       m_pDS->exec(strSQL.c_str());
-    }
+
+      InvalidatePathHash(strPath);
+   }
 
     //TODO: move this below CommitTransaction() once UPnP doesn't rely on this anymore
     if (!bKeepId)
       AnnounceRemove("tvshow", idTvShow);
-
-    InvalidatePathHash(strPath);
 
     CommitTransaction();
 
@@ -3094,15 +3089,16 @@ void CVideoDatabase::DeleteMusicVideo(const CStdString& strFilenameAndPath, bool
 
       strSQL=PrepareSQL("delete from musicvideo where idMVideo=%i", idMVideo);
       m_pDS->exec(strSQL.c_str());
+
+      CStdString strPath, strFileName;
+      SplitPath(strFilenameAndPath,strPath,strFileName);
+      InvalidatePathHash(strPath);
     }
 
     //TODO: move this below CommitTransaction() once UPnP doesn't rely on this anymore
     if (!bKeepId)
       AnnounceRemove("musicvideo", idMVideo);
 
-    CStdString strPath, strFileName;
-    SplitPath(strFilenameAndPath,strPath,strFileName);
-    InvalidatePathHash(strPath);
     CommitTransaction();
 
   }
@@ -8311,7 +8307,7 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const se
     sql = StringUtils::Format("DELETE FROM path "
                                 "WHERE (strContent IS NULL OR strContent = '') "
                                   "AND (strSettings IS NULL OR strSettings = '') "
-                                  "and (strHash IS NULL OR strHash = '') "
+                                  "AND (strHash IS NULL OR strHash = '') "
                                   "AND (exclude IS NULL OR exclude != 1) "
                                   "AND NOT EXISTS (SELECT 1 FROM files WHERE files.idPath = path.idPath) "
                                   "AND NOT EXISTS (SELECT 1 FROM tvshowlinkpath WHERE tvshowlinkpath.idPath = path.idPath) "
