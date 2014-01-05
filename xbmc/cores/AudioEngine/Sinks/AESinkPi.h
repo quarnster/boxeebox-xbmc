@@ -19,37 +19,47 @@
  *
  */
 
+#include "system.h"
+
+#if defined(TARGET_RASPBERRY_PI)
+
 #include "cores/AudioEngine/Interfaces/AESink.h"
 #include "cores/AudioEngine/Utils/AEDeviceInfo.h"
-#include <stdint.h>
 
-#include "threads/CriticalSection.h"
+#include "cores/omxplayer/OMXAudio.h"
 
-class CAESinkOSS : public IAESink
+class CAESinkPi : public IAESink
 {
 public:
-  virtual const char *GetName() { return "OSS"; }
+  virtual const char *GetName() { return "SinkPi"; }
 
-  CAESinkOSS();
-  virtual ~CAESinkOSS();
+  CAESinkPi();
+  virtual ~CAESinkPi();
 
-  virtual bool Initialize  (AEAudioFormat &format, std::string &device);
+  virtual bool Initialize(AEAudioFormat &format, std::string &device);
   virtual void Deinitialize();
+  virtual bool IsCompatible(const AEAudioFormat &format, const std::string &device);
 
-  virtual void         Stop            ();
   virtual double       GetDelay        ();
-  virtual double       GetCacheTotal   () { return 0.0; } /* FIXME */
+  virtual double       GetCacheTime    ();
+  virtual double       GetCacheTotal   ();
   virtual unsigned int AddPackets      (uint8_t *data, unsigned int frames, bool hasAudio, bool blocking = false);
   virtual void         Drain           ();
-  static  void         EnumerateDevicesEx(AEDeviceInfoList &list, bool force = false);
-private:
-  int m_fd;
-  bool m_blockingNeedsUpdate;
-  std::string      m_device;
-  AEAudioFormat   m_initFormat;
-  AEAudioFormat   m_format;
 
-  CAEChannelInfo  GetChannelLayout(AEAudioFormat format);
-  std::string      GetDeviceUse(const AEAudioFormat format, const std::string &device);
+  static void          EnumerateDevicesEx(AEDeviceInfoList &list, bool force = false);
+private:
+  void                 SetAudioDest();
+
+  std::string          m_initDevice;
+  AEAudioFormat        m_initFormat;
+  AEAudioFormat        m_format;
+  unsigned int         m_sinkbuffer_size;  ///< total size of the buffer
+  double               m_sinkbuffer_sec_per_byte;
+  static CAEDeviceInfo m_info;
+  bool                 m_Initialized;
+  uint32_t             m_submitted;
+  OMX_AUDIO_PARAM_PCMMODETYPE m_pcm_input;
+  COMXCoreComponent    m_omx_render;
 };
 
+#endif
