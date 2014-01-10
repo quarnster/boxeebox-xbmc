@@ -55,9 +55,7 @@ SRCS += Sinks/AESinkALSA.cpp
 SRCS += Sinks/AESinkOSS.cpp
 SRCS += Sinks/AESinkIntelSMD.cpp
 ifeq (@USE_PULSE@,1)
-SRCS += Engines/PulseAE/PulseAE.cpp
-SRCS += Engines/PulseAE/PulseAEStream.cpp
-SRCS += Engines/PulseAE/PulseAESound.cpp
+SRCS += Sinks/AESinkPULSE.cpp
 endif
 endif
 endif
