@@ -141,6 +141,10 @@ set(libs
 	libfontconfig.so
 	libxml2.so
 	libxslt.so
+	libplist.so
+    libplist++.so
+    libshairplay.so.0
+    airport.key
 )
 
 foreach(lib ${libs})
@@ -248,4 +252,11 @@ add_custom_target(refresh
 	COMMAND       touch ${CMAKE_BINARY_DIR}/toolchain-prefix/src/toolchain-stamp/toolchain-download
 	COMMAND       touch ${CMAKE_BINARY_DIR}/intel-prefix/src/intel-stamp/intel-download
 	DEPENDS libs-refresh
+)
+
+add_custom_target(
+avahi
+COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/avahi-client ${SYSROOT}/usr/local/include/avahi-client
+COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/avahi-common ${SYSROOT}/usr/local/include/avahi-common
+COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/lib ${SYSROOT}/usr/local/lib
 )

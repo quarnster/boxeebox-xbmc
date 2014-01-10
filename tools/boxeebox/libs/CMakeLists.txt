@@ -21,6 +21,27 @@ string(REPLACE "\n" "" HOSTMACHINE ${HOSTMACHINE})
 include(ExternalProject)
 
 ExternalProject_Add(
+    libshairplay
+    GIT_REPOSITORY        https://github.com/juhovh/shairplay.git  
+	PATCH_COMMAND         ./autogen.sh    
+    CONFIGURE_COMMAND     ${BASIC_CONF} --sysconfdir=/
+      BUILD_COMMAND       make
+	    COMMAND           make install
+    INSTALL_COMMAND       cp -P ${CMAKE_BINARY_DIR}/libshairplay-prefix/src/libshairplay/airport.key ${SYSROOT}/usr/local/lib
+)
+
+ExternalProject_Add(
+    libplist
+    URL                   http://www.libimobiledevice.org/downloads/libplist-1.8.tar.bz2
+    URL_MD5               2a9e0258847d50f9760dc3ece25f4dc6
+	PATCH_COMMAND         sed -ie "s/TARGET_LINK_LIBRARIES( plist /TARGET_LINK_LIBRARIES( plist m z  /" src/CMakeLists.txt
+   	COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/libplist-patches/0001-dontbuildswig.patch
+	COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/libplist-patches/0002-fixclang.diff
+    BUILD_COMMAND         ${BASIC_CMAKE} -DCMAKE_C_FLAGS=-ldl -DCMAKE_LD_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
+    INSTALL_COMMAND       make install
+)
+
+ExternalProject_Add(
 	mysql
 	URL 				http://ftp.gwdg.de/pub/misc/mysql/Downloads/MySQL-5.1/mysql-5.1.72.tar.gz
 	URL_MD5 			ed79cd48e3e7402143548917813cdb80
