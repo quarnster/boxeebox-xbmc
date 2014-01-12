@@ -22,7 +22,7 @@ msgstr "Määra"
 
 msgctxt "#31003"
 msgid "Power Options"
-msgstr "Valikud"
+msgstr "Energia valikud"
 
 msgctxt "#31004"
 msgid "Working..."
@@ -62,7 +62,7 @@ msgstr "Nimetused"
 
 msgctxt "#31026"
 msgid "Misc Options"
-msgstr "Veel valikuid"
+msgstr "Muud valikud"
 
 msgctxt "#31027"
 msgid "Location"
@@ -74,7 +74,7 @@ msgstr "Poster ääreni"
 
 msgctxt "#31029"
 msgid "Fanart"
-msgstr "Pildid"
+msgstr "Fännipildid"
 
 msgctxt "#31031"
 msgid "Pic Thumbs"
@@ -116,17 +116,21 @@ msgctxt "#31046"
 msgid "SEEKING"
 msgstr "OTSIMINE"
 
+msgctxt "#31048"
+msgid "Visualisation Presets"
+msgstr "Visualiseeringute eelseadistused"
+
 msgctxt "#31049"
 msgid "End Time"
-msgstr "Lõpp aeg"
+msgstr "Lõpu aeg"
 
 msgctxt "#31050"
 msgid "Sort: Ascending"
-msgstr "Järjesta: Kasvav"
+msgstr "Järjesta: Kasvavalt"
 
 msgctxt "#31051"
 msgid "Sort: Descending"
-msgstr "Järjesta: Kahanev"
+msgstr "Järjesta: Kahanevalt"
 
 msgctxt "#31055"
 msgid "Open playlist"
@@ -142,7 +146,7 @@ msgstr "Sulge esitusloend"
 
 msgctxt "#31058"
 msgid "System music files"
-msgstr "Süsteemi muusika failid"
+msgstr "Süsteemsed muusikafailid"
 
 msgctxt "#31059"
 msgid "Current playlist"
@@ -166,15 +170,19 @@ msgstr "Taust"
 
 msgctxt "#31103"
 msgid "Show \"Paused\" in picture slide show"
-msgstr "Näita piltide slaidieslitusel teksti \"pausis\""
+msgstr "Näita piltide slaidiesitusel teksti \"peatatud\""
+
+msgctxt "#31104"
+msgid "Play Trailers in a window [COLOR=grey3](Video Information Dialogue Only)[/COLOR]"
+msgstr "Esita treilereid aknas [COLOR=grey3](ainult Video dialoogiaken)[/COLOR]"
 
 msgctxt "#31106"
 msgid "Miscellaneous options"
-msgstr "Mitmesugused seaded"
+msgstr "Muud valikud"
 
 msgctxt "#31107"
 msgid "Hide Flagging read from video filenames [COLOR=grey3](Blu-ray, HD-DVD)[/COLOR]"
-msgstr "Peida loetud märgistus videofailide nimedest [COLOR=grey3](Blu-ray, HD-DVD)[/COLOR]"
+msgstr "Peida lugemise märgistus videofailide nimedest [COLOR=grey3](Blu-ray, HD-DVD)[/COLOR]"
 
 msgctxt "#31108"
 msgid "Hide Main Menu Buttons"
@@ -202,7 +210,11 @@ msgstr "Näita viimati lisatud albumeid"
 
 msgctxt "#31117"
 msgid "Show Recently added Videos"
-msgstr "Näita viimati lisatud videosid"
+msgstr "Näita viimati lisatud videoid"
+
+msgctxt "#31118"
+msgid "Home Page Programs Sub-menu"
+msgstr "Peamenüü Programmide alammenüü"
 
 msgctxt "#31119"
 msgid "Hide Background Fanart"
@@ -211,6 +223,10 @@ msgstr "Peida fännipiltide taust"
 msgctxt "#31124"
 msgid "Show Background \"Now Playing\" Video"
 msgstr "Näita taustal \"Hetkel mängib\" videot"
+
+msgctxt "#31125"
+msgid "Show Background \"Now Playing\" Visualisation"
+msgstr "Näita taustal \"Hetkel mängib\" visuaali"
 
 msgctxt "#31126"
 msgid "Play TV theme songs in video library (TvTunes add-on)"
@@ -224,9 +240,25 @@ msgctxt "#31128"
 msgid "Lyrics"
 msgstr "Laulutekst"
 
+msgctxt "#31129"
+msgid "Hide Fanart in full screen visualisation"
+msgstr "Peida fännikunst täisekraanivaates"
+
 msgctxt "#31132"
 msgid "Lyrics Add-on"
-msgstr "Laulutekstide lisamoodulid"
+msgstr "Laulutekstide lisamoodul"
+
+msgctxt "#31134"
+msgid "Home Page Videos Sub-menu"
+msgstr "Peamenüü Videote alammenüü"
+
+msgctxt "#31135"
+msgid "Home Page Music Sub-menu"
+msgstr "Peamenüü Muusika alammenüü"
+
+msgctxt "#31136"
+msgid "Home Page Pictures Sub-menu"
+msgstr "Peamenüü Piltide alammenüü"
 
 msgctxt "#31140"
 msgid "Music OSD"
@@ -235,6 +267,10 @@ msgstr "Muusika OSD"
 msgctxt "#31141"
 msgid "Video OSD"
 msgstr "Video OSD"
+
+msgctxt "#31142"
+msgid "Settings level"
+msgstr "Seadete tase"
 
 msgctxt "#31200"
 msgid "Shortcuts"
@@ -246,7 +282,7 @@ msgstr "Vali laul"
 
 msgctxt "#31205"
 msgid "Lyrics Source"
-msgstr "Laulusõnade allikas"
+msgstr "Laulutekstide allikas"
 
 msgctxt "#31206"
 msgid "Found"
@@ -294,11 +330,11 @@ msgstr "Fännipilt[CR][CR]ei ole saadaval[CR][CR]Määramiseks vajuta nuppu"
 
 msgctxt "#31312"
 msgid "Current Scraper"
-msgstr "Käibiv kraabits"
+msgstr "Käibiv kaabits"
 
 msgctxt "#31313"
 msgid "Choose a Scraper"
-msgstr "Vali kraabits"
+msgstr "Vali kaabits"
 
 msgctxt "#31314"
 msgid "Content Scanning Options"
@@ -306,11 +342,11 @@ msgstr "Sisu skaneerimise valikud"
 
 msgctxt "#31317"
 msgid "Set Fanart Path"
-msgstr "Määra fännipiltide rada"
+msgstr "Määra fännipiltide asukoht"
 
 msgctxt "#31319"
 msgid "Selected Profile"
-msgstr "Vali profiil"
+msgstr "Valitud profiil"
 
 msgctxt "#31320"
 msgid "Last Logged In"
@@ -342,7 +378,7 @@ msgstr "Viimati lisatud"
 
 msgctxt "#31329"
 msgid "[B]Timer set![/B] [COLOR=grey2] - System auto shutdown in[/COLOR]"
-msgstr "[B]Loendur määratud![/B] [COLOR=grey2] - Süsteemi automaatne sulgemine[/COLOR]"
+msgstr "[B]Taimer seatud![/B] [COLOR=grey2] - Süsteemi automaatne seiskamine[/COLOR]"
 
 msgctxt "#31330"
 msgid "Click button to play[CR][CR]Movie trailer"
@@ -394,7 +430,7 @@ msgstr "Rüü vaikeväärtus"
 
 msgctxt "#31391"
 msgid "Skin default with no Caps"
-msgstr "Rüü vaikeväärtus ilma tõstutundlikuseta"
+msgstr "Rüü vaikeväärtus ilma suurtähtedeta"
 
 msgctxt "#31392"
 msgid "Arial based"
@@ -402,7 +438,7 @@ msgstr "Arial-il põhinev"
 
 msgctxt "#31400"
 msgid "[B]CONFIGURE APPEARANCE SETTINGS[/B][CR][CR]Change the skin · Set language and region · Change file listing options[CR]Set up a screensaver"
-msgstr "[B]KONFIGUREERI VÄLIMUSE SEADEID[/B][CR][CR]Muuda rüüd · Muuda keelt ja regiooni · Muuda faililoendi valikuid[CR]Seadista ekraanisäästja"
+msgstr "[B]KONFIGUREERI VÄLIMUSE SEADEID[/B][CR][CR]Muuda rüüd · Määra keel ja regioon · Muuda faililoendi valikuid[CR]Seadista ekraanisäästja"
 
 msgctxt "#31401"
 msgid "[B]CONFIGURE VIDEO SETTINGS[/B][CR][CR]Manage your video library · Set video playback options · Change video listing options[CR]Set subtitle fonts"
@@ -410,31 +446,43 @@ msgstr "[B]KONFIGUREERI VIDEO SEADEID[/B][CR][CR]Halda enda videoteeki · Määr
 
 msgctxt "#31402"
 msgid "[B]CONFIGURE MUSIC SETTINGS[/B][CR][CR]Manage your music library · Set music playback options · Change music listing options[CR]Setup song submission · Set karaoke options"
-msgstr "[B]KONFIGUREERI MUUSIKA SEADEID[/B][CR][CR]Halda enda muusikateeki · Määra muusika esitamise seaded · Määra muusika loendi seaded[CR]Seadista loo esitamine · Seadista karaoke valikud"
+msgstr "[B]KONFIGUREERI MUUSIKA SEADEID[/B][CR][CR]Halda enda muusikateeki · Määra muusika esitamise seaded · Muuda muusikaloendi valikuid[CR]Seadista loo esitamine · Seadista karaoke valikud"
 
 msgctxt "#31403"
 msgid "[B]CONFIGURE PICTURE SETTINGS[/B][CR][CR]Set picture listing options · Configure slideshows"
-msgstr "[B]KONFIGUREERI PILDI SEADEID[/B][CR][CR]Määra piltide loendi seaded · Konfigureeri slaidiesitlusi"
+msgstr "[B]KONFIGUREERI PILDI SEADEID[/B][CR][CR]Määra pildiloendi seaded · Konfigureeri slaidiesitlusi"
 
 msgctxt "#31404"
 msgid "[B]CONFIGURE WEATHER SETTINGS[/B][CR][CR]Set three cities to collect weather information"
-msgstr "[B]KONFIGUREERI ILMA SEADEID[/B][CR][CR]Vali kolm linna, millele ilmaprognoose koostatakse"
+msgstr "[B]KONFIGUREERI ILMA SEADEID[/B][CR][CR]Vali ilmaprognooside koostamiseks kolm linna"
 
 msgctxt "#31406"
 msgid "[B]CONFIGURE SYSTEM SETTINGS[/B][CR][CR]Setup and calibrate displays · Configure audio output · Setup remote controls[CR]Set power saving options · Enable debugging · Setup master lock"
-msgstr "[B]KONFIGUREERI SÜSTEEMI SEADEID[/B][CR][CR]Seadista ja kalibreeri ekraane · Konfigureeri heliväljundit · Seadista kaugjuhtimine[CR]Määra energia säästu valikud· Luba silumine · Seadista pealukk"
+msgstr "[B]KONFIGUREERI SÜSTEEMI SEADEID[/B][CR][CR]Seadista ja kalibreeri ekraane · Konfigureeri heliväljundit · Seadista kaugjuhtimine[CR]Määra energiasäästu valikud· Luba silumine · Seadista pealukk"
 
 msgctxt "#31408"
 msgid "[B]CONFIGURE ADD-ONS[/B][CR][CR]Manage your installed Add-ons · Browse for and install Add-ons from xbmc.org[CR]Modify Add-on settings"
 msgstr "[B]KONFIGUREERI LISAMOODULEID[/B][CR][CR]Halda enda lisamooduleid · Sirvi ja paigalda lisamooduleid aadressilt xbmc.org[CR]Muuda lisamoodulite seadeid"
 
+msgctxt "#31409"
+msgid "[B]CONFIGURE TV SETTINGS[/B][CR][CR]Change full screen info · Manage EPG data settings"
+msgstr "[B]SEADISTA TV SEADEID[/B][CR][CR]Muuda täisekraani infot · Halda elektroonilise saatekava seadeid"
+
 msgctxt "#31410"
 msgid "[B]CONFIGURE SERVICE SETTINGS[/B][CR][CR]Setup control of XBMC via UPnP and HTTP · Configure file sharing[CR]Enable Zeroconf · Configure AirPlay"
-msgstr "[B]KONFIGUREERI TEENUSE SEADEID[/B][CR][CR]Seadista XBMC uhtimine UPnP ja HTTP kaudu · Seadista failide ühiskasutus[CR]Luba Zeroconf · Konfigureeri AirPlay"
+msgstr "[B]KONFIGUREERI TEENUSE SEADEID[/B][CR][CR]Seadista XBMC juhtimine UPnP ja HTTP kaudu · Seadista failide jagamine[CR]Luba Zeroconf · Konfigureeri AirPlay"
 
 msgctxt "#31411"
 msgid "First run help...."
-msgstr "Esimese kasutuse abi...."
+msgstr "Esmakasutuse abi...."
+
+msgctxt "#31412"
+msgid "This tab signifies that there is a menu off to the side of this window that contains extra options for this section.  To access the menu, navigate to the left with your remote control or keyboard or place your mouse pointer over the tab. [CR][CR]Click \"Ok\" to close this dialogue. It will not appear again."
+msgstr "See märge näitab, et selle akna taga on peidus lisaseadete menüü.  Menüü nägemiseks vajutage puldil või klaviatuuril vasakut noolt või suunake hiir selle märke kohale. [CR][CR]Vajutage dialoogi sulgemiseks \"Ok\". See ei avane uuesti."
+
+msgctxt "#31413"
+msgid "Local subtitle available"
+msgstr "Lokaalsed subtiitrid on saadaval"
 
 msgctxt "#31421"
 msgid "Select your XBMC user Profile[CR]to login and continue"
@@ -466,15 +514,15 @@ msgstr "Olemasolevad[CR]grupid"
 
 msgctxt "#31509"
 msgid "Channel Group"
-msgstr "Kanali grupp"
+msgstr "Kanalite grupp"
 
 msgctxt "#31510"
 msgid "Timer Set"
-msgstr "Ajastuse seade"
+msgstr "Taimer määratud"
 
 msgctxt "#31511"
 msgid "Channel Options"
-msgstr "Kanali valik"
+msgstr "Kanalite valikud"
 
 msgctxt "#31901"
 msgid "36 Hour Forecast"

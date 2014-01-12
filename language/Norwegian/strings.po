@@ -11212,10 +11212,6 @@ msgctxt "#36219"
 msgid "Default EPG window to show. Defaults to Timeline."
 msgstr "Viser standard EPG-vindu. Bruker tidslinjevisning som standard."
 
-msgctxt "#36220"
-msgid "Number of days of EPG data to import from backends. Defaults to 2 days."
-msgstr "Antall dager med EPG-informasjon som skal hentes fra kulisseklienten. Standarden er 2 dager."
-
 msgctxt "#36221"
 msgid "Time between EPG data imports from backends. Defaults to 120 minutes."
 msgstr "Tid mellom datahentinger fra kulisseklienten. Standarden er 120 minutter."
@@ -11450,7 +11446,7 @@ msgstr "Ingen informasjon tilgjengelig enda."
 
 msgctxt "#36281"
 msgid "XBMC will search for thumbs on remote shares and optical media. This can often slow down the listing of network folders."
-msgstr "XMBC vil søke etter miniatyrer på nettverksstasjoner og optiske medier. Dette kan forsinke visningen av nettverksmapper."
+msgstr "XBMC vil søke etter miniatyrer på nettverksstasjoner og optiske medier. Dette kan forsinke visningen av nettverksmapper."
 
 msgctxt "#36282"
 msgid "No info available yet."
@@ -11975,6 +11971,14 @@ msgstr "Velg steder som brukes for å hente værinfo."
 msgctxt "#36420"
 msgid "No info available yet."
 msgstr "Ingen informasjon tilgjengelig enda."
+
+msgctxt "#36426"
+msgid "Switch to channel"
+msgstr "Bytt til kanal"
+
+msgctxt "#36428"
+msgid "Record"
+msgstr "Opptak"
 
 msgctxt "#36502"
 msgid "None"
