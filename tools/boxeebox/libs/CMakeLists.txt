@@ -23,7 +23,9 @@ include(ExternalProject)
 ExternalProject_Add(
     libshairplay
     GIT_REPOSITORY        https://github.com/juhovh/shairplay.git  
-	PATCH_COMMAND         ./autogen.sh    
+	PATCH_COMMAND         ./autogen.sh
+	    COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/xcode-llmvfix.patch
+        COMMAND           patch -p0 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/01-add_fairplay_handshake.patch
     CONFIGURE_COMMAND     ${BASIC_CONF} --sysconfdir=/
       BUILD_COMMAND       make
 	    COMMAND           make install
@@ -38,7 +40,8 @@ ExternalProject_Add(
    	COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/libplist-patches/0001-dontbuildswig.patch
 	COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/libplist-patches/0002-fixclang.diff
     BUILD_COMMAND         ${BASIC_CMAKE} -DCMAKE_C_FLAGS=-ldl -DCMAKE_LD_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
-    INSTALL_COMMAND       make install
+	COMMAND               make
+    INSTALL_COMMAND       make install             
 )
 
 ExternalProject_Add(
