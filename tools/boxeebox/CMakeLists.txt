@@ -141,10 +141,10 @@ set(libs
 	libfontconfig.so
 	libxml2.so
 	libxslt.so
-	libplist.so
-    libplist++.so
     libshairplay.so.0
     airport.key
+	libiconv.so
+	libplist.so
 )
 
 foreach(lib ${libs})

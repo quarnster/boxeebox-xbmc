@@ -21,6 +21,15 @@ string(REPLACE "\n" "" HOSTMACHINE ${HOSTMACHINE})
 include(ExternalProject)
 
 ExternalProject_Add(
+    libiconv
+    URL               http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
+	URL_MD5           e34509b1623cec449dfeb73d7ce9c6c6
+    CONFIGURE_COMMAND ${BASIC_CONF}
+    BUILD_COMMAND     make
+    INSTALL_COMMAND   make install
+)
+
+ExternalProject_Add(
     libshairplay
     GIT_REPOSITORY        https://github.com/juhovh/shairplay.git  
 	PATCH_COMMAND         ./autogen.sh
@@ -38,10 +47,9 @@ ExternalProject_Add(
     URL_MD5               2a9e0258847d50f9760dc3ece25f4dc6
 	PATCH_COMMAND         sed -ie "s/TARGET_LINK_LIBRARIES( plist /TARGET_LINK_LIBRARIES( plist m z  /" src/CMakeLists.txt
    	COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/libplist-patches/0001-dontbuildswig.patch
-	COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/libplist-patches/0002-fixclang.diff
-    BUILD_COMMAND         ${BASIC_CMAKE} -DCMAKE_C_FLAGS=-ldl -DCMAKE_LD_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
+    BUILD_COMMAND         ${BASIC_CMAKE} -DWITH_STATIC_LIB=ON -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
 	COMMAND               make
-    INSTALL_COMMAND       make install             
+    INSTALL_COMMAND       make install          
 )
 
 ExternalProject_Add(
@@ -84,7 +92,7 @@ ExternalProject_Add(
     libxml2
     URL               http://xmlsoft.org/sources/libxml2-2.9.1.tar.gz
 	URL_MD5           9c0cfef285d5c4a5c80d00904ddab380
-    CONFIGURE_COMMAND ${BASIC_CONF} --without-python --without-iconv
+    CONFIGURE_COMMAND ${BASIC_CONF} --without-python
     BUILD_COMMAND     make
     INSTALL_COMMAND   make install
 )
