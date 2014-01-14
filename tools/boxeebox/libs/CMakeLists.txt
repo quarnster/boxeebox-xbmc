@@ -21,15 +21,6 @@ string(REPLACE "\n" "" HOSTMACHINE ${HOSTMACHINE})
 include(ExternalProject)
 
 ExternalProject_Add(
-    libiconv
-    URL               http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
-	URL_MD5           e34509b1623cec449dfeb73d7ce9c6c6
-    CONFIGURE_COMMAND ${BASIC_CONF}
-    BUILD_COMMAND     make
-    INSTALL_COMMAND   make install
-)
-
-ExternalProject_Add(
     libshairplay
     GIT_REPOSITORY        https://github.com/juhovh/shairplay.git  
 	PATCH_COMMAND         ./autogen.sh
@@ -92,7 +83,7 @@ ExternalProject_Add(
     libxml2
     URL               http://xmlsoft.org/sources/libxml2-2.9.1.tar.gz
 	URL_MD5           9c0cfef285d5c4a5c80d00904ddab380
-    CONFIGURE_COMMAND ${BASIC_CONF} --without-python
+    CONFIGURE_COMMAND ${BASIC_CONF} --without-python --without-iconv
     BUILD_COMMAND     make
     INSTALL_COMMAND   make install
 )
