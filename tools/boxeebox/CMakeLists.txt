@@ -141,9 +141,8 @@ set(libs
 	libfontconfig.so
 	libxml2.so
 	libxslt.so
-    libshairplay.so.0
-    airport.key
-	libiconv.so
+	libshairplay.so.0
+	airport.key
 	libplist.so
 )
 
