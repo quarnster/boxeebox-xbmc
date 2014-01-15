@@ -143,7 +143,7 @@ set(libs
 	libxslt.so
 	libshairplay.so.0
 	airport.key
-	libplist.so
+	libplist.so.1
 )
 
 foreach(lib ${libs})
