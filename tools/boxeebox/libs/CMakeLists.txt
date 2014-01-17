@@ -21,6 +21,27 @@ string(REPLACE "\n" "" HOSTMACHINE ${HOSTMACHINE})
 include(ExternalProject)
 
 ExternalProject_Add(
+    libxml2
+    URL                   http://xmlsoft.org/sources/libxml2-2.9.1.tar.gz
+	URL_MD5               9c0cfef285d5c4a5c80d00904ddab380
+    CONFIGURE_COMMAND     ${BASIC_CONF} --without-python --without-iconv
+    BUILD_COMMAND         make
+    INSTALL_COMMAND       make install
+)
+
+ExternalProject_Add(
+    libplist
+    URL                   http://www.libimobiledevice.org/downloads/libplist-1.8.tar.bz2
+    URL_MD5               2a9e0258847d50f9760dc3ece25f4dc6
+	PATCH_COMMAND         sed -ie "s/TARGET_LINK_LIBRARIES( plist /TARGET_LINK_LIBRARIES( plist m z  /" src/CMakeLists.txt
+   	COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/libplist-patches/0001-dontbuildswig.patch
+	BUILD_COMMAND         ${BASIC_CMAKE}          
+    COMMAND               make CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib 
+    INSTALL_COMMAND       make install
+	DEPENDS               libxml2
+)
+
+ExternalProject_Add(
     libshairplay
     GIT_REPOSITORY        https://github.com/juhovh/shairplay.git  
 	PATCH_COMMAND         ./autogen.sh
@@ -30,17 +51,7 @@ ExternalProject_Add(
       BUILD_COMMAND       make
 	    COMMAND           make install
     INSTALL_COMMAND       cp -P ${CMAKE_BINARY_DIR}/libshairplay-prefix/src/libshairplay/airport.key ${SYSROOT}/usr/local/lib
-)
-
-ExternalProject_Add(
-    libplist
-    URL                   http://www.libimobiledevice.org/downloads/libplist-1.8.tar.bz2
-    URL_MD5               2a9e0258847d50f9760dc3ece25f4dc6
-	PATCH_COMMAND         sed -ie "s/TARGET_LINK_LIBRARIES( plist /TARGET_LINK_LIBRARIES( plist m z  /" src/CMakeLists.txt
-   	COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/libplist-patches/0001-dontbuildswig.patch
-    BUILD_COMMAND         ${BASIC_CMAKE} -DWITH_STATIC_LIB=ON -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
-	COMMAND               make
-    INSTALL_COMMAND       make install          
+	DEPENDS               libxml2 libplist
 )
 
 ExternalProject_Add(
@@ -77,15 +88,7 @@ ExternalProject_Add(
     CONFIGURE_COMMAND ${BASIC_CONF} --without-python --with-debug --with-debugger --with-mem-debug --with-libxml-prefix=${TARGET_DIR} ac_cv_path_LIBGCRYPT_CONFIG=/usr/local/bin/
     BUILD_COMMAND     make
     INSTALL_COMMAND   make install
-)
-
-ExternalProject_Add(
-    libxml2
-    URL               http://xmlsoft.org/sources/libxml2-2.9.1.tar.gz
-	URL_MD5           9c0cfef285d5c4a5c80d00904ddab380
-    CONFIGURE_COMMAND ${BASIC_CONF} --without-python --without-iconv
-    BUILD_COMMAND     make
-    INSTALL_COMMAND   make install
+	DEPENDS libxml2
 )
 
 ExternalProject_Add(
