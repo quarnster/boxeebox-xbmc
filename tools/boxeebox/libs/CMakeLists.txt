@@ -94,7 +94,7 @@ ExternalProject_Add(
 ExternalProject_Add(
 	enca
 	URL					https://github.com/nijel/enca/archive/1.15.tar.gz
-	URL_MD5				fef132969d26e649719eae08297a4a52
+	URL_MD5				c976da70571bea8a0ad83e150fcfa8d5
 	CONFIGURE_COMMAND   ${BASIC_CONF}
 	BUILD_COMMAND       make
     BUILD_IN_SOURCE     1
