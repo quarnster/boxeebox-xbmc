@@ -371,9 +371,9 @@ AC_ARG_ENABLE([alsa],
 
 AC_ARG_ENABLE([pulse],
   [AS_HELP_STRING([--enable-pulse],
-  [enable PulseAudio support (default is no)])],
+  [enable PulseAudio support (default is auto)])],
   [use_pulse=$enableval],
-  [use_pulse=no])
+  [use_pulse=auto])
 
 AC_ARG_ENABLE([ssh],
   [AS_HELP_STRING([--disable-ssh],
@@ -1250,7 +1250,12 @@ XB_FIND_SONAME([VORBIS],      [vorbis])
 XB_FIND_SONAME([VORBISFILE],  [vorbisfile])
 XB_FIND_SONAME([MODPLUG],     [modplug])
 XB_FIND_SONAME([ASS],         [ass])
-XB_FIND_SONAME([MPEG2],       [mpeg2])
+
+#link statically against mpeg2 on ios  because of ios7
+#crash & burn if dyloaded
+if test "$ARCH" != "arm-osx" ; then
+  XB_FIND_SONAME([MPEG2],       [mpeg2])
+fi
 
 # Audio encoders
 if test "x$use_libmp3lame" != "xno"; then
