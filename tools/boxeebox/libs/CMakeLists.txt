@@ -93,7 +93,7 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	enca
-	URL					http://dl.cihar.com/enca/enca-1.15.tar.bz2
+	URL					https://github.com/nijel/enca/archive/1.15.tar.gz
 	URL_MD5				fef132969d26e649719eae08297a4a52
 	CONFIGURE_COMMAND   ${BASIC_CONF}
 	BUILD_COMMAND       make
