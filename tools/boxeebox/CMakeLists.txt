@@ -68,7 +68,7 @@ export PYTHON_NOVERSIONCHECK=\"y\"
 export PYTHON=\"${local}/bin/python\"
 export PYTHON_CPPFLAGS=\"-I${local}/include/python2.7\"
 export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
-${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --disable-gl --disable-sdl --enable-mysql --enable-addons-with-dependencies --disable-x11 --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --enable-external-ffmpeg --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=yes --enable-libusb --with-lirc-device=/var/run/lirc/lircd 
+${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --disable-gl --disable-sdl --enable-mysql --enable-addons-with-dependencies --disable-x11 --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --enable-external-ffmpeg --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=yes --enable-libusb --with-lirc-device=/var/run/lirc/lircd --enable-airplay
 "
 )
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh)
@@ -141,10 +141,9 @@ set(libs
 	libfontconfig.so
 	libxml2.so
 	libxslt.so
+	libshairplay.so.0
+	airport.key
 	libplist.so.1
-    libplist++.so
-    libshairplay.so.0
-    airport.key
 )
 
 foreach(lib ${libs})
