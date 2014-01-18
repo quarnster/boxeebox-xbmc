@@ -33,12 +33,12 @@ ExternalProject_Add(
     libplist
     URL                   http://www.libimobiledevice.org/downloads/libplist-1.8.tar.bz2
     URL_MD5               2a9e0258847d50f9760dc3ece25f4dc6
-	PATCH_COMMAND         sed -ie "s/TARGET_LINK_LIBRARIES( plist /TARGET_LINK_LIBRARIES( plist m z  /" src/CMakeLists.txt
-   	COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/libplist-patches/0001-dontbuildswig.patch
-	BUILD_COMMAND         ${BASIC_CMAKE}          
+    PATCH_COMMAND         sed -ie 's/TARGET_LINK_LIBRARIES( plist \(.*\))/TARGET_LINK_LIBRARIES( plist \1 z m)  /' src/CMakeLists.txt
+    COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/libplist-patches/0001-dontbuildswig.patch
+    BUILD_COMMAND         ${BASIC_CMAKE}          
     COMMAND               make CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib 
     INSTALL_COMMAND       make install
-	DEPENDS               libxml2
+    DEPENDS               libxml2
 )
 
 ExternalProject_Add(
