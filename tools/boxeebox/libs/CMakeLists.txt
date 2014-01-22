@@ -544,8 +544,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	boost
-	URL 				http://sourceforge.net/projects/boost/files/boost/1.54.0/boost_1_54_0.tar.bz2/download
-	URL_MD5 			15cb8c0803064faef0c4ddf5bc5ca279
+	URL 				http://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.gz/download
+	URL_MD5 			93780777cfbf999a600f62883bd54b17
 	PATCH_COMMAND 		${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/boost.user-config.jam ./tools/build/v2/user-config.jam
 	CONFIGURE_COMMAND 	./bootstrap.sh --prefix=${TARGET_DIR}
 	BUILD_COMMAND 		""
