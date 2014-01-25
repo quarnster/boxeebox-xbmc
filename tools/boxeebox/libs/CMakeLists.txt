@@ -449,8 +449,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
         nfs
-        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.6.0.tar.gz
-        URL_MD5           14a422a227745fa841f78a29f01492a4
+        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.8.0.tar.gz
+        URL_MD5           0f20c7c104aa2e2ee563169b7e164aab
         PATCH_COMMAND     <SOURCE_DIR>/bootstrap --prefix=${TARGET_DIR} --host=${TARGET}
 	        COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
         CONFIGURE_COMMAND ${BASIC_CONF}
