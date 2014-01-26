@@ -215,6 +215,14 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
+    libcddb
+    URL                   http://prdownloads.sourceforge.net/libcddb/libcddb-1.3.2.tar.bz2
+	URL_MD5               8bb4a6f542197e8e9648ae597cd6bc8a
+    CONFIGURE_COMMAND     ${BASIC_CONF}
+	DEPENDS               libcdio
+)
+
+ExternalProject_Add(
 	taglib
 	URL 				http://taglib.github.io/releases/taglib-1.8.tar.gz
 	URL_MD5 			dcb8bd1b756f2843e18b1fdf3aaeee15
