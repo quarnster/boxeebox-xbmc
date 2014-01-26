@@ -144,6 +144,7 @@ set(libs
 	libshairplay.so.0
 	airport.key
 	libplist.so.1
+	libcddb.so.2
 )
 
 foreach(lib ${libs})
