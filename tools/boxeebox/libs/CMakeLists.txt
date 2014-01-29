@@ -622,8 +622,6 @@ ExternalProject_Add(
 	   COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0015-fixed-memleak-in-mpegts-demuxer-on-some-malformed-mp.patch
 	   COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0016-Speed-up-mpegts-av_find_stream_info.patch
 	   COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0017-allow-customizing-shared-library-soname-name-with-ma.patch
-	   COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0018-dxva-mpeg2-Allocate-slices-array-dynamically-fixes-v.patch
-	   COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0019-dxva-mpeg2-speed-up-slice-allocation.patch
 	   COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0020-dxva-vc1-Take-BI-into-account-for-forward-and-backwa.patch
 	   COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0021-dxva-vc1-Pass-overlapping-transforms-hint.patch
 	   COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0022-dxva-h264-Fix-dxva-playback-of-streams-that-don-t-st.patch
