@@ -68,7 +68,7 @@ export PYTHON_NOVERSIONCHECK=\"y\"
 export PYTHON=\"${local}/bin/python\"
 export PYTHON_CPPFLAGS=\"-I${local}/include/python2.7\"
 export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
-${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --disable-gl --disable-sdl --enable-mysql --enable-addons-with-dependencies --disable-x11 --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --enable-external-ffmpeg --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=yes --enable-libusb --with-lirc-device=/var/run/lirc/lircd --enable-airplay
+${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --disable-gl --disable-sdl --enable-mysql --enable-addons-with-dependencies --disable-x11 --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=yes --enable-libusb --with-lirc-device=/var/run/lirc/lircd --enable-airplay
 "
 )
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh)
@@ -104,14 +104,6 @@ set(libs
 	libpcre.so.1
 	libcdio.so.14
 	libtag.so.1
-	libavutil.so.52
-	libavcodec.so.54
-	libavformat.so.54
-	libavdevice.so.54
-	libavfilter.so.3
-	libswscale.so.2
-	libswresample.so.0
-	libpostproc.so.52	
 	libturbojpeg.so.0
 	libsmbclient.so.0
 	libnfs.so.1
