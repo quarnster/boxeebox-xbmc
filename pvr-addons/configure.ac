@@ -25,9 +25,9 @@ AC_ARG_ENABLE([release],
 ### External dependencies option
 AC_ARG_ENABLE([addons-with-dependencies],
   [AS_HELP_STRING([--enable-addons-with-dependencies],
-  [enable build of addons that depend on external libraries (default is no)])],
+  [enable build of addons that depend on external libraries (default is yes)])],
   [build_addons_with_dependencies=$enableval],
-  [build_addons_with_dependencies=no])
+  [build_addons_with_dependencies=yes])
 
 AC_ARG_ENABLE([mysql],
   [AS_HELP_STRING([--disable-mysql],
