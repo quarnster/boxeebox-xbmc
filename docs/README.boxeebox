@@ -40,6 +40,7 @@ mkdir build
 cd build
 cmake -DTARGET_DIR=<WHERE_YOU_WANT_TO_INSTALL_XBMC> ..
 make avahi
+make pvr
 make
 #done
 

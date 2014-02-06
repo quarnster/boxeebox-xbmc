@@ -68,7 +68,7 @@ export PYTHON_NOVERSIONCHECK=\"y\"
 export PYTHON=\"${local}/bin/python\"
 export PYTHON_CPPFLAGS=\"-I${local}/include/python2.7\"
 export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
-${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --disable-gl --disable-sdl --enable-mysql --enable-addons-with-dependencies --disable-x11 --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=yes --enable-libusb --with-lirc-device=/var/run/lirc/lircd --enable-airplay
+${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --disable-gl --disable-sdl --enable-mysql --disable-x11 --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=yes --enable-libusb --with-lirc-device=/var/run/lirc/lircd --enable-airplay
 "
 )
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh)
@@ -251,4 +251,15 @@ avahi
 COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/avahi-client ${SYSROOT}/usr/local/include/avahi-client
 COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/avahi-common ${SYSROOT}/usr/local/include/avahi-common
 COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/lib ${SYSROOT}/usr/local/lib
+)
+
+add_custom_target(
+pvr
+cd ${CMAKE_SOURCE_DIR}
+COMMAND rm -rf ${CMAKE_SOURCE_DIR}/../../pvr-addons
+COMMAND git clone https://github.com/opdenkamp/xbmc-pvr-addons.git
+COMMAND  ${CMAKE_COMMAND} -E copy  ${CMAKE_SOURCE_DIR}/pvr-addons.patch ${CMAKE_SOURCE_DIR}/build/xbmc-pvr-addons
+COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/build/xbmc-pvr-addons/pvr-addons.patch
+COMMAND mv  ${CMAKE_SOURCE_DIR}/build/xbmc-pvr-addons ${CMAKE_SOURCE_DIR}/../../pvr-addons
+COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./bootstrap
 )
