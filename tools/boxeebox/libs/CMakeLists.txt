@@ -425,6 +425,16 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
+    libbluray
+    URL                   ftp://ftp.videolan.org/pub/videolan/libbluray/0.5.0/libbluray-0.5.0.tar.bz2
+    URL_MD5               04cf15d0f3581a955d3a2ccb9dc06e9e
+    CONFIGURE_COMMAND     ${BASIC_CONF} --disable-examples --disable-doxygen-doc
+    BUILD_COMMAND         make
+    INSTALL_COMMAND       make install
+    DEPENDS               libxml2  freetype2
+)
+
+ExternalProject_Add(
 	libssh
 	URL 				http://www.libssh.org/files/0.5/libssh-0.5.3.tar.gz
 	URL_MD5 			9ad01838d3b89d98e900e0f6260a88cc
