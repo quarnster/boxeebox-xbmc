@@ -234,6 +234,10 @@ static bool PredicateAudioPriority(const OMXSelectionStream& lh, const OMXSelect
   PREDICATE_RETURN(lh.type_index == CMediaSettings::Get().GetCurrentVideoSettings().m_AudioStream
                  , rh.type_index == CMediaSettings::Get().GetCurrentVideoSettings().m_AudioStream);
 
+  // TrueHD never has enough cpu to decode on Pi, so prefer to avoid that
+  PREDICATE_RETURN(lh.codec != "truehd"
+                 , rh.codec != "truehd");
+
   if(!StringUtils::EqualsNoCase(CSettings::Get().GetString("locale.audiolanguage"), "original"))
   {
     CStdString audio_language = g_langInfo.GetAudioLanguage();
@@ -2161,7 +2165,7 @@ void COMXPlayer::CheckAutoSceneSkip()
   || m_CurrentVideo.dts == DVD_NOPTS_VALUE)
     return;
 
-  const int64_t clock = DVD_TIME_TO_MSEC(min(m_CurrentAudio.dts, m_CurrentVideo.dts) + m_offset_pts);
+  const int64_t clock = GetTime();
 
   CEdl::Cut cut;
   if(!m_Edl.InCut(clock, &cut))
