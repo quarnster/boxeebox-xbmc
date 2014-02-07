@@ -137,6 +137,7 @@ set(libs
 	airport.key
 	libplist.so.1
 	libcddb.so.2
+	libbluray.so.1
 )
 
 foreach(lib ${libs})
