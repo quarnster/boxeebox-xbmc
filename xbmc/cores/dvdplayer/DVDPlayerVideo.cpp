@@ -1218,7 +1218,7 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
 
   AutoCrop(pPicture);
 
-  int buffer = g_renderManager.WaitForBuffer(m_bStop, std::max(DVD_TIME_TO_MSEC(iSleepTime) + 500, 1));
+  int buffer = g_renderManager.WaitForBuffer(m_bStop, std::max(DVD_TIME_TO_MSEC(iSleepTime) + 500, 0));
   if (buffer < 0)
     return EOS_DROPPED;
 
