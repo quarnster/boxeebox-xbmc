@@ -547,6 +547,7 @@ ExternalProject_Add(
 		COMMAND mv Parser/pgen Parser/hostpgen
 		COMMAND make distclean
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/Python-2.7.2-xcompile.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/Python-2.7.2-default-is-optimized.patch
 		COMMAND sed -e "13735,13738d" -i configure
 		COMMAND sed -e "185d" -i Makefile.pre.in
 		COMMAND sed -e "954,959d" -i Makefile.pre.in
