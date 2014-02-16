@@ -104,7 +104,6 @@ set(libs
 	libpcre.so.1
 	libcdio.so.14
 	libtag.so.1
-	libturbojpeg.so.0
 	libsmbclient.so.0
 	libnfs.so.1
 	librtmp.so.1
@@ -138,7 +137,6 @@ set(libs
 	libplist.so.1
 	libcddb.so.2
 	libbluray.so.1
-	libjpeg.so.62
 )
 
 foreach(lib ${libs})
