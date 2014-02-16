@@ -308,7 +308,7 @@ ExternalProject_Add(
 	libjpeg-turbo
 	URL 				http://sourceforge.net/projects/libjpeg-turbo/files/1.3.0/libjpeg-turbo-1.3.0.tar.gz/download
 	URL_MD5 			e1e65cc711a1ade1322c06ad4a647741
-    CONFIGURE_COMMAND   ${BASIC_CONF}
+    CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-nls --with-jpeg8 --without-simd
     BUILD_COMMAND       make
     INSTALL_COMMAND     make install
     BUILD_IN_SOURCE     1
@@ -359,8 +359,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	curl
-	URL 				http://curl.haxx.se/download/curl-7.31.0.tar.bz2
-	URL_MD5 			b7bea20579ac2f696338ae03f2c19ba5
+	URL 				http://curl.haxx.se/download/curl-7.35.0.tar.gz
+	URL_MD5 			f5ae45ed6e86debb721b68392b5ce13c
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 	DEPENDS openssl zlib bzip2
@@ -456,8 +456,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	samba
-	URL                     http://ftp.samba.org/pub/samba/stable/samba-3.6.21.tar.gz
-	URL_MD5                 faa67c625508dc495c082357913ccea6
+	URL                     http://ftp.samba.org/pub/samba/stable/samba-3.6.22.tar.gz
+	URL_MD5                 59add4bb178ebc188d857bc13a508c0b
 	CONFIGURE_COMMAND	CC=${TARGET}-gcc CFLAGS=-I${SYSROOT}/usr/local/include LDFLAGS=-L${SYSROOT}/usr/local/lib ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 ./configure --prefix=${TARGET_DIR} --host=${TARGET} samba_cv_CC_NEGATIVE_ENUM_VALUES=yes libreplace_cv_HAVE_GETADDRINFO=no ac_cv_file__proc_sys_kernel_core_pattern=yes  samba_cv_HAVE_STAT_ST_FLAGS=no samba_cv_DARWIN_INITGROUPS=no --without-ldap --without-krb5 --without-ads --disable-cups --enable-swat=no --with-winbind=no --without-dnsupdate --without-libsmbsharemodes --without-pam --without-pam_smbpass --without-libaddns
  	BUILD_COMMAND 		${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} libsmbclient libtalloc libtevent libtdb
 	INSTALL_COMMAND 	${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} installlibsmbclient installlibtalloc installlibtevent installlibtdb
@@ -467,11 +467,10 @@ ExternalProject_Add(
 
 ExternalProject_Add(
         nfs
-        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.8.0.tar.gz
-        URL_MD5           0f20c7c104aa2e2ee563169b7e164aab
-        PATCH_COMMAND     <SOURCE_DIR>/bootstrap --prefix=${TARGET_DIR} --host=${TARGET}
-	        COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
-        CONFIGURE_COMMAND ${BASIC_CONF}
+        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.9.2.tar.gz
+        URL_MD5           c2697061fbccf2de610fd3b03f2d1a34
+        PATCH_COMMAND     patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
+        CONFIGURE_COMMAND ${BASIC_CONF} --disable-examples --disable-tirpc
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
         BUILD_IN_SOURCE   1
