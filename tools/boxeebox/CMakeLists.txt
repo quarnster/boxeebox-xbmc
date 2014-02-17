@@ -94,7 +94,7 @@ add_custom_target(
 
 set(libs
 	libjasper.so.1	
-	libpng16.so.16	
+	libpng15.so.15	
 	libyajl.so.2
 	libssh.so.4
 	libmicrohttpd.so.10
