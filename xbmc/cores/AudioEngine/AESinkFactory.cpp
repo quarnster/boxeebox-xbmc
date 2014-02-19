@@ -154,7 +154,7 @@ void CAESinkFactory::EnumerateEx(AESinkInfoList &list, bool force)
 #if defined(TARGET_WINDOWS)
 
   info.m_deviceInfoList.clear();
-  info.m_sinkName = "DirectSound";
+  info.m_sinkName = "DIRECTSOUND";
   CAESinkDirectSound::EnumerateDevicesEx(info.m_deviceInfoList, force);
   if(!info.m_deviceInfoList.empty())
     list.push_back(info);
