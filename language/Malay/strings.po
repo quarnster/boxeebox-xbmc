@@ -805,10 +805,6 @@ msgctxt "#251"
 msgid "Select destination directory"
 msgstr "Pilih destinasi direktori"
 
-msgctxt "#252"
-msgid "Output stereo to all speakers"
-msgstr "Output stereo ke semua pembesar suara"
-
 msgctxt "#253"
 msgid "Number of channels"
 msgstr "Jumlah saluran"
@@ -1568,6 +1564,10 @@ msgstr "Latar Belakang"
 msgctxt "#33081"
 msgid "This file is stacked, select the part you want to play from."
 msgstr "Fail ini disusun tindan. Pilih bahagian yang anda ingin mainkan."
+
+msgctxt "#34100"
+msgid "Number of channels"
+msgstr "Jumlah saluran"
 
 msgctxt "#34122"
 msgid "Always"

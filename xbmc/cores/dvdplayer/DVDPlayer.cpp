@@ -231,17 +231,27 @@ private:
   bool original;
   bool preferextsubs;
   bool subson;
+  PredicateSubtitleFilter filter;
 public:
   PredicateSubtitlePriority(std::string& lang)
     : audiolang(lang),
       original(StringUtils::EqualsNoCase(CSettings::Get().GetString("locale.subtitlelanguage"), "original")),
       preferextsubs(CSettings::Get().GetBool("subtitles.preferexternal")),
-      subson(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn)
+      subson(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn),
+      filter(lang)
   {
   };
 
+  bool relevant(const SelectionStream& ss) const
+  {
+    return !filter(ss);
+  }
+
   bool operator()(const SelectionStream& lh, const SelectionStream& rh) const
   {
+    PREDICATE_RETURN(relevant(lh)
+                   , relevant(rh));
+
     PREDICATE_RETURN(lh.type_index == CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream
                    , rh.type_index == CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream);
 
@@ -662,20 +672,6 @@ bool CDVDPlayer::OpenInputStream()
     m_filename = g_mediaManager.TranslateDevicePath("");
   }
 
-  // before creating the input stream, if this is an HLS playlist then get the
-  // most appropriate bitrate based on our network settings
-  // ensure to strip off the url options by using a temp CURL object
-  if (StringUtils::StartsWith(filename, "http://") &&
-      StringUtils::EndsWith(CURL(filename).GetFileName(), ".m3u8"))
-  {
-    // get the available bandwidth (as per user settings)
-    int maxrate = CSettings::Get().GetInt("network.bandwidth");
-    if(maxrate <= 0)
-      maxrate = INT_MAX;
-
-    // determine the most appropriate stream
-    m_filename = PLAYLIST::CPlayListM3U::GetBestBandwidthStream(m_filename, (size_t)maxrate);
-  }
   m_pInputStream = CDVDFactoryInputStream::CreateInputStream(this, m_filename, m_mimetype);
   if(m_pInputStream == NULL)
   {
@@ -824,34 +820,28 @@ void CDVDPlayer::OpenDefaultStreams(bool reset)
     CloseAudioStream(true);
 
   // enable  or disable subtitles
-  SetSubtitleVisible(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn);
+  bool visible = CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn;
 
   // open subtitle stream
   SelectionStream as = m_SelectionStreams.Get(STREAM_AUDIO, GetAudioStream());
-  PredicateSubtitleFilter psf(as.language);
-  streams = m_SelectionStreams.RemoveIf(STREAM_SUBTITLE, psf);
   PredicateSubtitlePriority psp(as.language);
-  std::stable_sort(streams.begin(), streams.end(), psp);
+  streams = m_SelectionStreams.Get(STREAM_SUBTITLE, psp);
   valid   = false;
   for(SelectionStreams::iterator it = streams.begin(); it != streams.end() && !valid; ++it)
   {
     if(OpenSubtitleStream(it->id, it->source))
     {
       valid = true;
-      if(it->flags & CDemuxStream::FLAG_FORCED)
-        m_dvdPlayerVideo.EnableSubtitle(true);
+      if(!psp.relevant(*it))
+        visible = false;
+      else if(it->flags & CDemuxStream::FLAG_FORCED)
+        visible = true;
     }
   }
   if(!valid)
-  {
     CloseSubtitleStream(true);
-    if (m_pInputStream && !(m_pInputStream->IsStreamType(DVDSTREAM_TYPE_DVD) || m_pInputStream->IsStreamType(DVDSTREAM_TYPE_BLURAY)))
-    {
-      SetSubtitleVisible(false);
-      if (GetSubtitleCount() > 0 && CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream == -1)
-        CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream = 0;
-    }
-  }
+
+  SetSubtitleVisibleInternal(visible);
 
   // open teletext stream
   streams = m_SelectionStreams.Get(STREAM_TELETEXT);
@@ -1040,7 +1030,8 @@ void CDVDPlayer::Process()
   if (CDVDInputStream::IMenus* ptr = dynamic_cast<CDVDInputStream::IMenus*>(m_pInputStream))
   {
     CLog::Log(LOGNOTICE, "DVDPlayer: playing a file with menu's");
-    m_PlayerOptions.starttime = 0;
+    if(dynamic_cast<CDVDInputStreamNavigator*>(m_pInputStream))
+      m_PlayerOptions.starttime = 0;
 
     if(m_PlayerOptions.state.size() > 0)
       ptr->SetState(m_PlayerOptions.state);
@@ -1199,7 +1190,7 @@ void CDVDPlayer::Process()
     UpdateApplication(1000);
 
     // make sure we run subtitle process here
-    m_dvdPlayerSubtitle.Process(m_clock.GetClock() + m_State.time_offset - m_dvdPlayerVideo.GetSubtitleDelay());
+    m_dvdPlayerSubtitle.Process(m_clock.GetClock() + m_State.time_offset - m_dvdPlayerVideo.GetSubtitleDelay(), m_State.time_offset);
 
     if (CheckDelayedChannelEntry())
       continue;
@@ -2271,11 +2262,7 @@ void CDVDPlayer::HandleMessages()
       else if (pMsg->IsType(CDVDMsg::PLAYER_SET_SUBTITLESTREAM_VISIBLE))
       {
         CDVDMsgBool* pValue = (CDVDMsgBool*)pMsg;
-
-        m_dvdPlayerVideo.EnableSubtitle(pValue->m_value);
-
-        if (m_pInputStream && m_pInputStream->IsStreamType(DVDSTREAM_TYPE_DVD))
-          static_cast<CDVDInputStreamNavigator*>(m_pInputStream)->EnableSubtitleStream(pValue->m_value);
+        SetSubtitleVisibleInternal(pValue->m_value);
       }
       else if (pMsg->IsType(CDVDMsg::PLAYER_SET_STATE))
       {
@@ -2856,6 +2843,15 @@ void CDVDPlayer::SetSubtitleVisible(bool bVisible)
   m_messenger.Put(new CDVDMsgBool(CDVDMsg::PLAYER_SET_SUBTITLESTREAM_VISIBLE, bVisible));
 }
 
+void CDVDPlayer::SetSubtitleVisibleInternal(bool bVisible)
+{
+  CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn = bVisible;
+  m_dvdPlayerVideo.EnableSubtitle(bVisible);
+
+  if (m_pInputStream && m_pInputStream->IsStreamType(DVDSTREAM_TYPE_DVD))
+    static_cast<CDVDInputStreamNavigator*>(m_pInputStream)->EnableSubtitleStream(bVisible);
+}
+
 int CDVDPlayer::GetAudioStreamCount()
 {
   return m_SelectionStreams.Count(STREAM_AUDIO);
@@ -3194,14 +3190,14 @@ bool CDVDPlayer::AdaptForcedSubtitles()
         if(OpenSubtitleStream(it->id, it->source))
         {
           valid = true;
-          SetSubtitleVisible(true);
+          SetSubtitleVisibleInternal(true);
         }
       }
     }
     if(!valid)
     {
       CloseSubtitleStream(true);
-      SetSubtitleVisible(false);
+      SetSubtitleVisibleInternal(false);
     }
   }
   return valid;
@@ -3432,6 +3428,12 @@ int CDVDPlayer::OnDVDNavResult(void* pData, int iMessage)
                   m_dvd.iDVDStillTime, time / 1000);
       }
     }
+    else if (iMessage == 6)
+    {
+      m_dvd.state = DVDSTATE_NORMAL;
+      CLog::Log(LOGDEBUG, "CDVDPlayer::OnDVDNavResult - libbluray read error (DVDSTATE_NORMAL)");
+      CGUIDialogKaiToast::QueueNotification(g_localizeStrings.Get(25008), g_localizeStrings.Get(25009));
+    }
 
     return 0;
   }
@@ -3489,7 +3491,7 @@ int CDVDPlayer::OnDVDNavResult(void* pData, int iMessage)
         int iStream = event->physical_wide;
         bool visible = !(iStream & 0x80);
 
-        SetSubtitleVisible(visible);
+        SetSubtitleVisibleInternal(visible);
 
         if (iStream >= 0)
           m_dvd.iSelectedSPUStream = (iStream & ~0x80);
@@ -3868,7 +3870,7 @@ bool CDVDPlayer::HasMenu()
 {
   CDVDInputStream::IMenus* pStream = dynamic_cast<CDVDInputStream::IMenus*>(m_pInputStream);
   if (pStream)
-    return true;
+    return pStream->HasMenu();
   else
     return false;
 }
@@ -4071,6 +4073,11 @@ void CDVDPlayer::UpdatePlayState(double timeout)
     state.dts = m_CurrentVideo.dts;
   else if(m_CurrentAudio.dts != DVD_NOPTS_VALUE)
     state.dts = m_CurrentAudio.dts;
+  else if(m_CurrentVideo.startpts != DVD_NOPTS_VALUE)
+    state.dts = m_CurrentVideo.startpts;
+  else if(m_CurrentAudio.startpts != DVD_NOPTS_VALUE)
+    state.dts = m_CurrentAudio.startpts;
+
 
   if(m_pDemuxer)
   {

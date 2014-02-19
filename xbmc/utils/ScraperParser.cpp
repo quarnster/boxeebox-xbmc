@@ -346,6 +346,7 @@ void CScraperParser::ParseXSLT(const CStdString& input, CStdString& dest, TiXmlE
     XSLTUtils xsltUtils;
     CStdString strXslt;
     strXslt << *pSheet;
+    ReplaceBuffers(strXslt);
 
     if (!xsltUtils.SetInput(input))
       CLog::Log(LOGDEBUG, "could not parse input XML");
@@ -528,8 +529,7 @@ void CScraperParser::Clean(CStdString& strDirty)
     size_t i2;
     if ((i2 = strDirty.find("!!!ENCODE!!!",i+12)) != std::string::npos)
     {
-      strBuffer = strDirty.substr(i+12,i2-i-12);
-      CURL::Encode(strBuffer);
+      strBuffer = CURL::Encode(strDirty.substr(i + 12, i2 - i - 12));
       strDirty.replace(i, i2-i+12, strBuffer);
       i += strBuffer.size();
     }

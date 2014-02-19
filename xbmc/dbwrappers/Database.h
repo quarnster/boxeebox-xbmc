@@ -102,8 +102,11 @@ public:
 
   /*!
    * @brief Execute a query that does not return any result.
+   *        Note that if BeginMultipleExecute() has been called, the
+   *        query will be queued until CommitMultipleExecute() is called.
    * @param strQuery The query to execute.
    * @return True if the query was executed successfully, false otherwise.
+   * @sa BeginMultipleExecute, CommitMultipleExecute
    */
   bool ExecuteQuery(const CStdString &strQuery);
 
@@ -114,6 +117,26 @@ public:
    * @return True if the query was executed successfully, false otherwise.
    */
   bool ResultQuery(const CStdString &strQuery);
+
+  /*!
+   * @brief Start a multiple execution queue. Any ExecuteQuery() function
+   *        following this call will be queued rather than executed until
+   *        CommitMultipleExecute() is performed.
+   *          NOTE: Queries that rely on any queued execute query will not
+   *                function as expected during this period!
+   * @return true if we could start a multiple execution queue, false otherwise.
+   * @sa CommitMultipleExecute, ExecuteQuery
+   */
+  bool BeginMultipleExecute();
+
+  /*!
+   * @brief Commit the multiple execution queue to the database.
+   *        Queries are performed within a transaction, and the transaction
+   *        is rolled back should any one query fail.
+   * @return True if the queries were executed successfully, false otherwise.
+   * @sa BeginMultipleExecute, ExecuteQuery
+   */
+  bool CommitMultipleExecute();
 
   /*!
    * @brief Open a new dataset.
@@ -146,11 +169,35 @@ protected:
   uint32_t ComputeCRC(const CStdString &text);
 
   virtual bool Open();
-  virtual bool CreateTables();
-  virtual void CreateViews() {};
-  virtual bool UpdateOldVersion(int version) { return true; };
 
-  virtual int GetMinVersion() const=0;
+  /*! \brief Create database tables and analytics as needed.
+   Calls CreateTables() and CreateAnalytics() on child classes.
+   */
+  bool CreateDatabase();
+
+  /* \brief Create tables for the current database schema.
+   Will be called on database creation.
+   */
+  virtual void CreateTables()=0;
+
+  /* \brief Create views, indices and triggers for the current database schema.
+   Will be called on database creation and database update.
+   */
+  virtual void CreateAnalytics()=0;
+
+  /* \brief Update database tables to the current version.
+   Note that analytics (views, indices, triggers) are not present during this
+   function, so don't rely on them.
+   */
+  virtual void UpdateTables(int version) {};
+
+  /* \brief The minimum schema version that we support updating from.
+   */
+  virtual int GetMinSchemaVersion() const { return 0; };
+
+  /* \brief The current schema version.
+   */
+  virtual int GetSchemaVersion() const=0;
   virtual const char *GetBaseDBName() const=0;
 
   int GetDBVersion();
@@ -167,8 +214,11 @@ protected:
 private:
   void InitSettings(DatabaseSettings &dbSettings);
   bool Connect(const CStdString &dbName, const DatabaseSettings &db, bool create);
-  bool UpdateVersionNumber();
+  void UpdateVersionNumber();
 
   bool m_bMultiWrite; /*!< True if there are any queries in the queue, false otherwise */
   unsigned int m_openCount;
+
+  bool m_multipleExecute;
+  std::vector<std::string> m_multipleQueries;
 };

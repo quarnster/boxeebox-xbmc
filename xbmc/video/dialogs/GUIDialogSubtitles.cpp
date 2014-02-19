@@ -31,6 +31,7 @@
 #include "filesystem/SpecialProtocol.h"
 #include "guilib/GUIImage.h"
 #include "guilib/GUIKeyboardFactory.h"
+#include "guilib/Key.h"
 #include "settings/MediaSettings.h"
 #include "settings/Settings.h"
 #include "settings/VideoSettings.h"
@@ -114,11 +115,13 @@ CGUIDialogSubtitles::~CGUIDialogSubtitles(void)
 
 bool CGUIDialogSubtitles::OnMessage(CGUIMessage& message)
 {
-  if  (message.GetMessage() == GUI_MSG_CLICKED)
+  if (message.GetMessage() == GUI_MSG_CLICKED)
   {
     int iControl = message.GetSenderId();
+    bool selectAction = (message.GetParam1() == ACTION_SELECT_ITEM ||
+                         message.GetParam1() == ACTION_MOUSE_LEFT_CLICK);
 
-    if (iControl == CONTROL_SUBLIST)
+    if (selectAction && iControl == CONTROL_SUBLIST)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), CONTROL_SUBLIST);
       OnMessage(msg);
@@ -128,7 +131,7 @@ bool CGUIDialogSubtitles::OnMessage(CGUIMessage& message)
         Download(*m_subtitles->Get(item));
       return true;
     }
-    else if (iControl == CONTROL_SERVICELIST)
+    else if (selectAction && iControl == CONTROL_SERVICELIST)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), CONTROL_SERVICELIST);
       OnMessage(msg);
@@ -233,7 +236,7 @@ void CGUIDialogSubtitles::FillServices()
   }
 
   std::string defaultService;
-  const CFileItem &item = g_application.CurrentFileItem();
+  const CFileItem &item = g_application.CurrentUnstackedItem();
   if (item.GetVideoContentType() == VIDEODB_CONTENT_TVSHOWS ||
       item.GetVideoContentType() == VIDEODB_CONTENT_EPISODES)
     // Set default service for tv shows
@@ -403,6 +406,8 @@ void CGUIDialogSubtitles::OnDownloadComplete(const CFileItemList *items, const s
 
   CStdString strFileName;
   CStdString strDestPath;
+#if 0
+  // TODO: Code to download all subtitles for all stack items in one run
   if (g_application.CurrentFileItem().IsStack())
   {
     for (int i = 0; i < items->Size(); i++)
@@ -411,17 +416,22 @@ void CGUIDialogSubtitles::OnDownloadComplete(const CFileItemList *items, const s
 //    CLog::Log(LOGDEBUG, "Stack Subs [%s} Found", vecItems[i]->GetLabel().c_str());
     }
   }
-  else if (StringUtils::StartsWith(g_application.CurrentFile(), "http://"))
+#endif
+
+  // Get (unstacked) path
+  const CStdString &strCurrentFile = g_application.CurrentUnstackedItem().GetPath();
+
+  if (StringUtils::StartsWith(strCurrentFile, "http://"))
   {
     strFileName = "TemporarySubs";
     strDestPath = "special://temp/";
   }
   else
   {
-    strFileName = URIUtils::GetFileName(g_application.CurrentFile());
+    strFileName = URIUtils::GetFileName(strCurrentFile);
     if (CSettings::Get().GetBool("subtitles.savetomoviefolder"))
     {
-      strDestPath = URIUtils::GetDirectory(g_application.CurrentFile());
+      strDestPath = URIUtils::GetDirectory(strCurrentFile);
       if (!CUtil::SupportsWriteFileOperations(strDestPath))
         strDestPath.clear();
     }

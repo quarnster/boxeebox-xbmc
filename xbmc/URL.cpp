@@ -37,13 +37,6 @@
 using namespace std;
 using namespace ADDON;
 
-CStdString URLEncodeInline(const CStdString& strData)
-{
-  CStdString buffer = strData;
-  CURL::Encode(buffer);
-  return buffer;
-}
-
 CURL::CURL(const CStdString& strURL1)
 {
   Parse(strURL1);
@@ -128,7 +121,7 @@ void CURL::Parse(const CStdString& strURL1)
         if (!(s.st_mode & S_IFDIR))
 #endif
         {
-          Encode(archiveName);
+          archiveName = Encode(archiveName);
           if (is_apk)
           {
             CURL c("apk://" + archiveName + "/" + strURL.substr(iPos + 1));
@@ -335,12 +328,12 @@ void CURL::Parse(const CStdString& strURL1)
   /* decode urlencoding on this stuff */
   if(URIUtils::ProtocolHasEncodedHostname(m_strProtocol))
   {
-    Decode(m_strHostName);
+    m_strHostName = Decode(m_strHostName);
     SetHostName(m_strHostName);
   }
 
-  Decode(m_strUserName);
-  Decode(m_strPassword);
+  m_strUserName = Decode(m_strUserName);
+  m_strPassword = Decode(m_strPassword);
 }
 
 void CURL::SetFileName(const CStdString& strFileName)
@@ -598,7 +591,7 @@ std::string CURL::GetWithoutUserDetails(bool redact) const
       strHostName = m_strHostName;
 
     if (URIUtils::ProtocolHasEncodedHostname(m_strProtocol))
-      strURL += URLEncodeInline(strHostName);
+      strURL += Encode(strHostName);
     else
       strURL += strHostName;
 
@@ -641,13 +634,14 @@ CStdString CURL::GetWithoutFilename() const
     strURL += m_strDomain;
     strURL += ";";
   }
-  else if (m_strUserName != "")
+
+  if (m_strUserName != "")
   {
-    strURL += URLEncodeInline(m_strUserName);
+    strURL += Encode(m_strUserName);
     if (m_strPassword != "")
     {
       strURL += ":";
-      strURL += URLEncodeInline(m_strPassword);
+      strURL += Encode(m_strPassword);
     }
     strURL += "@";
   }
@@ -657,7 +651,7 @@ CStdString CURL::GetWithoutFilename() const
   if (m_strHostName != "")
   {
     if( URIUtils::ProtocolHasEncodedHostname(m_strProtocol) )
-      strURL += URLEncodeInline(m_strHostName);
+      strURL += Encode(m_strHostName);
     else
       strURL += m_strHostName;
     if (HasPort())
@@ -706,11 +700,11 @@ bool CURL::IsFullPath(const CStdString &url)
   return false;
 }
 
-void CURL::Decode(CStdString& strURLData)
+std::string CURL::Decode(const std::string& strURLData)
 //modified to be more accomodating - if a non hex value follows a % take the characters directly and don't raise an error.
 // However % characters should really be escaped like any other non safe character (www.rfc-editor.org/rfc/rfc1738.txt)
 {
-  CStdString strResult;
+  std::string strResult;
 
   /* result will always be less than source */
   strResult.reserve( strURLData.length() );
@@ -740,45 +734,30 @@ void CURL::Decode(CStdString& strURLData)
     }
     else strResult += kar;
   }
-  strURLData = strResult;
-}
-
-void CURL::Encode(CStdString& strURLData)
-{
-  CStdString strResult;
-
-  /* wonder what a good value is here is, depends on how often it occurs */
-  strResult.reserve( strURLData.length() * 2 );
-
-  for (int i = 0; i < (int)strURLData.size(); ++i)
-  {
-    int kar = (unsigned char)strURLData[i];
-    //if (kar == ' ') strResult += '+'; // obsolete
-    if (isalnum(kar) || strchr("-_.!()" , kar) ) // Don't URL encode these according to RFC1738
-    {
-      strResult += kar;
-    }
-    else
-    {
-      CStdString strTmp = StringUtils::Format("%%%02.2x", kar);
-      strResult += strTmp;
-    }
-  }
-  strURLData = strResult;
-}
-
-std::string CURL::Decode(const std::string& strURLData)
-{
-  CStdString url = strURLData;
-  Decode(url);
-  return url;
+  
+  return strResult;
 }
 
 std::string CURL::Encode(const std::string& strURLData)
 {
-  CStdString url = strURLData;
-  Encode(url);
-  return url;
+  std::string strResult;
+
+  /* wonder what a good value is here is, depends on how often it occurs */
+  strResult.reserve( strURLData.length() * 2 );
+
+  for (size_t i = 0; i < strURLData.size(); ++i)
+  {
+    const char kar = strURLData[i];
+    
+    // Don't URL encode "-_.!()" according to RFC1738
+    // TODO: Update it to "-_.~" after Gotham according to RFC3986
+    if (StringUtils::isasciialphanum(kar) || kar == '-' || kar == '.' || kar == '_' || kar == '!' || kar == '(' || kar == ')')
+      strResult.push_back(kar);
+    else
+      strResult += StringUtils::Format("%%%02.2x", (unsigned int)((unsigned char)kar)); // TODO: Change to "%%%02.2X" after Gotham
+  }
+
+  return strResult;
 }
 
 CStdString CURL::TranslateProtocol(const CStdString& prot)

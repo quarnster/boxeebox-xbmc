@@ -61,6 +61,10 @@
           <control type="toggle" />
         </setting>
       </group>
+      <group id="3">
+        <setting id="audiooutput.ac3transcode" help="37024">
+        </setting>
+      </group>
     </category>
   </section>
 </settings>

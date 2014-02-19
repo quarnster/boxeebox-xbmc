@@ -23,7 +23,6 @@
 #include "AESinkDirectSound.h"
 #include "utils/Log.h"
 #include <initguid.h>
-#include <Mmreg.h>
 #include <list>
 #include "threads/SingleLock.h"
 #include "threads/SystemClock.h"
@@ -233,10 +232,10 @@ bool CAESinkDirectSound::Initialize(AEAudioFormat &format, std::string &device)
 
   m_AvgBytesPerSec = wfxex.Format.nAvgBytesPerSec;
 
-  unsigned int uiFrameCount = (int)(format.m_sampleRate * 0.01); //default to 10ms chunks
+  unsigned int uiFrameCount = (int)(format.m_sampleRate * 0.015); //default to 15ms chunks
   m_dwFrameSize = wfxex.Format.nBlockAlign;
   m_dwChunkSize = m_dwFrameSize * uiFrameCount;
-  m_dwBufferLen = m_dwChunkSize * 12; //120ms total buffer
+  m_dwBufferLen = m_dwChunkSize * 12; //180ms total buffer
 
   // fill in the secondary sound buffer descriptor
   DSBUFFERDESC dsbdesc;
@@ -550,6 +549,8 @@ void CAESinkDirectSound::EnumerateDevicesEx(AEDeviceInfoList &deviceInfoList, bo
       deviceInfo.m_channels = layoutsByChCount[std::max(std::min(smpwfxex->nChannels, (WORD) DS_SPEAKER_COUNT), (WORD) 2)];
       deviceInfo.m_dataFormats.push_back(AEDataFormat(AE_FMT_FLOAT));
       deviceInfo.m_dataFormats.push_back(AEDataFormat(AE_FMT_AC3));
+      // DTS is played with the same infrastructure as AC3
+      deviceInfo.m_dataFormats.push_back(AEDataFormat(AE_FMT_DTS));
       deviceInfo.m_sampleRates.push_back(std::min(smpwfxex->nSamplesPerSec, (DWORD) 192000));
     }
     else
@@ -563,7 +564,7 @@ void CAESinkDirectSound::EnumerateDevicesEx(AEDeviceInfoList &deviceInfoList, bo
 
     deviceInfo.m_deviceName       = strDevName;
     deviceInfo.m_displayName      = strWinDevType.append(strFriendlyName);
-    deviceInfo.m_displayNameExtra = std::string("DirectSound: ").append(strFriendlyName);
+    deviceInfo.m_displayNameExtra = std::string("DIRECTSOUND: ").append(strFriendlyName);
     deviceInfo.m_deviceType       = aeDeviceType;
 
     deviceInfoList.push_back(deviceInfo);

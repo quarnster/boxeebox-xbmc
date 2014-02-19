@@ -1046,7 +1046,7 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#252"
-msgid "Output stereo to all speakers"
+msgid "Stereo upmix"
 msgstr ""
 
 msgctxt "#253"
@@ -1990,11 +1990,7 @@ msgctxt "#470"
 msgid "Credits"
 msgstr ""
 
-msgctxt "#471"
-msgid "Modchip"
-msgstr ""
-
-#empty strings from id 472 to 473
+#empty strings from id 471 to 473
 
 msgctxt "#474"
 msgid "Off"
@@ -2797,7 +2793,12 @@ msgctxt "#666"
 msgid "Verbose logging..."
 msgstr ""
 
-#empty strings from id 667 to 699
+#: system/settings/settings.xml
+msgctxt "#667"
+msgid "Enable Dolby Digital transcoding"
+msgstr ""
+
+#empty strings from id 668 to 699
 
 msgctxt "#700"
 msgid "Cleaning up library"
@@ -5996,10 +5997,82 @@ msgid "Allow hardware acceleration (MediaCodec)"
 msgstr ""
 
 msgctxt "#13440"
-msgid "Frame Multi Threaded Decoding (less reliable)"
+msgid "Allow frame-multi-threaded decoding"
 msgstr ""
 
-#empty strings from id 13441 to 13499
+#. Description of Mpeg-2 Codec for VDPAU
+#: system/settings/settings.xml
+msgctxt "#13441"
+msgid "Use Mpeg-2 VDPAU"
+msgstr ""
+
+#. Description of setting #13441 'Use Mpeg-2 VDPAU'
+#: system/settings/settings.xml
+msgctxt "#13442"
+msgid "Enable this option to use hardware acceleration for Mpeg-(1/2) codecs. If disabled the CPU will be used instead. Older Radeon Cards tend to segfault with this enabled."
+msgstr ""
+
+#. Description of Mpeg-4 Codec for VDPAU
+#: system/settings/settings.xml
+msgctxt "#13443"
+msgid "Use Mpeg-4 VDPAU"
+msgstr ""
+
+#. Description of setting #13443 'Use Mpeg-4 VDPAU'
+#: system/settings/settings.xml
+msgctxt "#13444"
+msgid "Enable this option to use hardware acceleration for the Mpeg-4 codec. If disabled the CPU will be used instead. Some ION Hardware has problems with this being enabled by default."
+msgstr ""
+
+#. Description of VC-1 Codec for VDPAU
+#: system/settings/settings.xml
+msgctxt "#13445"
+msgid "Use VC-1 VDPAU"
+msgstr ""
+
+#. Description of setting #13445 'Use VC-1 VDPAU'
+#: system/settings/settings.xml
+msgctxt "#13446"
+msgid "Enable this option to use hardware acceleration for VC-1 based codecs. If disabled the CPU will be used instead. AMD Hardware with VDPAU cannot decode VC-1 Simple."
+msgstr ""
+
+#. Description of Mpeg-2 Codec for VAAPI
+#: system/settings/settings.xml
+msgctxt "#13447"
+msgid "Use Mpeg-2 VAAPI"
+msgstr ""
+
+#. Description of setting #13447 'Use Mpeg-2 VAAPI'
+#: system/settings/settings.xml
+msgctxt "#13448"
+msgid "Enable this option to use hardware acceleration for Mpeg-(1/2) codecs. If disabled the CPU will be used instead. Some Mpeg-2 Videos might have green artifacts."
+msgstr ""
+
+#. Description of Mpeg-4 Codec for VAAPI
+#: system/settings/settings.xm
+msgctxt "#13449"
+msgid "Use Mpeg-4 VAAPI"
+msgstr ""
+
+#. Description of setting #13449 'Use Mpeg-4 VAAPI'
+#: system/settings/settings.xml
+msgctxt "#13450"
+msgid "Enable this option to use hardware acceleration for the Mpeg-4 codec. If disabled the CPU will be used instead."
+msgstr ""
+
+#. Description of VC-1 Codec for VAAPI
+#: system/settings/settings.xm
+msgctxt "#13451"
+msgid "Use VC-1 VAAPI"
+msgstr ""
+
+#. Description of setting #13451 'Use VC-1 VAAPI'
+#: system/settings/settings.xml
+msgctxt "#13452"
+msgid "Enable this option to use hardware acceleration for VC-1 based codecs. If disabled the CPU will be used instead. Especially VC-1 Interlaced fails hard on Intel hardware."
+msgstr ""
+
+#empty strings from id 13453 to 13499
 
 #: system/settings/settings.xml
 msgctxt "#13500"
@@ -7257,9 +7330,10 @@ msgctxt "#19017"
 msgid "TV recordings"
 msgstr ""
 
+#. Name of a setting, asking to enter the path to a folder that contains icons for TV channels
 #: system/settings/settings.xml
 msgctxt "#19018"
-msgid "Default folder for PVR thumbnails"
+msgid "Folder with channel icons"
 msgstr ""
 
 #: xbmc/windows/GUIWindowSystemInfo.cpp
@@ -7456,7 +7530,12 @@ msgctxt "#19065"
 msgid "Default EPG window"
 msgstr ""
 
-#empty string with id 19066
+#. Name of a shortcut to a custom folder for channel icons
+#: xbmc/pvr/windows/GUIWindowPVRChannels.cpp
+#: xbmc/pvr/dialogs/GUIDialogPVRChannelManager.cpp
+msgctxt "#19066"
+msgid "Channel icons"
+msgstr ""
 
 msgctxt "#19067"
 msgid "This event is already being recorded."
@@ -8356,7 +8435,35 @@ msgctxt "#19281"
 msgid "Confirm channel switches by pressing OK"
 msgstr ""
 
-#empty strings from id 19282 to 19498
+#. Label for a select option or list item, representing an icon graphic (like a TV channel icon)
+#: xbmc/pvr/windows/GUIWindowPVRChannels.cpp
+#: xbmc/pvr/dialogs/GUIDialogPVRChannelManager.cpp
+msgctxt "#19282"
+msgid "Current icon"
+msgstr ""
+
+#. Label for a select option or list item, representing an icon graphic (like a TV channel icon)
+#: xbmc/pvr/windows/GUIWindowPVRChannels.cpp
+#: xbmc/pvr/dialogs/GUIDialogPVRChannelManager.cpp
+msgctxt "#19283"
+msgid "No icon"
+msgstr ""
+
+#. Label for a select/menu option to select an icon graphic
+#: xbmc/pvr/windows/GUIWindowPVRChannels.cpp
+#: xbmc/pvr/dialogs/GUIDialogPVRChannelManager.cpp
+msgctxt "#19284"
+msgid "Choose icon"
+msgstr ""
+
+#. Label for a select/menu option to select an icon graphic
+#: xbmc/pvr/windows/GUIWindowPVRChannels.cpp
+#: xbmc/pvr/dialogs/GUIDialogPVRChannelManager.cpp
+msgctxt "#19285"
+msgid "Browse for icon"
+msgstr ""
+
+#empty strings from id 19286 to 19498
 
 #: xbmc/epg/Epg.cpp
 msgctxt "#19499"
@@ -8732,7 +8839,7 @@ msgstr ""
 
 #: xbmc/epg/Epg.cpp
 msgctxt "#19648"
-msgid "Fitness &amp; Health"
+msgid "Fitness & Health"
 msgstr ""
 
 #: xbmc/epg/Epg.cpp
@@ -8764,7 +8871,7 @@ msgstr ""
 
 #: xbmc/epg/Epg.cpp
 msgctxt "#19662"
-msgid "Black &amp; White"
+msgid "Black & White"
 msgstr ""
 
 #: xbmc/epg/Epg.cpp
@@ -9811,7 +9918,12 @@ msgctxt "#20321"
 msgid "Scanning albums using %s"
 msgstr ""
 
-#empty strings from id 20322 to 20323
+#empty string with id 20322
+
+#: xbmc/video/windows/GUIWindowVideoNav.cpp
+msgctxt "#20323"
+msgid "Movie plot"
+msgstr ""
 
 msgctxt "#20324"
 msgid "Play part..."
@@ -10549,7 +10661,7 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#21366"
-msgid "Subtitle folder"
+msgid "Custom subtitle folder"
 msgstr ""
 
 msgctxt "#21367"
@@ -10963,7 +11075,7 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#21460"
-msgid "Subtitle location"
+msgid "Subtitle location on screen"
 msgstr ""
 
 #: system/settings/settings.xml
@@ -12146,7 +12258,22 @@ msgctxt "#25006"
 msgid "Select playback item"
 msgstr ""
 
-#empty strings from id 25007 to 29799
+#: xbmc/filesystem/BlurayDirectory.cpp
+msgctxt "#25007"
+msgid "Chapters: %u - duration: %s"
+msgstr ""
+
+#: xbmc/cores/dvdplayer/DVDPlayer.cpp
+msgctxt "#25008"
+msgid "Blu-ray Disc playback failed"
+msgstr ""
+
+#: xbmc/cores/dvdplayer/DVDPlayer.cpp
+msgctxt "#25009"
+msgid "The menu of this Blu-ray Disc is not supported"
+msgstr ""
+
+#empty strings from id 25010 to 29799
 #strings 29800 thru 29998 reserved strings used only in the default Project Mayhem III skin and not c++ code
 
 #: skin.confluence
@@ -12582,7 +12709,7 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#34100"
-msgid "Speaker Configuration"
+msgid "Number of channels"
 msgstr ""
 
 #: system/settings/settings.xml
@@ -14405,7 +14532,7 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#36362"
-msgid "Select the maximum number of audio channels/speakers available for audio decoded."
+msgid "Select the number of channels supported by the audio connection, or the number of speakers if connected by analog connections. This setting does not apply to passthrough audio. Note - SPDIF supports 2.0 channels only but can still output multichannel audio using a format supported by passthrough."
 msgstr ""
 
 #: system/settings/settings.xml
@@ -14415,7 +14542,7 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#36364"
-msgid "Select to enable upmixing of 2 channel stereo sources to the number of audio channels specified by the speaker configuration."
+msgid "Select to enable upmixing of 2 channel audio to the number of audio channels specified by the speaker configuration."
 msgstr ""
 
 #: system/settings/settings.xml
@@ -14710,7 +14837,7 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#36423"
-msgid "Use ffmpeg frame multiple thread decoding when hardware decoding not working or disabled. (less reliable than default single thread mode)"
+msgid "Use frame-multi-threaded decoding instead of hardware accelerated decoding (less reliable than default single thread mode)."
 msgstr ""
 
 #: system/settings/settings.xml
@@ -14738,7 +14865,12 @@ msgctxt "#36428"
 msgid "Record"
 msgstr ""
 
-#empty strings from id 36429 to 36499
+#: system/settings/settings.xml
+msgctxt "#36429"
+msgid "Select this if the audio out connection only supports multichannel audio as Dolby Digital 5.1, this allows multichannel audio such as AAC5.1 or FLAC5.1 to be listened to in 5.1 surround sound. Note - transcoding can lead to a reduction in sound quality"
+msgstr ""
+
+#empty strings from id 36430 to 36499
 #end reservation
 
 #: system/settings/settings.xml
@@ -15013,4 +15145,19 @@ msgstr ""
 #: system/settings/rbp.xml
 msgctxt "#37021"
 msgid "Set GUI resolution limit"
+msgstr ""
+
+#: xbmc/network/upnp/UPnPPlayer.cpp
+msgctxt "#37022"
+msgid "UPnP Player"
+msgstr ""
+
+#: xbmc/network/upnp/UPnPPlayer.cpp
+msgctxt "#37023"
+msgid "Do you wish to stop playback on the remote device?"
+msgstr ""
+
+#: system/settings/rbp.xml
+msgctxt "#37024"
+msgid "Select this if the audio out connection only supports multichannel audio as Dolby Digital 5.1, this allows multichannel audio such as AAC5.1 or FLAC5.1 to be listened to in 5.1 surround sound. Note - Not recommended on Pi as this requires a lot of CPU."
 msgstr ""

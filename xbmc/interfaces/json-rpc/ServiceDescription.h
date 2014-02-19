@@ -22,7 +22,7 @@
 namespace JSONRPC
 {
   const char* const JSONRPC_SERVICE_ID          = "http://xbmc.org/jsonrpc/ServiceDescription.json";
-  const char* const JSONRPC_SERVICE_VERSION     = "6.13.3";
+  const char* const JSONRPC_SERVICE_VERSION     = "6.13.5";
   const char* const JSONRPC_SERVICE_DESCRIPTION = "JSON-RPC API of XBMC";
 
   const char* const JSONRPC_SERVICE_TYPES[] = {  
@@ -581,6 +581,7 @@ namespace JSONRPC
         "\"properties\": {"
           "\"name\": { \"type\": \"string\", \"required\": true },"
           "\"role\": { \"type\": \"string\", \"required\": true },"
+          "\"order\": { \"type\": \"integer\", \"required\": true },"
           "\"thumbnail\": { \"type\": \"string\" }"
         "},"
         "\"additionalProperties\": false"
@@ -825,7 +826,7 @@ namespace JSONRPC
                   "\"endtime\", \"runtime\", \"progress\", \"progresspercentage\","
                   "\"genre\", \"episodename\", \"episodenum\", \"episodepart\","
                   "\"firstaired\", \"hastimer\", \"isactive\", \"parentalrating\","
-                  "\"wasactive\", \"thumbnail\" ]"
+                  "\"wasactive\", \"thumbnail\", \"rating\" ]"
       "}"
     "}",
     "\"PVR.Details.Broadcast\": {"
@@ -847,9 +848,10 @@ namespace JSONRPC
         "\"firstaired\": { \"type\": \"string\" },"
         "\"hastimer\": { \"type\": \"boolean\" },"
         "\"isactive\": { \"type\": \"boolean\" },"
-        "\"rating\": { \"type\": \"integer\" },"
+        "\"parentalrating\": { \"type\": \"integer\" },"
         "\"wasactive\": { \"type\": \"boolean\" },"
-        "\"thumbnail\": { \"type\": \"string\" }"
+        "\"thumbnail\": { \"type\": \"string\" },"
+        "\"rating\": { \"type\": \"integer\" }"
       "}"
     "}",
     "\"Textures.Details.Size\": {"
@@ -1665,9 +1667,13 @@ namespace JSONRPC
       "\"returns\": {"
         "\"type\": \"object\","
         "\"properties\": {"
-          "\"major\": { \"type\": \"integer\", \"minimum\": 0, \"required\": true, \"description\": \"Bumped on backwards incompatible changes to the API definition\" },"
-          "\"minor\": { \"type\": \"integer\", \"minimum\": 0, \"required\": true, \"description\": \"Bumped on backwards compatible additions/changes to the API definition\" },"
-          "\"patch\": { \"type\": \"integer\", \"minimum\": 0, \"required\": true, \"description\": \"Bumped on any changes to the internal implementation but not to the API definition\" }"
+          "\"version\": { \"type\": \"object\", \"required\": true,"
+            "\"properties\": {"
+              "\"major\": { \"type\": \"integer\", \"minimum\": 0, \"required\": true, \"description\": \"Bumped on backwards incompatible changes to the API definition\" },"
+              "\"minor\": { \"type\": \"integer\", \"minimum\": 0, \"required\": true, \"description\": \"Bumped on backwards compatible additions/changes to the API definition\" },"
+              "\"patch\": { \"type\": \"integer\", \"minimum\": 0, \"required\": true, \"description\": \"Bumped on any changes to the internal implementation but not to the API definition\" }"
+            "}"
+          "}"
         "}"
       "}"
     "}",

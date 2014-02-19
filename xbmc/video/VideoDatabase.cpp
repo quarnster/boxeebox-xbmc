@@ -81,7 +81,160 @@ bool CVideoDatabase::Open()
   return CDatabase::Open(g_advancedSettings.m_databaseVideo);
 }
 
-bool CVideoDatabase::CreateTables()
+void CVideoDatabase::CreateTables()
+{
+  CLog::Log(LOGINFO, "create bookmark table");
+  m_pDS->exec("CREATE TABLE bookmark ( idBookmark integer primary key, idFile integer, timeInSeconds double, totalTimeInSeconds double, thumbNailImage text, player text, playerState text, type integer)\n");
+
+  CLog::Log(LOGINFO, "create settings table");
+  m_pDS->exec("CREATE TABLE settings ( idFile integer, Deinterlace bool,"
+              "ViewMode integer,ZoomAmount float, PixelRatio float, VerticalShift float, AudioStream integer, SubtitleStream integer,"
+              "SubtitleDelay float, SubtitlesOn bool, Brightness float, Contrast float, Gamma float,"
+              "VolumeAmplification float, AudioDelay float, OutputToAllSpeakers bool, ResumeTime integer, Crop bool, CropLeft integer,"
+              "CropRight integer, CropTop integer, CropBottom integer, Sharpness float, NoiseReduction float, NonLinStretch bool, PostProcess bool,"
+              "ScalingMethod integer, DeinterlaceMode integer, StereoMode integer, StereoInvert bool)\n");
+
+  CLog::Log(LOGINFO, "create stacktimes table");
+  m_pDS->exec("CREATE TABLE stacktimes (idFile integer, times text)\n");
+
+  CLog::Log(LOGINFO, "create genre table");
+  m_pDS->exec("CREATE TABLE genre ( idGenre integer primary key, strGenre text)\n");
+
+  CLog::Log(LOGINFO, "create genrelinkmovie table");
+  m_pDS->exec("CREATE TABLE genrelinkmovie ( idGenre integer, idMovie integer)\n");
+
+  CLog::Log(LOGINFO, "create country table");
+  m_pDS->exec("CREATE TABLE country ( idCountry integer primary key, strCountry text)\n");
+
+  CLog::Log(LOGINFO, "create countrylinkmovie table");
+  m_pDS->exec("CREATE TABLE countrylinkmovie ( idCountry integer, idMovie integer)\n");
+
+  CLog::Log(LOGINFO, "create movie table");
+  CStdString columns = "CREATE TABLE movie ( idMovie integer primary key, idFile integer";
+
+  for (int i = 0; i < VIDEODB_MAX_COLUMNS; i++)
+    columns += StringUtils::Format(",c%02d text", i);
+
+  columns += ", idSet integer)";
+  m_pDS->exec(columns.c_str());
+
+  CLog::Log(LOGINFO, "create actorlinkmovie table");
+  m_pDS->exec("CREATE TABLE actorlinkmovie ( idActor integer, idMovie integer, strRole text, iOrder integer)\n");
+
+  CLog::Log(LOGINFO, "create directorlinkmovie table");
+  m_pDS->exec("CREATE TABLE directorlinkmovie ( idDirector integer, idMovie integer)\n");
+
+  CLog::Log(LOGINFO, "create writerlinkmovie table");
+  m_pDS->exec("CREATE TABLE writerlinkmovie ( idWriter integer, idMovie integer)\n");
+
+  CLog::Log(LOGINFO, "create actors table");
+  m_pDS->exec("CREATE TABLE actors ( idActor integer primary key, strActor text, strThumb text )\n");
+
+  CLog::Log(LOGINFO, "create path table");
+  m_pDS->exec("CREATE TABLE path ( idPath integer primary key, strPath text, strContent text, strScraper text, strHash text, scanRecursive integer, useFolderNames bool, strSettings text, noUpdate bool, exclude bool, dateAdded text)");
+
+  CLog::Log(LOGINFO, "create files table");
+  m_pDS->exec("CREATE TABLE files ( idFile integer primary key, idPath integer, strFilename text, playCount integer, lastPlayed text, dateAdded text)");
+
+  CLog::Log(LOGINFO, "create tvshow table");
+  columns = "CREATE TABLE tvshow ( idShow integer primary key";
+
+  for (int i = 0; i < VIDEODB_MAX_COLUMNS; i++)
+    columns += StringUtils::Format(",c%02d text", i);;
+
+  columns += ")";
+  m_pDS->exec(columns.c_str());
+
+  CLog::Log(LOGINFO, "create directorlinktvshow table");
+  m_pDS->exec("CREATE TABLE directorlinktvshow ( idDirector integer, idShow integer)\n");
+
+  CLog::Log(LOGINFO, "create actorlinktvshow table");
+  m_pDS->exec("CREATE TABLE actorlinktvshow ( idActor integer, idShow integer, strRole text, iOrder integer)\n");
+
+  CLog::Log(LOGINFO, "create studiolinktvshow table");
+  m_pDS->exec("CREATE TABLE studiolinktvshow ( idStudio integer, idShow integer)\n");
+
+  CLog::Log(LOGINFO, "create episode table");
+  columns = "CREATE TABLE episode ( idEpisode integer primary key, idFile integer";
+  for (int i = 0; i < VIDEODB_MAX_COLUMNS; i++)
+  {
+    CStdString column;
+    if ( i == VIDEODB_ID_EPISODE_SEASON || i == VIDEODB_ID_EPISODE_EPISODE || i == VIDEODB_ID_EPISODE_BOOKMARK)
+      column = StringUtils::Format(",c%02d varchar(24)", i);
+    else
+      column = StringUtils::Format(",c%02d text", i);
+
+    columns += column;
+  }
+  columns += ", idShow integer)";
+  m_pDS->exec(columns.c_str());
+
+  CLog::Log(LOGINFO, "create tvshowlinkpath table");
+  m_pDS->exec("CREATE TABLE tvshowlinkpath (idShow integer, idPath integer)\n");
+
+  CLog::Log(LOGINFO, "create actorlinkepisode table");
+  m_pDS->exec("CREATE TABLE actorlinkepisode ( idActor integer, idEpisode integer, strRole text, iOrder integer)\n");
+
+  CLog::Log(LOGINFO, "create directorlinkepisode table");
+  m_pDS->exec("CREATE TABLE directorlinkepisode ( idDirector integer, idEpisode integer)\n");
+
+  CLog::Log(LOGINFO, "create writerlinkepisode table");
+  m_pDS->exec("CREATE TABLE writerlinkepisode ( idWriter integer, idEpisode integer)\n");
+
+  CLog::Log(LOGINFO, "create genrelinktvshow table");
+  m_pDS->exec("CREATE TABLE genrelinktvshow ( idGenre integer, idShow integer)\n");
+
+  CLog::Log(LOGINFO, "create movielinktvshow table");
+  m_pDS->exec("CREATE TABLE movielinktvshow ( idMovie integer, IdShow integer)\n");
+
+  CLog::Log(LOGINFO, "create studio table");
+  m_pDS->exec("CREATE TABLE studio ( idStudio integer primary key, strStudio text)\n");
+
+  CLog::Log(LOGINFO, "create studiolinkmovie table");
+  m_pDS->exec("CREATE TABLE studiolinkmovie ( idStudio integer, idMovie integer)\n");
+
+  CLog::Log(LOGINFO, "create musicvideo table");
+  columns = "CREATE TABLE musicvideo ( idMVideo integer primary key, idFile integer";
+  for (int i = 0; i < VIDEODB_MAX_COLUMNS; i++)
+    columns += StringUtils::Format(",c%02d text", i);;
+
+  columns += ")";
+  m_pDS->exec(columns.c_str());
+
+  CLog::Log(LOGINFO, "create artistlinkmusicvideo table");
+  m_pDS->exec("CREATE TABLE artistlinkmusicvideo ( idArtist integer, idMVideo integer)\n");
+
+  CLog::Log(LOGINFO, "create genrelinkmusicvideo table");
+  m_pDS->exec("CREATE TABLE genrelinkmusicvideo ( idGenre integer, idMVideo integer)\n");
+
+  CLog::Log(LOGINFO, "create studiolinkmusicvideo table");
+  m_pDS->exec("CREATE TABLE studiolinkmusicvideo ( idStudio integer, idMVideo integer)\n");
+
+  CLog::Log(LOGINFO, "create directorlinkmusicvideo table");
+  m_pDS->exec("CREATE TABLE directorlinkmusicvideo ( idDirector integer, idMVideo integer)\n");
+
+  CLog::Log(LOGINFO, "create streaminfo table");
+  m_pDS->exec("CREATE TABLE streamdetails (idFile integer, iStreamType integer, "
+    "strVideoCodec text, fVideoAspect float, iVideoWidth integer, iVideoHeight integer, "
+    "strAudioCodec text, iAudioChannels integer, strAudioLanguage text, strSubtitleLanguage text, iVideoDuration integer, strStereoMode text)");
+
+ CLog::Log(LOGINFO, "create sets table");
+  m_pDS->exec("CREATE TABLE sets ( idSet integer primary key, strSet text)\n");
+
+  CLog::Log(LOGINFO, "create seasons table");
+  m_pDS->exec("CREATE TABLE seasons ( idSeason integer primary key, idShow integer, season integer)");
+
+  CLog::Log(LOGINFO, "create art table");
+  m_pDS->exec("CREATE TABLE art(art_id INTEGER PRIMARY KEY, media_id INTEGER, media_type TEXT, type TEXT, url TEXT)");
+
+  CLog::Log(LOGINFO, "create tag table");
+  m_pDS->exec("CREATE TABLE tag (idTag integer primary key, strTag text)");
+
+  CLog::Log(LOGINFO, "create taglinks table");
+  m_pDS->exec("CREATE TABLE taglinks (idTag integer, idMedia integer, media_type TEXT)");
+}
+
+void CVideoDatabase::CreateAnalytics()
 {
   /* indexes should be added on any columns that are used in in  */
   /* a where or a join. primary key on a column is the same as a */
@@ -94,276 +247,116 @@ bool CVideoDatabase::CreateTables()
   /* advantage of a index that has been created on ( idGenre, idMovie ) */
   /*, hower on on ( idMovie, idGenre ) will be considered for use       */
 
-  BeginTransaction();
-  try
-  {
-    CDatabase::CreateTables();
+  CLog::Log(LOGINFO, "%s - creating indicies", __FUNCTION__);
+  m_pDS->exec("CREATE INDEX ix_bookmark ON bookmark (idFile, type)");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_settings ON settings ( idFile )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_stacktimes ON stacktimes ( idFile )\n");
+  m_pDS->exec("CREATE INDEX ix_path ON path ( strPath(255) )");
+  m_pDS->exec("CREATE INDEX ix_files ON files ( idPath, strFilename(255) )");
 
-    CLog::Log(LOGINFO, "create bookmark table");
-    m_pDS->exec("CREATE TABLE bookmark ( idBookmark integer primary key, idFile integer, timeInSeconds double, totalTimeInSeconds double, thumbNailImage text, player text, playerState text, type integer)\n");
-    m_pDS->exec("CREATE INDEX ix_bookmark ON bookmark (idFile, type)");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_genrelinkmovie_1 ON genrelinkmovie ( idGenre, idMovie)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_genrelinkmovie_2 ON genrelinkmovie ( idMovie, idGenre)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_countrylinkmovie_1 ON countrylinkmovie ( idCountry, idMovie)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_countrylinkmovie_2 ON countrylinkmovie ( idMovie, idCountry)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_movie_file_1 ON movie (idFile, idMovie)");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_movie_file_2 ON movie (idMovie, idFile)");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_actorlinkmovie_1 ON actorlinkmovie ( idActor, idMovie )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_actorlinkmovie_2 ON actorlinkmovie ( idMovie, idActor )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinkmovie_1 ON directorlinkmovie ( idDirector, idMovie )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinkmovie_2 ON directorlinkmovie ( idMovie, idDirector )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_writerlinkmovie_1 ON writerlinkmovie ( idWriter, idMovie )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_writerlinkmovie_2 ON writerlinkmovie ( idMovie, idWriter )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_studiolinkmovie_1 ON studiolinkmovie ( idStudio, idMovie)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_studiolinkmovie_2 ON studiolinkmovie ( idMovie, idStudio)\n");
 
-    CLog::Log(LOGINFO, "create settings table");
-    m_pDS->exec("CREATE TABLE settings ( idFile integer, Deinterlace bool,"
-                "ViewMode integer,ZoomAmount float, PixelRatio float, VerticalShift float, AudioStream integer, SubtitleStream integer,"
-                "SubtitleDelay float, SubtitlesOn bool, Brightness float, Contrast float, Gamma float,"
-                "VolumeAmplification float, AudioDelay float, OutputToAllSpeakers bool, ResumeTime integer, Crop bool, CropLeft integer,"
-                "CropRight integer, CropTop integer, CropBottom integer, Sharpness float, NoiseReduction float, NonLinStretch bool, PostProcess bool,"
-                "ScalingMethod integer, DeinterlaceMode integer, StereoMode integer, StereoInvert bool)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_settings ON settings ( idFile )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinktvshow_1 ON directorlinktvshow ( idDirector, idShow )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinktvshow_2 ON directorlinktvshow ( idShow, idDirector )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_actorlinktvshow_1 ON actorlinktvshow ( idActor, idShow )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_actorlinktvshow_2 ON actorlinktvshow ( idShow, idActor )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_studiolinktvshow_1 ON studiolinktvshow ( idStudio, idShow)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_studiolinktvshow_2 ON studiolinktvshow ( idShow, idStudio)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_tvshowlinkpath_1 ON tvshowlinkpath ( idShow, idPath )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_tvshowlinkpath_2 ON tvshowlinkpath ( idPath, idShow )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_movielinktvshow_1 ON movielinktvshow ( idShow, idMovie)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_movielinktvshow_2 ON movielinktvshow ( idMovie, idShow)\n");
 
-    CLog::Log(LOGINFO, "create stacktimes table");
-    m_pDS->exec("CREATE TABLE stacktimes (idFile integer, times text)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_stacktimes ON stacktimes ( idFile )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_episode_file_1 on episode (idEpisode, idFile)");
+  m_pDS->exec("CREATE UNIQUE INDEX id_episode_file_2 on episode (idFile, idEpisode)");
+  CStdString createColIndex = StringUtils::Format("CREATE INDEX ix_episode_season_episode on episode (c%02d, c%02d)", VIDEODB_ID_EPISODE_SEASON, VIDEODB_ID_EPISODE_EPISODE);
+  m_pDS->exec(createColIndex.c_str());
+  createColIndex = StringUtils::Format("CREATE INDEX ix_episode_bookmark on episode (c%02d)", VIDEODB_ID_EPISODE_BOOKMARK);
+  m_pDS->exec(createColIndex.c_str());
+  m_pDS->exec("CREATE INDEX ix_episode_show1 on episode(idEpisode,idShow)");
+  m_pDS->exec("CREATE INDEX ix_episode_show2 on episode(idShow,idEpisode)");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_actorlinkepisode_1 ON actorlinkepisode ( idActor, idEpisode )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_actorlinkepisode_2 ON actorlinkepisode ( idEpisode, idActor )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinkepisode_1 ON directorlinkepisode ( idDirector, idEpisode )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinkepisode_2 ON directorlinkepisode ( idEpisode, idDirector )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_writerlinkepisode_1 ON writerlinkepisode ( idWriter, idEpisode )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_writerlinkepisode_2 ON writerlinkepisode ( idEpisode, idWriter )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_genrelinktvshow_1 ON genrelinktvshow ( idGenre, idShow)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_genrelinktvshow_2 ON genrelinktvshow ( idShow, idGenre)\n");
 
-    CLog::Log(LOGINFO, "create genre table");
-    m_pDS->exec("CREATE TABLE genre ( idGenre integer primary key, strGenre text)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_musicvideo_file_1 on musicvideo (idMVideo, idFile)");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_musicvideo_file_2 on musicvideo (idFile, idMVideo)");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_artistlinkmusicvideo_1 ON artistlinkmusicvideo ( idArtist, idMVideo)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_artistlinkmusicvideo_2 ON artistlinkmusicvideo ( idMVideo, idArtist)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_genrelinkmusicvideo_1 ON genrelinkmusicvideo ( idGenre, idMVideo)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_genrelinkmusicvideo_2 ON genrelinkmusicvideo ( idMVideo, idGenre)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_studiolinkmusicvideo_1 ON studiolinkmusicvideo ( idStudio, idMVideo)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_studiolinkmusicvideo_2 ON studiolinkmusicvideo ( idMVideo, idStudio)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinkmusicvideo_1 ON directorlinkmusicvideo ( idDirector, idMVideo )\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinkmusicvideo_2 ON directorlinkmusicvideo ( idMVideo, idDirector )\n");
 
-    CLog::Log(LOGINFO, "create genrelinkmovie table");
-    m_pDS->exec("CREATE TABLE genrelinkmovie ( idGenre integer, idMovie integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_genrelinkmovie_1 ON genrelinkmovie ( idGenre, idMovie)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_genrelinkmovie_2 ON genrelinkmovie ( idMovie, idGenre)\n");
+  m_pDS->exec("CREATE INDEX ixMovieBasePath ON movie ( c23(12) )");
+  m_pDS->exec("CREATE INDEX ixMusicVideoBasePath ON musicvideo ( c14(12) )");
+  m_pDS->exec("CREATE INDEX ixEpisodeBasePath ON episode ( c19(12) )");
+  m_pDS->exec("CREATE INDEX ixTVShowBasePath on tvshow ( c17(12) )");
 
-    CLog::Log(LOGINFO, "create country table");
-    m_pDS->exec("CREATE TABLE country ( idCountry integer primary key, strCountry text)\n");
+  m_pDS->exec("CREATE INDEX ix_streamdetails ON streamdetails (idFile)");
+  m_pDS->exec("CREATE INDEX ix_seasons ON seasons (idShow, season)");
+  m_pDS->exec("CREATE INDEX ix_art ON art(media_id, media_type(20), type(20))");
 
-    CLog::Log(LOGINFO, "create countrylinkmovie table");
-    m_pDS->exec("CREATE TABLE countrylinkmovie ( idCountry integer, idMovie integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_countrylinkmovie_1 ON countrylinkmovie ( idCountry, idMovie)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_countrylinkmovie_2 ON countrylinkmovie ( idMovie, idCountry)\n");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_tag_1 ON tag (strTag(255))");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_taglinks_1 ON taglinks (idTag, media_type(20), idMedia)");
+  m_pDS->exec("CREATE UNIQUE INDEX ix_taglinks_2 ON taglinks (idMedia, media_type(20), idTag)");
+  m_pDS->exec("CREATE INDEX ix_taglinks_3 ON taglinks (media_type(20))");
 
-    CLog::Log(LOGINFO, "create movie table");
-    CStdString columns = "CREATE TABLE movie ( idMovie integer primary key, idFile integer";
+  CLog::Log(LOGINFO, "%s - creating triggers", __FUNCTION__);
+  m_pDS->exec("CREATE TRIGGER delete_movie AFTER DELETE ON movie FOR EACH ROW BEGIN "
+              "DELETE FROM art WHERE media_id=old.idMovie AND media_type='movie'; "
+              "DELETE FROM taglinks WHERE idMedia=old.idMovie AND media_type='movie'; "
+              "END");
+  m_pDS->exec("CREATE TRIGGER delete_tvshow AFTER DELETE ON tvshow FOR EACH ROW BEGIN "
+              "DELETE FROM art WHERE media_id=old.idShow AND media_type='tvshow'; "
+              "DELETE FROM taglinks WHERE idMedia=old.idShow AND media_type='tvshow'; "
+              "END");
+  m_pDS->exec("CREATE TRIGGER delete_musicvideo AFTER DELETE ON musicvideo FOR EACH ROW BEGIN "
+              "DELETE FROM art WHERE media_id=old.idMVideo AND media_type='musicvideo'; "
+              "DELETE FROM taglinks WHERE idMedia=old.idMVideo AND media_type='musicvideo'; "
+              "END");
+  m_pDS->exec("CREATE TRIGGER delete_episode AFTER DELETE ON episode FOR EACH ROW BEGIN "
+              "DELETE FROM art WHERE media_id=old.idEpisode AND media_type='episode'; "
+              "END");
+  m_pDS->exec("CREATE TRIGGER delete_season AFTER DELETE ON seasons FOR EACH ROW BEGIN "
+              "DELETE FROM art WHERE media_id=old.idSeason AND media_type='season'; "
+              "END");
+  m_pDS->exec("CREATE TRIGGER delete_set AFTER DELETE ON sets FOR EACH ROW BEGIN "
+              "DELETE FROM art WHERE media_id=old.idSet AND media_type='set'; "
+              "END");
+  m_pDS->exec("CREATE TRIGGER delete_person AFTER DELETE ON actors FOR EACH ROW BEGIN "
+              "DELETE FROM art WHERE media_id=old.idActor AND media_type IN ('actor','artist','writer','director'); "
+              "END");
+  m_pDS->exec("CREATE TRIGGER delete_tag AFTER DELETE ON taglinks FOR EACH ROW BEGIN "
+              "DELETE FROM tag WHERE idTag=old.idTag AND idTag NOT IN (SELECT DISTINCT idTag FROM taglinks); "
+              "END");
 
-    for (int i = 0; i < VIDEODB_MAX_COLUMNS; i++)
-      columns += StringUtils::Format(",c%02d text", i);
-
-    columns += ", idSet integer)";
-    m_pDS->exec(columns.c_str());
-    m_pDS->exec("CREATE UNIQUE INDEX ix_movie_file_1 ON movie (idFile, idMovie)");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_movie_file_2 ON movie (idMovie, idFile)");
-
-    CLog::Log(LOGINFO, "create actorlinkmovie table");
-    m_pDS->exec("CREATE TABLE actorlinkmovie ( idActor integer, idMovie integer, strRole text, iOrder integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_actorlinkmovie_1 ON actorlinkmovie ( idActor, idMovie )\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_actorlinkmovie_2 ON actorlinkmovie ( idMovie, idActor )\n");
-
-    CLog::Log(LOGINFO, "create directorlinkmovie table");
-    m_pDS->exec("CREATE TABLE directorlinkmovie ( idDirector integer, idMovie integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinkmovie_1 ON directorlinkmovie ( idDirector, idMovie )\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinkmovie_2 ON directorlinkmovie ( idMovie, idDirector )\n");
-
-    CLog::Log(LOGINFO, "create writerlinkmovie table");
-    m_pDS->exec("CREATE TABLE writerlinkmovie ( idWriter integer, idMovie integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_writerlinkmovie_1 ON writerlinkmovie ( idWriter, idMovie )\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_writerlinkmovie_2 ON writerlinkmovie ( idMovie, idWriter )\n");
-
-    CLog::Log(LOGINFO, "create actors table");
-    m_pDS->exec("CREATE TABLE actors ( idActor integer primary key, strActor text, strThumb text )\n");
-
-    CLog::Log(LOGINFO, "create path table");
-    m_pDS->exec("CREATE TABLE path ( idPath integer primary key, strPath text, strContent text, strScraper text, strHash text, scanRecursive integer, useFolderNames bool, strSettings text, noUpdate bool, exclude bool, dateAdded text)");
-    m_pDS->exec("CREATE INDEX ix_path ON path ( strPath(255) )");
-
-    CLog::Log(LOGINFO, "create files table");
-    m_pDS->exec("CREATE TABLE files ( idFile integer primary key, idPath integer, strFilename text, playCount integer, lastPlayed text, dateAdded text)");
-    m_pDS->exec("CREATE INDEX ix_files ON files ( idPath, strFilename(255) )");
-
-    CLog::Log(LOGINFO, "create tvshow table");
-    columns = "CREATE TABLE tvshow ( idShow integer primary key";
-
-    for (int i = 0; i < VIDEODB_MAX_COLUMNS; i++)
-      columns += StringUtils::Format(",c%02d text", i);;
-
-    columns += ")";
-    m_pDS->exec(columns.c_str());
-
-    CLog::Log(LOGINFO, "create directorlinktvshow table");
-    m_pDS->exec("CREATE TABLE directorlinktvshow ( idDirector integer, idShow integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinktvshow_1 ON directorlinktvshow ( idDirector, idShow )\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinktvshow_2 ON directorlinktvshow ( idShow, idDirector )\n");
-
-    CLog::Log(LOGINFO, "create actorlinktvshow table");
-    m_pDS->exec("CREATE TABLE actorlinktvshow ( idActor integer, idShow integer, strRole text, iOrder integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_actorlinktvshow_1 ON actorlinktvshow ( idActor, idShow )\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_actorlinktvshow_2 ON actorlinktvshow ( idShow, idActor )\n");
-
-    CLog::Log(LOGINFO, "create studiolinktvshow table");
-    m_pDS->exec("CREATE TABLE studiolinktvshow ( idStudio integer, idShow integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_studiolinktvshow_1 ON studiolinktvshow ( idStudio, idShow)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_studiolinktvshow_2 ON studiolinktvshow ( idShow, idStudio)\n");
-
-    CLog::Log(LOGINFO, "create episode table");
-    columns = "CREATE TABLE episode ( idEpisode integer primary key, idFile integer";
-    for (int i = 0; i < VIDEODB_MAX_COLUMNS; i++)
-    {
-      CStdString column;
-      if ( i == VIDEODB_ID_EPISODE_SEASON || i == VIDEODB_ID_EPISODE_EPISODE || i == VIDEODB_ID_EPISODE_BOOKMARK)
-        column = StringUtils::Format(",c%02d varchar(24)", i);
-      else
-        column = StringUtils::Format(",c%02d text", i);
-
-      columns += column;
-    }
-    columns += ", idShow integer)";
-    m_pDS->exec(columns.c_str());
-    m_pDS->exec("CREATE UNIQUE INDEX ix_episode_file_1 on episode (idEpisode, idFile)");
-    m_pDS->exec("CREATE UNIQUE INDEX id_episode_file_2 on episode (idFile, idEpisode)");
-    CStdString createColIndex = StringUtils::Format("CREATE INDEX ix_episode_season_episode on episode (c%02d, c%02d)", VIDEODB_ID_EPISODE_SEASON, VIDEODB_ID_EPISODE_EPISODE);
-    m_pDS->exec(createColIndex.c_str());
-    createColIndex = StringUtils::Format("CREATE INDEX ix_episode_bookmark on episode (c%02d)", VIDEODB_ID_EPISODE_BOOKMARK);
-    m_pDS->exec(createColIndex.c_str());
-    m_pDS->exec("CREATE INDEX ix_episode_show1 on episode(idEpisode,idShow)");
-    m_pDS->exec("CREATE INDEX ix_episode_show2 on episode(idShow,idEpisode)");
-
-    CLog::Log(LOGINFO, "create tvshowlinkpath table");
-    m_pDS->exec("CREATE TABLE tvshowlinkpath (idShow integer, idPath integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_tvshowlinkpath_1 ON tvshowlinkpath ( idShow, idPath )\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_tvshowlinkpath_2 ON tvshowlinkpath ( idPath, idShow )\n");
-
-    CLog::Log(LOGINFO, "create actorlinkepisode table");
-    m_pDS->exec("CREATE TABLE actorlinkepisode ( idActor integer, idEpisode integer, strRole text, iOrder integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_actorlinkepisode_1 ON actorlinkepisode ( idActor, idEpisode )\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_actorlinkepisode_2 ON actorlinkepisode ( idEpisode, idActor )\n");
-
-    CLog::Log(LOGINFO, "create directorlinkepisode table");
-    m_pDS->exec("CREATE TABLE directorlinkepisode ( idDirector integer, idEpisode integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinkepisode_1 ON directorlinkepisode ( idDirector, idEpisode )\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinkepisode_2 ON directorlinkepisode ( idEpisode, idDirector )\n");
-
-    CLog::Log(LOGINFO, "create writerlinkepisode table");
-    m_pDS->exec("CREATE TABLE writerlinkepisode ( idWriter integer, idEpisode integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_writerlinkepisode_1 ON writerlinkepisode ( idWriter, idEpisode )\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_writerlinkepisode_2 ON writerlinkepisode ( idEpisode, idWriter )\n");
-
-    CLog::Log(LOGINFO, "create genrelinktvshow table");
-    m_pDS->exec("CREATE TABLE genrelinktvshow ( idGenre integer, idShow integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_genrelinktvshow_1 ON genrelinktvshow ( idGenre, idShow)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_genrelinktvshow_2 ON genrelinktvshow ( idShow, idGenre)\n");
-
-    CLog::Log(LOGINFO, "create movielinktvshow table");
-    m_pDS->exec("CREATE TABLE movielinktvshow ( idMovie integer, IdShow integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_movielinktvshow_1 ON movielinktvshow ( idShow, idMovie)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_movielinktvshow_2 ON movielinktvshow ( idMovie, idShow)\n");
-
-    CLog::Log(LOGINFO, "create studio table");
-    m_pDS->exec("CREATE TABLE studio ( idStudio integer primary key, strStudio text)\n");
-
-    CLog::Log(LOGINFO, "create studiolinkmovie table");
-    m_pDS->exec("CREATE TABLE studiolinkmovie ( idStudio integer, idMovie integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_studiolinkmovie_1 ON studiolinkmovie ( idStudio, idMovie)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_studiolinkmovie_2 ON studiolinkmovie ( idMovie, idStudio)\n");
-
-    CLog::Log(LOGINFO, "create musicvideo table");
-    columns = "CREATE TABLE musicvideo ( idMVideo integer primary key, idFile integer";
-    for (int i = 0; i < VIDEODB_MAX_COLUMNS; i++)
-      columns += StringUtils::Format(",c%02d text", i);;
-
-    columns += ")";
-    m_pDS->exec(columns.c_str());
-
-    m_pDS->exec("CREATE UNIQUE INDEX ix_musicvideo_file_1 on musicvideo (idMVideo, idFile)");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_musicvideo_file_2 on musicvideo (idFile, idMVideo)");
-
-    CLog::Log(LOGINFO, "create artistlinkmusicvideo table");
-    m_pDS->exec("CREATE TABLE artistlinkmusicvideo ( idArtist integer, idMVideo integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_artistlinkmusicvideo_1 ON artistlinkmusicvideo ( idArtist, idMVideo)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_artistlinkmusicvideo_2 ON artistlinkmusicvideo ( idMVideo, idArtist)\n");
-
-    CLog::Log(LOGINFO, "create genrelinkmusicvideo table");
-    m_pDS->exec("CREATE TABLE genrelinkmusicvideo ( idGenre integer, idMVideo integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_genrelinkmusicvideo_1 ON genrelinkmusicvideo ( idGenre, idMVideo)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_genrelinkmusicvideo_2 ON genrelinkmusicvideo ( idMVideo, idGenre)\n");
-
-    CLog::Log(LOGINFO, "create studiolinkmusicvideo table");
-    m_pDS->exec("CREATE TABLE studiolinkmusicvideo ( idStudio integer, idMVideo integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_studiolinkmusicvideo_1 ON studiolinkmusicvideo ( idStudio, idMVideo)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_studiolinkmusicvideo_2 ON studiolinkmusicvideo ( idMVideo, idStudio)\n");
-
-    CLog::Log(LOGINFO, "create directorlinkmusicvideo table");
-    m_pDS->exec("CREATE TABLE directorlinkmusicvideo ( idDirector integer, idMVideo integer)\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinkmusicvideo_1 ON directorlinkmusicvideo ( idDirector, idMVideo )\n");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_directorlinkmusicvideo_2 ON directorlinkmusicvideo ( idMVideo, idDirector )\n");
-
-    CLog::Log(LOGINFO, "create streaminfo table");
-    m_pDS->exec("CREATE TABLE streamdetails (idFile integer, iStreamType integer, "
-      "strVideoCodec text, fVideoAspect float, iVideoWidth integer, iVideoHeight integer, "
-      "strAudioCodec text, iAudioChannels integer, strAudioLanguage text, strSubtitleLanguage text, iVideoDuration integer, strStereoMode text)");
-    m_pDS->exec("CREATE INDEX ix_streamdetails ON streamdetails (idFile)");
-
-   CLog::Log(LOGINFO, "create sets table");
-    m_pDS->exec("CREATE TABLE sets ( idSet integer primary key, strSet text)\n");
-
-    // create basepath indices
-    m_pDS->exec("CREATE INDEX ixMovieBasePath ON movie ( c23(12) )");
-    m_pDS->exec("CREATE INDEX ixMusicVideoBasePath ON musicvideo ( c14(12) )");
-    m_pDS->exec("CREATE INDEX ixEpisodeBasePath ON episode ( c19(12) )");
-    m_pDS->exec("CREATE INDEX ixTVShowBasePath on tvshow ( c17(12) )");
-
-    CLog::Log(LOGINFO, "create seasons table");
-    m_pDS->exec("CREATE TABLE seasons ( idSeason integer primary key, idShow integer, season integer)");
-    m_pDS->exec("CREATE INDEX ix_seasons ON seasons (idShow, season)");
-
-    CLog::Log(LOGINFO, "create art table");
-    m_pDS->exec("CREATE TABLE art(art_id INTEGER PRIMARY KEY, media_id INTEGER, media_type TEXT, type TEXT, url TEXT)");
-    m_pDS->exec("CREATE INDEX ix_art ON art(media_id, media_type(20), type(20))");
-
-    CLog::Log(LOGINFO, "create tag table");
-    m_pDS->exec("CREATE TABLE tag (idTag integer primary key, strTag text)");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_tag_1 ON tag (strTag(255))");
-
-    CLog::Log(LOGINFO, "create taglinks table");
-    m_pDS->exec("CREATE TABLE taglinks (idTag integer, idMedia integer, media_type TEXT)");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_taglinks_1 ON taglinks (idTag, media_type(20), idMedia)");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_taglinks_2 ON taglinks (idMedia, media_type(20), idTag)");
-    m_pDS->exec("CREATE INDEX ix_taglinks_3 ON taglinks (media_type(20))");
-
-    CLog::Log(LOGINFO, "create deletion triggers");
-    m_pDS->exec("CREATE TRIGGER delete_movie AFTER DELETE ON movie FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idMovie AND media_type='movie'; "
-                "DELETE FROM taglinks WHERE idMedia=old.idMovie AND media_type='movie'; "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_tvshow AFTER DELETE ON tvshow FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idShow AND media_type='tvshow'; "
-                "DELETE FROM taglinks WHERE idMedia=old.idShow AND media_type='tvshow'; "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_musicvideo AFTER DELETE ON musicvideo FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idMVideo AND media_type='musicvideo'; "
-                "DELETE FROM taglinks WHERE idMedia=old.idMVideo AND media_type='musicvideo'; "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_episode AFTER DELETE ON episode FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idEpisode AND media_type='episode'; "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_season AFTER DELETE ON seasons FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idSeason AND media_type='season'; "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_set AFTER DELETE ON sets FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idSet AND media_type='set'; "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_person AFTER DELETE ON actors FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idActor AND media_type IN ('actor','artist','writer','director'); "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_tag AFTER DELETE ON taglinks FOR EACH ROW BEGIN "
-                "DELETE FROM tag WHERE idTag=old.idTag AND idTag NOT IN (SELECT DISTINCT idTag FROM taglinks); "
-                "END");
-
-    // we create views last to ensure all indexes are rolled in
-    CreateViews();
-  }
-  catch (...)
-  {
-    CLog::Log(LOGERROR, "%s unable to create tables:%i", __FUNCTION__, (int)GetLastError());
-    RollbackTransaction();
-    return false;
-  }
-  CommitTransaction();
-  return true;
+  CreateViews();
 }
 
 void CVideoDatabase::CreateViews()
 {
   CLog::Log(LOGINFO, "create episodeview");
-  m_pDS->exec("DROP VIEW IF EXISTS episodeview");
   CStdString episodeview = PrepareSQL("CREATE VIEW episodeview AS SELECT "
                                       "  episode.*,"
                                       "  files.strFileName AS strFileName,"
@@ -393,7 +386,6 @@ void CVideoDatabase::CreateViews()
   m_pDS->exec(episodeview.c_str());
 
   CLog::Log(LOGINFO, "create tvshowview");
-  m_pDS->exec("DROP VIEW IF EXISTS tvshowview");
   CStdString tvshowview = PrepareSQL("CREATE VIEW tvshowview AS SELECT "
                                      "  tvshow.*,"
                                      "  path.strPath AS strPath,"
@@ -415,7 +407,6 @@ void CVideoDatabase::CreateViews()
   m_pDS->exec(tvshowview.c_str());
 
   CLog::Log(LOGINFO, "create musicvideoview");
-  m_pDS->exec("DROP VIEW IF EXISTS musicvideoview");
   m_pDS->exec("CREATE VIEW musicvideoview AS SELECT"
               "  musicvideo.*,"
               "  files.strFileName as strFileName,"
@@ -434,7 +425,6 @@ void CVideoDatabase::CreateViews()
               "    bookmark.idFile=musicvideo.idFile AND bookmark.type=1");
 
   CLog::Log(LOGINFO, "create movieview");
-  m_pDS->exec("DROP VIEW IF EXISTS movieview");
   m_pDS->exec("CREATE VIEW movieview AS SELECT"
               "  movie.*,"
               "  sets.strSet AS strSet,"
@@ -2875,6 +2865,9 @@ void CVideoDatabase::DeleteMovie(const CStdString& strFilenameAndPath, bool bKee
     strSQL=PrepareSQL("delete from countrylinkmovie where idMovie=%i", idMovie);
     m_pDS->exec(strSQL.c_str());
 
+    strSQL=PrepareSQL("delete from writerlinkmovie where idMovie=%i", idMovie);
+    m_pDS->exec(strSQL.c_str());
+
     DeleteStreamDetails(GetFileId(strFilenameAndPath));
 
     // keep the movie table entry, linking to tv shows, and bookmarks
@@ -4157,162 +4150,8 @@ public:
   string media_type;
 };
 
-bool CVideoDatabase::UpdateOldVersion(int iVersion)
+void CVideoDatabase::UpdateTables(int iVersion)
 {
-  if (iVersion < 43)
-  {
-    m_pDS->exec("ALTER TABLE settings ADD VerticalShift float");
-  }
-  if (iVersion < 44)
-  {
-    // only if MySQL is used and default character set is not utf8
-    // string data needs to be converted to proper utf8
-    CStdString charset = m_pDS->getDatabase()->getDefaultCharset();
-    if (!m_sqlite && !charset.empty() && charset != "utf8")
-    {
-      map<CStdString, CStdStringArray> tables;
-      map<CStdString, CStdStringArray>::iterator itt;
-      CStdStringArray::iterator itc;
-
-      // columns that need to be converted
-      // content columns
-      CStdStringArray c_columns;
-      for (int i = 0; i < 22; i++)
-        c_columns.push_back(StringUtils::Format("c%02d", i));
-
-      tables.insert(pair<CStdString, CStdStringArray> ("episode", c_columns));
-      tables.insert(pair<CStdString, CStdStringArray> ("movie", c_columns));
-      tables.insert(pair<CStdString, CStdStringArray> ("musicvideo", c_columns));
-      tables.insert(pair<CStdString, CStdStringArray> ("tvshow", c_columns));
-
-      //common columns
-      CStdStringArray c1;
-      c1.push_back("strRole");
-      tables.insert(pair<CStdString, CStdStringArray> ("actorlinkepisode", c1));
-      tables.insert(pair<CStdString, CStdStringArray> ("actorlinkmovie", c1));
-      tables.insert(pair<CStdString, CStdStringArray> ("actorlinktvshow", c1));
-
-      //remaining columns
-      CStdStringArray c2;
-      c2.push_back("strActor");
-      tables.insert(pair<CStdString, CStdStringArray> ("actors", c2));
-
-      CStdStringArray c3;
-      c3.push_back("strCountry");
-      tables.insert(pair<CStdString, CStdStringArray> ("country", c3));
-
-      CStdStringArray c4;
-      c4.push_back("strFilename");
-      tables.insert(pair<CStdString, CStdStringArray> ("files", c4));
-
-      CStdStringArray c5;
-      c5.push_back("strGenre");
-      tables.insert(pair<CStdString, CStdStringArray> ("genre", c5));
-
-      CStdStringArray c6;
-      c6.push_back("strSet");
-      tables.insert(pair<CStdString, CStdStringArray> ("sets", c6));
-
-      CStdStringArray c7;
-      c7.push_back("strStudio");
-      tables.insert(pair<CStdString, CStdStringArray> ("studio", c7));
-
-      CStdStringArray c8;
-      c8.push_back("strPath");
-      tables.insert(pair<CStdString, CStdStringArray> ("path", c8));
-
-      for (itt = tables.begin(); itt != tables.end(); ++itt)
-      {
-        CStdString q;
-        q = PrepareSQL("UPDATE `%s` SET", itt->first.c_str());
-        for (itc = itt->second.begin(); itc != itt->second.end(); ++itc)
-        {
-          q += PrepareSQL(" `%s` = CONVERT(CAST(CONVERT(`%s` USING %s) AS BINARY) USING utf8)",
-                          itc->c_str(), itc->c_str(), charset.c_str());
-          if (*itc != itt->second.back())
-          {
-            q += ",";
-          }
-        }
-        m_pDS->exec(q);
-      }
-    }
-  }
-  if (iVersion < 45)
-  {
-    m_pDS->exec("ALTER TABLE movie ADD c22 text");
-    m_pDS->exec("ALTER TABLE episode ADD c22 text");
-    m_pDS->exec("ALTER TABLE musicvideo ADD c22 text");
-    m_pDS->exec("ALTER TABLE tvshow ADD c22 text");
-    // Now update our tables
-    UpdateBasePath("movie", "idMovie", VIDEODB_ID_BASEPATH);
-    UpdateBasePath("musicvideo", "idMVideo", VIDEODB_ID_MUSICVIDEO_BASEPATH);
-    UpdateBasePath("episode", "idEpisode", VIDEODB_ID_EPISODE_BASEPATH);
-    UpdateBasePath("tvshow", "idShow", VIDEODB_ID_TV_BASEPATH, true);
-  }
-  if (iVersion < 46)
-  { // add indices for dir entry lookups
-    m_pDS->exec("CREATE INDEX ixMovieBasePath ON movie ( c22(255) )");
-    m_pDS->exec("CREATE INDEX ixMusicVideoBasePath ON musicvideo ( c13(255) )");
-    m_pDS->exec("CREATE INDEX ixEpisodeBasePath ON episode ( c18(255) )");
-    m_pDS->exec("CREATE INDEX ixTVShowBasePath ON tvshow ( c16(255) )");
-  }
-  if (iVersion < 50)
-  {
-    m_pDS->exec("ALTER TABLE settings ADD ScalingMethod integer");
-    m_pDS->exec(PrepareSQL("UPDATE settings set ScalingMethod=%i", CMediaSettings::Get().GetDefaultVideoSettings().m_ScalingMethod));
-  }
-  if (iVersion < 51)
-  {
-    // Add iOrder fields to actorlink* tables to be able to list
-    // actors by importance
-    m_pDS->exec("ALTER TABLE actorlinkmovie ADD iOrder integer");
-    m_pDS->exec("ALTER TABLE actorlinktvshow ADD iOrder integer");
-    m_pDS->exec("ALTER TABLE actorlinkepisode ADD iOrder integer");
-  }
-  if (iVersion < 52)
-  { // Add basepath link to path table for faster content retrieval, and indicies
-    m_pDS->exec("ALTER TABLE movie ADD c23 text");
-    m_pDS->exec("ALTER TABLE episode ADD c23 text");
-    m_pDS->exec("ALTER TABLE musicvideo ADD c23 text");
-    m_pDS->exec("ALTER TABLE tvshow ADD c23 text");
-    m_pDS->dropIndex("movie", "ixMovieBasePath");
-    m_pDS->dropIndex("musicvideo", "ixMusicVideoBasePath");
-    m_pDS->dropIndex("episode", "ixEpisodeBasePath");
-    m_pDS->dropIndex("tvshow", "ixTVShowBasePath");
-    m_pDS->exec("CREATE INDEX ixMovieBasePath ON movie ( c23(12) )");
-    m_pDS->exec("CREATE INDEX ixMusicVideoBasePath ON musicvideo ( c14(12) )");
-    m_pDS->exec("CREATE INDEX ixEpisodeBasePath ON episode ( c19(12) )");
-    m_pDS->exec("CREATE INDEX ixTVShowBasePath ON tvshow ( c17(12) )");
-    // now update the base path links
-    UpdateBasePathID("movie", "idMovie", VIDEODB_ID_BASEPATH, VIDEODB_ID_PARENTPATHID);
-    UpdateBasePathID("musicvideo", "idMVideo", VIDEODB_ID_MUSICVIDEO_BASEPATH, VIDEODB_ID_MUSICVIDEO_PARENTPATHID);
-    UpdateBasePathID("episode", "idEpisode", VIDEODB_ID_EPISODE_BASEPATH, VIDEODB_ID_EPISODE_PARENTPATHID);
-    UpdateBasePathID("tvshow", "idShow", VIDEODB_ID_TV_BASEPATH, VIDEODB_ID_TV_PARENTPATHID);
-  }
-  if (iVersion < 54)
-  { // Change INDEX for bookmark table
-    m_pDS->dropIndex("bookmark", "ix_bookmark");
-    m_pDS->exec("CREATE INDEX ix_bookmark ON bookmark (idFile, type)");
-  }
-  if (iVersion < 55)
-  {
-    m_pDS->exec("ALTER TABLE settings ADD DeinterlaceMode integer");
-    m_pDS->exec("UPDATE settings SET DeinterlaceMode = 2 WHERE Deinterlace NOT IN (0,1)"); // anything other than none: method auto => mode force
-    m_pDS->exec("UPDATE settings SET DeinterlaceMode = 1 WHERE Deinterlace = 1"); // method auto => mode auto
-    m_pDS->exec("UPDATE settings SET DeinterlaceMode = 0, Deinterlace = 1 WHERE Deinterlace = 0"); // method none => mode off, method auto
-  }
-
-  if (iVersion < 59)
-  { // base paths for video_ts and bdmv files was wrong (and inconsistent depending on where and when they were scanned)
-    CStdString where = PrepareSQL(" WHERE files.strFileName LIKE 'VIDEO_TS.IFO' or files.strFileName LIKE 'index.BDMV'");
-    UpdateBasePath("movie", "idMovie", VIDEODB_ID_BASEPATH, false, where);
-    UpdateBasePath("musicvideo", "idMVideo", VIDEODB_ID_MUSICVIDEO_BASEPATH, false, where);
-    UpdateBasePath("episode", "idEpisode", VIDEODB_ID_EPISODE_BASEPATH, false, where);
-    UpdateBasePathID("movie", "idMovie", VIDEODB_ID_BASEPATH, VIDEODB_ID_PARENTPATHID);
-    UpdateBasePathID("musicvideo", "idMVideo", VIDEODB_ID_MUSICVIDEO_BASEPATH, VIDEODB_ID_MUSICVIDEO_PARENTPATHID);
-    UpdateBasePathID("episode", "idEpisode", VIDEODB_ID_EPISODE_BASEPATH, VIDEODB_ID_EPISODE_PARENTPATHID);
-  }
   if (iVersion < 61)
   {
     m_pDS->exec("ALTER TABLE path ADD dateAdded text");
@@ -4321,7 +4160,6 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
   if (iVersion < 62)
   { // add seasons table
     m_pDS->exec("CREATE TABLE seasons ( idSeason integer primary key, idShow integer, season integer)");
-    m_pDS->exec("CREATE INDEX ix_seasons ON seasons (idShow, season)");
     // insert all seasons for each show
     m_pDS->query("SELECT idShow FROM tvshow");
     while (!m_pDS->eof())
@@ -4330,7 +4168,9 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
                                   "  SELECT DISTINCT"
                                   "    idShow,c%02d"
                                   "  FROM"
-                                  "    episodeview"
+                                  "    episode"
+                                  "  JOIN tvshowlinkepisode ON"
+                                  "    episode.idEpisode=tvshowlinkepisode.idEpisode"
                                   "  WHERE idShow=%i", VIDEODB_ID_EPISODE_SEASON, m_pDS->fv(0).get_asInt());
       m_pDS2->exec(sql.c_str());
       // and the "all seasons node"
@@ -4342,14 +4182,6 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
   if (iVersion < 63)
   { // add art table
     m_pDS->exec("CREATE TABLE art(art_id INTEGER PRIMARY KEY, media_id INTEGER, media_type TEXT, type TEXT, url TEXT)");
-    m_pDS->exec("CREATE INDEX ix_art ON art(media_id, media_type(20), type(20))");
-    m_pDS->exec("CREATE TRIGGER delete_movie AFTER DELETE ON movie FOR EACH ROW BEGIN DELETE FROM art WHERE media_id=old.idMovie AND media_type='movie'; END");
-    m_pDS->exec("CREATE TRIGGER delete_tvshow AFTER DELETE ON tvshow FOR EACH ROW BEGIN DELETE FROM art WHERE media_id=old.idShow AND media_type='tvshow'; END");
-    m_pDS->exec("CREATE TRIGGER delete_musicvideo AFTER DELETE ON musicvideo FOR EACH ROW BEGIN DELETE FROM art WHERE media_id=old.idMVideo AND media_type='musicvideo'; END");
-    m_pDS->exec("CREATE TRIGGER delete_episode AFTER DELETE ON episode FOR EACH ROW BEGIN DELETE FROM art WHERE media_id=old.idEpisode AND media_type='episode'; END");
-    m_pDS->exec("CREATE TRIGGER delete_season AFTER DELETE ON seasons FOR EACH ROW BEGIN DELETE FROM art WHERE media_id=old.idSeason AND media_type='season'; END");
-    m_pDS->exec("CREATE TRIGGER delete_set AFTER DELETE ON sets FOR EACH ROW BEGIN DELETE FROM art WHERE media_id=old.idSet AND media_type='set'; END");
-    m_pDS->exec("CREATE TRIGGER delete_person AFTER DELETE ON actors FOR EACH ROW BEGIN DELETE FROM art WHERE media_id=old.idActor AND media_type IN ('actor','artist','writer','director'); END");
 
     CMediaSettings::Get().SetVideoNeedsUpdate(63);
     CSettings::Get().Save();
@@ -4366,18 +4198,11 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
       m_pDS->next();
     }
     m_pDS->exec("DROP TABLE tvshowlinkepisode");
-    m_pDS->exec("CREATE INDEX ix_episode_show1 on episode(idEpisode,idShow)");
-    m_pDS->exec("CREATE INDEX ix_episode_show2 on episode(idShow,idEpisode)");
   }
   if (iVersion < 67)
   {
     m_pDS->exec("CREATE TABLE tag (idTag integer primary key, strTag text)");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_tag_1 ON tag (strTag(255))");
-
     m_pDS->exec("CREATE TABLE taglinks (idTag integer, idMedia integer, media_type TEXT)");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_taglinks_1 ON taglinks (idTag, media_type(20), idMedia)");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_taglinks_2 ON taglinks (idMedia, media_type(20), idTag)");
-    m_pDS->exec("CREATE INDEX ix_taglinks_3 ON taglinks (media_type(20))");
   }
   if (iVersion < 68)
   { // add idSet to movie table
@@ -4460,44 +4285,6 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
       }
     }
   }
-  if (iVersion < 73)
-  {
-    m_pDS->exec("DROP TRIGGER IF EXISTS delete_movie");
-    m_pDS->exec("DROP TRIGGER IF EXISTS delete_tvshow");
-    m_pDS->exec("DROP TRIGGER IF EXISTS delete_musicvideo");
-    m_pDS->exec("DROP TRIGGER IF EXISTS delete_episode");
-    m_pDS->exec("DROP TRIGGER IF EXISTS delete_season");
-    m_pDS->exec("DROP TRIGGER IF EXISTS delete_set");
-    m_pDS->exec("DROP TRIGGER IF EXISTS delete_person");
-
-    m_pDS->exec("CREATE TRIGGER delete_movie AFTER DELETE ON movie FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idMovie AND media_type='movie'; "
-                "DELETE FROM taglinks WHERE idMedia=old.idMovie AND media_type='movie'; "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_tvshow AFTER DELETE ON tvshow FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idShow AND media_type='tvshow'; "
-                "DELETE FROM taglinks WHERE idMedia=old.idShow AND media_type='tvshow'; "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_musicvideo AFTER DELETE ON musicvideo FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idMVideo AND media_type='musicvideo'; "
-                "DELETE FROM taglinks WHERE idMedia=old.idMVideo AND media_type='musicvideo'; "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_episode AFTER DELETE ON episode FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idEpisode AND media_type='episode'; "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_season AFTER DELETE ON seasons FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idSeason AND media_type='season'; "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_set AFTER DELETE ON sets FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idSet AND media_type='set'; "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_person AFTER DELETE ON actors FOR EACH ROW BEGIN "
-                "DELETE FROM art WHERE media_id=old.idActor AND media_type IN ('actor','artist','writer','director'); "
-                "END");
-    m_pDS->exec("CREATE TRIGGER delete_tag AFTER DELETE ON taglinks FOR EACH ROW BEGIN "
-                "DELETE FROM tag WHERE idTag=old.idTag AND idTag NOT IN (SELECT DISTINCT idTag FROM taglinks); "
-                "END");
-  }
   if (iVersion < 74)
   { // update the runtime columns
     vector< pair<string, int> > tables;
@@ -4521,13 +4308,6 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
         m_pDS->exec(PrepareSQL("update %s set c%02d=%d where id%s=%d", (i->first=="mvideo")?"musicvideo":i->first.c_str(), i->second, j->second, i->first.c_str(), j->first));
     }
   }
-  if (iVersion < 75)
-  { // make indices on path, file non-unique (mysql has a prefix index, and prefixes aren't necessarily unique)
-    m_pDS->dropIndex("path", "ix_path");
-    m_pDS->dropIndex("files", "ix_files");
-    m_pDS->exec("CREATE INDEX ix_path ON path ( strPath(255) )");
-    m_pDS->exec("CREATE INDEX ix_files ON files ( idPath, strFilename(255) )");
-  }
   if (iVersion < 76)
   {
     m_pDS->exec("ALTER TABLE settings ADD StereoMode integer");
@@ -4535,15 +4315,11 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
   }
   if (iVersion < 77)
     m_pDS->exec("ALTER TABLE streamdetails ADD strStereoMode text");
-
-  // always recreate the view after any table change
-  CreateViews();
-  return true;
 }
 
-int CVideoDatabase::GetMinVersion() const
+int CVideoDatabase::GetSchemaVersion() const
 {
-  return 77;
+  return 78;
 }
 
 bool CVideoDatabase::LookupByFolders(const CStdString &path, bool shows)
@@ -4554,60 +4330,6 @@ bool CVideoDatabase::LookupByFolders(const CStdString &path, bool shows)
   if (scraper && scraper->Content() == CONTENT_TVSHOWS && !shows)
     return false; // episodes
   return settings.parent_name_root; // shows, movies, musicvids
-}
-
-void CVideoDatabase::UpdateBasePath(const char *table, const char *id, int column, bool shows, const CStdString &where)
-{
-  CStdString query;
-  if (shows)
-    query = PrepareSQL("SELECT idShow,path.strPath from tvshowlinkpath join path on tvshowlinkpath.idPath=path.idPath");
-  else
-    query = PrepareSQL("SELECT %s.%s,path.strPath,files.strFileName from %s join files on %s.idFile=files.idFile join path on files.idPath=path.idPath", table, id, table, table);
-  query += where;
-
-  map<CStdString, bool> paths;
-  m_pDS2->query(query.c_str());
-  while (!m_pDS2->eof())
-  {
-    CStdString path(m_pDS2->fv(1).get_asString());
-    map<CStdString, bool>::iterator i = paths.find(path);
-    if (i == paths.end())
-    {
-      paths.insert(make_pair(path, LookupByFolders(path, shows)));
-      i = paths.find(path);
-    }
-    CStdString filename;
-    if (!shows)
-      ConstructPath(filename, path, m_pDS2->fv(2).get_asString());
-    else
-      filename = path;
-    CFileItem item(filename, shows);
-    path = item.GetBaseMoviePath(i->second);
-    CStdString sql = PrepareSQL("UPDATE %s set c%02d='%s' where %s.%s=%i", table, column, path.c_str(), table, id, m_pDS2->fv(0).get_asInt());
-    m_pDS->exec(sql.c_str());
-    m_pDS2->next();
-  }
-  m_pDS2->close();
-}
-
-void CVideoDatabase::UpdateBasePathID(const char *table, const char *id, int column, int idColumn)
-{
-  CStdString query = PrepareSQL("SELECT %s,c%02d from %s", id, column, table);
-  m_pDS2->query(query.c_str());
-  while (!m_pDS2->eof())
-  {
-    int rowID = m_pDS2->fv(0).get_asInt();
-    CStdString path(m_pDS2->fv(1).get_asString());
-    // find the parent path of this item
-    int pathID = AddPath(URIUtils::GetParentPath(path));
-    if (pathID >= 0)
-    {
-      CStdString sql = PrepareSQL("UPDATE %s SET c%02d=%d WHERE %s=%d", table, idColumn, pathID, id, rowID);
-      m_pDS->exec(sql.c_str());
-    }
-    m_pDS2->next();
-  }
-  m_pDS2->close();
 }
 
 bool CVideoDatabase::GetPlayCounts(const CStdString &strPath, CFileItemList &items)
@@ -5219,20 +4941,23 @@ bool CVideoDatabase::GetMusicVideoAlbumsNav(const CStdString& strBaseDir, CFileI
     if (NULL == m_pDB.get()) return false;
     if (NULL == m_pDS.get()) return false;
 
+    CVideoDbUrl videoUrl;
+    if (!videoUrl.FromString(strBaseDir))
+      return false;
+
     CStdString strSQL = "select %s from musicvideoview ";
     Filter extFilter = filter;
+    extFilter.fields = PrepareSQL("musicvideoview.c%02d, musicvideoview.idMVideo, actors.strActor", VIDEODB_ID_MUSICVIDEO_ALBUM);
+    extFilter.AppendJoin(PrepareSQL("join artistlinkmusicvideo on artistlinkmusicvideo.idMVideo = musicvideoview.idMVideo"));
+    extFilter.AppendJoin(PrepareSQL("join actors on actors.idActor = artistlinkmusicvideo.idArtist"));
     if (CProfilesManager::Get().GetMasterProfile().getLockMode() != LOCK_MODE_EVERYONE && !g_passwordManager.bMasterUser)
     {
-      extFilter.fields = PrepareSQL("musicvideoview.c%02d, musicvideoview.idMVideo, actors.strActor, path.strPath", VIDEODB_ID_MUSICVIDEO_ALBUM);
-      extFilter.AppendJoin("join artistlinkmusicvideo on artistlinkmusicvideo.idMVideo = musicvideoview.idMVideo join actors on actors.idActor = artistlinkmusicvideo.idArtist join files on files.idFile = musicvideoview.idFile join path on path.idPath = files.idPath");
+      extFilter.fields += " path.strPath";
+      extFilter.AppendJoin("join files on files.idFile = musicvideoview.idFile join path on path.idPath = files.idPath");
     }
-    else
-    {
-      extFilter.fields = PrepareSQL("musicvideoview.c%02d, musicvideoview.idMVideo, actors.strActor", VIDEODB_ID_MUSICVIDEO_ALBUM);
-      extFilter.AppendJoin("join artistlinkmusicvideo on artistlinkmusicvideo.idMVideo = musicvideoview.idMVideo join actors on actors.idActor = artistlinkmusicvideo.idArtist");
-    }
+
     if (idArtist > -1)
-      extFilter.AppendWhere(PrepareSQL("artistlinkmusicvideo.idArtist = %i", idArtist));
+      videoUrl.AddOption("artistid", idArtist);
 
     extFilter.AppendGroup(PrepareSQL("musicvideoview.c%02d", VIDEODB_ID_MUSICVIDEO_ALBUM));
 
@@ -5244,8 +4969,7 @@ bool CVideoDatabase::GetMusicVideoAlbumsNav(const CStdString& strBaseDir, CFileI
     }
     strSQL = StringUtils::Format(strSQL.c_str(), !extFilter.fields.empty() ? extFilter.fields.c_str() : "*");
 
-    CVideoDbUrl videoUrl;
-    if (!BuildSQL(strBaseDir, strSQL, extFilter, strSQL, videoUrl))
+    if (!BuildSQL(videoUrl.ToString(), strSQL, extFilter, strSQL, videoUrl))
       return false;
 
     int iRowsFound = RunQuery(strSQL);
@@ -7577,7 +7301,7 @@ int CVideoDatabase::GetMatchingMusicVideo(const CStdString& strArtist, const CSt
     else
     { // we want to return the matching musicvideo
       if (CProfilesManager::Get().GetMasterProfile().getLockMode() != LOCK_MODE_EVERYONE && !g_passwordManager.bMasterUser)
-        strSQL = PrepareSQL("select musicvideo.idMVideo from musicvideo,files,path,artistlinkmusicvideo,actors where files.idFile=musicvideo.idFile and files.idPath=path.idPath and musicvideo.c%02d like '%s' and musicvideo.c%02d like '%s' and artistlinkmusicvideo.idMVideo=musicvideo.idMVideo and artistlinkmusicvideo.idArtist=actors.idActors and actors.strActor like '%s'",VIDEODB_ID_MUSICVIDEO_ALBUM,strAlbum.c_str(),VIDEODB_ID_MUSICVIDEO_TITLE,strTitle.c_str(),strArtist.c_str());
+        strSQL = PrepareSQL("select musicvideo.idMVideo from musicvideo,files,path,artistlinkmusicvideo,actors where files.idFile=musicvideo.idFile and files.idPath=path.idPath and musicvideo.c%02d like '%s' and musicvideo.c%02d like '%s' and artistlinkmusicvideo.idMVideo=musicvideo.idMVideo and artistlinkmusicvideo.idArtist=actors.idActor and actors.strActor like '%s'",VIDEODB_ID_MUSICVIDEO_ALBUM,strAlbum.c_str(),VIDEODB_ID_MUSICVIDEO_TITLE,strTitle.c_str(),strArtist.c_str());
       else
         strSQL = PrepareSQL("select musicvideo.idMVideo from musicvideo join artistlinkmusicvideo on artistlinkmusicvideo.idMVideo=musicvideo.idMVideo join actors on actors.idActor=artistlinkmusicvideo.idArtist where musicvideo.c%02d like '%s' and musicvideo.c%02d like '%s' and actors.strActor like '%s'",VIDEODB_ID_MUSICVIDEO_ALBUM,strAlbum.c_str(),VIDEODB_ID_MUSICVIDEO_TITLE,strTitle.c_str(),strArtist.c_str());
     }
@@ -8060,8 +7784,12 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const se
 
       if (handle == NULL && progress != NULL)
       {
-        progress->SetPercentage(current * 100 / total);
-        progress->Progress();
+        int percentage = current * 100 / total;
+        if (percentage > progress->GetPercentage())
+        {
+          progress->SetPercentage(percentage);
+          progress->Progress();
+        }
         if (progress->IsCanceled())
         {
           progress->Close();
@@ -9866,14 +9594,19 @@ bool CVideoDatabase::GetFilter(CDbUrl &videoUrl, Filter &filter, SortDescription
     option = options.find("artistid");
     if (option != options.end())
     {
-      filter.AppendJoin(PrepareSQL("join artistlinkmusicvideo on artistlinkmusicvideo.idMVideo = musicvideoview.idMVideo"));
+      if (itemType != "albums")
+        filter.AppendJoin(PrepareSQL("join artistlinkmusicvideo on artistlinkmusicvideo.idMVideo = musicvideoview.idMVideo"));
       filter.AppendWhere(PrepareSQL("artistlinkmusicvideo.idArtist = %i", (int)option->second.asInteger()));
     }
 
     option = options.find("artist");
     if (option != options.end())
     {
-      filter.AppendJoin(PrepareSQL("join artistlinkmusicvideo on artistlinkmusicvideo.idMVideo = musicvideoview.idMVideo join actors on actors.idActor = artistlinkmusicvideo.idArtist"));
+      if (itemType != "albums")
+      {
+        filter.AppendJoin(PrepareSQL("join artistlinkmusicvideo on artistlinkmusicvideo.idMVideo = musicvideoview.idMVideo"));
+        filter.AppendJoin(PrepareSQL("join actors on actors.idActor = artistlinkmusicvideo.idArtist"));
+      }
       filter.AppendWhere(PrepareSQL("actors.strActor like '%s'", option->second.asString().c_str()));
     }
 

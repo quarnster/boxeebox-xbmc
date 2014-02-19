@@ -1906,6 +1906,9 @@
     <ClCompile Include="..\..\xbmc\input\InertialScrollingHandler.cpp">
       <Filter>input</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\xbmc\interfaces\info\InfoBool.cpp">
+      <Filter>interfaces\info</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\xbmc\interfaces\info\InfoExpression.cpp">
       <Filter>interfaces\info</Filter>
     </ClCompile>
@@ -2836,9 +2839,6 @@
     <ClCompile Include="..\..\xbmc\music\tags\TagLoaderTagLib.cpp">
       <Filter>music\tags</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\music\tags\MusicInfoTagLoaderWav.cpp">
-      <Filter>music\tags</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\interfaces\python\test\TestSwig.cpp">
       <Filter>interfaces\python\test</Filter>
     </ClCompile>
@@ -3112,6 +3112,9 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\utils\XSLTUtils.cpp">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Video\DVDVideoCodec.cpp">
+      <Filter>cores\dvdplayer\DVDCodecs\Video</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -5796,9 +5799,6 @@
       <Filter>music\tags</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\music\tags\TagLoaderTagLib.h">
-      <Filter>music\tags</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\music\tags\MusicInfoTagLoaderWav.h">
       <Filter>music\tags</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\interfaces\json-rpc\AddonsOperations.h">

@@ -285,12 +285,12 @@ bool CGUIWindowVideoNav::GetDirectory(const CStdString &strDirectory, CFileItemL
       VIDEODATABASEDIRECTORY::NODE_TYPE node = dir.GetDirectoryChildType(items.GetPath());
 
       // perform the flattening logic for tvshows with a single (unwatched) season (+ optional special season)
-      if (node == NODE_TYPE_SEASONS)
+      if (node == NODE_TYPE_SEASONS && !items.IsEmpty())
       {
         int itemsSize = items.GetObjectCount();
         int firstIndex = items.Size() - itemsSize;
         // check if the last item is the "All seasons" item which should be ignored for flattening
-        if (items[items.Size() - 1]->GetVideoInfoTag()->m_iSeason < 0)
+        if (!items[items.Size() - 1]->HasVideoInfoTag() || items[items.Size() - 1]->GetVideoInfoTag()->m_iSeason < 0)
           itemsSize -= 1;
 
         int iFlatten = CSettings::Get().GetInt("videolibrary.flattentvshows");
@@ -304,7 +304,7 @@ bool CGUIWindowVideoNav::GetDirectory(const CStdString &strDirectory, CFileItemL
           for(int i = 0; i < items.Size(); i++)
           {
             const CFileItemPtr item = items.Get(i);
-            if (item->GetProperty("unwatchedepisodes").asInteger() != 0 && item->GetVideoInfoTag()->m_iSeason != 0)
+            if (item->GetProperty("unwatchedepisodes").asInteger() != 0 && item->GetVideoInfoTag()->m_iSeason > 0)
               count++;
           }
           bFlatten = (count < 2); // flatten if there is only 1 unwatched season (not counting specials)
@@ -600,7 +600,6 @@ void CGUIWindowVideoNav::DoSearch(const CStdString& strSearch, CFileItemList& it
   CStdString strGenre = g_localizeStrings.Get(515); // Genre
   CStdString strActor = g_localizeStrings.Get(20337); // Actor
   CStdString strDirector = g_localizeStrings.Get(20339); // Director
-  CStdString strMovie = g_localizeStrings.Get(20338); // Movie
 
   //get matching names
   m_database.GetMoviesByName(strSearch, tempItems);
@@ -653,7 +652,7 @@ void CGUIWindowVideoNav::DoSearch(const CStdString& strSearch, CFileItemList& it
   AppendAndClearSearchItems(tempItems, "[" + g_localizeStrings.Get(20365) + "] ", items);
 
   m_database.GetMoviesByPlot(strSearch, tempItems);
-  AppendAndClearSearchItems(tempItems, "[" + strMovie + " " + g_localizeStrings.Get(207) + "] ", items);
+  AppendAndClearSearchItems(tempItems, "[" + g_localizeStrings.Get(20323) + "] ", items);
 }
 
 void CGUIWindowVideoNav::PlayItem(int iItem)

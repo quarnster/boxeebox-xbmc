@@ -242,6 +242,7 @@ static const ActionMapping actions[] =
         {"playpvr"               , ACTION_PVR_PLAY},
         {"playpvrtv"             , ACTION_PVR_PLAY_TV},
         {"playpvrradio"          , ACTION_PVR_PLAY_RADIO},
+        {"record"                , ACTION_RECORD},
 
         // Mouse actions
         {"leftclick"         , ACTION_MOUSE_LEFT_CLICK},
@@ -889,7 +890,7 @@ bool CButtonTranslator::TranslateJoystickString(int window, const char* szDevice
   return (action > 0);
 }
 
-bool CButtonTranslator::TranslateTouchAction(int touchAction, int touchPointers, int &window, int &action)
+bool CButtonTranslator::TranslateTouchAction(int window, int touchAction, int touchPointers, int &action)
 {
   action = 0;
   if (touchPointers <= 0)
@@ -900,10 +901,7 @@ bool CButtonTranslator::TranslateTouchAction(int touchAction, int touchPointers,
 
   action = GetTouchActionCode(window, touchAction);
   if (action <= 0)
-  {
-    window = WINDOW_INVALID;
     action = GetTouchActionCode(-1, touchAction);
-  }
 
   return action > 0;
 }

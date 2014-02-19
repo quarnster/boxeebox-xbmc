@@ -157,6 +157,7 @@ CUPnPRenderer::SetupServices()
         ",http-get:*:video/xvid:*"
         ",http-get:*:video/x-divx:*"
         ",http-get:*:video/x-matroska:*"
+        ",http-get:*:video/x-mkv:*"
         ",http-get:*:video/x-ms-wmv:*"
         ",http-get:*:video/x-ms-avi:*"
         ",http-get:*:video/x-flv:*"
@@ -210,7 +211,7 @@ CUPnPRenderer::ProcessHttpGetRequest(NPT_HttpRequest&              request,
             }
 
             // open the file
-            CStdString path = CURL::Decode((const char*) filepath);
+            CStdString path (CURL::Decode((const char*) filepath));
             NPT_File file(path.c_str());
             NPT_Result result = file.Open(NPT_FILE_OPEN_MODE_READ);
             if (NPT_FAILED(result)) {

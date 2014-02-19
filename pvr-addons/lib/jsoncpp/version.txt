@@ -1,2 +1,0 @@
-JSONcpp 0.50
-http://jsoncpp.sourceforge.net/

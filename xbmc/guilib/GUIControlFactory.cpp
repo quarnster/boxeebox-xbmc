@@ -806,7 +806,7 @@ CGUIControl* CGUIControlFactory::Create(int parentID, const CRect &rect, TiXmlEl
           (labelInfo.align & XBFONT_RIGHT))
         posX -= width;
     }
-    if (!width)
+    if (!width) // no width specified, so compute from parent
       width = max(rect.Width() - posX, 0.0f);
   }
   if (!GetDimensions(pControlNode, "top", "bottom", "centertop", "centerbottom", "height", rect.Height(), posY, height, minHeight))
@@ -1386,6 +1386,7 @@ CGUIControl* CGUIControlFactory::Create(int parentID, const CRect &rect, TiXmlEl
     if (infoLabels.size())
       ((CGUITextBox *)control)->SetInfo(infoLabels[0]);
     ((CGUITextBox *)control)->SetAutoScrolling(pControlNode);
+    ((CGUITextBox *)control)->SetMinHeight(minHeight);
   }
   else if (type == CGUIControl::GUICONTROL_SELECTBUTTON)
   {

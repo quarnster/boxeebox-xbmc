@@ -155,7 +155,7 @@ int MysqlDatabase::connect(bool create_new) {
         char sqlcmd[512];
         int ret;
 
-        sprintf(sqlcmd, "CREATE DATABASE `%s`", db.c_str());
+        sprintf(sqlcmd, "CREATE DATABASE `%s` CHARACTER SET utf8 COLLATE utf8_general_ci", db.c_str());
         if ( (ret=query_with_reconnect(sqlcmd)) != MYSQL_OK )
         {
           throw DbErrors("Can't create new database: '%s' (%d)", db.c_str(), ret);
@@ -250,7 +250,7 @@ int MysqlDatabase::copy(const char *backup_name) {
     }
 
     // create the new database
-    sprintf(sql, "CREATE DATABASE `%s`", backup_name);
+    sprintf(sql, "CREATE DATABASE `%s` CHARACTER SET utf8 COLLATE utf8_general_ci", backup_name);
     if ( (ret=query_with_reconnect(sql)) != MYSQL_OK )
     {
       mysql_free_result(res);
@@ -279,35 +279,103 @@ int MysqlDatabase::copy(const char *backup_name) {
       if ( (ret=query_with_reconnect(sql)) != MYSQL_OK )
       {
         mysql_free_result(res);
-        throw DbErrors("Can't copy data for table '%s'\nError: %s", row[0], ret);
+        throw DbErrors("Can't copy data for table '%s'\nError: %d", row[0], ret);
       }
     }
     mysql_free_result(res);
 
-    // after table are recreated and repopulated we can recreate views
-    // grab a list of views and their definitions
-    sprintf(sql, "SELECT TABLE_NAME, VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = '%s'", db.c_str());
-    if ( (ret=query_with_reconnect(sql)) != MYSQL_OK )
-      throw DbErrors("Can't determine views to recreate.");
+    // we don't recreate views, indicies, or triggers on copy
+    // as we'll be dropping and recreating them anyway
+  }
 
-    // get list of all views from old DB
-    MYSQL_RES* resViews = mysql_store_result(conn);
+  return 1;
+}
 
-    if (resViews)
+int MysqlDatabase::drop_analytics(void) {
+  if ( !active || conn == NULL)
+    throw DbErrors("Can't clean database: no active connection...");
+
+  char sql[4096];
+  int ret;
+
+  // ensure we're connected to the db we are about to clean from stuff
+  if ( (ret=mysql_select_db(conn, db.c_str())) != MYSQL_OK )
+    throw DbErrors("Can't connect to database: '%s'",db.c_str());
+
+  // getting a list of indexes in the database
+  sprintf(sql, "SELECT DISTINCT table_name, index_name"
+          "  FROM information_schema.statistics"
+          " WHERE index_name != 'PRIMARY' AND"
+          "       table_schema = '%s'", db.c_str());
+  if ( (ret=query_with_reconnect(sql)) != MYSQL_OK )
+    throw DbErrors("Can't determine list of indexes to drop.");
+
+  // we will acquire lists here
+  MYSQL_RES* res = mysql_store_result(conn);
+  MYSQL_ROW row;
+
+  if (res)
+  {
+    while ( (row=mysql_fetch_row(res)) != NULL )
     {
-      while ( (row=mysql_fetch_row(resViews)) != NULL )
-      {
-        sprintf(sql, "CREATE VIEW %s.%s AS %s",
-                backup_name, row[0], row[1]);
+      sprintf(sql, "ALTER TABLE %s.%s DROP INDEX %s", db.c_str(), row[0], row[1]);
 
-        if ( (ret=query_with_reconnect(sql)) != MYSQL_OK )
-        {
-          mysql_free_result(resViews);
-          throw DbErrors("Can't create view '%s'\nError: %s", db.c_str(), ret);
-        }
+      if ( (ret=query_with_reconnect(sql)) != MYSQL_OK )
+      {
+        mysql_free_result(res);
+        throw DbErrors("Can't drop index '%s'\nError: %d", row[0], ret);
       }
-      mysql_free_result(resViews);
     }
+    mysql_free_result(res);
+  }
+
+  // next topic is a views list
+  sprintf(sql, "SELECT table_name"
+          "  FROM information_schema.views"
+          " WHERE table_schema = '%s'", db.c_str());
+  if ( (ret=query_with_reconnect(sql)) != MYSQL_OK )
+    throw DbErrors("Can't determine list of views to drop.");
+
+  res = mysql_store_result(conn);
+
+  if (res)
+  {
+    while ( (row=mysql_fetch_row(res)) != NULL )
+    {
+      /* we do not need IF EXISTS because these views are exist */
+      sprintf(sql, "DROP VIEW %s.%s", db.c_str(), row[0]);
+
+      if ( (ret=query_with_reconnect(sql)) != MYSQL_OK )
+      {
+        mysql_free_result(res);
+        throw DbErrors("Can't drop view '%s'\nError: %d", row[0], ret);
+      }
+    }
+    mysql_free_result(res);
+  }
+
+  // triggers
+  sprintf(sql, "SELECT trigger_name"
+          "  FROM information_schema.triggers"
+          " WHERE event_object_schema = '%s'", db.c_str());
+  if ( (ret=query_with_reconnect(sql)) != MYSQL_OK )
+    throw DbErrors("Can't determine list of triggers to drop.");
+
+  res = mysql_store_result(conn);
+
+  if (res)
+  {
+    while ( (row=mysql_fetch_row(res)) != NULL )
+    {
+      sprintf(sql, "DROP TRIGGER %s.%s", db.c_str(), row[0]);
+
+      if ( (ret=query_with_reconnect(sql)) != MYSQL_OK )
+      {
+        mysql_free_result(res);
+        throw DbErrors("Can't create trigger '%s'\nError: %s", row[0], ret);
+      }
+    }
+    mysql_free_result(res);
   }
 
   return 1;
@@ -1375,7 +1443,8 @@ int MysqlDataset::exec(const string &sql) {
   }
 
   // force the charset and collation to UTF-8
-  if ( ci_find(qry, "CREATE TABLE") != string::npos )
+  if ( ci_find(qry, "CREATE TABLE") != string::npos 
+    || ci_find(qry, "CREATE TEMPORARY TABLE") != string::npos )
   {
     qry += " CHARACTER SET utf8 COLLATE utf8_general_ci";
   }

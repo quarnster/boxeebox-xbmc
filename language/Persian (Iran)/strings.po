@@ -861,10 +861,6 @@ msgctxt "#251"
 msgid "Select destination directory"
 msgstr "دایرکتوری مقصد را انتخاب کنید"
 
-msgctxt "#252"
-msgid "Output stereo to all speakers"
-msgstr "خروجی استریو به همه ی بلندگوها"
-
 msgctxt "#253"
 msgid "Number of channels"
 msgstr "تعداد کانال ها"
@@ -1668,10 +1664,6 @@ msgstr "محل OSD"
 msgctxt "#470"
 msgid "Credits"
 msgstr "کارت های اعتباری"
-
-msgctxt "#471"
-msgid "Modchip"
-msgstr "مودچیپ"
 
 msgctxt "#474"
 msgid "Off"
@@ -6545,6 +6537,10 @@ msgctxt "#24027"
 msgid "Weather"
 msgstr "آب و هوا"
 
+msgctxt "#24121"
+msgid "Enter search string"
+msgstr "رشته ی جستجو را وارد کنید"
+
 msgctxt "#33069"
 msgid "Backgrounds"
 msgstr "پس زمیته ها"
@@ -6552,6 +6548,10 @@ msgstr "پس زمیته ها"
 msgctxt "#33081"
 msgid "This file is stacked, select the part you want to play from."
 msgstr "این فایل چند بخشی است, قسمت مورد نظر را برای پخش انتخاب کنید."
+
+msgctxt "#34100"
+msgid "Number of channels"
+msgstr "تعداد کانال ها"
 
 msgctxt "#34122"
 msgid "Always"

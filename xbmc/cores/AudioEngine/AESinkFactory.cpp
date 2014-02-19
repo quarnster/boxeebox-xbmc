@@ -23,10 +23,10 @@
 #if defined(TARGET_WINDOWS)
   #include "Sinks/AESinkWASAPI.h"
   #include "Sinks/AESinkDirectSound.h"
-#elif defined(TARGET_ANDROID)
-  #include "Sinks/AESinkAUDIOTRACK.h"
 #elif defined(TARGET_BOXEE)
-  #include "Sinks/AESinkIntelSMD.h"  
+  #include "Sinks/AESinkIntelSMD.h" 
+#elif defined(TARGET_ANDROID)
+  #include "Sinks/AESinkAUDIOTRACK.h"  
 #elif defined(TARGET_RASPBERRY_PI)
   #include "Sinks/AESinkPi.h"
 #elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
@@ -60,12 +60,12 @@ void CAESinkFactory::ParseDevice(std::string &device, std::string &driver)
 #if defined(TARGET_WINDOWS)
         driver == "WASAPI"      ||
         driver == "DIRECTSOUND" ||
-#elif defined(TARGET_ANDROID)
-        driver == "AUDIOTRACK"  ||
 #elif defined(TARGET_BOXEE)
         driver == "IntelSMD" ||		
+#elif defined(TARGET_ANDROID)
+        driver == "AUDIOTRACK"  ||		
 #elif defined(TARGET_RASPBERRY_PI)
-        driver == "Pi"          ||
+        driver == "PI"          ||
 #elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
   #if defined(HAS_ALSA)
         driver == "ALSA"        ||
@@ -75,7 +75,8 @@ void CAESinkFactory::ParseDevice(std::string &device, std::string &driver)
   #endif
         driver == "OSS"         ||
 #endif
-        driver == "PROFILER")
+        driver == "PROFILER"    ||
+        driver == "NULL")
       device = device.substr(pos + 1, device.length() - pos - 1);
     else
       driver.clear();
@@ -84,20 +85,47 @@ void CAESinkFactory::ParseDevice(std::string &device, std::string &driver)
     driver.clear();
 }
 
-#define TRY_SINK(SINK) \
-{ \
-  tmpFormat = desiredFormat; \
-  tmpDevice = device; \
-  sink      = new CAESink ##SINK(); \
-  if (sink->Initialize(tmpFormat, tmpDevice)) \
-  { \
-    desiredFormat = tmpFormat; \
-    device        = tmpDevice; \
-    return sink; \
-  } \
-  sink->Deinitialize(); \
-  delete sink; \
-  sink = NULL; \
+IAESink *CAESinkFactory::TrySink(std::string &driver, std::string &device, AEAudioFormat &format)
+{
+  IAESink *sink = NULL;
+
+  if (driver == "NULL")
+    sink = new CAESinkNULL();
+
+#if defined(TARGET_WINDOWS)
+  else if (driver == "WASAPI")
+    sink = new CAESinkWASAPI();
+  else if (driver == "DIRECTSOUND")
+    sink = new CAESinkDirectSound();
+#elif defined(TARGET_BOXEE)
+    sink = new CAESinkIntelSMD();	
+#elif defined(TARGET_ANDROID)
+	sink = new CAESinkAUDIOTRACK();
+#elif defined(TARGET_RASPBERRY_PI)
+  sink = new CAESinkPi();
+#elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
+#if defined(HAS_PULSEAUDIO)
+  else if (driver == "PULSE")
+    sink = new CAESinkPULSE();
+#endif
+#if defined(HAS_ALSA)
+  else if (driver == "ALSA")
+    sink = new CAESinkALSA();
+#endif
+  else if (driver == "OSS")
+    sink = new CAESinkOSS();
+#endif
+
+  if (!sink)
+    return NULL;
+
+  if (sink->Initialize(format, device))
+  {
+    return sink;
+  }
+  sink->Deinitialize();
+  delete sink;
+  return NULL;
 }
 
 IAESink *CAESinkFactory::Create(std::string &device, AEAudioFormat &desiredFormat, bool rawPassthrough)
@@ -106,88 +134,115 @@ IAESink *CAESinkFactory::Create(std::string &device, AEAudioFormat &desiredForma
   std::string driver;
   ParseDevice(device, driver);
 
-  AEAudioFormat  tmpFormat;
+  AEAudioFormat  tmpFormat = desiredFormat;
   IAESink       *sink;
-  std::string    tmpDevice;
+  std::string    tmpDevice = device;
 
-  if (driver == "PROFILER")
-    TRY_SINK(Profiler);
+  sink = TrySink(driver, tmpDevice, tmpFormat);
+  if (sink)
+  {
+    desiredFormat = tmpFormat;
+    return sink;
+  }
 
-
-#if defined(TARGET_WINDOWS)
-  if (driver == "WASAPI")
-    TRY_SINK(WASAPI)
-  else
-    TRY_SINK(DirectSound) // always fall back to DirectSound
-
-#elif defined(TARGET_ANDROID)
-  if (driver.empty() || driver == "AUDIOTRACK")
-    TRY_SINK(AUDIOTRACK)
-	
-#elif defined(TARGET_BOXEE)
-  if (driver.empty() || driver == "IntelSMD")
-    TRY_SINK(IntelSMD)	
-
-#elif defined(TARGET_RASPBERRY_PI)
-  if (driver.empty() || driver == "Pi")
-    TRY_SINK(Pi)
-
-#elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
-  #if defined(HAS_PULSEAUDIO)
-  if (driver.empty() || driver == "PULSE")
-    TRY_SINK(PULSE)
-  #endif
-
-  #if defined(HAS_ALSA)
-  if (driver.empty() || driver == "ALSA")
-    TRY_SINK(ALSA)
-  #endif
-
-  if (driver.empty() || driver == "OSS")
-    TRY_SINK(OSS)
-#endif
-
-  // complete failure.
-  TRY_SINK(NULL);
-
-  // should never get here
-  ASSERT(false);
   return NULL;
-}
-
-#define ENUMERATE_SINK(SINK, force) { \
-  AESinkInfo info; \
-  info.m_sinkName = #SINK; \
-  CAESink ##SINK::EnumerateDevicesEx(info.m_deviceInfoList, force); \
-  if(!info.m_deviceInfoList.empty()) \
-    list.push_back(info); \
 }
 
 void CAESinkFactory::EnumerateEx(AESinkInfoList &list, bool force)
 {
+  AESinkInfo info;
 #if defined(TARGET_WINDOWS)
-  ENUMERATE_SINK(DirectSound, force);
-  ENUMERATE_SINK(WASAPI, force);
-#elif defined(TARGET_ANDROID)
-    ENUMERATE_SINK(AUDIOTRACK, force);
-#elif defined(TARGET_BOXEE)
-    ENUMERATE_SINK(IntelSMD, force);	
-#elif defined(TARGET_RASPBERRY_PI)
-    ENUMERATE_SINK(Pi, force);
-#elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
-  #if defined(HAS_PULSEAUDIO)
-    ENUMERATE_SINK(PULSE, force);
-  #endif
 
-  if (!list.empty()) {
-    return;
+  info.m_deviceInfoList.clear();
+  info.m_sinkName = "DIRECTSOUND";
+  CAESinkDirectSound::EnumerateDevicesEx(info.m_deviceInfoList, force);
+  if(!info.m_deviceInfoList.empty())
+    list.push_back(info);
+
+  info.m_deviceInfoList.clear();
+  info.m_sinkName = "WASAPI";
+  CAESinkWASAPI::EnumerateDevicesEx(info.m_deviceInfoList, force);
+  if(!info.m_deviceInfoList.empty())
+    list.push_back(info);
+
+#elif defined(TARGET_BOXEE)
+
+  info.m_deviceInfoList.clear();
+  info.m_sinkName = "IntelSMD";
+  CAESinkIntelSMD::EnumerateDevicesEx(info.m_deviceInfoList, force);
+  if(!info.m_deviceInfoList.empty())
+    list.push_back(info);
+	
+#elif defined(TARGET_ANDROID)
+
+  info.m_deviceInfoList.clear();
+  info.m_sinkName = "AUDIOTRACK";
+  CAESinkAUDIOTRACK::EnumerateDevicesEx(info.m_deviceInfoList, force);
+  if(!info.m_deviceInfoList.empty())
+    list.push_back(info);
+
+#elif defined(TARGET_RASPBERRY_PI)
+
+  info.m_deviceInfoList.clear();
+  info.m_sinkName = "PI";
+  CAESinkPi::EnumerateDevicesEx(info.m_deviceInfoList, force);
+  if(!info.m_deviceInfoList.empty())
+    list.push_back(info);
+
+#elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
+  // check if user wants us to do something specific
+  if (getenv("AE_SINK"))
+  {
+    std::string envSink = (std::string)getenv("AE_SINK");
+    std::transform(envSink.begin(), envSink.end(), envSink.begin(), ::toupper);
+    info.m_deviceInfoList.clear();
+    #if defined(HAS_PULSEAUDIO)
+    if (envSink == "PULSE")
+      CAESinkPULSE::EnumerateDevicesEx(info.m_deviceInfoList, force);
+    #endif
+    #if defined(HAS_ALSA)
+    if (envSink == "ALSA")
+      CAESinkALSA::EnumerateDevicesEx(info.m_deviceInfoList, force);
+    #endif
+    if (envSink == "OSS")
+      CAESinkOSS::EnumerateDevicesEx(info.m_deviceInfoList, force);
+
+    if(!info.m_deviceInfoList.empty())
+    {
+      info.m_sinkName = envSink;
+      list.push_back(info);
+      return;
+    }
+    else
+      CLog::Log(LOGNOTICE, "User specified Sink %s could not be enumerated", envSink.c_str());
   }
 
-  #if defined(HAS_ALSA)
-    ENUMERATE_SINK(ALSA, force);
+  #if defined(HAS_PULSEAUDIO)
+  info.m_deviceInfoList.clear();
+  info.m_sinkName = "PULSE";
+  CAESinkPULSE::EnumerateDevicesEx(info.m_deviceInfoList, force);
+  if(!info.m_deviceInfoList.empty())
+  {
+    list.push_back(info);
+    return;
+  }
   #endif
 
-    ENUMERATE_SINK(OSS, force);
+  #if defined(HAS_ALSA)
+  info.m_deviceInfoList.clear();
+  info.m_sinkName = "ALSA";
+  CAESinkALSA::EnumerateDevicesEx(info.m_deviceInfoList, force);
+  if(!info.m_deviceInfoList.empty())
+    list.push_back(info);
+    return;
+  #endif
+
+  info.m_deviceInfoList.clear();
+  info.m_sinkName = "OSS";
+  CAESinkOSS::EnumerateDevicesEx(info.m_deviceInfoList, force);
+  if(!info.m_deviceInfoList.empty())
+    list.push_back(info);
+
 #endif
 
 }

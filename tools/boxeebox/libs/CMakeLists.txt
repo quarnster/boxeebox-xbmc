@@ -202,9 +202,10 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	sqlite
-	URL 				http://www.sqlite.org/2013/sqlite-autoconf-3080200.tar.gz
-	URL_MD5 			f62206713e6a08d4ccbc60b1fd712a1a
-	CONFIGURE_COMMAND	${BASIC_CONF} --enable-threadsafe --disable-readline
+	URL 				http://www.sqlite.org/2014/sqlite-autoconf-3080301.tar.gz
+	URL_MD5 			509ff98d8dc9729b618b7e96612079c6
+	CONFIGURE_COMMAND   ${BASIC_CONF} --enable-threadsafe --disable-readline --enable-dynamic-extensions
+	BUILD_COMMAND       make CXXFLAGS+=-DSQLITE_ENABLE_COLUMN_METADATA=1 CFLAGS+=-DSQLITE_TEMP_STORE=3  CFLAGS+=-DSQLITE_ENABLE_STAT3 CFLAGS+=-DSQLITE_DEFAULT_MMAP_SIZE=268435456
 )
 
 ExternalProject_Add(
@@ -212,6 +213,14 @@ ExternalProject_Add(
 	URL 				http://ftp.gnu.org/gnu/libcdio/libcdio-0.90.tar.gz
 	URL_MD5				1b245b023fb03a58d030fd2800db3247
 	CONFIGURE_COMMAND 	${BASIC_CONF}
+)
+
+ExternalProject_Add(
+    libcddb
+    URL                   http://prdownloads.sourceforge.net/libcddb/libcddb-1.3.2.tar.bz2
+	URL_MD5               8bb4a6f542197e8e9648ae597cd6bc8a
+    CONFIGURE_COMMAND     ${BASIC_CONF}
+	DEPENDS               libcdio
 )
 
 ExternalProject_Add(
@@ -224,8 +233,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libpng
-	URL 				http://sourceforge.net/projects/libpng/files/libpng16/older-releases/1.6.3/libpng-1.6.3.tar.gz/download
-	URL_MD5 			98B652B6C174C35148F1F5F513FE490D
+	URL 				http://sourceforge.net/projects/libpng/files/libpng15/older-releases/1.5.13/libpng-1.5.13.tar.gz/download
+	URL_MD5 			9c5a584d4eb5fe40d0f1bc2090112c65
 	CONFIGURE_COMMAND 	CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib ${BASIC_CONF}
 	BUILD_COMMAND		CFLAGS=-I${TARGET_DIR}/include make ${PARALLEL}
 	DEPENDS				zlib
@@ -300,7 +309,7 @@ ExternalProject_Add(
 	libjpeg-turbo
 	URL 				http://sourceforge.net/projects/libjpeg-turbo/files/1.3.0/libjpeg-turbo-1.3.0.tar.gz/download
 	URL_MD5 			e1e65cc711a1ade1322c06ad4a647741
-    CONFIGURE_COMMAND   ${BASIC_CONF}
+    CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-nls --with-jpeg8 --without-simd
     BUILD_COMMAND       make
     INSTALL_COMMAND     make install
     BUILD_IN_SOURCE     1
@@ -351,8 +360,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	curl
-	URL 				http://curl.haxx.se/download/curl-7.31.0.tar.bz2
-	URL_MD5 			b7bea20579ac2f696338ae03f2c19ba5
+	URL 				http://curl.haxx.se/download/curl-7.35.0.tar.gz
+	URL_MD5 			f5ae45ed6e86debb721b68392b5ce13c
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 	DEPENDS openssl zlib bzip2
@@ -417,6 +426,16 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
+    libbluray
+    URL                   ftp://ftp.videolan.org/pub/videolan/libbluray/0.5.0/libbluray-0.5.0.tar.bz2
+    URL_MD5               04cf15d0f3581a955d3a2ccb9dc06e9e
+    CONFIGURE_COMMAND     ${BASIC_CONF} --disable-examples --disable-doxygen-doc
+    BUILD_COMMAND         make
+    INSTALL_COMMAND       make install
+    DEPENDS               libxml2  freetype2
+)
+
+ExternalProject_Add(
 	libssh
 	URL 				http://www.libssh.org/files/0.5/libssh-0.5.3.tar.gz
 	URL_MD5 			9ad01838d3b89d98e900e0f6260a88cc
@@ -438,8 +457,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	samba
-	URL                     http://ftp.samba.org/pub/samba/stable/samba-3.6.21.tar.gz
-	URL_MD5                 faa67c625508dc495c082357913ccea6
+	URL                     http://ftp.samba.org/pub/samba/stable/samba-3.6.22.tar.gz
+	URL_MD5                 59add4bb178ebc188d857bc13a508c0b
 	CONFIGURE_COMMAND	CC=${TARGET}-gcc CFLAGS=-I${SYSROOT}/usr/local/include LDFLAGS=-L${SYSROOT}/usr/local/lib ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 ./configure --prefix=${TARGET_DIR} --host=${TARGET} samba_cv_CC_NEGATIVE_ENUM_VALUES=yes libreplace_cv_HAVE_GETADDRINFO=no ac_cv_file__proc_sys_kernel_core_pattern=yes  samba_cv_HAVE_STAT_ST_FLAGS=no samba_cv_DARWIN_INITGROUPS=no --without-ldap --without-krb5 --without-ads --disable-cups --enable-swat=no --with-winbind=no --without-dnsupdate --without-libsmbsharemodes --without-pam --without-pam_smbpass --without-libaddns
  	BUILD_COMMAND 		${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} libsmbclient libtalloc libtevent libtdb
 	INSTALL_COMMAND 	${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} installlibsmbclient installlibtalloc installlibtevent installlibtdb
@@ -449,11 +468,10 @@ ExternalProject_Add(
 
 ExternalProject_Add(
         nfs
-        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.6.0.tar.gz
-        URL_MD5           14a422a227745fa841f78a29f01492a4
-        PATCH_COMMAND     <SOURCE_DIR>/bootstrap --prefix=${TARGET_DIR} --host=${TARGET}
-	        COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
-        CONFIGURE_COMMAND ${BASIC_CONF}
+        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.9.2.tar.gz
+        URL_MD5           c2697061fbccf2de610fd3b03f2d1a34
+        PATCH_COMMAND     patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
+        CONFIGURE_COMMAND ${BASIC_CONF} --disable-examples --disable-tirpc
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
         BUILD_IN_SOURCE   1
@@ -529,6 +547,7 @@ ExternalProject_Add(
 		COMMAND mv Parser/pgen Parser/hostpgen
 		COMMAND make distclean
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/Python-2.7.2-xcompile.patch
+		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/Python-2.7.2-default-is-optimized.patch
 		COMMAND sed -e "13735,13738d" -i configure
 		COMMAND sed -e "185d" -i Makefile.pre.in
 		COMMAND sed -e "954,959d" -i Makefile.pre.in
@@ -544,8 +563,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	boost
-	URL 				http://sourceforge.net/projects/boost/files/boost/1.54.0/boost_1_54_0.tar.bz2/download
-	URL_MD5 			15cb8c0803064faef0c4ddf5bc5ca279
+	URL 				http://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.gz/download
+	URL_MD5 			93780777cfbf999a600f62883bd54b17
 	PATCH_COMMAND 		${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/boost.user-config.jam ./tools/build/v2/user-config.jam
 	CONFIGURE_COMMAND 	./bootstrap.sh --prefix=${TARGET_DIR}
 	BUILD_COMMAND 		""
@@ -593,63 +612,3 @@ add_custom_command(OUTPUT ${TARGET_DIR}/lib/libGLESv2.so
 )
 
 add_custom_target(dummylibs ALL DEPENDS DEPENDS ${TARGET_DIR}/lib/libEGL.so ${TARGET_DIR}/lib/libGLESv2.so)
-
-ExternalProject_Add(
-	ffmpeg
-	URL 				http://ffmpeg.org/releases/ffmpeg-1.2.4.tar.bz2
-	URL_MD5 			f1cfdbaae308214beeb621746300de16
-	PATCH_COMMAND
-	    COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0001-Support-raw-dvdsub-palette-as-stored-on-normal-dvd-s.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0002-Change-fallthrough-logic-for-read_seek-to-be-based-o.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0003-matroska-Check-return-value-of-avio_seek-and-avoid-m.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0004-asf-hacks.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0005-if-av_read_packet-returns-AVERROR_IO-we-are-done.-ff.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0006-added-Ticket-7187-TV-Teletext-support-for-DVB-EBU-Te.patch
-	    COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0007-Don-t-accept-mpegts-PMT-that-isn-t-current.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0008-Don-t-reparse-PMT-unless-it-s-version-has-changed.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0010-Read-PID-timestamps-as-well-as-PCR-timestamps-to-fin.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0011-Get-stream-durations-using-read_timestamp.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0013-aacenc-add-recognized-profiles-array.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0014-changed-allow-4-second-skew-between-streams-in-mov-b.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0015-fixed-memleak-in-mpegts-demuxer-on-some-malformed-mp.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0016-Speed-up-mpegts-av_find_stream_info.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0017-allow-customizing-shared-library-soname-name-with-ma.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0018-dxva-mpeg2-Allocate-slices-array-dynamically-fixes-v.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0019-dxva-mpeg2-speed-up-slice-allocation.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0020-dxva-vc1-Take-BI-into-account-for-forward-and-backwa.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0021-dxva-vc1-Pass-overlapping-transforms-hint.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0022-dxva-h264-Fix-dxva-playback-of-streams-that-don-t-st.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0024-add-public-version-of-ff_read_frame_flush.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0026-Handle-return-value-of-BeginFrame-better.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0028-ffmpeg-1.2-fixed-dvd-still-frames-ended-up-in-intern.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0029-stop-forcing-gas-preprocessor-for-darwin.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0036-backport-register-vdpau-hwaccel-for-mpeg12-fe1f36547d0be963e352de0cde1a6cba59ea2e78.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0037-backport-fix-vdpau-vc1-interlace-modes-b37cc5995b88ec68a68cb8e496a008e1cd467077.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0039-h264-expose-h264-frame-packing-as-stereo_mode-metada.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0040-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-s.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0041-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-i.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0042-ffmpeg-backport-fmtconvert-Add-a-new-method-int32_to.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0043-ffmpeg-backport-dcadec-Use-int32_to_float_fmul_array.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0044-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-i.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0045-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-i.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0046-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-d.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0047-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-f.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0048-ffmpeg-backport-dcadsp-Add-a-new-method-qmf_32_subba.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0049-ffmpeg-backport-arm-Add-VFP-accelerated-version-of-q.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0050-ffmpeg-backport-arm-Mangle-external-symbols-properly.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0051-ffmpeg-backport-avio-Add-an-internal-function-for-re.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0052-ffmpeg-backport-mpegts-Remove-one-memcpy-per-packet.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0053-ffmpeg-backport-mpegts-Make-discard_pid-faster-for-s.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0054-ffmpeg-backport-mpegts-Remove-one-64-bit-integer-mod.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0055-ffmpeg-backport-fix-compilation-droid-gcc-4-7.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0056-backport-h264-do-not-discard-NAL_SEI-when-skipping-frames.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0057-backport-swresample-Make-rematrix-maxvalue-user-settable.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0058-backport-fixed-not-keeping-custom-http-headers.patch
- 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0059-backport-mpegts-do-not-set-pts-for-missing-dts.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0060-mpegts-stop-analyzing-when-pmt-for-all-programs-have.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/999-0001-h264_parser-Initialize-the-h264dsp-context-in-the-.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/ffmpeg.git-21a2b97365b566cf9c6e526b5165dde4673b526e.patch
-		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/ffmpeg-patches/0060-ffmpeg-backport-avcodec-aacdec-default-to-non-wide-7.patch
-	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --enable-shared --disable-static --disable-programs --enable-gpl
-	BUILD_COMMAND 		make ${PARALLEL}
-)

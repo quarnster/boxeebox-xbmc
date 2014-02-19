@@ -116,6 +116,10 @@ msgctxt "#31046"
 msgid "SEEKING"
 msgstr "בחיפוש"
 
+msgctxt "#31048"
+msgid "Visualisation Presets"
+msgstr "קביעוני חיזוי"
+
 msgctxt "#31049"
 msgid "End Time"
 msgstr "זמן סיום"
@@ -168,6 +172,10 @@ msgctxt "#31103"
 msgid "Show \"Paused\" in picture slide show"
 msgstr "הראה \"הפסקה\" במצגת תמונות"
 
+msgctxt "#31104"
+msgid "Play Trailers in a window [COLOR=grey3](Video Information Dialogue Only)[/COLOR]"
+msgstr "נגן קדימונים בחלון"
+
 msgctxt "#31106"
 msgid "Miscellaneous options"
 msgstr "אפשרות שונות"
@@ -204,6 +212,10 @@ msgctxt "#31117"
 msgid "Show Recently added Videos"
 msgstr "הצג וידאו שנוסף לאחרונה"
 
+msgctxt "#31118"
+msgid "Home Page Programs Sub-menu"
+msgstr "תת-תפריט תוכנות במסך הבית"
+
 msgctxt "#31119"
 msgid "Hide Background Fanart"
 msgstr "החבא הצגת פאנארט ברקע"
@@ -211,6 +223,10 @@ msgstr "החבא הצגת פאנארט ברקע"
 msgctxt "#31124"
 msgid "Show Background \"Now Playing\" Video"
 msgstr "הצג ברקע \"מנגן כעת\" וידאו"
+
+msgctxt "#31125"
+msgid "Show Background \"Now Playing\" Visualisation"
+msgstr "הצג חיזוי \"מנגן עכשיו\" ברקע"
 
 msgctxt "#31126"
 msgid "Play TV theme songs in video library (TvTunes add-on)"
@@ -224,9 +240,25 @@ msgctxt "#31128"
 msgid "Lyrics"
 msgstr "מילות שירים"
 
+msgctxt "#31129"
+msgid "Hide Fanart in full screen visualisation"
+msgstr "הסתר חיזוי פאנארט במסך מלא"
+
 msgctxt "#31132"
 msgid "Lyrics Add-on"
 msgstr "תוספי מילים לשירים"
+
+msgctxt "#31134"
+msgid "Home Page Videos Sub-menu"
+msgstr "תת-תפריט וידאו במסך הבית"
+
+msgctxt "#31135"
+msgid "Home Page Music Sub-menu"
+msgstr "תת-תפריט מוסיקה במסך הבית"
+
+msgctxt "#31136"
+msgid "Home Page Pictures Sub-menu"
+msgstr "תת-תפריט תמונות במסך הבית"
 
 msgctxt "#31140"
 msgid "Music OSD"
@@ -235,6 +267,10 @@ msgstr "מוזיקה OSD"
 msgctxt "#31141"
 msgid "Video OSD"
 msgstr "וידאו OSD"
+
+msgctxt "#31142"
+msgid "Settings level"
+msgstr "רמת הגדרות"
 
 msgctxt "#31200"
 msgid "Shortcuts"
@@ -436,13 +472,29 @@ msgctxt "#31411"
 msgid "First run help...."
 msgstr "הרץ עזרה תחילה...."
 
+msgctxt "#31412"
+msgid "This tab signifies that there is a menu off to the side of this window that contains extra options for this section.  To access the menu, navigate to the left with your remote control or keyboard or place your mouse pointer over the tab. [CR][CR]Click \"Ok\" to close this dialogue. It will not appear again."
+msgstr ".לשונית זו מציינת שיש תפריט נוסף לצד חלון זה שמכיל הגדרות נוספות לחלק זה. ע\"מ לגשת לתפריט זה, לחץ על מקש שמאלה בשלט או במקלדת או הצב את העכבר על לשונית זו. [CR][CR]לחץ על \"אישור\" ע\"מ לסגור תיבה זו.היא לא תופיע שוב."
+
 msgctxt "#31413"
 msgid "Local subtitle available"
 msgstr "כתובית מקומית זמינה"
 
+msgctxt "#31420"
+msgid "Login"
+msgstr "כניסה"
+
 msgctxt "#31421"
 msgid "Select your XBMC user Profile[CR]to login and continue"
 msgstr "בחר בפרופיל משתמש XBMC [CR]שלך כדי להתחבר ולהמשיך"
+
+msgctxt "#31422"
+msgid "Show or hide the login screen at startup."
+msgstr "הצג או הסתר מסך התחברות בהפעלה."
+
+msgctxt "#31423"
+msgid "Select the profile that will be used at startup when the login screen is disabled."
+msgstr "בחר פרופיל שישמש כברירת מחדל"
 
 msgctxt "#31501"
 msgid "Scheduled Time"
@@ -534,7 +586,7 @@ msgstr "סרטים"
 
 msgctxt "#31955"
 msgid "TV SHOWS"
-msgstr "תכניות טלוויזיה"
+msgstr "סדרות"
 
 msgctxt "#31956"
 msgid "MUSIC"

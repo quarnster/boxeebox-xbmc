@@ -139,7 +139,6 @@
 		18B7C89D129423A7009E7A26 /* MusicInfoTagLoaderNSF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C878129423A7009E7A26 /* MusicInfoTagLoaderNSF.cpp */; };
 		18B7C89F129423A7009E7A26 /* MusicInfoTagLoaderShn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C87C129423A7009E7A26 /* MusicInfoTagLoaderShn.cpp */; };
 		18B7C8A0129423A7009E7A26 /* MusicInfoTagLoaderSPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C87E129423A7009E7A26 /* MusicInfoTagLoaderSPC.cpp */; };
-		18B7C8A1129423A7009E7A26 /* MusicInfoTagLoaderWav.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C880129423A7009E7A26 /* MusicInfoTagLoaderWav.cpp */; };
 		18B7C8A4129423A7009E7A26 /* MusicInfoTagLoaderYM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C886129423A7009E7A26 /* MusicInfoTagLoaderYM.cpp */; };
 		18B7C8D712942546009E7A26 /* ButtonTranslator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C8CB12942546009E7A26 /* ButtonTranslator.cpp */; };
 		18B7C8D812942546009E7A26 /* KeyboardLayoutConfiguration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C8CD12942546009E7A26 /* KeyboardLayoutConfiguration.cpp */; };
@@ -284,6 +283,9 @@
 		7C1409A9184015C9009F9411 /* InfoExpression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C1409A7184015C6009F9411 /* InfoExpression.cpp */; };
 		7C1409AA184015C9009F9411 /* InfoExpression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C1409A7184015C6009F9411 /* InfoExpression.cpp */; };
 		7C1409AB184015C9009F9411 /* InfoExpression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C1409A7184015C6009F9411 /* InfoExpression.cpp */; };
+		7C15DCBC1892481400FCE564 /* InfoBool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C15DCBB1892481300FCE564 /* InfoBool.cpp */; };
+		7C15DCBD1892481400FCE564 /* InfoBool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C15DCBB1892481300FCE564 /* InfoBool.cpp */; };
+		7C15DCBE1892481400FCE564 /* InfoBool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C15DCBB1892481300FCE564 /* InfoBool.cpp */; };
 		7C1A492315A962EE004AF4A4 /* SeekHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C1A492115A962EE004AF4A4 /* SeekHandler.cpp */; };
 		7C1A85661520522500C63311 /* TextureCacheJob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C1A85631520522500C63311 /* TextureCacheJob.cpp */; };
 		7C1D682915A7D2FD00658B65 /* DatabaseManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C1D682715A7D2FD00658B65 /* DatabaseManager.cpp */; };
@@ -1262,7 +1264,6 @@
 		DFF0F30D17528350002DA3A4 /* MusicInfoTagLoaderNSF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C878129423A7009E7A26 /* MusicInfoTagLoaderNSF.cpp */; };
 		DFF0F30E17528350002DA3A4 /* MusicInfoTagLoaderShn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C87C129423A7009E7A26 /* MusicInfoTagLoaderShn.cpp */; };
 		DFF0F30F17528350002DA3A4 /* MusicInfoTagLoaderSPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C87E129423A7009E7A26 /* MusicInfoTagLoaderSPC.cpp */; };
-		DFF0F31017528350002DA3A4 /* MusicInfoTagLoaderWav.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C880129423A7009E7A26 /* MusicInfoTagLoaderWav.cpp */; };
 		DFF0F31117528350002DA3A4 /* MusicInfoTagLoaderYM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C886129423A7009E7A26 /* MusicInfoTagLoaderYM.cpp */; };
 		DFF0F31217528350002DA3A4 /* TagLibVFSStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AE84CB5915A5B8A600A3810E /* TagLibVFSStream.cpp */; };
 		DFF0F31317528350002DA3A4 /* TagLoaderTagLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AEC0083015ACAC6E0099888C /* TagLoaderTagLib.cpp */; };
@@ -2677,7 +2678,6 @@
 		E499138E174E5F0E00741B6D /* MusicInfoTagLoaderNSF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C878129423A7009E7A26 /* MusicInfoTagLoaderNSF.cpp */; };
 		E499138F174E5F0E00741B6D /* MusicInfoTagLoaderShn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C87C129423A7009E7A26 /* MusicInfoTagLoaderShn.cpp */; };
 		E4991390174E5F0E00741B6D /* MusicInfoTagLoaderSPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C87E129423A7009E7A26 /* MusicInfoTagLoaderSPC.cpp */; };
-		E4991391174E5F0E00741B6D /* MusicInfoTagLoaderWav.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C880129423A7009E7A26 /* MusicInfoTagLoaderWav.cpp */; };
 		E4991392174E5F0E00741B6D /* MusicInfoTagLoaderYM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C886129423A7009E7A26 /* MusicInfoTagLoaderYM.cpp */; };
 		E4991393174E5F0E00741B6D /* TagLibVFSStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AE84CB5915A5B8A600A3810E /* TagLibVFSStream.cpp */; };
 		E4991394174E5F0E00741B6D /* TagLoaderTagLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AEC0083015ACAC6E0099888C /* TagLoaderTagLib.cpp */; };
@@ -3122,6 +3122,9 @@
 		F58E293911FFC103006F4D46 /* DVDInputStreamBluray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F58E293711FFC103006F4D46 /* DVDInputStreamBluray.cpp */; };
 		F592568810FBF2E100D2C91D /* ConvolutionKernels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F592568710FBF2E100D2C91D /* ConvolutionKernels.cpp */; };
 		F595994510E9F322004B58B3 /* DVDVideoCodecCrystalHD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F595994410E9F322004B58B3 /* DVDVideoCodecCrystalHD.cpp */; };
+		F597B05B18A804E0005AADAE /* DVDVideoCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F597B05A18A804E0005AADAE /* DVDVideoCodec.cpp */; };
+		F597B05C18A804E0005AADAE /* DVDVideoCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F597B05A18A804E0005AADAE /* DVDVideoCodec.cpp */; };
+		F597B05D18A804E0005AADAE /* DVDVideoCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F597B05A18A804E0005AADAE /* DVDVideoCodec.cpp */; };
 		F59876C00FBA351D008EF4FB /* VideoReferenceClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59876BF0FBA351D008EF4FB /* VideoReferenceClock.cpp */; };
 		F59879080FBAA0C3008EF4FB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F59879070FBAA0C3008EF4FB /* QuartzCore.framework */; };
 		F5987F050FBDF274008EF4FB /* DPMSSupport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5987F040FBDF274008EF4FB /* DPMSSupport.cpp */; };
@@ -3462,8 +3465,6 @@
 		18B7C87D129423A7009E7A26 /* MusicInfoTagLoaderShn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicInfoTagLoaderShn.h; sourceTree = "<group>"; };
 		18B7C87E129423A7009E7A26 /* MusicInfoTagLoaderSPC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MusicInfoTagLoaderSPC.cpp; sourceTree = "<group>"; };
 		18B7C87F129423A7009E7A26 /* MusicInfoTagLoaderSPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicInfoTagLoaderSPC.h; sourceTree = "<group>"; };
-		18B7C880129423A7009E7A26 /* MusicInfoTagLoaderWav.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MusicInfoTagLoaderWav.cpp; sourceTree = "<group>"; };
-		18B7C881129423A7009E7A26 /* MusicInfoTagLoaderWav.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicInfoTagLoaderWav.h; sourceTree = "<group>"; };
 		18B7C886129423A7009E7A26 /* MusicInfoTagLoaderYM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MusicInfoTagLoaderYM.cpp; sourceTree = "<group>"; };
 		18B7C887129423A7009E7A26 /* MusicInfoTagLoaderYM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicInfoTagLoaderYM.h; sourceTree = "<group>"; };
 		18B7C8CB12942546009E7A26 /* ButtonTranslator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ButtonTranslator.cpp; sourceTree = "<group>"; };
@@ -3744,6 +3745,7 @@
 		7C140988183224B8009F9411 /* SettingUpdate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SettingUpdate.h; path = lib/SettingUpdate.h; sourceTree = "<group>"; };
 		7C1409A7184015C6009F9411 /* InfoExpression.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InfoExpression.cpp; sourceTree = "<group>"; };
 		7C1409A8184015C8009F9411 /* InfoExpression.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InfoExpression.h; sourceTree = "<group>"; };
+		7C15DCBB1892481300FCE564 /* InfoBool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InfoBool.cpp; sourceTree = "<group>"; };
 		7C1A492115A962EE004AF4A4 /* SeekHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SeekHandler.cpp; sourceTree = "<group>"; };
 		7C1A492215A962EE004AF4A4 /* SeekHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SeekHandler.h; sourceTree = "<group>"; };
 		7C1A495B15A96918004AF4A4 /* SaveFileStateJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SaveFileStateJob.h; sourceTree = "<group>"; };
@@ -5465,6 +5467,7 @@
 		F592568710FBF2E100D2C91D /* ConvolutionKernels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionKernels.cpp; sourceTree = "<group>"; };
 		F595994310E9F322004B58B3 /* DVDVideoCodecCrystalHD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDVideoCodecCrystalHD.h; sourceTree = "<group>"; };
 		F595994410E9F322004B58B3 /* DVDVideoCodecCrystalHD.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDVideoCodecCrystalHD.cpp; sourceTree = "<group>"; };
+		F597B05A18A804E0005AADAE /* DVDVideoCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDVideoCodec.cpp; sourceTree = "<group>"; };
 		F59876BE0FBA351D008EF4FB /* VideoReferenceClock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoReferenceClock.h; sourceTree = "<group>"; };
 		F59876BF0FBA351D008EF4FB /* VideoReferenceClock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VideoReferenceClock.cpp; sourceTree = "<group>"; };
 		F59879070FBAA0C3008EF4FB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = /System/Library/Frameworks/QuartzCore.framework; sourceTree = "<absolute>"; };
@@ -6054,8 +6057,6 @@
 				18B7C87D129423A7009E7A26 /* MusicInfoTagLoaderShn.h */,
 				18B7C87E129423A7009E7A26 /* MusicInfoTagLoaderSPC.cpp */,
 				18B7C87F129423A7009E7A26 /* MusicInfoTagLoaderSPC.h */,
-				18B7C880129423A7009E7A26 /* MusicInfoTagLoaderWav.cpp */,
-				18B7C881129423A7009E7A26 /* MusicInfoTagLoaderWav.h */,
 				18B7C886129423A7009E7A26 /* MusicInfoTagLoaderYM.cpp */,
 				18B7C887129423A7009E7A26 /* MusicInfoTagLoaderYM.h */,
 				AE84CB5915A5B8A600A3810E /* TagLibVFSStream.cpp */,
@@ -6751,6 +6752,7 @@
 		7C89674213C03B21003631FE /* info */ = {
 			isa = PBXGroup;
 			children = (
+				7C15DCBB1892481300FCE564 /* InfoBool.cpp */,
 				7C89674413C03B22003631FE /* InfoBool.h */,
 				7C1409A7184015C6009F9411 /* InfoExpression.cpp */,
 				7C1409A8184015C8009F9411 /* InfoExpression.h */,
@@ -7632,6 +7634,7 @@
 				F5F240EB110A4F76009126C6 /* CrystalHD.cpp */,
 				F5F240EC110A4F76009126C6 /* CrystalHD.h */,
 				E38E153B0D25F9F900618676 /* DllLibMpeg2.h */,
+				F597B05A18A804E0005AADAE /* DVDVideoCodec.cpp */,
 				E38E153C0D25F9F900618676 /* DVDVideoCodec.h */,
 				F595994410E9F322004B58B3 /* DVDVideoCodecCrystalHD.cpp */,
 				F595994310E9F322004B58B3 /* DVDVideoCodecCrystalHD.h */,
@@ -9837,6 +9840,7 @@
 				E38E20440D25F9FD00618676 /* DirectoryNodeTop100.cpp in Sources */,
 				E38E20460D25F9FD00618676 /* DirectoryNodeYearAlbum.cpp in Sources */,
 				E38E20470D25F9FD00618676 /* DirectoryNodeYearSong.cpp in Sources */,
+				F597B05B18A804E0005AADAE /* DVDVideoCodec.cpp in Sources */,
 				E38E20490D25F9FD00618676 /* QueryParams.cpp in Sources */,
 				E38E204A0D25F9FD00618676 /* MusicDatabaseDirectory.cpp in Sources */,
 				E38E204B0D25F9FD00618676 /* MusicSearchDirectory.cpp in Sources */,
@@ -10371,7 +10375,6 @@
 				18B7C89D129423A7009E7A26 /* MusicInfoTagLoaderNSF.cpp in Sources */,
 				18B7C89F129423A7009E7A26 /* MusicInfoTagLoaderShn.cpp in Sources */,
 				18B7C8A0129423A7009E7A26 /* MusicInfoTagLoaderSPC.cpp in Sources */,
-				18B7C8A1129423A7009E7A26 /* MusicInfoTagLoaderWav.cpp in Sources */,
 				18B7C8A4129423A7009E7A26 /* MusicInfoTagLoaderYM.cpp in Sources */,
 				18B7C8D712942546009E7A26 /* ButtonTranslator.cpp in Sources */,
 				18B7C8D812942546009E7A26 /* KeyboardLayoutConfiguration.cpp in Sources */,
@@ -10751,6 +10754,7 @@
 				DF0ABB73183A94A30018445D /* Utf8Utils.cpp in Sources */,
 				7C1409A9184015C9009F9411 /* InfoExpression.cpp in Sources */,
 				AE32174218313ADF0003FAFC /* XSLTUtils.cpp in Sources */,
+				7C15DCBC1892481400FCE564 /* InfoBool.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11314,6 +11318,7 @@
 				DFF0F2C417528350002DA3A4 /* TextureGL.cpp in Sources */,
 				DFF0F2C517528350002DA3A4 /* TextureManager.cpp in Sources */,
 				DFF0F2C617528350002DA3A4 /* VisibleEffect.cpp in Sources */,
+				F597B05D18A804E0005AADAE /* DVDVideoCodec.cpp in Sources */,
 				DFF0F2C717528350002DA3A4 /* XBTF.cpp in Sources */,
 				DFF0F2C817528350002DA3A4 /* XBTFReader.cpp in Sources */,
 				DFF0F2C917528350002DA3A4 /* GenericTouchActionHandler.cpp in Sources */,
@@ -11385,7 +11390,6 @@
 				DFF0F30D17528350002DA3A4 /* MusicInfoTagLoaderNSF.cpp in Sources */,
 				DFF0F30E17528350002DA3A4 /* MusicInfoTagLoaderShn.cpp in Sources */,
 				DFF0F30F17528350002DA3A4 /* MusicInfoTagLoaderSPC.cpp in Sources */,
-				DFF0F31017528350002DA3A4 /* MusicInfoTagLoaderWav.cpp in Sources */,
 				DFF0F31117528350002DA3A4 /* MusicInfoTagLoaderYM.cpp in Sources */,
 				DFF0F31217528350002DA3A4 /* TagLibVFSStream.cpp in Sources */,
 				DFF0F31317528350002DA3A4 /* TagLoaderTagLib.cpp in Sources */,
@@ -11794,6 +11798,7 @@
 				DF0ABB75183A94A30018445D /* Utf8Utils.cpp in Sources */,
 				7C1409AB184015C9009F9411 /* InfoExpression.cpp in Sources */,
 				AE32174318313AE10003FAFC /* XSLTUtils.cpp in Sources */,
+				7C15DCBE1892481400FCE564 /* InfoBool.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12034,6 +12039,7 @@
 				E49911E1174E5D3700741B6D /* DVDInputStreamHTSP.cpp in Sources */,
 				E49911E2174E5D3700741B6D /* DVDInputStreamHttp.cpp in Sources */,
 				E49911E3174E5D3700741B6D /* DVDInputStreamMemory.cpp in Sources */,
+				F597B05C18A804E0005AADAE /* DVDVideoCodec.cpp in Sources */,
 				E49911E4174E5D3700741B6D /* DVDInputStreamNavigator.cpp in Sources */,
 				E49911E5174E5D3700741B6D /* DVDInputStreamPVRManager.cpp in Sources */,
 				E49911E6174E5D3700741B6D /* DVDInputStreamRTMP.cpp in Sources */,
@@ -12435,7 +12441,6 @@
 				E499138E174E5F0E00741B6D /* MusicInfoTagLoaderNSF.cpp in Sources */,
 				E499138F174E5F0E00741B6D /* MusicInfoTagLoaderShn.cpp in Sources */,
 				E4991390174E5F0E00741B6D /* MusicInfoTagLoaderSPC.cpp in Sources */,
-				E4991391174E5F0E00741B6D /* MusicInfoTagLoaderWav.cpp in Sources */,
 				E4991392174E5F0E00741B6D /* MusicInfoTagLoaderYM.cpp in Sources */,
 				E4991393174E5F0E00741B6D /* TagLibVFSStream.cpp in Sources */,
 				E4991394174E5F0E00741B6D /* TagLoaderTagLib.cpp in Sources */,
@@ -12839,6 +12844,7 @@
 				DF0ABB74183A94A30018445D /* Utf8Utils.cpp in Sources */,
 				7C1409AA184015C9009F9411 /* InfoExpression.cpp in Sources */,
 				AE4E87A717354C4A00D15206 /* XSLTUtils.cpp in Sources */,
+				7C15DCBD1892481400FCE564 /* InfoBool.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13291,6 +13297,8 @@
 					"-lswresample",
 					"-lswscale",
 					"-ltag",
+					"-lxslt",
+					"-lxml2",
 					"-L$XBMC_DEPENDS/lib/mysql",
 					"-lmysqlclient",
 				);
@@ -13405,6 +13413,8 @@
 					"-lswresample",
 					"-lswscale",
 					"-ltag",
+					"-lxslt",
+					"-lxml2",
 					"-L$XBMC_DEPENDS/lib/mysql",
 					"-lmysqlclient",
 				);

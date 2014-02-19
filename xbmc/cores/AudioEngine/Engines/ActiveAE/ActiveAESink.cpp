@@ -107,6 +107,33 @@ bool CActiveAESink::HasPassthroughDevice()
   return false;
 }
 
+bool CActiveAESink::SupportsFormat(const std::string &device, AEDataFormat format)
+{
+  std::string dev = device;
+  std::string dri;
+  CAESinkFactory::ParseDevice(dev, dri);
+  for (AESinkInfoList::iterator itt = m_sinkInfoList.begin(); itt != m_sinkInfoList.end(); ++itt)
+  {
+    if (dri == itt->m_sinkName)
+    {
+      for (AEDeviceInfoList::iterator itt2 = itt->m_deviceInfoList.begin(); itt2 != itt->m_deviceInfoList.end(); ++itt2)
+      {
+        CAEDeviceInfo& info = *itt2;
+        if (info.m_deviceName == dev)
+        {
+          AEDataFormatList::iterator itt3;
+          itt3 = find(info.m_dataFormats.begin(), info.m_dataFormats.end(), format);
+          if (itt3 != info.m_dataFormats.end())
+            return true;
+          else
+            return false;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 enum SINK_STATES
 {
   S_TOP = 0,                      // 0
@@ -656,6 +683,29 @@ void CActiveAESink::OpenSink()
   m_sinkFormat = m_requestedFormat;
   CLog::Log(LOGDEBUG, "CActiveAESink::OpenSink - trying to open device %s", device.c_str());
   m_sink = CAESinkFactory::Create(device, m_sinkFormat, passthrough);
+
+  // try first device in out list
+  if (!m_sink && !m_sinkInfoList.empty())
+  {
+    driver = m_sinkInfoList.front().m_sinkName;
+    device = m_sinkInfoList.front().m_deviceInfoList.front().m_deviceName;
+    GetDeviceFriendlyName(device);
+    if (!driver.empty())
+      device = driver + ":" + device;
+    m_sinkFormat = m_requestedFormat;
+    CLog::Log(LOGDEBUG, "CActiveAESink::OpenSink - trying to open device %s", device.c_str());
+    m_sink = CAESinkFactory::Create(device, m_sinkFormat, passthrough);
+  }
+
+  // open NULL sink
+  // TODO: should not be required by ActiveAE
+  if (!m_sink)
+  {
+    device = "NULL:NULL";
+    m_sinkFormat = m_requestedFormat;
+    CLog::Log(LOGDEBUG, "CActiveAESink::OpenSink - open NULL sink");
+    m_sink = CAESinkFactory::Create(device, m_sinkFormat, passthrough);
+  }
 
   if (!m_sink)
   {

@@ -870,8 +870,8 @@ msgid "Select destination directory"
 msgstr "Zielordner wählen"
 
 msgctxt "#252"
-msgid "Output stereo to all speakers"
-msgstr "Stereo auf allen Lautsprechern ausgeben"
+msgid "Stereo upmix"
+msgstr "Stereo upmix"
 
 msgctxt "#253"
 msgid "Number of channels"
@@ -1713,10 +1713,6 @@ msgctxt "#470"
 msgid "Credits"
 msgstr "Anerkennung"
 
-msgctxt "#471"
-msgid "Modchip"
-msgstr "Modchip"
-
 msgctxt "#474"
 msgid "Off"
 msgstr "Aus"
@@ -1791,7 +1787,7 @@ msgstr "Übersteuerungsreserve"
 
 msgctxt "#495"
 msgid "Upsample videos to GUI resolution"
-msgstr "Videos in GUI-Auflösung abspielen"
+msgstr "Videos in Auflösung der Benutzeroberfläche abspielen"
 
 msgctxt "#496"
 msgid "Calibration"
@@ -2404,6 +2400,10 @@ msgstr "Komprimierungsgrad"
 msgctxt "#666"
 msgid "Verbose logging..."
 msgstr "Ausführliches loggen..."
+
+msgctxt "#667"
+msgid "Enable Dolby Digital transcoding"
+msgstr "Dolby Digital Umwandlung einschalten"
 
 msgctxt "#700"
 msgid "Cleaning up library"
@@ -3451,7 +3451,7 @@ msgstr "Einstellungen->Bildschirm"
 
 msgctxt "#10010"
 msgid "Settings - Appearance - GUI Calibration"
-msgstr "Einstellungen->Darstellung->GUI-Kalibrierung"
+msgstr "Einstellungen->Darstellung->Benutzeroberflächen-Kalibrierung"
 
 msgctxt "#10011"
 msgid "Settings - Videos - Screen Calibration"
@@ -3519,7 +3519,7 @@ msgstr "Zurücksetzen"
 
 msgctxt "#10036"
 msgid "Basic"
-msgstr "Standard"
+msgstr "Einfach"
 
 msgctxt "#10037"
 msgid "Standard"
@@ -4977,10 +4977,6 @@ msgctxt "#13439"
 msgid "Allow hardware acceleration (MediaCodec)"
 msgstr "Hardwarebeschleunigung erlauben (MediaCodec)"
 
-msgctxt "#13440"
-msgid "Frame Multi Threaded Decoding (less reliable)"
-msgstr "Multi-Prozessor-Dekodierung  (unzuverlässig)"
-
 msgctxt "#13500"
 msgid "A/V sync method"
 msgstr "A/V Sync Methode"
@@ -5303,7 +5299,7 @@ msgstr "Datumsformat"
 
 msgctxt "#14053"
 msgid "GUI filters"
-msgstr "GUI-Filter"
+msgstr "Benutzeroberflächen-Filter"
 
 msgctxt "#14055"
 msgid "Use background scanning"
@@ -6006,8 +6002,8 @@ msgid "TV recordings"
 msgstr "TV Aufnahmen"
 
 msgctxt "#19018"
-msgid "Default folder for PVR thumbnails"
-msgstr "Standard-Ordner für PVR Thumbnails"
+msgid "Folder with channel icons"
+msgstr "Verzeichnis mit Kanal-Icons"
 
 msgctxt "#19019"
 msgid "Channels"
@@ -6196,6 +6192,10 @@ msgstr "Gehe an das Ende"
 msgctxt "#19065"
 msgid "Default EPG window"
 msgstr "Standard EPG-Fenster"
+
+msgctxt "#19066"
+msgid "Channel icons"
+msgstr "Kanal-Icons"
 
 msgctxt "#19067"
 msgid "This event is already being recorded."
@@ -6831,7 +6831,7 @@ msgstr "Zeige Hinweis bei Timer Aktualisierungen"
 
 msgctxt "#19234"
 msgid "Use backend channels numbers (only works with 1 enabled PVR Add-on)"
-msgstr "Verwende Kanalreihenfolge des Backends (nur mit 1 PVR Add-on möglich)"
+msgstr "Verwende Kanalnummerierung des Backends (nur mit 1 PVR Add-on möglich)"
 
 msgctxt "#19235"
 msgid "PVR manager is starting up"
@@ -7020,6 +7020,22 @@ msgstr "Clientspezifische Einstellungen"
 msgctxt "#19281"
 msgid "Confirm channel switches by pressing OK"
 msgstr "Kanalwechsel durch Drücken von OK bestätigen"
+
+msgctxt "#19282"
+msgid "Current icon"
+msgstr "Aktuelles Icon"
+
+msgctxt "#19283"
+msgid "No icon"
+msgstr "Kein Icon"
+
+msgctxt "#19284"
+msgid "Choose icon"
+msgstr "Icon auswählen"
+
+msgctxt "#19285"
+msgid "Browse for icon"
+msgstr "Nach Icon browsen"
 
 msgctxt "#19499"
 msgid "Other/Unknown"
@@ -7305,10 +7321,6 @@ msgctxt "#19647"
 msgid "Motoring"
 msgstr "Auto"
 
-msgctxt "#19648"
-msgid "Fitness &amp; Health"
-msgstr "Fitness und Gesundheit"
-
 msgctxt "#19649"
 msgid "Cooking"
 msgstr "Kochen"
@@ -7328,10 +7340,6 @@ msgstr "Besonderheiten"
 msgctxt "#19661"
 msgid "Original Language"
 msgstr "Originalsprache"
-
-msgctxt "#19662"
-msgid "Black &amp; White"
-msgstr "Schwarz-weiß"
 
 msgctxt "#19663"
 msgid "Unpublished"
@@ -8249,6 +8257,10 @@ msgctxt "#20321"
 msgid "Scanning albums using %s"
 msgstr "Durchsuche Alben mit %s"
 
+msgctxt "#20323"
+msgid "Movie plot"
+msgstr "Handlung"
+
 msgctxt "#20324"
 msgid "Play part..."
 msgstr "Einzelteil spielen..."
@@ -8894,8 +8906,8 @@ msgid "Remove media share"
 msgstr "Quelle entfernen"
 
 msgctxt "#21366"
-msgid "Subtitle folder"
-msgstr "Alternatives Untertitel-Verzeichnis"
+msgid "Custom subtitle folder"
+msgstr "Angepasstes Untertitel-Verzeichnis"
 
 msgctxt "#21367"
 msgid "Movie & alternate subtitle directory"
@@ -9266,8 +9278,8 @@ msgid "mixed"
 msgstr "gemischt"
 
 msgctxt "#21460"
-msgid "Subtitle location"
-msgstr "Position der Untertitel"
+msgid "Subtitle location on screen"
+msgstr "Untertitelposition auf dem Bildschirm"
 
 msgctxt "#21461"
 msgid "Fixed"
@@ -10229,6 +10241,14 @@ msgctxt "#24119"
 msgid "Select service that will be used as default to search for Movie subtitles"
 msgstr "Wählen Sie den Dienst der standardmäßig für die Suche nach Untertiteln von Filmen verwendet werden soll"
 
+msgctxt "#24120"
+msgid "Manual search string"
+msgstr "Suchbegriff"
+
+msgctxt "#24121"
+msgid "Enter search string"
+msgstr "Suchbegriff eingeben"
+
 msgctxt "#25000"
 msgid "Notifications"
 msgstr "Benachrichtigungen"
@@ -10256,6 +10276,18 @@ msgstr "Titel %d"
 msgctxt "#25006"
 msgid "Select playback item"
 msgstr "Wähle Eintrag für Wiedergabe"
+
+msgctxt "#25007"
+msgid "Chapters: %u - duration: %s"
+msgstr "Kapitel: %u - Dauer: %s"
+
+msgctxt "#25008"
+msgid "Blu-ray Disc playback failed"
+msgstr "Blu-ray Wiedergabe nicht möglich"
+
+msgctxt "#25009"
+msgid "The menu of this Blu-ray Disc is not supported"
+msgstr "Das Menü der Blu-ray wird nicht unterstützt"
 
 msgctxt "#29800"
 msgid "Library Mode"
@@ -10614,8 +10646,8 @@ msgid "Windows Media Audio 2 (FFmpeg wmav2)"
 msgstr "Windows Media Audio 2 (FFmpeg wmav2)"
 
 msgctxt "#34100"
-msgid "Speaker Configuration"
-msgstr "Lautsprecherkonfiguration"
+msgid "Number of channels"
+msgstr "Anzahl der Kanäle"
 
 msgctxt "#34101"
 msgid "2.0"
@@ -10663,7 +10695,7 @@ msgstr "Wählen Sie das gewünschte Verhalten wenn gerade kein Ton wiedergegeben
 
 msgctxt "#34120"
 msgid "Play GUI sounds"
-msgstr "GUI Sounds abspielen"
+msgstr "Sounds der Benutzeroberfläche abspielen"
 
 msgctxt "#34121"
 msgid "Only when playback stopped"
@@ -11415,7 +11447,7 @@ msgstr "Sortiere Kanäle nach Kanalnummer auf dem Server, aber benutze XBMC´s e
 
 msgctxt "#36206"
 msgid "Use numbering from the backend, instead of configuring them manually over XBMC."
-msgstr "Benutze Numerierung vom backend, anstelle sie manuell über XBMC zu konfigurieren."
+msgstr "Benutze Numerierung vom Backend, anstelle sie manuell über XBMC zu konfigurieren."
 
 msgctxt "#36207"
 msgid "Open the channel manager, which allows modifying the channel order, channel name, icon, etc."
@@ -11468,6 +11500,10 @@ msgstr "Noch keine Informationen vorhanden."
 msgctxt "#36219"
 msgid "Default EPG window to show. Defaults to Timeline."
 msgstr "Standard EPG-Anzeigefenster. Standard: Zeitleiste"
+
+msgctxt "#36220"
+msgid "Number of days of EPG data to import from backends. Defaults to 3 days."
+msgstr "Anzahl der Tage für die EPG Daten vom Backend importiert werden sollen. Standard ist 3 Tage."
 
 msgctxt "#36221"
 msgid "Time between EPG data imports from backends. Defaults to 120 minutes."
@@ -12034,16 +12070,12 @@ msgid "Select how the properties of the audio output are set: [Fixed] - output p
 msgstr "Legen Sie das Verhalten der Ton-Ausgabe fest: [Fest eingestellt] - Ausgabe verwendet stets die festgelegte Sampling-Rate und Lautsprecherkonfiguration; [Beste Übereinstimmung] - Ausgabe wird stets so gut wie möglich an das Quell-Format angepasst; [Optimiert] - Ausgabe wird einmalig zu Beginn der Wiedergabe konfiguriert und gleicht sich während dieser nicht mehr einem geänderten Quell-Format an."
 
 msgctxt "#36362"
-msgid "Select the maximum number of audio channels/speakers available for audio decoded."
-msgstr "Wählen Sie die maximale Anzahl an Audio-Kanälen/Lautsprechern die für dekodierten Ton zur Verfügung stehen."
+msgid "Select the number of channels supported by the audio connection, or the number of speakers if connected by analog connections. This setting does not apply to passthrough audio. Note - SPDIF supports 2.0 channels only but can still output multichannel audio using a format supported by passthrough."
+msgstr "Anzahl der Kanäle auswählen, die durch die Audioverbindung unterstützt werden, oder die Anzahl der Lautsprecher bei analoger Verbindung. Diese Einstellung gilt nicht für Passthrough-Audio. Hinweis - SPDIF unterstützt nur 2.0 Kanäle, kann jedoch noch Multikanal-Audio ausgeben, wenn ein Format verwendet wird, das von Passthrough unterstützt wird."
 
 msgctxt "#36363"
 msgid "Boost AC3 streams that have been downmixed to 2 channels."
 msgstr "Verstärke AC3-Spuren die auf 2-Kanäle reduziert wurden."
-
-msgctxt "#36364"
-msgid "Select to enable upmixing of 2 channel stereo sources to the number of audio channels specified by the speaker configuration."
-msgstr "Konvertiere 2-Kanal Stereo-Ton in die Anzahl an Audio-Kanälen, die in der Lautsprecher-Konfiguration festgelegt ist."
 
 msgctxt "#36365"
 msgid "Select this option if your receiver is capable of decoding AC3 streams."
@@ -12277,10 +12309,6 @@ msgctxt "#36422"
 msgid "Enable hardware video decode using AMLogic decoder"
 msgstr "Hardware Videodecodierung mit AMLogic Decoder aktivieren"
 
-msgctxt "#36423"
-msgid "Use ffmpeg frame multiple thread decoding when hardware decoding not working or disabled. (less reliable than default single thread mode)"
-msgstr "Verwende die Multi-Prozessor-Dekodierung von ffmpeg für Fälle bei denen die Hardware-Dekodierung fehlschlägt oder deaktiviert wurde. (weniger zuverlässig als standard Single-Prozessor-Methode)"
-
 msgctxt "#36424"
 msgid "Select what will happen when an EPG item is selected: [Show context menu] will trigger the contextual menu from where you can choose further actions; [Switch to channel] will instantly tune to the related channel; [Show information] will display a detailed information with plot and further options; [Record] will create a recording timer for the selected item."
 msgstr "Wähle was geschehen soll wenn ein EPG-Eintrag ausgewählt wird: [Kontext-Menü anzeigen] öffnet das kontextabhängige Menü von welchem aus weitere Aktionen gewählt werden können; [Zum Kanal wechseln] wechselt unverzüglich zum entsprechenden Kanal; [Informationen anzeigen] zeigt detaillierte Informationen wie die Inhaltsangabe sowie weitere Optionen; [Aufnehmen] erstellt einen Aufnahme-Timer für den gewählten Eintrag."
@@ -12300,6 +12328,10 @@ msgstr "Informationen anzeigen"
 msgctxt "#36428"
 msgid "Record"
 msgstr "Aufnehmen"
+
+msgctxt "#36429"
+msgid "Select this if the audio out connection only supports multichannel audio as Dolby Digital 5.1, this allows multichannel audio such as AAC5.1 or FLAC5.1 to be listened to in 5.1 surround sound. Note - transcoding can lead to a reduction in sound quality"
+msgstr "Auswählen, wenn der Audio-Ausgang nur Multikanal-Ton als Dolby Digital 5.1 unterstützt, dies ermöglicht Multikanal-Ton wie AAC5.1 oder FLAC5.1 als 5.1 Surround-Sound zu hören. Hinweis - Umwandlung kann zur Reduzierung der Tonqualität führen."
 
 msgctxt "#36500"
 msgid "Stereoscopic mode (current)"
@@ -12445,6 +12477,14 @@ msgctxt "#36546"
 msgid "Sets the visual depth of subtitles for stereoscopic videos. The higher the value, the closer the subtitles will appear to the viewer."
 msgstr "Legt die visuelle Tiefe der Untertitel für stereoskopische Videos fest. Je höher der Wert, desto näher wirken die Untertitel."
 
+msgctxt "#36547"
+msgid "Use higher quality textures for covers and fanart (uses more memory)"
+msgstr "Cover und Fanarts mit höherer Qualität benutzen (benötigt mehr Speicher)"
+
+msgctxt "#36548"
+msgid "Limits resolution of GUI to save memory. Does not affect video playback. Use 1080 for unlimited. Requires restart."
+msgstr "Begrenzt die Auflösung der Benutzeroberfläche um Arbeitsspeicher zu sparen. Dies betrifft nicht die Wiedergabe von Videos. Verwende 1080 für unbegrenzt. Benötigt Neustart. "
+
 msgctxt "#37000"
 msgid "(Visually Impaired)"
 msgstr "(Sehbehinderte)"
@@ -12492,3 +12532,19 @@ msgstr "Center-Lautsprecher beim Heruntermischen verstärken"
 msgctxt "#37019"
 msgid "Enables system keys like printscreen, alt-tab and volume keys when in fullscreen"
 msgstr "Ermöglicht die Verwendung von System-Tasten wie Drucken, Alt-Tabulator oder Lautstärke im Vollbild-Modus"
+
+msgctxt "#37020"
+msgid "Enable higher colour depth artwork"
+msgstr "Höhere Farbtiefe in Grafiken verwenden"
+
+msgctxt "#37021"
+msgid "Set GUI resolution limit"
+msgstr "Maximale Auflösung der Benutzeroberfläche"
+
+msgctxt "#37022"
+msgid "UPnP Player"
+msgstr "UPnP-Abspieler"
+
+msgctxt "#37023"
+msgid "Do you wish to stop playback on the remote device?"
+msgstr "Möchten Sie die Wiedergabe anhalten für das Remote-Gerät?"

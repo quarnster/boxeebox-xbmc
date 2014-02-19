@@ -870,8 +870,8 @@ msgid "Select destination directory"
 msgstr "Odaberi odredišni direktorij"
 
 msgctxt "#252"
-msgid "Output stereo to all speakers"
-msgstr "Reproduciraj stereo na sve zvučnike"
+msgid "Stereo upmix"
+msgstr "Stereo razdvajanje"
 
 msgctxt "#253"
 msgid "Number of channels"
@@ -1195,7 +1195,7 @@ msgstr "Izlazno podešavanje"
 
 msgctxt "#338"
 msgid "Fixed"
-msgstr "Fiksni"
+msgstr "Fiksno"
 
 msgctxt "#339"
 msgid "Optimized"
@@ -1716,10 +1716,6 @@ msgstr "OSD položaj"
 msgctxt "#470"
 msgid "Credits"
 msgstr "Zasluge"
-
-msgctxt "#471"
-msgid "Modchip"
-msgstr "Modčip"
 
 msgctxt "#474"
 msgid "Off"
@@ -2408,6 +2404,10 @@ msgstr "Razina sažimanja"
 msgctxt "#666"
 msgid "Verbose logging..."
 msgstr "Verbalno zapisivanje..."
+
+msgctxt "#667"
+msgid "Enable Dolby Digital transcoding"
+msgstr "Omogući Dolby Digital transkôdiranje"
 
 msgctxt "#700"
 msgid "Cleaning up library"
@@ -4982,8 +4982,8 @@ msgid "Allow hardware acceleration (MediaCodec)"
 msgstr "Dopusti hardversko ubrzanje (MediaCodec)"
 
 msgctxt "#13440"
-msgid "Frame Multi Threaded Decoding (less reliable)"
-msgstr "Višenizno dekôdiranje sličica (manje pouzdano)"
+msgid "Allow frame-multi-threaded decoding"
+msgstr "Omogući više-nizno dekôdiranje"
 
 msgctxt "#13500"
 msgid "A/V sync method"
@@ -5480,6 +5480,10 @@ msgstr "Zaustavi ripanje CD-a"
 msgctxt "#15012"
 msgid "Unavailable source"
 msgstr "Nedostupan izvor"
+
+msgctxt "#15013"
+msgid "What would you like to do with media items from %s"
+msgstr "Što želite učiniti s medijskim datotekama iz %s"
 
 msgctxt "#15014"
 msgid "Keep"
@@ -6006,8 +6010,8 @@ msgid "TV recordings"
 msgstr "TV snimanje"
 
 msgctxt "#19018"
-msgid "Default folder for PVR thumbnails"
-msgstr "Zadana mapa za PVR minijature"
+msgid "Folder with channel icons"
+msgstr "Mapa s ikonama programa"
 
 msgctxt "#19019"
 msgid "Channels"
@@ -6196,6 +6200,10 @@ msgstr "Idi na kraj"
 msgctxt "#19065"
 msgid "Default EPG window"
 msgstr "Zadani EPG prozor"
+
+msgctxt "#19066"
+msgid "Channel icons"
+msgstr "Ikone programa"
 
 msgctxt "#19067"
 msgid "This event is already being recorded."
@@ -7021,6 +7029,22 @@ msgctxt "#19281"
 msgid "Confirm channel switches by pressing OK"
 msgstr "Potvrdi prebacivanje programa pritiskom na 'U redu'"
 
+msgctxt "#19282"
+msgid "Current icon"
+msgstr "Trenutna ikona"
+
+msgctxt "#19283"
+msgid "No icon"
+msgstr "Nema ikone"
+
+msgctxt "#19284"
+msgid "Choose icon"
+msgstr "Odaberi ikonu"
+
+msgctxt "#19285"
+msgid "Browse for icon"
+msgstr "Potraži ikonu"
+
 msgctxt "#19499"
 msgid "Other/Unknown"
 msgstr "Ostalo/Nepoznato"
@@ -7305,10 +7329,6 @@ msgctxt "#19647"
 msgid "Motoring"
 msgstr "Automobili"
 
-msgctxt "#19648"
-msgid "Fitness &amp; Health"
-msgstr "Fitness i zdravlje"
-
 msgctxt "#19649"
 msgid "Cooking"
 msgstr "Kuhanje"
@@ -7328,10 +7348,6 @@ msgstr "Posebne osobine"
 msgctxt "#19661"
 msgid "Original Language"
 msgstr "Izvorni jezik"
-
-msgctxt "#19662"
-msgid "Black &amp; White"
-msgstr "Crno i bijelo"
 
 msgctxt "#19663"
 msgid "Unpublished"
@@ -8109,6 +8125,14 @@ msgctxt "#20199"
 msgid "Downloading artist info failed"
 msgstr "Neuspjelo preuzimanje informacija izvođača"
 
+msgctxt "#20220"
+msgid "Override song tags with online information"
+msgstr "Prikaži oznake pjesama s Interneta"
+
+msgctxt "#20221"
+msgid "With this enabled, any information that is downloaded for albums and artists will override anything you have set in your song tags, such as genres, year, song artists etc. Useful if you have MusicBrainz identifiers in your song tags."
+msgstr "Ako je ovo omogućeno, svaka informacija koja je preuzeta za albume i izvođače biti će prikazana umjesto informacija postavljenih u oznakama pjesama, poput žanra, godine, izvođača pjesme itd. Korisno ako imate MusicBrainz identifikatore u vašim oznakama pjesama."
+
 msgctxt "#20240"
 msgid "Android music"
 msgstr "Android glazba"
@@ -8240,6 +8264,10 @@ msgstr "Pretraživanje izvođača pomoću %s"
 msgctxt "#20321"
 msgid "Scanning albums using %s"
 msgstr "Pretraživanje albuma pomoću %s"
+
+msgctxt "#20323"
+msgid "Movie plot"
+msgstr "Kratak sadržaj filma"
 
 msgctxt "#20324"
 msgid "Play part..."
@@ -8886,8 +8914,8 @@ msgid "Remove media share"
 msgstr "Odstrani dijeljenje medija"
 
 msgctxt "#21366"
-msgid "Subtitle folder"
-msgstr "Mapa podnaslova"
+msgid "Custom subtitle folder"
+msgstr "Prilagođena mapa podnaslova"
 
 msgctxt "#21367"
 msgid "Movie & alternate subtitle directory"
@@ -9258,8 +9286,8 @@ msgid "mixed"
 msgstr "izmješano"
 
 msgctxt "#21460"
-msgid "Subtitle location"
-msgstr "Lokacija podnaslova"
+msgid "Subtitle location on screen"
+msgstr "Položaj podnaslova na zaslonu"
 
 msgctxt "#21461"
 msgid "Fixed"
@@ -10221,6 +10249,14 @@ msgctxt "#24119"
 msgid "Select service that will be used as default to search for Movie subtitles"
 msgstr "Odaberite uslugu koja će se koristiti kao zadana za podnaslove filmova"
 
+msgctxt "#24120"
+msgid "Manual search string"
+msgstr "Prilagođeni zahtjev za pretraživanje"
+
+msgctxt "#24121"
+msgid "Enter search string"
+msgstr "Upišite zahtjev za pretraživanje"
+
 msgctxt "#25000"
 msgid "Notifications"
 msgstr "Obavijesti"
@@ -10248,6 +10284,18 @@ msgstr "Naslov: %d"
 msgctxt "#25006"
 msgid "Select playback item"
 msgstr "Odaberi stavku reprodukcije"
+
+msgctxt "#25007"
+msgid "Chapters: %u - duration: %s"
+msgstr "Poglavlja: %u - trajanje: %s"
+
+msgctxt "#25008"
+msgid "Blu-ray Disc playback failed"
+msgstr "Neuspjela reprodukcija Blu-ray diska"
+
+msgctxt "#25009"
+msgid "The menu of this Blu-ray Disc is not supported"
+msgstr "Izbornik ovog Blu-ray diska nije podržan"
 
 msgctxt "#29800"
 msgid "Library Mode"
@@ -10606,8 +10654,8 @@ msgid "Windows Media Audio 2 (FFmpeg wmav2)"
 msgstr "Windows Media Audio 2 (FFmpeg wmav2)"
 
 msgctxt "#34100"
-msgid "Speaker Configuration"
-msgstr "Podešavanje zvučnika"
+msgid "Number of channels"
+msgstr "Broj programa"
 
 msgctxt "#34101"
 msgid "2.0"
@@ -11461,6 +11509,10 @@ msgctxt "#36219"
 msgid "Default EPG window to show. Defaults to Timeline."
 msgstr "Zadani EPG prozor prikaza. Zadana je Kronologija."
 
+msgctxt "#36220"
+msgid "Number of days of EPG data to import from backends. Defaults to 3 days."
+msgstr "Broj dana EPG podataka koji će se uvesti iz pozadinskih softvera. Zadano je 3 dana."
+
 msgctxt "#36221"
 msgid "Time between EPG data imports from backends. Defaults to 120 minutes."
 msgstr "Vrijeme između uvoza EPG podataka iz pozadinskih softvera. Zadano je 120 minuta."
@@ -12026,16 +12078,16 @@ msgid "Select how the properties of the audio output are set: [Fixed] - output p
 msgstr "Odaberite kako su svojstva zvučnog izlaza postavljena: [Nepromjenjivo] - izlazna svojstva su postavljena na određeno uzrokovanje i podešavanja zvučnika svo vrijeme; [Najbolje odgovarajuće] - izlazna svojstva su postavljena da se uvijek što bliže podudraju svojstivima izvora koliko je to moguće; [Optimizirano] - izlazna svojstva su postavljena na početku reprodukcije i neće se promijeniti ako se svojstva izvora promijene."
 
 msgctxt "#36362"
-msgid "Select the maximum number of audio channels/speakers available for audio decoded."
-msgstr "Odaberite maksimalan broj zvučnih kanala/zvučnika dostupnih za zvučno dekôdiranje."
+msgid "Select the number of channels supported by the audio connection, or the number of speakers if connected by analog connections. This setting does not apply to passthrough audio. Note - SPDIF supports 2.0 channels only but can still output multichannel audio using a format supported by passthrough."
+msgstr "Odaberite broj kanala podržan zvučnim povezivanjem ili brojem zvučnika ako je spojeno analognim povezivanjem. Ove postavke ne obuhvaćaju izlaz zvuka. Napomena - SPDIF podržava samo 2.0 kanale ali još uvijek može slati višekanalni zvuk koristeći format podržan na izlazu."
 
 msgctxt "#36363"
 msgid "Boost AC3 streams that have been downmixed to 2 channels."
 msgstr "Pojačaj AC3 streamove koji su pretvoreni u 2 kanala."
 
 msgctxt "#36364"
-msgid "Select to enable upmixing of 2 channel stereo sources to the number of audio channels specified by the speaker configuration."
-msgstr "Odaberite za omogućavanje razdvajanja 2-kanalnog stereo izvora u broj zvučnih kanala određenih zvučnim podešavanjima."
+msgid "Select to enable upmixing of 2 channel audio to the number of audio channels specified by the speaker configuration."
+msgstr "Odaberite za omogućavanje razdvajanja 2-kanalnog zvuka na broj zvučnih kanala određenih postavkama zvučnika."
 
 msgctxt "#36365"
 msgid "Select this option if your receiver is capable of decoding AC3 streams."
@@ -12270,16 +12322,32 @@ msgid "Enable hardware video decode using AMLogic decoder"
 msgstr "Omogući hardversko dekôdiranje video datoteka koristeći AMLogic dekôder."
 
 msgctxt "#36423"
-msgid "Use ffmpeg frame multiple thread decoding when hardware decoding not working or disabled. (less reliable than default single thread mode)"
-msgstr "Koristi ffmpeg višenizno dekôdiranje sličica kada hardversko dekôdiranje ne radi ili je onemogućeno. (manje pouzdano nego zadani jednonizni način)"
+msgid "Use frame-multi-threaded decoding instead of hardware accelerated decoding (less reliable than default single thread mode)."
+msgstr "Koristi dekôdiranje sličica-više-nizno umjesto dekôdiranja hardverskim ubrzanjem (manje pouzdano od jedno-niznog načina)."
+
+msgctxt "#36424"
+msgid "Select what will happen when an EPG item is selected: [Show context menu] will trigger the contextual menu from where you can choose further actions; [Switch to channel] will instantly tune to the related channel; [Show information] will display a detailed information with plot and further options; [Record] will create a recording timer for the selected item."
+msgstr "Odaberite što će se dogoditi kada je EPG stavka odabrana: [Prikaži kontekstualni izbornik] će uključiti kontekstualni izbornik iz kojega možete odabrati dodatne radnje; [Prebaci na program] odmah će prebaciti na pripadajući program; [Prikaži informacije] će pokazati opširne informacije sa sadržajem emisija i dodatnim mogućnostima; [Snimaj] će zakazati snimanje za odabranu stavku."
+
+msgctxt "#36425"
+msgid "Show context menu"
+msgstr "Prikaži kontekstualni izbornik"
 
 msgctxt "#36426"
 msgid "Switch to channel"
 msgstr "Prebaci na program"
 
+msgctxt "#36427"
+msgid "Show information"
+msgstr "Prikaži informacije"
+
 msgctxt "#36428"
 msgid "Record"
 msgstr "Snimaj"
+
+msgctxt "#36429"
+msgid "Select this if the audio out connection only supports multichannel audio as Dolby Digital 5.1, this allows multichannel audio such as AAC5.1 or FLAC5.1 to be listened to in 5.1 surround sound. Note - transcoding can lead to a reduction in sound quality"
+msgstr "Odaberite ovo ako izlazno zvučno povezivanje samo podržava višekanalni zvuk poput Dolby Digitala 5.1, ovo omogućuje slušanje višekanalnog zvuka poput AAC5.1 ili FLAC5.1 na 5.1 surround zvuku. Napomena - transkôdiranje može prouzročiti slabiju kvalitetu zvuka"
 
 msgctxt "#36500"
 msgid "Stereoscopic mode (current)"
@@ -12425,6 +12493,14 @@ msgctxt "#36546"
 msgid "Sets the visual depth of subtitles for stereoscopic videos. The higher the value, the closer the subtitles will appear to the viewer."
 msgstr "Postavite vizualnu dubinu podnaslova za stereoskopske video snimke. Ako je veća vrijednost, podnaslovi će biti bliži gledatelju."
 
+msgctxt "#36547"
+msgid "Use higher quality textures for covers and fanart (uses more memory)"
+msgstr "Koristi višu kvalitetu tekstura za slike omota (koristi više memorije)"
+
+msgctxt "#36548"
+msgid "Limits resolution of GUI to save memory. Does not affect video playback. Use 1080 for unlimited. Requires restart."
+msgstr "Ograničava razlučivost GUI sučelja u svrhu štednje memorije. Ne utječe na video reprodukciju. Koristi 1080 za neograničeno. Potrebno je ponovno pokretanje."
+
 msgctxt "#37000"
 msgid "(Visually Impaired)"
 msgstr "(slabovidno)"
@@ -12472,3 +12548,19 @@ msgstr "Pojačaj središnji kanal pri spajanju kanala zvuka"
 msgctxt "#37019"
 msgid "Enables system keys like printscreen, alt-tab and volume keys when in fullscreen"
 msgstr "Omogućava tipke sustava poput 'Print Screen', 'Alt-Tab' i tipke glasnoće zvuka u cjelozaslonskom prikazu"
+
+msgctxt "#37020"
+msgid "Enable higher colour depth artwork"
+msgstr "Omogući višu dubinu boja slika omota"
+
+msgctxt "#37021"
+msgid "Set GUI resolution limit"
+msgstr "Postavi ograničenje razlučivosti GUI sučelja"
+
+msgctxt "#37022"
+msgid "UPnP Player"
+msgstr "UPnP reproduktor"
+
+msgctxt "#37023"
+msgid "Do you wish to stop playback on the remote device?"
+msgstr "Želite li zaustaviti reprodukciju na udaljenom uređaju?"

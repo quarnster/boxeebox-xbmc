@@ -317,6 +317,7 @@
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\Utils\AEWAVLoader.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecPassthrough.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Video\CrystalHD.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Video\DVDVideoCodec.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxBXA.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxCDDA.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxPVRClient.cpp" />
@@ -639,6 +640,7 @@
     <ClCompile Include="..\..\xbmc\interfaces\Builtins.cpp" />
     <ClCompile Include="..\..\xbmc\interfaces\generic\LanguageInvokerThread.cpp" />
     <ClCompile Include="..\..\xbmc\interfaces\generic\ScriptInvocationManager.cpp" />
+    <ClCompile Include="..\..\xbmc\interfaces\info\InfoBool.cpp" />
     <ClCompile Include="..\..\xbmc\interfaces\info\InfoExpression.cpp" />
     <ClCompile Include="..\..\xbmc\interfaces\info\SkinVariable.cpp" />
     <ClCompile Include="..\..\xbmc\interfaces\json-rpc\AddonsOperations.cpp" />
@@ -747,7 +749,6 @@
     <ClCompile Include="..\..\xbmc\music\tags\MusicInfoTagLoaderNSF.cpp" />
     <ClCompile Include="..\..\xbmc\music\tags\MusicInfoTagLoaderShn.cpp" />
     <ClCompile Include="..\..\xbmc\music\tags\MusicInfoTagLoaderSPC.cpp" />
-    <ClCompile Include="..\..\xbmc\music\tags\MusicInfoTagLoaderWav.cpp" />
     <ClCompile Include="..\..\xbmc\music\tags\MusicInfoTagLoaderYM.cpp" />
     <ClCompile Include="..\..\xbmc\music\tags\TagLibVFSStream.cpp" />
     <ClCompile Include="..\..\xbmc\music\tags\TagLoaderTagLib.cpp" />
@@ -1138,7 +1139,6 @@
     <ClInclude Include="..\..\xbmc\interfaces\python\swig.h" />
     <ClInclude Include="..\..\xbmc\interfaces\python\XBPython.h" />
     <ClInclude Include="..\..\xbmc\music\MusicDbUrl.h" />
-    <ClInclude Include="..\..\xbmc\music\tags\MusicInfoTagLoaderWav.h" />
     <ClInclude Include="..\..\xbmc\music\tags\TagLibVFSStream.h" />
     <ClInclude Include="..\..\xbmc\music\tags\TagLoaderTagLib.h" />
     <ClInclude Include="..\..\xbmc\network\httprequesthandler\HTTPImageHandler.h" />
