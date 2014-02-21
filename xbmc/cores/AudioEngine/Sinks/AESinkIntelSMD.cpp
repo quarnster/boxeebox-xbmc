@@ -718,31 +718,17 @@ void CAESinkIntelSMD::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   info.m_sampleRates.clear();
   
   info.m_deviceType =  AE_DEVTYPE_HDMI; 
-  info.m_deviceName = "HDMI";
-  info.m_displayName = "HDMI";
+  info.m_deviceName = "IntelSMD";
+  info.m_displayName = "IntelSMD";
   info.m_displayNameExtra = "";
   info.m_channels += AE_CH_FL;
   info.m_channels += AE_CH_FR;
   info.m_sampleRates.push_back(48000);
   info.m_dataFormats.push_back(AE_FMT_S16LE);
-  info.m_dataFormats.push_back(AE_FMT_AC3);
+  info.m_dataFormats.push_back(AE_FMT_AAC);
   info.m_dataFormats.push_back(AE_FMT_DTS);
-  info.m_dataFormats.push_back(AE_FMT_EAC3);  
-  
-  list.push_back(info);
-  
-  info.m_channels.Reset();
-  info.m_dataFormats.clear();
-  info.m_sampleRates.clear();
-
-  info.m_deviceType = AE_DEVTYPE_PCM;
-  info.m_deviceName = "Analogue";
-  info.m_displayName = "Analogue";
-  info.m_displayNameExtra = "";
-  info.m_channels += AE_CH_FL;
-  info.m_channels += AE_CH_FR;
-  info.m_sampleRates.push_back(48000);
-  info.m_dataFormats.push_back(AE_FMT_S16LE);
+  info.m_dataFormats.push_back(AE_FMT_DTSHD);
+  info.m_dataFormats.push_back(AE_FMT_TRUEHD);
   list.push_back(info);
 }
 
