@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2010-2013 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,53 +19,50 @@
  *
  */
 
-#include "system.h"
-
 #include "cores/AudioEngine/Interfaces/AESink.h"
-#include "cores/AudioEngine/AEFactory.h"
-#include "Utils/AEDeviceInfo.h"
-#include "Utils/AEUtil.h"
-#include <pulse/pulseaudio.h>
-#include "threads/CriticalSection.h"
+#include "cores/AudioEngine/Utils/AEDeviceInfo.h"
 
-class CAESinkPULSE : public IAESink
+#define DO_440HZ_TONE_TEST 0
+
+#if DO_440HZ_TONE_TEST
+typedef struct {
+  float currentPhase;
+  float phaseIncrement;
+} SineWaveGenerator;
+#endif
+
+class AERingBuffer;
+class CAAudioUnitSink;
+
+class CAESinkDARWINIOS : public IAESink
 {
 public:
-  virtual const char *GetName() { return "PULSE"; }
+  virtual const char *GetName() { return "DARWINIOS"; }
 
-  CAESinkPULSE();
-  virtual ~CAESinkPULSE();
+  CAESinkDARWINIOS();
+  virtual ~CAESinkDARWINIOS();
 
   virtual bool Initialize(AEAudioFormat &format, std::string &device);
   virtual void Deinitialize();
+  virtual bool IsCompatible(const AEAudioFormat &format, const std::string &device);
 
   virtual double       GetDelay        ();
   virtual double       GetCacheTotal   ();
   virtual unsigned int AddPackets      (uint8_t *data, unsigned int frames, bool hasAudio, bool blocking = false);
   virtual void         Drain           ();
+  virtual bool         HasVolume       ();
+  virtual void         SetVolume       (float scale);
+  static void          EnumerateDevicesEx(AEDeviceInfoList &list, bool force = false);
 
-  virtual bool HasVolume() { return true; };
-  virtual void SetVolume(float volume);
-
-  static void EnumerateDevicesEx(AEDeviceInfoList &list, bool force = false);
-  bool IsInitialized();
-  CCriticalSection m_sec;
 private:
-  bool Pause(bool pause);
-  static inline bool WaitForOperation(pa_operation *op, pa_threaded_mainloop *mainloop, const char *LogEntry);
-  static bool SetupContext(const char *host, pa_context **context, pa_threaded_mainloop **mainloop);
+  static AEDeviceInfoList m_devices;
+  CAEDeviceInfo      m_info;
+  AEAudioFormat      m_format;
+  double             m_volume;
+  bool               m_volume_changed;
 
-  bool m_IsAllocated;
-  bool m_passthrough;
-
-  AEAudioFormat m_format;
-  unsigned int m_BytesPerSecond;
-  unsigned int m_BufferSize;
-  unsigned int m_Channels;
-  
-  pa_stream *m_Stream;
-  pa_cvolume m_Volume;
-
-  pa_context *m_Context;
-  pa_threaded_mainloop *m_MainLoop;
+  CAAudioUnitSink   *m_audioSink;
+#if DO_440HZ_TONE_TEST
+  SineWaveGenerator  m_SineWaveGenerator;
+#endif
 };
