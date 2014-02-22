@@ -61,7 +61,7 @@ void CAESinkFactory::ParseDevice(std::string &device, std::string &driver)
         driver == "WASAPI"      ||
         driver == "DIRECTSOUND" ||
 #elif defined(TARGET_BOXEE)
-        driver == "IntelSMD" ||		
+        driver == "INTELSMD" ||		
 #elif defined(TARGET_ANDROID)
         driver == "AUDIOTRACK"  ||		
 #elif defined(TARGET_RASPBERRY_PI)
@@ -168,7 +168,7 @@ void CAESinkFactory::EnumerateEx(AESinkInfoList &list, bool force)
 #elif defined(TARGET_BOXEE)
 
   info.m_deviceInfoList.clear();
-  info.m_sinkName = "IntelSMD";
+  info.m_sinkName = "INTELSMD";
   CAESinkIntelSMD::EnumerateDevicesEx(info.m_deviceInfoList, force);
   if(!info.m_deviceInfoList.empty())
     list.push_back(info);
