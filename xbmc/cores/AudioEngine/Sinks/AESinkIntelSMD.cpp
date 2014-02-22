@@ -727,6 +727,7 @@ void CAESinkIntelSMD::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   info.m_dataFormats.push_back(AE_FMT_S16LE);
   info.m_dataFormats.push_back(AE_FMT_AAC);
   info.m_dataFormats.push_back(AE_FMT_DTS);
+  info.m_dataFormats.push_back(AE_FMT_AC3); 
   info.m_dataFormats.push_back(AE_FMT_DTSHD);
   info.m_dataFormats.push_back(AE_FMT_TRUEHD);
   list.push_back(info);
