@@ -168,7 +168,7 @@ public:
 
     if (preferexternal)
     {
-      if(ss.source == STREAM_SOURCE_DEMUX_SUB || ss.source == STREAM_SOURCE_TEXT)
+      if(STREAM_SOURCE_MASK(ss.source) == STREAM_SOURCE_DEMUX_SUB || STREAM_SOURCE_MASK(ss.source) == STREAM_SOURCE_TEXT)
         return false;
     }
 
@@ -257,11 +257,11 @@ public:
 
     if (preferextsubs)
     {
-      PREDICATE_RETURN(lh.source == STREAM_SOURCE_DEMUX_SUB
-                     , rh.source == STREAM_SOURCE_DEMUX_SUB);
+      PREDICATE_RETURN(STREAM_SOURCE_MASK(lh.source) == STREAM_SOURCE_DEMUX_SUB
+                     , STREAM_SOURCE_MASK(rh.source) == STREAM_SOURCE_DEMUX_SUB);
 
-      PREDICATE_RETURN(lh.source == STREAM_SOURCE_TEXT
-                     , rh.source == STREAM_SOURCE_TEXT);
+      PREDICATE_RETURN(STREAM_SOURCE_MASK(lh.source) == STREAM_SOURCE_TEXT
+                     , STREAM_SOURCE_MASK(rh.source) == STREAM_SOURCE_TEXT);
     }
 
     if(!subson || original)
@@ -276,15 +276,15 @@ public:
     CStdString subtitle_language = g_langInfo.GetSubtitleLanguage();
     if(!original)
     {
-      PREDICATE_RETURN((lh.source == STREAM_SOURCE_DEMUX_SUB || lh.source == STREAM_SOURCE_TEXT) && g_LangCodeExpander.CompareLangCodes(subtitle_language, lh.language)
-                     , (rh.source == STREAM_SOURCE_DEMUX_SUB || rh.source == STREAM_SOURCE_TEXT) && g_LangCodeExpander.CompareLangCodes(subtitle_language, rh.language));
+      PREDICATE_RETURN((STREAM_SOURCE_MASK(lh.source) == STREAM_SOURCE_DEMUX_SUB || STREAM_SOURCE_MASK(lh.source) == STREAM_SOURCE_TEXT) && g_LangCodeExpander.CompareLangCodes(subtitle_language, lh.language)
+                     , (STREAM_SOURCE_MASK(rh.source) == STREAM_SOURCE_DEMUX_SUB || STREAM_SOURCE_MASK(rh.source) == STREAM_SOURCE_TEXT) && g_LangCodeExpander.CompareLangCodes(subtitle_language, rh.language));
     }
 
-    PREDICATE_RETURN(lh.source == STREAM_SOURCE_DEMUX_SUB
-                   , rh.source == STREAM_SOURCE_DEMUX_SUB);
+    PREDICATE_RETURN(STREAM_SOURCE_MASK(lh.source) == STREAM_SOURCE_DEMUX_SUB
+                   , STREAM_SOURCE_MASK(rh.source) == STREAM_SOURCE_DEMUX_SUB);
 
-    PREDICATE_RETURN(lh.source == STREAM_SOURCE_TEXT
-                   , rh.source == STREAM_SOURCE_TEXT);
+    PREDICATE_RETURN(STREAM_SOURCE_MASK(lh.source) == STREAM_SOURCE_TEXT
+                   , STREAM_SOURCE_MASK(rh.source) == STREAM_SOURCE_TEXT);
 
     if(!original)
     {
@@ -578,17 +578,9 @@ bool CDVDPlayer::OpenFile(const CFileItem& file, const CPlayerOptions &options)
 #endif
 
     Create();
-    if(!m_ready.WaitMSec(g_advancedSettings.m_videoBusyDialogDelay_ms))
-    {
-      CGUIDialogBusy* dialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
-      if(dialog)
-      {
-        dialog->Show();
-        while(!m_ready.WaitMSec(1))
-          g_windowManager.ProcessRenderLoop(false);
-        dialog->Close();
-      }
-    }
+
+    // wait for the ready event
+    CGUIDialogBusy::WaitOnEvent(m_ready, g_advancedSettings.m_videoBusyDialogDelay_ms, false);
 
     // Playback might have been stopped due to some error
     if (m_bStop || m_bAbortRequest)

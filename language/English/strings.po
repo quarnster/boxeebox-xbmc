@@ -5646,7 +5646,7 @@ msgid "Scan for new content"
 msgstr ""
 
 msgctxt "#13350"
-msgid "Now playing..."
+msgid "Current playlist"
 msgstr ""
 
 msgctxt "#13351"
@@ -11838,7 +11838,13 @@ msgctxt "#24023"
 msgid "Disabled"
 msgstr ""
 
-#empty strings from id 24024 to 24026
+#. Used as an error message (triggered from content dialog) on disabled scrapers
+#: xbmc/settings/dialogs/GUIDialogContentSettings.cpp
+msgctxt "#24024"
+msgid "Add-on disabled"
+msgstr ""
+
+#empty strings from id 24025 to 24026
 
 #: xbmc/addons/addon.cpp
 msgctxt "#24027"
@@ -12224,7 +12230,12 @@ msgctxt "#24121"
 msgid "Enter search string"
 msgstr ""
 
-#empty strings from id 24122 to 24999
+#: xbmc/filesystem/AddonDirectory.cpp
+msgctxt "#24122"
+msgid "Update all"
+msgstr ""
+
+#empty strings from id 24123 to 24999
 
 msgctxt "#25000"
 msgid "Notifications"
