@@ -59,7 +59,7 @@ CAESinkIntelSMD::CAESinkIntelSMD()
   m_audioDevice = -1;
   m_audioDeviceInput = -1;
 
-  m_fCurrentVolume = 0;
+//  m_fCurrentVolume = 0;
 }
 
 CAESinkIntelSMD::~CAESinkIntelSMD()
@@ -229,7 +229,7 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   g_IntelSMDGlobals.SetAudioDeviceState(ISMD_DEV_STATE_PLAY, m_audioDevice);
 
 //  m_fCurrentVolume = g_settings.m_fVolumeLevel;
-  g_IntelSMDGlobals.SetMasterVolume(m_fCurrentVolume);
+//  g_IntelSMDGlobals.SetMasterVolume(m_fCurrentVolume);
 
   m_bPause = false;
   m_bIsAllocated = true;
@@ -535,15 +535,15 @@ void CAESinkIntelSMD::Drain()
   }
 }
 
-void CAESinkIntelSMD::SetVolume(float nVolume)
-{
+//void CAESinkIntelSMD::SetVolume(float nVolume)
+//{
   // If we fail or if we are doing passthrough, don't set
-  if (!m_bIsAllocated )
-    return;
+ // if (!m_bIsAllocated )
+ //   return;
 
-  m_fCurrentVolume = nVolume;
-  g_IntelSMDGlobals.SetMasterVolume(nVolume);
-}
+//  m_fCurrentVolume = nVolume;
+//  g_IntelSMDGlobals.SetMasterVolume(nVolume);
+//}
 
 bool CAESinkIntelSMD::SoftSuspend()
 {
