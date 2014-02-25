@@ -47,8 +47,8 @@ public:
   virtual double        GetCacheTotal   ();
   virtual unsigned int  AddPackets      (uint8_t *data, unsigned int frames, bool hasAudio, bool blocking = false);
   virtual void          Drain           ();
-  virtual bool          HasVolume() { return true; }
-  virtual void          SetVolume(float volume);
+  //virtual bool          HasVolume() { return true; }
+  //virtual void          SetVolume(float volume);
   virtual bool          SoftSuspend();
   virtual bool          SoftResume();
 
@@ -62,7 +62,7 @@ private:
   void SetDefaultOutputConfig(ismd_audio_output_config_t& output_config);
   void ConfigureAudioOutputParams(ismd_audio_output_config_t& output_config, int output, int sampleSize, int sampleRate, int channels, ismd_audio_format_t format, bool bPassthrough);
 
-  float m_fCurrentVolume;
+  //float m_fCurrentVolume;
   bool m_bPause;
   bool m_bIsAllocated;
 
