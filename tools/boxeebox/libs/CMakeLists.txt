@@ -204,6 +204,7 @@ ExternalProject_Add(
 	sqlite
 	URL 				http://www.sqlite.org/2014/sqlite-autoconf-3080301.tar.gz
 	URL_MD5 			509ff98d8dc9729b618b7e96612079c6
+	PATCH_COMMAND       patch -p0 < ${CMAKE_SOURCE_DIR}/sqlite3.c.patch
 	CONFIGURE_COMMAND   ${BASIC_CONF} --enable-threadsafe --disable-readline --enable-dynamic-extensions
 	BUILD_COMMAND       make CXXFLAGS+=-DSQLITE_ENABLE_COLUMN_METADATA=1 CFLAGS+=-DSQLITE_TEMP_STORE=3  CFLAGS+=-DSQLITE_ENABLE_STAT3 CFLAGS+=-DSQLITE_DEFAULT_MMAP_SIZE=268435456
 )
