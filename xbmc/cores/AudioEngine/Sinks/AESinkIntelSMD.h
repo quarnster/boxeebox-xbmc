@@ -71,6 +71,7 @@ private:
   
   unsigned int m_dwChunkSize;
   unsigned int m_dwBufferLen;
+  double m_dSampleRate;
 };
 
 #endif
