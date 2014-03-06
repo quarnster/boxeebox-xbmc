@@ -2065,7 +2065,6 @@ void CActiveAE::Deamplify(CSoundPacket &dstSample)
       CAEUtil::SSEMulArray(buffer, volume, nb_floats);
 #else
       float *fbuffer = buffer;
-      float volume = m_muted ? 0.0f : m_volume;
       for (int i = 0; i < nb_floats; i++)
         *fbuffer++ *= volume;
 #endif
