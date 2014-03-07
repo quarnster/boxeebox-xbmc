@@ -47,6 +47,7 @@ public:
   virtual double        GetCacheTotal   ();
   virtual unsigned int  AddPackets      (uint8_t *data, unsigned int frames, bool hasAudio, bool blocking = false);
   virtual void          Drain           ();
+  virtual double GetLatency() { return m_latency; };
   //virtual bool          HasVolume() { return true; }
   //virtual void          SetVolume(float volume);
   virtual bool          SoftSuspend();
@@ -57,14 +58,17 @@ public:
   static  void          EnumerateDevicesEx(AEDeviceInfoList &list, bool force = false);
 
 private:
-  unsigned int SendDataToInput(unsigned char* buffer_data, unsigned int buffer_size, ismd_pts_t pts = ISMD_NO_PTS);
+  unsigned int SendDataToInput(unsigned char* buffer_data, unsigned int buffer_size);
   ismd_audio_format_t GetISMDFormat(AEDataFormat format);
   void SetDefaultOutputConfig(ismd_audio_output_config_t& output_config);
   void ConfigureAudioOutputParams(ismd_audio_output_config_t& output_config, int output, int sampleSize, int sampleRate, int channels, ismd_audio_format_t format, bool bPassthrough);
+  void ConfigureDolbyPlusModes(ismd_audio_processor_t proc_handle, ismd_dev_t input_handle, bool bAC3Encode);
+  void ConfigureDTSModes(ismd_audio_processor_t proc_handle, ismd_dev_t input_handle);
 
   //float m_fCurrentVolume;
   bool m_bPause;
   bool m_bIsAllocated;
+  double m_latency;
 
   ismd_dev_t        m_audioDevice;
   ismd_dev_handle_t m_audioDeviceInput;
@@ -72,6 +76,7 @@ private:
   unsigned int m_dwChunkSize;
   unsigned int m_dwBufferLen;
   double m_dSampleRate;
+  unsigned int m_frameSize;
 };
 
 #endif

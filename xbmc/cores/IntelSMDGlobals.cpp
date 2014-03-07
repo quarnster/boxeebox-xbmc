@@ -282,11 +282,11 @@ bool  CIntelSMDGlobals::BuildAudioOutputs()
     m_audioOutputSPDIF = AddAudioOutput(AE_DEVTYPE_IEC958);
     EnableAudioOutput(m_audioOutputSPDIF);
   }
-  // if (bIsAnalog)
-  // {
-  //   m_audioOutputI2S0 = AddAudioOutput(AUDIO_ANALOG);
-  //   EnableAudioOutput(m_audioOutputI2S0);
-  // }
+  if (bIsAnalog)
+  {
+     m_audioOutputI2S0 = AddAudioOutput(AE_DEVTYPE_PCM);
+     EnableAudioOutput(m_audioOutputI2S0);
+  }
   return true;
 }
 
@@ -322,11 +322,11 @@ ismd_audio_output_t CIntelSMDGlobals::AddAudioOutput(int output)
     hwId = GEN3_HW_OUTPUT_SPDIF;
     name = "SPDIF";
     break;
-  // case AUDIO_ANALOG:
-  //   dev = m_audioOutputI2S0;
-  //   hwId = GEN3_HW_OUTPUT_I2S0;
-  //   name = "I2S0";
-  //   break;
+  case AE_DEVTYPE_PCM:
+    dev = m_audioOutputI2S0;
+    hwId = GEN3_HW_OUTPUT_I2S0;
+    name = "I2S0";
+    break;
   default:
     CLog::Log(LOGERROR, "%s - Unkown output", __DEBUG_ID__);
     return -1;
