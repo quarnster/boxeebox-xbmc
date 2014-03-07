@@ -46,6 +46,7 @@ public:
 protected:
   CIntelSMDVideo*       m_Device;
   const char*           m_pFormatName;
+  static CCriticalSection m_SMDVideoLock;
 };
 
 #endif
