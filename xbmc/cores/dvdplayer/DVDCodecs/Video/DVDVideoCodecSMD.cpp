@@ -39,8 +39,6 @@
 #define VERBOSE()
 #endif
 
-CCriticalSection CDVDVideoCodecSMD::m_SMDVideoLock;
-
 
 CDVDVideoCodecSMD::CDVDVideoCodecSMD() :
 m_Device(NULL),
@@ -50,7 +48,6 @@ m_pFormatName("SMD: codec not configured")
 
 CDVDVideoCodecSMD::~CDVDVideoCodecSMD()
 {
-  CSingleLock lock(m_SMDVideoLock);
   Dispose();
 }
 
@@ -103,30 +100,39 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
     break;
   }
 
+  m_Device = CIntelSMDVideo::GetInstance();
+
+  if (!m_Device)
   {
-    CSingleLock lock(m_SMDVideoLock);
-
-    m_Device = CIntelSMDVideo::GetInstance();
-
-    if (!m_Device)
-    {
-      CLog::Log(LOGERROR, "%s: Failed to open Intel SMD device", __DEBUG_ID__);
-      return false;
-    }
+    CLog::Log(LOGERROR, "%s: Failed to open Intel SMD device", __DEBUG_ID__);
+    return false;
+  }
   
+  // check to see if any other threads are closing the previous device and wait
+  int counter = 0;
+  while (counter < 1000)
+  {
     if (m_Device->IsConfigured()) {
-      CLog::Log(LOGERROR, "%s: Trying to open up a second SMD codec instance?", __DEBUG_ID__);
-      return false;
+      counter++; 
+      usleep(5000); 
     }
-
-    m_Device->SetWidth(hints.width);
-    m_Device->SetHeight(hints.height);
-
-    if (m_Device && !m_Device->OpenDecoder(hints.codec, codec_type, hints.extrasize, hints.extradata))
-    {
-      CLog::Log(LOGERROR, "%s: Failed to open Intel SMD decoder", __DEBUG_ID__);
-      return false;
+    else {
+      break;
     }
+  }
+
+  if (m_Device->IsConfigured()) {
+    CLog::Log(LOGERROR, "%s: Trying to open up a second SMD codec instance?", __DEBUG_ID__);
+    return false;
+  }
+
+  m_Device->SetWidth(hints.width);
+  m_Device->SetHeight(hints.height);
+
+  if (m_Device && !m_Device->OpenDecoder(hints.codec, codec_type, hints.extrasize, hints.extradata))
+  {
+    CLog::Log(LOGERROR, "%s: Failed to open Intel SMD decoder", __DEBUG_ID__);
+    return false;
   }
 
   CLog::Log(LOGINFO, "%s: Opened Intel SMD Codec, %s", __DEBUG_ID__, m_pFormatName);
