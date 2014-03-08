@@ -107,9 +107,22 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
     CLog::Log(LOGERROR, "%s: Failed to open Intel SMD device", __DEBUG_ID__);
     return false;
   }
+  
+  // check to see if any other threads are closing the previous device and wait
+  int counter = 0;
+  while (counter < 1000)
+  {
+    if (m_Device->IsConfigured()) {
+      counter++; 
+      usleep(5000); 
+    }
+    else {
+      break;
+    }
+  }
 
   if (m_Device->IsConfigured()) {
-    CLog::Log(LOGERROR, "%s: Trying to open up a second SMD codec instance??", __DEBUG_ID__);
+    CLog::Log(LOGERROR, "%s: Trying to open up a second SMD codec instance?", __DEBUG_ID__);
     return false;
   }
 
@@ -130,6 +143,7 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 void CDVDVideoCodecSMD::Dispose(void)
 {
   VERBOSE();
+
   if (m_Device)
   {
     m_Device->CloseDecoder();

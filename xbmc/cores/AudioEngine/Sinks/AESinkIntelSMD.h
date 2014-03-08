@@ -40,7 +40,7 @@ public:
 
   virtual bool          Initialize  (AEAudioFormat &format, std::string &device);
   virtual void          Deinitialize();
-  virtual bool          IsCompatible(const AEAudioFormat &format, const std::string &device);
+  //virtual bool          IsCompatible(const AEAudioFormat &format, const std::string &device);
 
   virtual double        GetDelay        ();
   virtual double        GetCacheTime    ();
@@ -53,8 +53,6 @@ public:
   virtual bool          SoftSuspend();
   virtual bool          SoftResume();
 
-  static CCriticalSection m_SMDAudioLock;
-
   static  void          EnumerateDevicesEx(AEDeviceInfoList &list, bool force = false);
 
 private:
@@ -63,7 +61,6 @@ private:
   void SetDefaultOutputConfig(ismd_audio_output_config_t& output_config);
   void ConfigureAudioOutputParams(ismd_audio_output_config_t& output_config, int output, int sampleSize, int sampleRate, int channels, ismd_audio_format_t format, bool bPassthrough);
   void ConfigureDolbyPlusModes(ismd_audio_processor_t proc_handle, ismd_dev_t input_handle, bool bAC3Encode);
-  void ConfigureDTSModes(ismd_audio_processor_t proc_handle, ismd_dev_t input_handle);
 
   //float m_fCurrentVolume;
   bool m_bPause;
@@ -77,6 +74,22 @@ private:
   unsigned int m_dwBufferLen;
   double m_dSampleRate;
   unsigned int m_frameSize;
+
+  static CCriticalSection m_SMDAudioLock;
+
+  static bool LoadEDID();
+  static void UnloadEDID();
+  //bool CheckEDIDSupport( ismd_audio_format_t format, int& iChannels, unsigned int& uiSampleRate, unsigned int& uiSampleSize );
+  static void DumpEDID();
+  typedef struct _edidCaps
+  {
+    ismd_audio_format_t format;
+    int channels;
+    unsigned char sample_rates; // 7 bit field corresponding to m_edidRates
+    unsigned char sample_sizes; // 4 bit field corresponding to m_edidSampleSizes, PCM only
+    struct _edidCaps* next;
+  } edidHint;
+  static edidHint* m_edidTable;
 };
 
 #endif

@@ -24,6 +24,7 @@
 #include "utils/log.h"
 #include "../../IntelSMDGlobals.h"
 #include "Utils/AEDeviceInfo.h"
+#include <sstream>
 extern "C"
 {
 #include <ismd_core.h>
@@ -31,7 +32,7 @@ extern "C"
 //#include <ismd_audio_ac3.h>
 #include <ismd_audio_ddplus.h>
 //#include <ismd_audio_truehd.h>
-#include <ismd_audio_dts.h>
+//#include <ismd_audio_dts.h>
 #include <pal_soc_info.h>
 }
 
@@ -46,11 +47,56 @@ extern "C"
 
 
 CCriticalSection CAESinkIntelSMD::m_SMDAudioLock;
+CAESinkIntelSMD::edidHint* CAESinkIntelSMD::m_edidTable = NULL;
 
 ismd_dev_t tmpDevice = -1;
 
 bool m_codecAvailable[ISMD_AUDIO_MEDIA_FMT_COUNT];
 bool m_checkedCodecs = false;
+
+static const unsigned int s_edidRates[] = {32000,44100,48000,88200,96000,176400,192000};
+static const unsigned int s_edidSampleSizes[] = {16,20,24,32};
+
+ismd_audio_format_t mapGDLAudioFormat( gdl_hdmi_audio_fmt_t f )
+{
+  ismd_audio_format_t result = ISMD_AUDIO_MEDIA_FMT_INVALID;
+  switch(f)
+  {
+    case GDL_HDMI_AUDIO_FORMAT_PCM:
+      result = ISMD_AUDIO_MEDIA_FMT_PCM;
+      break;
+    case GDL_HDMI_AUDIO_FORMAT_MPEG1:
+    case GDL_HDMI_AUDIO_FORMAT_MPEG2:
+    case GDL_HDMI_AUDIO_FORMAT_MP3:
+      result = ISMD_AUDIO_MEDIA_FMT_MPEG;
+      break;
+    case GDL_HDMI_AUDIO_FORMAT_AAC:
+      result = ISMD_AUDIO_MEDIA_FMT_AAC;
+      break;
+    case GDL_HDMI_AUDIO_FORMAT_DTS:
+      result = ISMD_AUDIO_MEDIA_FMT_DTS;
+      break;
+    case GDL_HDMI_AUDIO_FORMAT_AC3:
+      result = ISMD_AUDIO_MEDIA_FMT_DD;
+      break;
+    case GDL_HDMI_AUDIO_FORMAT_DDP:
+      result = ISMD_AUDIO_MEDIA_FMT_DD_PLUS;
+      break;
+    case GDL_HDMI_AUDIO_FORMAT_DTSHD:
+      result = ISMD_AUDIO_MEDIA_FMT_DTS_HD_MA;
+      break;
+    case GDL_HDMI_AUDIO_FORMAT_MLP:
+      result = ISMD_AUDIO_MEDIA_FMT_TRUE_HD;
+      break;
+    case GDL_HDMI_AUDIO_FORMAT_WMA_PRO:
+      result = ISMD_AUDIO_MEDIA_FMT_WM9;
+      break;
+    default:
+      break;
+
+  };
+  return result;
+}
 
 // Functions to determine whether a device is enabled by name
 static inline bool isHDMI(std::string &device)
@@ -177,7 +223,7 @@ CAESinkIntelSMD::CAESinkIntelSMD()
 {
   VERBOSE2();
   m_bIsAllocated = false;
-  m_latency = 0.0;
+  m_latency = 0.025;
   m_dwChunkSize = 0;
   m_dwBufferLen = 0;
   m_dSampleRate = 0.0;
@@ -198,6 +244,9 @@ CAESinkIntelSMD::CAESinkIntelSMD()
       m_codecAvailable[i] = (ismd_audio_codec_available((ismd_audio_format_t)i) == ISMD_SUCCESS);
       CLog::Log(LOGDEBUG, "%s: ismd_audio_format %d codec available: %d", __DEBUG_ID__, i, m_codecAvailable[i]);
     }
+
+    //Turn off DTS hw decoding as that currently is not working properly
+    m_codecAvailable[ISMD_AUDIO_MEDIA_FMT_DTS] = false;
   }
 }
 
@@ -333,7 +382,6 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
     case ISMD_AUDIO_MEDIA_FMT_DD:
       CLog::Log(LOGDEBUG, "%s: Initialize DD detected", __DEBUG_ID__);
       bHDMIPassthrough = bSPDIFPassthrough = true;
-      //ConfigureDolbyModes(g_IntelSMDGlobals.GetAudioProcessor(), m_audioDevice);
       break;
     case ISMD_AUDIO_MEDIA_FMT_DD_PLUS:
       CLog::Log(LOGDEBUG, "%s: Initialize DD Plus detected", __DEBUG_ID__);
@@ -352,7 +400,6 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
     case ISMD_AUDIO_MEDIA_FMT_DTS_LBR:
       CLog::Log(LOGDEBUG, "%s: Initialize DTS detected", __DEBUG_ID__);
       bHDMIPassthrough = bSPDIFPassthrough = true;
-      ConfigureDTSModes(audioProcessor, m_audioDevice);
       break;
     case ISMD_AUDIO_MEDIA_FMT_DTS_HD:
     case ISMD_AUDIO_MEDIA_FMT_DTS_HD_MA:
@@ -534,91 +581,6 @@ void CAESinkIntelSMD::ConfigureDolbyPlusModes(ismd_audio_processor_t proc_handle
   if (result != ISMD_SUCCESS)
   {
     CLog::Log(LOGERROR, "%s ISMD_AUDIO_DDPLUS_OUTPUT_CONFIGURATION failed %d", __DEBUG_ID__, result);
-  }
-}
-
-void CAESinkIntelSMD::ConfigureDTSModes(ismd_audio_processor_t proc_handle, ismd_dev_t input_handle)
-{
-  ismd_result_t result;
-  ismd_audio_decoder_param_t dec_param;
-
-
-  //please set downmix_mode as ISMD_AUDIO_DTS_DOWNMIX_MODE_INTERNAL
-  /* Valid values: "ISMD_AUDIO_DTS_DOWNMIX_MODE_EXTERNAL" | "ISMD_AUDIO_DTS_DOWNMIX_MODE_INTERNAL" */
-  {
-    /* Set the downmix mode parameter for DTS core decoder. */
-    ismd_audio_dts_downmix_mode_t *param = (ismd_audio_dts_downmix_mode_t *) &dec_param;
-    *param = ISMD_AUDIO_DTS_DOWNMIX_MODE_INTERNAL;
-    CLog::Log(LOGNONE, "ConfigureDTSModes ISMD_AUDIO_DTS_DOWNMIXMODE %d", *param);
-    if ((result = ismd_audio_input_set_decoder_param(proc_handle, input_handle,
-        ISMD_AUDIO_DTS_DOWNMIXMODE, &dec_param)) != ISMD_SUCCESS)
-    {
-      CLog::Log(LOGERROR, "%s Setting the downmix mode on DTS CORE decoder failed %d", __DEBUG_ID__, result);
-    }
-  }
-
-  //please set speaker_out as 2   /* Please see ismd_audio_dts for acceptable values.(0 = default spkr out)*/
-  {
-    /* Set the Speaker output configuration of the DTS core decoder. */
-    ismd_audio_dts_speaker_output_configuration_t *param = (ismd_audio_dts_speaker_output_configuration_t *) &dec_param;
-    *param = 2;
-    CLog::Log(LOGNONE, "ConfigureDTSModes ISMD_AUDIO_DTS_SPKROUT %d", *param);
-    if ((result = ismd_audio_input_set_decoder_param(proc_handle, input_handle,
-        ISMD_AUDIO_DTS_SPKROUT, &dec_param)) != ISMD_SUCCESS)
-    {
-      CLog::Log(LOGERROR, "%s Setting the speaker output mode on DTS CORE decoder failed %d", __DEBUG_ID__, result);
-    }
-  }
-  // please set dynamic_range_percent as 0  /* Valid values: 0 - 100*/
-  {
-    /* Set the DRC percent of the DTS core decoder. */
-    ismd_audio_dts_dynamic_range_compression_percent_t *param = (ismd_audio_dts_dynamic_range_compression_percent_t *) &dec_param;
-    *param = 0;
-    CLog::Log(LOGNONE, "ConfigureDTSModes ISMD_AUDIO_DTS_DRCPERCENT %d", *param);
-    if ((result = ismd_audio_input_set_decoder_param(proc_handle, input_handle,
-        ISMD_AUDIO_DTS_DRCPERCENT, &dec_param)) != ISMD_SUCCESS)
-    {
-      CLog::Log(LOGERROR, "%s Setting the DRC percent on DTS CORE decoder failed %d", __DEBUG_ID__, result);
-    }
-  }
-
-  // please set number_output_channels as 2  /* Valid values:  Specify number of output channels 1 - 6.*/
-  {
-    /* Set the number of output channels of the DTS core decoder. */
-    ismd_audio_dts_num_output_channels_t *param = (ismd_audio_dts_num_output_channels_t *) &dec_param;
-    *param = 2;
-    CLog::Log(LOGNONE, "ConfigureDTSModes ISMD_AUDIO_DTS_NUM_OUTPUT_CHANNELS %d", *param);
-    if ((result = ismd_audio_input_set_decoder_param(proc_handle, input_handle,
-        ISMD_AUDIO_DTS_NUM_OUTPUT_CHANNELS, &dec_param)) != ISMD_SUCCESS)
-    {
-      CLog::Log(LOGERROR, "%s Setting the num output channels on DTS CORE decoder failed %d", __DEBUG_ID__, result);
-    }
-  }
-  // please set lfe_downmix as ISMD_AUDIO_DTS_LFE_DOWNMIX_NONE
-  /* Valid values: "ISMD_AUDIO_DTS_LFE_DOWNMIX_NONE" | "ISMD_AUDIO_DTS_LFE_DOWNMIX_10DB" */
-  {
-    /* Set the LFE downmix setting of the DTS core decoder. */
-    int *param = (int *) &dec_param;
-    *param = ISMD_AUDIO_DTS_LFE_DOWNMIX_NONE;
-    CLog::Log(LOGNONE, "ConfigureDTSModes ISMD_AUDIO_DTS_LFEDNMX %d", *param);
-    if ((result = ismd_audio_input_set_decoder_param(proc_handle, input_handle,
-        ISMD_AUDIO_DTS_LFEDNMX, &dec_param)) != ISMD_SUCCESS)
-    {
-      CLog::Log(LOGERROR, "%s Setting the LFE downmix on DTS CORE decoder failed %d", __DEBUG_ID__, result);
-    }
-  }
-
-  // please set sec_audio_scale as 0      /* Valid values: 0 | 1 */
-  {
-    /* Set the LFE downmix setting of the DTS core decoder. */
-    ismd_audio_dts_secondary_audio_scale_t *param = (ismd_audio_dts_secondary_audio_scale_t *) &dec_param;
-    *param = 0;
-    CLog::Log(LOGNONE, "ConfigureDTSModes ISMD_AUDIO_DTS_SEC_AUD_SCALING %d", *param);
-    if ((result = ismd_audio_input_set_decoder_param(proc_handle, input_handle,
-        ISMD_AUDIO_DTS_SEC_AUD_SCALING, &dec_param)) != ISMD_SUCCESS)
-    {
-      CLog::Log(LOGERROR, "%s Setting the secondary audio scaling on DTS CORE decoder failed %d", __DEBUG_ID__, result);
-    }
   }
 }
 
@@ -830,7 +792,7 @@ unsigned int CAESinkIntelSMD::AddPackets(uint8_t* data, unsigned int len, bool h
   total = len;
 
   //printf("len %d chunksize %d m_bTimed %d\n", len, m_dwChunkSize, m_bTimed);
-
+  
   while (len)
   {
     unsigned int bytes_to_copy = len > block_size ? block_size : len;
@@ -1043,23 +1005,11 @@ void CAESinkIntelSMD::SetDefaultOutputConfig(ismd_audio_output_config_t& output_
   output_config.stream_delay = 0;
 }
 
-bool CAESinkIntelSMD::IsCompatible(const AEAudioFormat &format, const std::string &device)
-{
-  VERBOSE();
-  // TODO(q)
-  switch (format.m_dataFormat) {
-  case AE_FMT_S16LE:
-    break;
-  default:
-    return false;
-  }
-  return true;
-}
-
-
 void CAESinkIntelSMD::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
 {
   VERBOSE();
+
+  LoadEDID();
   // most likely TODO(q)- now messed up by quasar?
   // And now even more messed up by Keyser :)
   CAEDeviceInfo info;
@@ -1192,5 +1142,97 @@ void CAESinkIntelSMD::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   list.push_back(info);
 }
 
+bool CAESinkIntelSMD::LoadEDID()
+{
+  UnloadEDID();
+
+  bool ret = false;
+  gdl_hdmi_audio_ctrl_t ctrl;
+  edidHint** cur = &m_edidTable;
+
+  // Set up our control
+  ctrl.cmd_id = GDL_HDMI_AUDIO_GET_CAPS;
+  ctrl.data._get_caps.index = 0;
+
+  while( gdl_port_recv(GDL_PD_ID_HDMI, GDL_PD_RECV_HDMI_AUDIO_CTRL, &ctrl, sizeof(ctrl)) == GDL_SUCCESS )
+  {
+    edidHint* hint = new edidHint;
+    if( !hint ) return false;
+
+    ret = true;
+
+    hint->format = mapGDLAudioFormat( (gdl_hdmi_audio_fmt_t)ctrl.data._get_caps.cap.format );
+    if( ISMD_AUDIO_MEDIA_FMT_INVALID == hint->format )
+    {
+      delete hint;
+      ctrl.data._get_caps.index++;
+      continue;
+    }
+    
+    hint->channels = (int)ctrl.data._get_caps.cap.max_channels;
+    hint->sample_rates = (unsigned char) (ctrl.data._get_caps.cap.fs & 0x7f);
+    if( ISMD_AUDIO_MEDIA_FMT_PCM == hint->format )
+    {
+      hint->sample_sizes = (ctrl.data._get_caps.cap.ss_bitrate & 0x07);
+      if( hint->sample_sizes & 0x04 )
+        hint->sample_sizes |= 0x08;  // if we support 24, we support 32.
+    }
+    else
+      hint->sample_sizes = 0;
+
+    *cur = hint;
+    cur = &( hint->next );
+
+    // get the next block
+    ctrl.data._get_caps.index++;
+  }
+
+  *cur = NULL;
+
+  DumpEDID();
+
+  return ret;
+}
+
+void CAESinkIntelSMD::UnloadEDID()
+{
+  while( m_edidTable )
+  {
+    edidHint* nxt = m_edidTable->next;
+    delete[] m_edidTable;
+    m_edidTable = nxt;
+  }
+}
+
+void CAESinkIntelSMD::DumpEDID()
+{
+  std::string formats[] = {"invalid","LPCM","DVDPCM","BRPCM","MPEG","AAC","AACLOAS","DD","DD+","TrueHD","DTS-HD","DTS-HD-HRA","DTS-HD-MA","DTS","DTS-LBR","WM9"};
+  CLog::Log(LOGINFO,"%s HDMI Audio sink supports the following formats:\n", __DEBUG_ID__);
+  for( edidHint* cur = m_edidTable; cur; cur = cur->next )
+  {
+    std::ostringstream line;
+    line << "* Format: " << formats[cur->format] << " Max channels: " << cur->channels << " Samplerates: ";
+
+    for( size_t z = 0; z < sizeof(s_edidRates); z++ )
+    {
+      if( cur->sample_rates & (1<<z) )
+      {
+        line << s_edidRates[z] << " ";
+      }         
+    }
+    if( ISMD_AUDIO_MEDIA_FMT_PCM == cur->format )
+    {
+      line << "Sample Sizes: ";
+      for( size_t z = 0; z< sizeof(s_edidSampleSizes); z++ )
+      {
+        if( cur->sample_sizes & (1<<z) )
+        {
+          line << s_edidSampleSizes[z] << " ";
+        }
+      }
+    }
+    CLog::Log(LOGINFO, "%s %s", __DEBUG_ID__, line.str().c_str());
+  }
+}
 
 #endif
