@@ -79,7 +79,8 @@ private:
 
   static bool LoadEDID();
   static void UnloadEDID();
-  //bool CheckEDIDSupport( ismd_audio_format_t format, int& iChannels, unsigned int& uiSampleRate, unsigned int& uiSampleSize );
+  static bool CheckEDIDSupport( ismd_audio_format_t format, int& iChannels, unsigned int& uiSampleRate, unsigned int& uiSampleSize );
+  static void GetEDIDInfo(int &maxChannels, std::vector<AEDataFormat> &formats, std::vector<unsigned int> &rates);
   static void DumpEDID();
   typedef struct _edidCaps
   {
