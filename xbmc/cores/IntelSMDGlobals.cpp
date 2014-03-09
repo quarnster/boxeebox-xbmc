@@ -1092,21 +1092,21 @@ bool CIntelSMDGlobals::ConfigureAudioOutput(ismd_audio_output_t output, ismd_aud
   result = ismd_audio_output_set_channel_config(m_audioProcessor, output, output_config.ch_config);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_sample_size failed %d", __DEBUG_ID__, result);
+    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_channel_config failed %d", __DEBUG_ID__, result);
 //    return false;
   }
 
   result = ismd_audio_output_set_mode(m_audioProcessor, output, output_config.out_mode);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_sample_size failed %d", __DEBUG_ID__, result);
+    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_set_mode failed %d", __DEBUG_ID__, result);
 //    return false;
   }
 
   result = ismd_audio_output_set_sample_rate(m_audioProcessor, output, output_config.sample_rate);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_sample_size failed %d", __DEBUG_ID__, result);
+    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_sample_rate failed %d", __DEBUG_ID__, result);
 //    return false;
   }
 
