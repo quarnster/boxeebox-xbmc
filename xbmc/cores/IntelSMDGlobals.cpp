@@ -778,8 +778,19 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
   //Connect DPE and Render
   if (m_video_output_port_proc != -1 && m_video_input_port_renderer != -1)
   {
-    res = ismd_port_connect(m_video_output_port_proc,
-        m_video_input_port_renderer);
+    int counter = 0;
+    while (counter < 1000)
+    {
+      res = ismd_port_connect(m_video_output_port_proc,
+          m_video_input_port_renderer);
+
+      if (res != ISMD_ERROR_PORT_BUSY)
+        break;
+       
+      counter++;
+      usleep(5000);
+    }
+
     if (res != ISMD_SUCCESS)
     {
       CLog::Log(LOGERROR, "%s ismd_port_connect failed: %d", __DEBUG_ID__, res);
