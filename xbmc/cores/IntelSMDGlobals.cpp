@@ -778,8 +778,19 @@ bool CIntelSMDGlobals::CreateVideoRender(gdl_plane_id_t plane)
   //Connect DPE and Render
   if (m_video_output_port_proc != -1 && m_video_input_port_renderer != -1)
   {
-    res = ismd_port_connect(m_video_output_port_proc,
-        m_video_input_port_renderer);
+    int counter = 0;
+    while (counter < 1000)
+    {
+      res = ismd_port_connect(m_video_output_port_proc,
+          m_video_input_port_renderer);
+
+      if (res != ISMD_ERROR_PORT_BUSY)
+        break;
+       
+      counter++;
+      usleep(5000);
+    }
+
     if (res != ISMD_SUCCESS)
     {
       CLog::Log(LOGERROR, "%s ismd_port_connect failed: %d", __DEBUG_ID__, res);
@@ -1092,21 +1103,21 @@ bool CIntelSMDGlobals::ConfigureAudioOutput(ismd_audio_output_t output, ismd_aud
   result = ismd_audio_output_set_channel_config(m_audioProcessor, output, output_config.ch_config);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_sample_size failed %d", __DEBUG_ID__, result);
+    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_channel_config failed %d", __DEBUG_ID__, result);
 //    return false;
   }
 
   result = ismd_audio_output_set_mode(m_audioProcessor, output, output_config.out_mode);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_sample_size failed %d", __DEBUG_ID__, result);
+    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_set_mode failed %d", __DEBUG_ID__, result);
 //    return false;
   }
 
   result = ismd_audio_output_set_sample_rate(m_audioProcessor, output, output_config.sample_rate);
   if (result != ISMD_SUCCESS)
   {
-    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_sample_size failed %d", __DEBUG_ID__, result);
+    CLog::Log(LOGWARNING, "%s ismd_audio_output_set_sample_rate failed %d", __DEBUG_ID__, result);
 //    return false;
   }
 
