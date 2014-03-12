@@ -1,7 +1,7 @@
 # XBMC Media Center language file
-# Addon Name: DirectX Spectrum
-# Addon id: visualization.dxspectrum
-# Addon Provider: Team XBMC
+# Addon Name: Confluence
+# Addon id: skin.confluence
+# Addon Provider: Jezz_X, Team XBMC
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC Main\n"
@@ -9,25 +9,17 @@ msgstr ""
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: XBMC Translation Team\n"
-"Language-Team: Malay (http://www.transifex.com/projects/p/xbmc-main/language/ms/)\n"
+"Language-Team: Georgian (http://www.transifex.com/projects/p/xbmc-main/language/ka/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ms\n"
+"Language: ka\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-msgctxt "#30005"
-msgid "Small"
-msgstr "Kecil"
+msgctxt "#31327"
+msgid "Resolution"
+msgstr "გარჩევადობა"
 
-msgctxt "#30006"
-msgid "Default"
-msgstr "Lalai"
-
-msgctxt "#30009"
-msgid "Speed"
-msgstr "Kelajuan"
-
-msgctxt "#30012"
-msgid "Default"
-msgstr "Lalai"
+msgctxt "#31362"
+msgid "Enabled"
+msgstr "ჩართულია"
