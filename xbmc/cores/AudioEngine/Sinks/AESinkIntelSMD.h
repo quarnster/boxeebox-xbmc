@@ -59,7 +59,7 @@ private:
   unsigned int SendDataToInput(unsigned char* buffer_data, unsigned int buffer_size);
   ismd_audio_format_t GetISMDFormat(AEDataFormat format);
   void SetDefaultOutputConfig(ismd_audio_output_config_t& output_config);
-  void ConfigureAudioOutputParams(ismd_audio_output_config_t& output_config, int output, int sampleSize, int sampleRate, int channels, ismd_audio_format_t format, bool bPassthrough);
+  void ConfigureAudioOutputParams(ismd_audio_output_config_t& output_config, int output, int sampleSize, int sampleRate, int channels, ismd_audio_format_t format, bool bPassthrough, bool bAC3Encode);
   void ConfigureDolbyPlusModes(ismd_audio_processor_t proc_handle, ismd_dev_t input_handle, bool bAC3Encode);
 
   //float m_fCurrentVolume;
@@ -79,7 +79,7 @@ private:
 
   static bool LoadEDID();
   static void UnloadEDID();
-  static bool CheckEDIDSupport( ismd_audio_format_t format, int& iChannels, unsigned int& uiSampleRate, unsigned int& uiSampleSize );
+  static bool CheckEDIDSupport( ismd_audio_format_t &format, int& iChannels, unsigned int& uiSampleRate, unsigned int& uiSampleSize, bool& bAC3Encode );
   static void GetEDIDInfo(int &maxChannels, std::vector<AEDataFormat> &formats, std::vector<unsigned int> &rates);
   static void DumpEDID();
   typedef struct _edidCaps
