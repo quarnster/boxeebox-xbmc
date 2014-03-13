@@ -25,6 +25,7 @@
 #include "utils/log.h"
 #include <math.h>
 #include "utils/StringUtils.h"
+#include "windowing/WindowingFactory.h"
 
 CEGLNativeTypeBoxee::CEGLNativeTypeBoxee()
 {
@@ -228,6 +229,7 @@ bool CEGLNativeTypeBoxee::SetNativeResolution(const RESOLUTION_INFO &res)
   display_info.color_space = GDL_COLOR_SPACE_RGB;
   display_info.gamma       = GDL_GAMMA_LINEAR;
 
+  g_IntelSMDGlobals.DisableAudioOutput(g_IntelSMDGlobals.GetHDMIOutput());
   rc = gdl_set_display_info(&display_info);
 
   if ( rc != GDL_SUCCESS)
@@ -318,7 +320,22 @@ bool CEGLNativeTypeBoxee::SetNativeResolution(const RESOLUTION_INFO &res)
 
   CLog::Log(LOGINFO, "GDL plane setup complete");
 
+  gdl_boolean_t hdmiClamp = g_Windowing.UseLimitedColor() ? GDL_TRUE : GDL_FALSE;
 
+  if(gdl_port_set_attr(GDL_PD_ID_HDMI, GDL_PD_ATTR_ID_OUTPUT_CLAMP, &hdmiClamp) != GDL_SUCCESS)
+  {
+    CLog::Log(LOGERROR, "Could not set gdl output clamp");
+  }
+
+  gdl_pd_attribute_t test;
+  gdl_port_get_attr(GDL_PD_ID_HDMI, GDL_PD_ATTR_ID_OUTPUT_CLAMP, &test);
+
+  if(test.content._bool.value == GDL_TRUE)
+    CLog::Log(LOGINFO, "HDMI Clamp enabled\n");
+  else
+    CLog::Log(LOGINFO, "HDMI Clamp disabled\n");
+
+  g_IntelSMDGlobals.EnableAudioOutput(g_IntelSMDGlobals.GetHDMIOutput());
   return true;
 }
 

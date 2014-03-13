@@ -932,6 +932,9 @@ void CSettings::InitializeConditions()
   m_settingsManager->AddCondition("has_dx");
   m_settingsManager->AddCondition("hasdxva2");
 #endif
+#ifdef HAS_INTEL_SMD
+  m_settingsManager->AddCondition("has_intel_smd");
+#endif
 
   if (g_application.IsStandAlone())
     m_settingsManager->AddCondition("isstandalone");

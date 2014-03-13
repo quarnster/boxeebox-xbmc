@@ -2354,6 +2354,7 @@
             <or>
               <condition>HAS_GL</condition>
               <condition>HAS_DX</condition>
+              <condition>HAS_INTEL_SMD</condition>
             </or>
           </requirement>
           <level>3</level>
