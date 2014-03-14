@@ -19,6 +19,8 @@
 
 
 import platform
+import urllib
+import re
 import xbmc
 import lib.common
 from lib.common import log, dialog_yesno
@@ -50,7 +52,7 @@ class Main:
                         _upgrademessage(msg, False)
             else:
                 pass
-                
+
 def _versioncheck():
     # initial vars
     from lib.jsoninterface import get_installedversion, get_versionfilelist
@@ -62,7 +64,6 @@ def _versioncheck():
     # copmpare installed and available
     oldversion, msg = compare_version(version_installed, versionlist)
     return oldversion, msg
-
 
 def _versionchecklinux(packages):
     if platform.dist()[0].lower() in ['ubuntu', 'debian', 'linuxmint']:
@@ -100,11 +101,44 @@ def _versionchecklinux(packages):
                         log("Error during upgrade")
         else:
             log("Error: no handler found")
+
+    elif platform.dist(supported_dists=('boxeebox'))[0].lower() == "boxeebox":
+        oldversion, msg = _versioncheckboxee()
+        if oldversion:
+            xbmc.executebuiltin("XBMC.Notification(%s, %s, %d, %s)" %(__addonname__,
+                                                                      msg,
+                                                                      15000,
+                                                                      __icon__))
+
     else:
         log("Unsupported platform %s" %platform.dist()[0])
         sys.exit(0)
 
+def _versioncheckboxee():
+    oldversion = False
+    msg = ''
 
+    # get localversion (date, hash)
+    local_version = list(re.findall("(\d{8})-(.+)$", xbmc.getInfoLabel("System.BuildVersion"))[0])
+
+    # get remoteversion (date, hash)
+    stream = urllib.urlopen("http://devil-strike.com/xbmc_boxeebox/changelog.txt")
+    changelog = stream.read()
+    stream.close()
+
+    for line in changelog.split('\n'):
+        line = line.lower().strip()
+        if line.startswith('changelog:'):
+            remote_version = list(re.findall("(\d{4}\.\d{2}\.\d{2}).*_(.{7,})$", line[11:].strip())[0])
+            break
+
+    remote_version[0] = remote_version[0].replace('.', '')
+    if remote_version[0] > local_version[0] or remote_version[1] != local_version[1]:
+        oldversion = True
+        msg = "Check http://boxeed.in/forums/viewtopic.php?f=13&t=148 for newest version."
+
+    log("Boxee recognized: %s vs %s" %(local_version, remote_version))
+    return oldversion, msg
 
 if (__name__ == "__main__"):
     log('Version %s started' % __addonversion__)
