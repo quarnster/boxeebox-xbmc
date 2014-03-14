@@ -20,10 +20,9 @@
 #pragma once
 
 #include <memory>
-#include <map>
+#include <vector>
 
-#include "network/ZeroconfBrowser.h"
-#include "threads/Thread.h"
+#include "network/Zeroconf.h"
 #include "threads/CriticalSection.h"
 
 #include <CoreFoundation/CoreFoundation.h>
@@ -33,44 +32,34 @@
   #include <CFNetwork/CFNetServices.h>
 #endif
 
-//platform specific implementation of  zeroconfbrowser interface using native os x APIs
-class CZeroconfBrowserOSX : public CZeroconfBrowser
+class CZeroconfOSX : public CZeroconf
 {
 public:
-  CZeroconfBrowserOSX();
-  ~CZeroconfBrowserOSX();
+  CZeroconfOSX();
+  ~CZeroconfOSX();
+protected:
+  //implement base CZeroConf interface
+  bool doPublishService(const std::string& fcr_identifier,
+                        const std::string& fcr_type,
+                        const std::string& fcr_name,
+                        unsigned int f_port,
+                        const std::vector<std::pair<std::string, std::string> >& txt);
+
+  bool doForceReAnnounceService(const std::string& fcr_identifier);
+
+  bool doRemoveService(const std::string& fcr_ident);
+
+  virtual void doStop();
 
 private:
-  ///implementation if CZeroconfBrowser interface
-  ///@{
-  virtual bool doAddServiceType(const CStdString &fcr_service_type);
-  virtual bool doRemoveServiceType(const CStdString &fcr_service_type);
+  static void registerCallback(CFNetServiceRef theService, CFStreamError* error, void* info);
+  void cancelRegistration(CFNetServiceRef theService);
 
-  virtual std::vector<CZeroconfBrowser::ZeroconfService> doGetFoundServices();
-  virtual bool doResolveService(CZeroconfBrowser::ZeroconfService &fr_service, double f_timeout);
-  ///@}
-
-  /// browser callback
-  static void BrowserCallback(CFNetServiceBrowserRef browser, CFOptionFlags flags, CFTypeRef domainOrService, CFStreamError *error, void *info);
-  /// resolve callback
-  static void ResolveCallback(CFNetServiceRef theService, CFStreamError *error, void *info);
-
-  /// adds the service to list of found services
-  void addDiscoveredService(CFNetServiceBrowserRef browser, CFOptionFlags flags, ZeroconfService const &fcr_service);
-  /// removes the service from list of found services
-  void removeDiscoveredService(CFNetServiceBrowserRef browser, CFOptionFlags flags, ZeroconfService const &fcr_service);
-  
   //CF runloop ref; we're using main-threads runloop
   CFRunLoopRef m_runloop;
-  
-  //shared variables (with guard)
-  //TODO: split the guard for discovered, resolved access?
+
+  //lock + data (accessed from runloop(main thread) + the rest)
   CCriticalSection m_data_guard;
-  // tBrowserMap maps service types the corresponding browser
-  typedef std::map<CStdString, CFNetServiceBrowserRef> tBrowserMap;
-  tBrowserMap m_service_browsers;
-  //tDiscoveredServicesMap maps browsers to their discovered services + a ref-count for each service
-  //ref-count is needed, because a service might pop up more than once, if there's more than one network-iface
-  typedef std::map<CFNetServiceBrowserRef, std::vector<std::pair<ZeroconfService, unsigned int> > > tDiscoveredServicesMap;
-  tDiscoveredServicesMap m_discovered_services;
+  typedef std::map<std::string, CFNetServiceRef> tServiceMap;
+  tServiceMap m_services;
 };
