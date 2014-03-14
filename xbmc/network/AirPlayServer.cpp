@@ -43,9 +43,6 @@
 #include "URL.h"
 #include "cores/IPlayer.h"
 #include "interfaces/AnnouncementManager.h"
-#ifdef HAS_ZEROCONF
-#include "network/Zeroconf.h"
-#endif // HAS_ZEROCONF
 
 using namespace ANNOUNCEMENT;
 
@@ -280,18 +277,6 @@ CAirPlayServer::~CAirPlayServer()
   CAnnouncementManager::RemoveAnnouncer(this);
 }
 
-void handleZeroconfAnnouncement()
-{
-#if defined(HAS_ZEROCONF)
-  static XbmcThreads::EndTime timeout(10000);
-  if(timeout.IsTimePast())
-  {
-    CZeroconf::GetInstance()->ForceReAnnounceService("servers.airplay");
-    timeout.Set(10000);
-  }
-#endif
-}
-
 void CAirPlayServer::Process()
 {
   m_bStop = false;
@@ -372,12 +357,6 @@ void CAirPlayServer::Process()
         }
       }
     }
-    
-    // by reannouncing the zeroconf service
-    // we fix issues where xbmc is detected
-    // as audio-only target on devices with
-    // ios7 and later
-    handleZeroconfAnnouncement();    
   }
 
   Deinitialize();

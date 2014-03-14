@@ -160,16 +160,13 @@ void PAPlayer::SoftStop(bool wait/* = false */, bool close/* = true */)
   /* if we are going to wait for them to finish fading */
   if(wait)
   {
-    // fail safe timer, do not wait longer than 1000ms
-    XbmcThreads::EndTime timer(1000);
-
     /* wait for them to fade out */
     lock.Leave();
     Sleep(FAST_XFADE_TIME);
     lock.Enter();
 
     /* be sure they have faded out */
-    while(wait && !CAEFactory::IsSuspended() && !timer.IsTimePast())
+    while(wait && !CAEFactory::IsSuspended())
     {
       wait = false;
       for(StreamList::iterator itt = m_streams.begin(); itt != m_streams.end(); ++itt)

@@ -11329,6 +11329,14 @@ msgctxt "#36262"
 msgid "Export the Music Library database to XML files. This will optionally overwrite your current XML files."
 msgstr "Eksportuoti fonotekos duomenų bazę XML failais. Tai bus perrašyti dabartiniai XML failai."
 
+msgctxt "#36261"
+msgid "Path where taken screenshots will be stored."
+msgstr "Nurodyti kelią kur bus saugomos ekrano sklandos."
+
+msgctxt "#36262"
+msgid "Export the Music Library database to XML files. This will optionally overwrite your current XML files."
+msgstr "Eksportuoti fonotekos duomenų bazę XML failais. Tai bus perrašyti dabartiniai XML failai."
+
 msgctxt "#36263"
 msgid "Import a XML file into the Music Library database."
 msgstr "Importuoti XML failą į fonoteką duomenų bazėje."

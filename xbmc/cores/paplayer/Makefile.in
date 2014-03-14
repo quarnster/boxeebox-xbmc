@@ -7,9 +7,11 @@ CFLAGS += -DHAS_ALSA
 CXXFLAGS += -DHAS_ALSA
 endif
 
-SRCS  = AudioDecoder.cpp
+SRCS  = ADPCMCodec.cpp
+SRCS += AudioDecoder.cpp
 SRCS += CodecFactory.cpp
 SRCS += DVDPlayerCodec.cpp
+SRCS += FLACcodec.cpp
 SRCS += ModplugCodec.cpp
 SRCS += MP3codec.cpp
 SRCS += NSFCodec.cpp
@@ -20,6 +22,7 @@ SRCS += PCMCodec.cpp
 SRCS += SIDCodec.cpp
 SRCS += TimidityCodec.cpp
 SRCS += VGMCodec.cpp
+SRCS += WAVcodec.cpp
 SRCS += YMCodec.cpp
 
 ifeq (@USE_ASAP_CODEC@,1)
