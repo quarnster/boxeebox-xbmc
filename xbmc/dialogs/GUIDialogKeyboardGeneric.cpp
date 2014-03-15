@@ -192,7 +192,7 @@ bool CGUIDialogKeyboardGeneric::OnAction(const CAction &action)
   { // input from the keyboard
     //char ch = action.GetID() & 0xFF;
     int ch = action.GetUnicode();
-    
+
     // Ignore non-printing characters
     if ( !((0 <= ch && ch < 0x8) || (0xE <= ch && ch < 0x1B) || (0x1C <= ch && ch < 0x20)) )
     {
@@ -386,12 +386,20 @@ void CGUIDialogKeyboardGeneric::UpdateLabel() // FIXME seems to be called twice 
     { // convert to *'s
       edit.clear();
       if (m_lastRemoteClickTime + REMOTE_SMS_DELAY > CTimeUtils::GetFrameTime() && m_iCursorPos > 0)
-      { // using the remove to input, so display the last key input
+      { // using the remote to input, so display the last key input
         edit.append(m_iCursorPos - 1, L'*');
         edit.append(1, m_strEdit[m_iCursorPos - 1]);
       }
       else
+      {
+#ifdef TARGET_BOXEE
+        // boxee remote imitates keyboard so we force always showing last key input
+        edit.append(m_iCursorPos - 1, L'*');
+        edit.append(1, m_strEdit[m_iCursorPos - 1]);
+#else
         edit.append(m_strEdit.size(), L'*');
+#endif
+      }
     }
     else if (!m_strEditing.empty())
     {
