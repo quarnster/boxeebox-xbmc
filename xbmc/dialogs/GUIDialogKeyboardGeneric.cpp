@@ -390,16 +390,19 @@ void CGUIDialogKeyboardGeneric::UpdateLabel() // FIXME seems to be called twice 
         edit.append(m_iCursorPos - 1, L'*');
         edit.append(1, m_strEdit[m_iCursorPos - 1]);
       }
+#ifdef TARGET_BOXEE // boxee remote imitates keyboard so we force always showing last key input
       else
       {
-#ifdef TARGET_BOXEE
-        // boxee remote imitates keyboard so we force always showing last key input
-        edit.append(m_iCursorPos - 1, L'*');
-        edit.append(1, m_strEdit[m_iCursorPos - 1]);
+        if(m_strEdit.size() > 0)
+        {
+            edit.append(m_strEdit.size() - 1, L'*');
+            edit.append(1, m_strEdit[m_strEdit.size() - 1]);
+        }
+      }
 #else
+      else
         edit.append(m_strEdit.size(), L'*');
 #endif
-      }
     }
     else if (!m_strEditing.empty())
     {
