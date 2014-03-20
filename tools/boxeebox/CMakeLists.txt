@@ -107,7 +107,7 @@ set(libs
 	libsmbclient.so.0
 	libnfs.so.1
 	librtmp.so.1
-	libdbus-1.so.3
+	libdbus-1.so
 	libexpat.so
 	libtdb.so.1
 	libtalloc.so.2
