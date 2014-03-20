@@ -120,8 +120,8 @@ set(libs
 	libvorbisfile.so
 	libvorbis.so
 	libvorbisenc.so
-	libenca.so
-	libass.so
+	libenca.so.0
+	libass.so.5
 	libao.so
 	libsqlite3.so
 	libcec.so.2	
