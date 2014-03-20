@@ -24,6 +24,7 @@
 #include "utils/log.h"
 #include "../../IntelSMDGlobals.h"
 #include "Utils/AEDeviceInfo.h"
+#include "Utils/AEUtil.h"
 #include <sstream>
 extern "C"
 {
@@ -51,7 +52,6 @@ CAESinkIntelSMD::edidHint* CAESinkIntelSMD::m_edidTable = NULL;
 
 ismd_dev_t tmpDevice = -1;
 
-bool m_codecAvailable[ISMD_AUDIO_MEDIA_FMT_COUNT];
 bool m_checkedCodecs = false;
 
 static const unsigned int s_edidRates[] = {32000,44100,48000,88200,96000,176400,192000};
@@ -181,10 +181,11 @@ static inline int getOutputSampleRate(int deviceType, int inputSampleRate)
     case 44100:
     case 88200:
     case 176400:
+      //outSampleRate = inputSampleRate;
       //if (deviceType == AE_DEVTYPE_PCM)
-        outSampleRate = 48000;
+      //  outSampleRate = 48000;
       //else if (deviceType == AE_DEVTYPE_IEC958)
-        //outSampleRate = 88200;
+      //  outSampleRate = 88200;
       break;
     default:
       break;
@@ -193,25 +194,8 @@ static inline int getOutputSampleRate(int deviceType, int inputSampleRate)
   return outSampleRate;
 }
 
-// Determines the supported sample size
-// TODO: Fix so non-16bit samples are supported
-static inline int getOutputSampleSize(int deviceType, int inputSampleSize)
-{
-  // default to 16bit sample size
-  int outSampleSize = 4;
-  
-  //if (inputSampleSize >= 8)// && deviceType == AE_DEVTYPE_HDMI)
-  //  outSampleSize = 8;
-  //else if (inputSampleSize >= 6)
-  //  outSampleSize = 6;
-  //else if (inputSampleSize >= 5 && deviceType == AE_DEVTYPE_HDMI)
-  //  outSampleSize = 5;
-	
-  return outSampleSize;
-}
-
 // Converts input format to supported output format
-static inline AEDataFormat getAEDataFormat(int deviceType, AEDataFormat inputMediaFormat)
+static inline AEDataFormat getAEDataFormat(int deviceType, AEDataFormat inputMediaFormat, unsigned int frameSize)
 {
   // default to 16 little endian
   AEDataFormat outputAEDataFormat = AE_FMT_S16LE;
@@ -220,14 +204,24 @@ static inline AEDataFormat getAEDataFormat(int deviceType, AEDataFormat inputMed
     case AE_FMT_S24BE3:
     case AE_FMT_S24LE3:
     case AE_FMT_S24NE3:
-      outputAEDataFormat = AE_FMT_S24LE3;
-    case AE_FMT_S32BE:
-    case AE_FMT_S32LE:
-    case AE_FMT_S32NE:
     case AE_FMT_S24BE4:
     case AE_FMT_S24LE4:
     case AE_FMT_S24NE4:
-      outputAEDataFormat = AE_FMT_S24LE4;
+      outputAEDataFormat = AE_FMT_S24NE4;
+    case AE_FMT_S32BE:
+    case AE_FMT_S32LE:
+    case AE_FMT_S32NE:
+      outputAEDataFormat = AE_FMT_S32LE;
+      break;
+    case AE_FMT_FLOAT:
+    case AE_FMT_DOUBLE:
+      // if using SPDIF/HDMI then attempt to detect 24 bit audio
+      // this uses the frame size to attempt to detect mono, stereo, 5.1, or 7.1 24 bit sources
+      // Currently 24 bit is disabled until it is determined why audio crackling is heard on certain setups.
+      //if ((deviceType == AE_DEVTYPE_IEC958 || deviceType == AE_DEVTYPE_HDMI) && (frameSize == 3 || frameSize == 6 || frameSize == 18 || frameSize == 24))
+      //  outputAEDataFormat = AE_FMT_S24NE4;
+      //else
+        outputAEDataFormat = AE_FMT_S16LE;
       break;
     default:
       break;
@@ -265,16 +259,9 @@ CAESinkIntelSMD::CAESinkIntelSMD()
   if (!m_checkedCodecs)
   {
     m_checkedCodecs = true;
-    // set invalid codec to false
-    m_codecAvailable[0] = false;
+   
     for(int i = 1; i < ISMD_AUDIO_MEDIA_FMT_COUNT; ++i)
-    {
-      m_codecAvailable[i] = (ismd_audio_codec_available((ismd_audio_format_t)i) == ISMD_SUCCESS);
-      CLog::Log(LOGDEBUG, "%s: ismd_audio_format %d codec available: %d", __DEBUG_ID__, i, m_codecAvailable[i]);
-    }
-
-    //Turn off DTS hw decoding as that currently is not working properly
-    m_codecAvailable[ISMD_AUDIO_MEDIA_FMT_DTS] = false;
+      CLog::Log(LOGDEBUG, "%s: ismd_audio_format %d codec available: %d", __DEBUG_ID__, i, ismd_audio_codec_available((ismd_audio_format_t)i) == ISMD_SUCCESS);
   }
 }
 
@@ -287,6 +274,9 @@ CAESinkIntelSMD::~CAESinkIntelSMD()
 bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
 {
   VERBOSE2();
+
+  CLog::Log(LOGDEBUG, "%s: device: %s, data format: %s, sample rate: %d, channel count: %d, frame size: %d", __DEBUG_ID__, device.c_str(), CAEUtil::DataFormatToStr(format.m_dataFormat), format.m_sampleRate, format.m_channelLayout.Count(), format.m_frameSize);
+
   CSingleLock lock(m_SMDAudioLock);
 
   bool bIsHDMI = isHDMI(device);
@@ -297,21 +287,12 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   ismd_result_t result;
   AEDataFormat inputDataFormat = format.m_dataFormat;
 
-  bool bIsCodecAvailable = m_codecAvailable[GetISMDFormat(inputDataFormat)];
   bool bSPDIFPassthrough = false;
   bool bHDMIPassthrough = false;
   bool bIsRawCodec = AE_IS_RAW(inputDataFormat);
 
-  // if standard audio keep buffer small so delay is short
-  if (!bIsRawCodec)
-    m_dwChunkSize = 1024;
-  else
-    m_dwChunkSize = 4*1024;
-
-  m_dwBufferLen = m_dwChunkSize;
   format.m_sampleRate = getOutputSampleRate(deviceType, format.m_sampleRate);
-  format.m_dataFormat = getAEDataFormat(deviceType, format.m_dataFormat);
-  format.m_frameSize = getOutputSampleSize(deviceType, format.m_frameSize);
+  format.m_dataFormat = getAEDataFormat(deviceType, format.m_dataFormat, format.m_frameSize);
 
   int channels = format.m_channelLayout.Count();
   // can not support more than 2 channels on anything other than HDMI
@@ -321,8 +302,6 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   else if (channels > 8)
     channels = 8;
 
-  if (!bIsRawCodec || !bIsCodecAvailable)
-    inputDataFormat = format.m_dataFormat;
 
   ismd_audio_processor_t  audioProcessor = -1;
   ismd_audio_format_t     ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_INVALID;
@@ -355,43 +334,61 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   }
 
   ismdAudioInputFormat = GetISMDFormat(inputDataFormat);
-  
-  // Can we do hardware decode?
-  bool bHardwareDecoder = m_codecAvailable[GetISMDFormat(inputDataFormat)];
-  if(ismdAudioInputFormat == ISMD_AUDIO_MEDIA_FMT_PCM)
-    bHardwareDecoder = false;
 
-  unsigned int uiBitsPerSample = format.m_frameSize*4;
+  unsigned int uiBitsPerSample = CAEUtil::DataFormatToBits(format.m_dataFormat);
+  unsigned int uiUsedBitsPerSample = CAEUtil::DataFormatToUsedBits(format.m_dataFormat);
+
   // Are we doing DD+ -> DD mode
   bool bAC3Encode = false;
   if (bIsHDMI)
   {
     unsigned int sampleRate = format.m_sampleRate;
+    unsigned int bitsPerSample = uiUsedBitsPerSample;
     if (format.m_encodedRate != 0)
       sampleRate = format.m_encodedRate;
 
     unsigned int suggSampleRate = sampleRate;
-    if (!CheckEDIDSupport(ismdAudioInputFormat, channels, suggSampleRate, uiBitsPerSample, bAC3Encode))
-    {
-      channels = 2;
-      format.m_sampleRate = 48000;
-      uiBitsPerSample = 16;
-      format.m_frameSize = 4;
-    }
-    else
+    if (!CheckEDIDSupport(ismdAudioInputFormat, channels, suggSampleRate, bitsPerSample, bAC3Encode))
     {
       if (suggSampleRate != sampleRate)
         format.m_sampleRate = suggSampleRate;
-      format.m_frameSize = uiBitsPerSample/4;
+
+      if (bitsPerSample != uiUsedBitsPerSample)
+      {
+        if (uiUsedBitsPerSample == 24)
+        {
+          format.m_dataFormat = AE_FMT_S24NE4;
+          uiUsedBitsPerSample = bitsPerSample;
+        }
+        else if (uiUsedBitsPerSample == 32)
+        {
+          format.m_dataFormat = AE_FMT_S32LE;
+          uiUsedBitsPerSample = bitsPerSample;
+        }
+        else
+        {
+          format.m_dataFormat = AE_FMT_S16LE;
+          uiUsedBitsPerSample = 16;
+        }
+        
+        uiBitsPerSample = CAEUtil::DataFormatToBits(format.m_dataFormat);
+      }
+      //format.m_frameSize = uiBitsPerSample/4;
     }  
   }
+  else if (bIsSPDIF && ismdAudioInputFormat == ISMD_AUDIO_MEDIA_FMT_DD_PLUS && ISMD_SUCCESS == ismd_audio_codec_available((ismd_audio_format_t) ISMD_AUDIO_ENCODE_FMT_AC3))
+  {
+    bAC3Encode = true;
+  }
+
+  unsigned int outputSampleRate = format.m_sampleRate;
   
-  // for DD+ passthrough, send as PCM passthrough
-  if (!bAC3Encode && bIsHDMI && ismdAudioInputFormat == ISMD_AUDIO_MEDIA_FMT_DD_PLUS)
+  // for raw codecs, send as PCM passthrough
+  if (!bAC3Encode && bIsRawCodec && ismdAudioInputFormat != ISMD_AUDIO_MEDIA_FMT_DD && ismdAudioInputFormat != ISMD_AUDIO_MEDIA_FMT_TRUE_HD)
   {
     format.m_dataFormat = AE_FMT_S16NE;
     ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_PCM;
-    bHDMIPassthrough = true;
+    bHDMIPassthrough = bSPDIFPassthrough = true;
   }
 
   format.m_channelLayout.Reset();
@@ -417,12 +414,32 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   else if (format.m_channelLayout.Count() == 8)
     inputChannelConfig = AUDIO_CHAN_CONFIG_8_CH;
 
+  format.m_frameSize = channels * (CAEUtil::DataFormatToBits(format.m_dataFormat) >> 3);
+
+  // if standard audio keep buffer small so delay is short
+  if (!bIsRawCodec)
+  {
+    // try to keep roughly 5ms buffer using multiples of a 1024 buffer size
+    int numBuffers = ((0.005*((double)(format.m_sampleRate*format.m_frameSize))) / 1024.0) + 0.5;
+    if (numBuffers == 0)
+      numBuffers = 1;
+    else if (numBuffers > 8)
+      numBuffers = 8;
+    m_dwChunkSize = numBuffers*1024;
+  }
+  else
+  {
+    m_dwChunkSize = 8*1024;
+  }
+
+  m_dwBufferLen = m_dwChunkSize;
+
   format.m_frames = m_dwChunkSize/format.m_frameSize;
   format.m_frameSamples = format.m_frames*channels;
   m_frameSize = format.m_frameSize;
 
-  CLog::Log(LOGINFO, "%s ismdAudioInputFormat %d Hardware decoding (non PCM) %d\n", __DEBUG_ID__,
-      ismdAudioInputFormat, bHardwareDecoder);
+  CLog::Log(LOGINFO, "%s ismdAudioInputFormat %d\n", __DEBUG_ID__,
+      ismdAudioInputFormat);
 
   int counter = 0;
   while(counter < 5)
@@ -447,25 +464,15 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
     case ISMD_AUDIO_MEDIA_FMT_DD_PLUS:
       CLog::Log(LOGDEBUG, "%s: Initialize DD Plus detected", __DEBUG_ID__);
 
+      bHDMIPassthrough = true;
       // check special case for DD+->DD using DDCO 
-      if((bAC3Encode || bIsSPDIF) && ISMD_SUCCESS == ismd_audio_codec_available((ismd_audio_format_t) ISMD_AUDIO_ENCODE_FMT_AC3))
+      if(bAC3Encode)
       {
         CLog::Log(LOGDEBUG, "%s: Initialize EAC3->AC3 transcoding is on", __DEBUG_ID__);
-        //bHDMIPassthrough = false;
+        bHDMIPassthrough = false;
         bAC3Encode = true; 
         ConfigureDolbyPlusModes(audioProcessor, m_audioDevice, bAC3Encode);       
       }
-      else
-      {
-        bHDMIPassthrough = true;
-        format.m_dataFormat = AE_FMT_S16NE;
-        result = ismd_audio_input_set_pcm_format(audioProcessor, m_audioDevice, uiBitsPerSample, format.m_sampleRate, inputChannelConfig);
-        if (result != ISMD_SUCCESS)
-        {
-          CLog::Log(LOGERROR, "%s - ismd_audio_input_set_pcm_format: %d", __DEBUG_ID__, result);
-    //    return false;
-        }
-      }      
       break;
     case ISMD_AUDIO_MEDIA_FMT_DTS:
     case ISMD_AUDIO_MEDIA_FMT_DTS_LBR:
@@ -477,10 +484,14 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
     case ISMD_AUDIO_MEDIA_FMT_DTS_HD_HRA:
       CLog::Log(LOGDEBUG, "%s: Initialize DTS-HD detected", __DEBUG_ID__);
       bHDMIPassthrough = true;
+      outputSampleRate = format.m_encodedRate;
+      channels = 2;
       break;
     case ISMD_AUDIO_MEDIA_FMT_TRUE_HD:
       CLog::Log(LOGDEBUG, "%s: Initialize TrueHD detected", __DEBUG_ID__);
       bHDMIPassthrough = true;
+      outputSampleRate = format.m_encodedRate;
+      channels = 2;
       break;
     case ISMD_AUDIO_MEDIA_FMT_PCM:
       result = ismd_audio_input_set_pcm_format(audioProcessor, m_audioDevice, uiBitsPerSample, format.m_sampleRate, inputChannelConfig);
@@ -502,11 +513,9 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
    {
      ismd_audio_output_t OutputSPDIF = g_IntelSMDGlobals.GetSPDIFOutput();
      ismd_audio_output_config_t spdif_output_config;
-     unsigned int samplesPerSec = format.m_sampleRate;
-     unsigned int bitsPerSec = uiBitsPerSample;
 
-     ConfigureAudioOutputParams(spdif_output_config, AE_DEVTYPE_IEC958, bitsPerSec,
-         samplesPerSec, format.m_channelLayout.Count(), ismdAudioInputFormat, bSPDIFPassthrough, bAC3Encode);
+     ConfigureAudioOutputParams(spdif_output_config, AE_DEVTYPE_IEC958, uiUsedBitsPerSample,
+        outputSampleRate, channels, ismdAudioInputFormat, bSPDIFPassthrough, bAC3Encode);
      if(!g_IntelSMDGlobals.ConfigureAudioOutput(OutputSPDIF, spdif_output_config))
      {
        CLog::Log(LOGERROR, "%s ConfigureAudioOutput SPDIF failed %d", __DEBUG_ID__, result);
@@ -521,8 +530,8 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   {
     ismd_audio_output_t OutputHDMI = g_IntelSMDGlobals.GetHDMIOutput();
     ismd_audio_output_config_t hdmi_output_config;
-    ConfigureAudioOutputParams(hdmi_output_config, AE_DEVTYPE_HDMI, uiBitsPerSample,
-      format.m_sampleRate, channels, ismdAudioInputFormat, bHDMIPassthrough, bAC3Encode);
+    ConfigureAudioOutputParams(hdmi_output_config, AE_DEVTYPE_HDMI, uiUsedBitsPerSample,
+      outputSampleRate, channels, ismdAudioInputFormat, bHDMIPassthrough, bAC3Encode);
     if(!g_IntelSMDGlobals.ConfigureAudioOutput(OutputHDMI, hdmi_output_config))
     {
       CLog::Log(LOGERROR, "%s ConfigureAudioOutput HDMI failed %d", __DEBUG_ID__, result);
@@ -598,8 +607,8 @@ bool CAESinkIntelSMD::Initialize(AEAudioFormat &format, std::string &device)
   m_bIsAllocated = true;
 
   // set latency when using passthrough since we are not using a timed audio interface
-  if (bSPDIFPassthrough || bHDMIPassthrough || bAC3Encode)
-    m_latency = 0.45;
+  if (bAC3Encode || ismdAudioInputFormat == ISMD_AUDIO_MEDIA_FMT_DD)
+    m_latency = 0.675;//0.45;
 
   CLog::Log(LOGINFO, "%s done", __DEBUG_ID__);
 
@@ -632,9 +641,9 @@ void CAESinkIntelSMD::Deinitialize()
   m_audioDeviceInput = -1;
 
   // enable outputs
-  //g_IntelSMDGlobals.EnableAudioOutput(g_IntelSMDGlobals.GetHDMIOutput());
-  //g_IntelSMDGlobals.EnableAudioOutput(g_IntelSMDGlobals.GetSPDIFOutput());
-  //g_IntelSMDGlobals.EnableAudioOutput(g_IntelSMDGlobals.GetI2SOutput());
+  g_IntelSMDGlobals.EnableAudioOutput(g_IntelSMDGlobals.GetHDMIOutput());
+  g_IntelSMDGlobals.EnableAudioOutput(g_IntelSMDGlobals.GetSPDIFOutput());
+  g_IntelSMDGlobals.EnableAudioOutput(g_IntelSMDGlobals.GetI2SOutput());
 
   m_bIsAllocated = false;
 
@@ -896,39 +905,6 @@ void CAESinkIntelSMD::Drain()
     Sleep(++milliseconds); // add 1 for the possible truncation used in the conversion to int
 
   CLog::Log(LOGDEBUG, "%s delay:%dms now:%dms", __DEBUG_ID__, milliseconds, (int)(GetCacheTime() * 1000.0));
-
-  /*CSingleLock lock(m_SMDAudioLock);
-  g_IntelSMDGlobals.FlushAudioDevice(m_audioDevice);
-  unsigned int curDepth = 0;
-  unsigned int maxDepth = 0;
-
-  if (!m_bIsAllocated || m_bPause)
-    return;
-
-  if(m_audioDeviceInput == -1)
-  {
-    CLog::Log(LOGERROR, "%s - inputPort == -1", __DEBUG_ID__);
-    return;
-  }
-
-  ismd_result_t smd_ret = g_IntelSMDGlobals.GetPortStatus(m_audioDeviceInput, curDepth, maxDepth);
-  if (smd_ret != ISMD_SUCCESS)
-  {
-    CLog::Log(LOGERROR, "%s - error getting port status: %d", __DEBUG_ID__, smd_ret);
-    return;
-  }
-
-  while (curDepth != 0)
-  {
-    usleep(5000);
-
-    ismd_result_t smd_ret = g_IntelSMDGlobals.GetPortStatus(m_audioDeviceInput, curDepth, maxDepth);
-    if (smd_ret != ISMD_SUCCESS)
-    {
-      CLog::Log(LOGERROR, "%s - error getting port status: %d", __DEBUG_ID__, smd_ret);
-      return;
-    }
-  }*/
 }
 
 //void CAESinkIntelSMD::SetVolume(float nVolume)
@@ -1011,7 +987,7 @@ ismd_audio_format_t CAESinkIntelSMD::GetISMDFormat(AEDataFormat audioMediaFormat
        ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_TRUE_HD;
        break;
      case AE_FMT_DTSHD:
-       ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_DTS_HD;
+       ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_DTS_HD_MA;
        break;
      case AE_FMT_DTS:
        ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_DTS;
@@ -1060,12 +1036,13 @@ void CAESinkIntelSMD::ConfigureAudioOutputParams(ismd_audio_output_config_t& out
         output_config.ch_config = ISMD_AUDIO_5_1;
     //}
 
-    //if(sampleRate == 48000 || sampleRate == 96000 || sampleRate == 32000 || sampleRate == 44100
-    //    || sampleRate == 88200 || sampleRate == 176400 || sampleRate == 192000)
-      //output_config.sample_rate = sampleRate;
-    //if(sampleSize == 16 || sampleSize == 20 || sampleSize == 24 || sampleSize == 32)
-     // output_config.sample_size = sampleSize;
   } // HDMI
+  else if (output == AE_DEVTYPE_IEC958)
+  {
+    // limit output sample rate for SPDIF
+    if (sampleSize > 24)
+      output_config.sample_size = 24;
+  }
 
   CLog::Log(LOGINFO, "%s stream_delay %d sample_size %d \
 ch_config %d out_mode %d sample_rate %d ch_map %d",
@@ -1129,9 +1106,9 @@ void CAESinkIntelSMD::GetEDIDInfo(int &maxChannels, std::vector<AEDataFormat> &f
       {
         aeFormat = AE_FMT_INVALID;
         if (s_edidSampleSizes[z] == 24)
-          aeFormat = AE_FMT_S24LE3;
+          aeFormat = AE_FMT_S24NE4;
         else if (s_edidSampleSizes[z] == 32)
-          aeFormat = AE_FMT_S24LE4;
+          aeFormat = AE_FMT_S32LE;
    
         if (aeFormat != AE_FMT_INVALID)
         {
@@ -1174,14 +1151,8 @@ void CAESinkIntelSMD::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   std::vector<unsigned int>::const_iterator it, itEnd = rates.end();
   for (it = rates.begin(); it != itEnd; ++it)
     info.m_sampleRates.push_back(*it);
-  
-  // support the sizes available on HDMI since SPDIF and analog will already support them
-  std::vector<AEDataFormat>::const_iterator itFormat, itFormatEnd = formats.end();
-  for (itFormat = formats.begin(); itFormat != itFormatEnd; ++itFormat)
-  {
-    if (!AE_IS_RAW(*itFormat))
-      info.m_dataFormats.push_back(*itFormat);
-  }
+
+  info.m_dataFormats.push_back(AE_FMT_S16LE);  
   list.push_back(info);
 
   info.m_channels.Reset();
@@ -1196,6 +1167,7 @@ void CAESinkIntelSMD::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
     info.m_channels += s_chMap[i];
 
   //info.m_sampleRates.push_back(48000);  
+  std::vector<AEDataFormat>::const_iterator itFormat, itFormatEnd = formats.end();
   for (itFormat = formats.begin(); itFormat != itFormatEnd; ++itFormat)
     info.m_dataFormats.push_back(*itFormat);
 
@@ -1220,8 +1192,7 @@ void CAESinkIntelSMD::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   info.m_sampleRates.push_back(96000);
   info.m_sampleRates.push_back(176400);
   info.m_sampleRates.push_back(192000);
-  //info.m_dataFormats.push_back(AE_FMT_S24LE4);
-  info.m_dataFormats.push_back(AE_FMT_S24LE3);
+  info.m_dataFormats.push_back(AE_FMT_S24NE4);
   info.m_dataFormats.push_back(AE_FMT_LPCM);
   info.m_dataFormats.push_back(AE_FMT_S16LE);
   info.m_dataFormats.push_back(AE_FMT_AC3);
@@ -1248,8 +1219,6 @@ void CAESinkIntelSMD::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   info.m_sampleRates.push_back(96000);
   info.m_sampleRates.push_back(176400);
   info.m_sampleRates.push_back(192000);
-  info.m_dataFormats.push_back(AE_FMT_S24LE4);
-  info.m_dataFormats.push_back(AE_FMT_S24LE3);
   info.m_dataFormats.push_back(AE_FMT_S16LE);
   list.push_back(info);
 }
@@ -1438,7 +1407,7 @@ bool CAESinkIntelSMD::CheckEDIDSupport( ismd_audio_format_t &format, int& iChann
     }
   }
 
-  if (!bFormatSupported && format == ISMD_AUDIO_MEDIA_FMT_DD_PLUS)
+  if (!bFormatSupported && format == ISMD_AUDIO_MEDIA_FMT_DD_PLUS && ISMD_SUCCESS == ismd_audio_codec_available((ismd_audio_format_t) ISMD_AUDIO_ENCODE_FMT_AC3))
   {
     bool bAC3Support = false;
     // check for AC3 support
