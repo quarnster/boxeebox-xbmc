@@ -172,7 +172,7 @@ bool CZeroconfAvahi::doForceReAnnounceService(const std::string& fcr_identifier)
   bool ret = false;
   ScopedEventLoopBlock l_block(mp_poll);
   tServiceMap::iterator it = m_services.find(fcr_identifier);
-  if (it != m_services.end())
+  if (it != m_services.end() && it->second->mp_group)
   {
     // to force a reannounce on avahi its enough to reverse the txtrecord list
     it->second->mp_txt = avahi_string_list_reverse(it->second->mp_txt);

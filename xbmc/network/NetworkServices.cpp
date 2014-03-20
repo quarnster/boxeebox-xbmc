@@ -210,6 +210,7 @@ bool CNetworkServices::OnSettingChanging(const CSetting *setting)
       }
 #endif //HAS_ZEROCONF
 
+      // note - airtunesserver has to start before airplay server (ios7 client detection bug)
 #ifdef HAS_AIRTUNES
       if (!StartAirTunesServer())
       {
@@ -402,6 +403,8 @@ void CNetworkServices::Start()
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, g_localizeStrings.Get(33102), g_localizeStrings.Get(33100));
   if (CSettings::Get().GetBool("services.esenabled") && !StartJSONRPCServer())
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, g_localizeStrings.Get(33103), g_localizeStrings.Get(33100));
+  
+  // note - airtunesserver has to start before airplay server (ios7 client detection bug)
   StartAirTunesServer();
   StartAirPlayServer();
   StartRss();
