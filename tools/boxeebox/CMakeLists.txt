@@ -107,31 +107,31 @@ set(libs
 	libsmbclient.so.0
 	libnfs.so.1
 	librtmp.so.1
-	libdbus-1.so
+	libdbus-1.so.3
 	libexpat.so
 	libtdb.so.1
 	libtalloc.so.2
 	libtevent.so.0
 	libmpeg2.so.0	
-	libFLAC.so
+	libFLAC.so.8
 	libFLAC++.so
-	libmodplug.so
-	libogg.so
-	libvorbisfile.so
-	libvorbis.so
-	libvorbisenc.so
+	libmodplug.so.1
+	libogg.so.0
+	libvorbisfile.so.3
+	libvorbis.so.0
+	libvorbisenc.so.2
 	libenca.so.0
 	libass.so.5
 	libao.so
-	libsqlite3.so
+	libsqlite3.so.0
 	libcec.so.2	
-	libfribidi.so
-	libfreetype.so
+	libfribidi.so.0
+	libfreetype.so.6
 	libgcrypt.so.20
-	libcurl.so
+	libcurl.so.4
 	libfontconfig.so
-	libxml2.so
-	libxslt.so
+	libxml2.so.2
+	libxslt.so.1
 	libshairplay.so.0
 	airport.key
 	libplist.so.1
