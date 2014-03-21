@@ -45,7 +45,7 @@
 #endif
 #if defined(HAS_INTEL_SMD)
 #include "Video/DVDVideoCodecSMD.h"
-#include "Audio/DVDAudioCodecSMD.h"
+//#include "Audio/DVDAudioCodecSMD.h"
 #endif
 #if defined(TARGET_ANDROID)
 #include "Video/DVDVideoCodecAndroidMediaCodec.h"
@@ -341,13 +341,13 @@ CDVDAudioCodec* CDVDFactoryCodec::CreateAudioCodec( CDVDStreamInfo &hint)
   CDVDAudioCodec* pCodec = NULL;
   CDVDCodecOptions options;
 
-#if defined(HAS_INTEL_SMD)
-  if (!hint.software)
-  {
-    pCodec = OpenCodec( new CDVDAudioCodecSMD(), hint, options);
-    if( pCodec ) return pCodec;
-  }
-#endif
+//#if defined(HAS_INTEL_SMD)
+//  if (!hint.software)
+//  {
+//    pCodec = OpenCodec( new CDVDAudioCodecSMD(), hint, options);
+//    if( pCodec ) return pCodec;
+//  }
+//#endif
 
   // try passthrough first
   pCodec = OpenCodec( new CDVDAudioCodecPassthrough(), hint, options );
