@@ -45,6 +45,7 @@
 #endif
 #if defined(HAS_INTEL_SMD)
 #include "Video/DVDVideoCodecSMD.h"
+#include "Audio/DVDAudioCodecSMD.h"
 #endif
 #if defined(TARGET_ANDROID)
 #include "Video/DVDVideoCodecAndroidMediaCodec.h"
@@ -312,7 +313,10 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
 #endif
 
 #if defined(HAS_INTEL_SMD)
-     if( (pCodec = OpenCodec(new CDVDVideoCodecSMD(), hint, options)) ) return pCodec;
+     if (!hint.software)
+     {
+       if( (pCodec = OpenCodec(new CDVDVideoCodecSMD(), hint, options)) ) return pCodec;
+     }
 #endif
 
   // try to decide if we want to try halfres decoding
@@ -336,6 +340,14 @@ CDVDAudioCodec* CDVDFactoryCodec::CreateAudioCodec( CDVDStreamInfo &hint)
 {
   CDVDAudioCodec* pCodec = NULL;
   CDVDCodecOptions options;
+
+#if defined(HAS_INTEL_SMD)
+  if (!hint.software)
+  {
+    pCodec = OpenCodec( new CDVDAudioCodecSMD(), hint, options);
+    if( pCodec ) return pCodec;
+  }
+#endif
 
   // try passthrough first
   pCodec = OpenCodec( new CDVDAudioCodecPassthrough(), hint, options );
