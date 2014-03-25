@@ -433,6 +433,7 @@ void CActiveAE::StateMachine(int signal, Protocol *port, Message *msg)
         case CActiveAEControlProtocol::DEVICECHANGE:
           time_t now;
           time(&now);
+          CLog::Log(LOGDEBUG,"CActiveAE - device change event");
           while (!m_extLastDeviceChange.empty() && (now - m_extLastDeviceChange.front() > 0))
           {
             m_extLastDeviceChange.pop();
@@ -444,6 +445,7 @@ void CActiveAE::StateMachine(int signal, Protocol *port, Message *msg)
           }
           m_extLastDeviceChange.push(now);
           UnconfigureSink();
+          m_controlPort.PurgeOut(CActiveAEControlProtocol::DEVICECHANGE);
           m_sink.EnumerateSinkList(true);
           LoadSettings();
           m_extError = false;
@@ -458,7 +460,6 @@ void CActiveAE::StateMachine(int signal, Protocol *port, Message *msg)
             m_state = AE_TOP_ERROR;
             m_extTimeout = 500;
           }
-          m_controlPort.PurgeOut(CActiveAEControlProtocol::DEVICECHANGE);
           return;
         case CActiveAEControlProtocol::PAUSESTREAM:
           CActiveAEStream *stream;
@@ -632,11 +633,13 @@ void CActiveAE::StateMachine(int signal, Protocol *port, Message *msg)
         switch (signal)
         {
         case CActiveAEControlProtocol::DISPLAYRESET:
+          CLog::Log(LOGDEBUG,"CActiveAE - display reset event");
           displayReset = true;
         case CActiveAEControlProtocol::INIT:
           m_extError = false;
           if (!displayReset)
           {
+            m_controlPort.PurgeOut(CActiveAEControlProtocol::DEVICECHANGE);
             m_sink.EnumerateSinkList(true);
             LoadSettings();
           }
@@ -1027,6 +1030,7 @@ void CActiveAE::Configure(AEAudioFormat *desiredFmt)
       outputFormat = inputFormat;
       outputFormat.m_dataFormat = AE_FMT_FLOATP;
       outputFormat.m_sampleRate = 48000;
+      outputFormat.m_encodedRate = 48000;
 
       // setup encoder
       if (!m_encoder)
