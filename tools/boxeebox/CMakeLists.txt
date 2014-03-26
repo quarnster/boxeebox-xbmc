@@ -113,32 +113,29 @@ set(libs
 	libtalloc.so.2
 	libtevent.so.0
 	libmpeg2.so.0	
-	libFLAC.so.8
-	libFLAC++.so
-	libmodplug.so.1
-	libogg.so.0
-	libvorbisfile.so.3
-	libvorbis.so.0
-	libvorbisenc.so.2
+	libFLAC.so
+	libmodplug.so
+	libogg.so
+	libvorbisfile.so
+	libvorbis.so
+	libvorbisenc.so
 	libenca.so.0
 	libass.so.5
 	libao.so
-	libsqlite3.so.0
+	libsqlite3.so
 	libcec.so.2	
-	libfribidi.so.0
-	libfreetype.so.6
+	libfribidi.so
+	libfreetype.so
 	libgcrypt.so.20
-	libcurl.so.4
+	libcurl.so
 	libfontconfig.so
-	libxml2.so.2
-	libxslt.so.1
+	libxml2.so
+	libxslt.so
 	libshairplay.so.0
 	airport.key
 	libplist.so.1
 	libcddb.so.2
 	libbluray.so.1
-	libmad.so.0
-	libsamplerate.so.0
 )
 
 foreach(lib ${libs})
