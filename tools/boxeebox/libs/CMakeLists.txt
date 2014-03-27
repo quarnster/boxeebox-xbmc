@@ -38,6 +38,10 @@ ExternalProject_Add(
     BUILD_COMMAND         ${BASIC_CMAKE}          
     COMMAND               make CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib 
     INSTALL_COMMAND       make install
+    COMMAND               rm -f ${SYSROOT}/usr/local/lib/libplist++.so ${SYSROOT}/usr/local/lib/libplist++.so.1 ${SYSROOT}/usr/local/lib/libplist++.so.1.1.8
+    COMMAND               rm -f ${SYSROOT}/usr/local/lib/libplist.so ${SYSROOT}/usr/local/lib/libplist.so.1
+    COMMAND               mv -f ${SYSROOT}/usr/local/lib/libplist.so.1.1.8 ${SYSROOT}/usr/local/lib/libplist.so.1
+    COMMAND               cp -P ${SYSROOT}/usr/local/lib/libplist.so.1 ${SYSROOT}/usr/lib
     DEPENDS               libxml2
 )
 
