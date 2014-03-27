@@ -136,6 +136,7 @@ set(libs
 	libplist.so.1
 	libcddb.so.2
 	libbluray.so.1
+	libgif.so.6
 )
 
 foreach(lib ${libs})
