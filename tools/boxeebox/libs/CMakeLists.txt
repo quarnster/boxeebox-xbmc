@@ -21,6 +21,15 @@ string(REPLACE "\n" "" HOSTMACHINE ${HOSTMACHINE})
 include(ExternalProject)
 
 ExternalProject_Add(
+    giflib
+    URL                   http://sourceforge.net/projects/giflib/files/giflib-5.x/giflib-5.0.5.tar.gz/download
+	URL_MD5               7c1c9434ce892d57a78c63cf15bbfbcc
+    CONFIGURE_COMMAND     ${BASIC_CONF}
+    BUILD_COMMAND         make
+    INSTALL_COMMAND       make install
+)
+
+ExternalProject_Add(
     libxml2
     URL                   http://xmlsoft.org/sources/libxml2-2.9.1.tar.gz
 	URL_MD5               9c0cfef285d5c4a5c80d00904ddab380
