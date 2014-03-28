@@ -480,8 +480,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
         nfs
-        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.9.3.tar.gz
-        URL_MD5           a07656eeca58ad8d4870da546745628a
+        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.9.2.tar.gz
+        URL_MD5           c2697061fbccf2de610fd3b03f2d1a34
         PATCH_COMMAND     patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
         CONFIGURE_COMMAND ${BASIC_CONF} --disable-examples --disable-tirpc
         BUILD_COMMAND     make
