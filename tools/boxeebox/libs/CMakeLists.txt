@@ -23,7 +23,7 @@ include(ExternalProject)
 ExternalProject_Add(
     giflib
     URL                   http://sourceforge.net/projects/giflib/files/giflib-5.x/giflib-5.0.5.tar.gz/download
-	URL_MD5               7c1c9434ce892d57a78c63cf15bbfbcc
+    URL_MD5               7c1c9434ce892d57a78c63cf15bbfbcc
     CONFIGURE_COMMAND     ${BASIC_CONF}
     BUILD_COMMAND         make
     INSTALL_COMMAND       make install
@@ -32,7 +32,7 @@ ExternalProject_Add(
 ExternalProject_Add(
     libxml2
     URL                   http://xmlsoft.org/sources/libxml2-2.9.1.tar.gz
-	URL_MD5               9c0cfef285d5c4a5c80d00904ddab380
+    URL_MD5               9c0cfef285d5c4a5c80d00904ddab380
     CONFIGURE_COMMAND     ${BASIC_CONF} --without-python --without-iconv
     BUILD_COMMAND         make
     INSTALL_COMMAND       make install
@@ -480,8 +480,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
         nfs
-        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.9.2.tar.gz
-        URL_MD5           c2697061fbccf2de610fd3b03f2d1a34
+        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.9.3.tar.gz
+        URL_MD5           a07656eeca58ad8d4870da546745628a
         PATCH_COMMAND     patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
         CONFIGURE_COMMAND ${BASIC_CONF} --disable-examples --disable-tirpc
         BUILD_COMMAND     make
