@@ -122,7 +122,6 @@ set(libs
 	libenca.so.0
 	libass.so.5
 	libao.so
-	libsqlite3.so
 	libcec.so.2	
 	libfribidi.so
 	libfreetype.so
