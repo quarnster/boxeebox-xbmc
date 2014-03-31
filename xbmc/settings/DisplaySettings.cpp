@@ -280,7 +280,7 @@ bool CDisplaySettings::OnSettingUpdate(CSetting* &setting, const char *oldSettin
   else if (settingId == "videoscreen.vsync")
   {
     // This ifdef is intended to catch everything except Linux and FreeBSD
-#if !defined(TARGET_LINUX) || defined(TARGET_DARWIN) || defined(TARGET_ANDROID) || defined(TARGET_RASPBERRY_PI)
+#if !defined(TARGET_LINUX) || defined(TARGET_DARWIN) || defined(TARGET_ANDROID) || defined(TARGET_RASPBERRY_PI) || defined(TARGET_BOXEE)
     // in the Gotham alphas through beta3 the default value for darwin and android was set incorrectly.
     CSettingInt *vsyncSetting = (CSettingInt*)setting;
     if (vsyncSetting->GetValue() == VSYNC_DRIVER)
@@ -651,7 +651,7 @@ void CDisplaySettings::SettingOptionsScreensFiller(const CSetting *setting, std:
 void CDisplaySettings::SettingOptionsVerticalSyncsFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current)
 {
   // This ifdef is intended to catch everything except Linux and FreeBSD
-#if defined(TARGET_LINUX) && !defined(TARGET_DARWIN) && !defined(TARGET_ANDROID) && !defined(TARGET_RASPBERRY_PI)
+#if defined(TARGET_LINUX) && !defined(TARGET_DARWIN) && !defined(TARGET_ANDROID) && !defined(TARGET_RASPBERRY_PI) && !defined(TARGET_BOXEE)
   list.push_back(make_pair(g_localizeStrings.Get(13101), VSYNC_DRIVER));
 #endif
   list.push_back(make_pair(g_localizeStrings.Get(13106), VSYNC_DISABLED));

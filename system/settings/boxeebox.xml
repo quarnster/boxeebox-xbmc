@@ -8,12 +8,6 @@
           <visible>false</visible>
         </setting>
       </group>
-      <group id="3">
-        <setting id="videoscreen.vsync">
-          <default>2</default> <!-- VSYNC_ALWAYS -->
-          <visible>false</visible>
-        </setting>
-      </group>
     </category>
   </section>
 </settings>
