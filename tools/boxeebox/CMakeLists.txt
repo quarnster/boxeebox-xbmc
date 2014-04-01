@@ -123,11 +123,11 @@ set(libs
 	libass.so.5
 	libao.so
 	libcec.so.2	
-	libfribidi.so
-	libfreetype.so
+	libfribidi.so.0
+	libfreetype.so.6
 	libgcrypt.so.20
 	libcurl.so
-	libfontconfig.so
+	libfontconfig.so.1
 	libxml2.so
 	libxslt.so
 	libshairplay.so.0
