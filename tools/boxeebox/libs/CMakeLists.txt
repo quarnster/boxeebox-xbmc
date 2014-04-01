@@ -21,6 +21,15 @@ string(REPLACE "\n" "" HOSTMACHINE ${HOSTMACHINE})
 include(ExternalProject)
 
 ExternalProject_Add(
+    yasm
+    URL                   http://www.tortall.net/projects/yasm/releases/yasm-1.2.0.tar.gz
+    URL_MD5               4cfc0686cf5350dd1305c4d905eb55a6
+    CONFIGURE_COMMAND     ${BASIC_CONF} --disable-warnerror --disable-profiling --disable-gcov --disable-python --disable-python-bindings --enable-nls --disable-rpath --without-dmalloc --with-gnu-ld --without-libiconv-prefix --without-libintl-prefix --disable-debug
+    BUILD_COMMAND         make
+    INSTALL_COMMAND       make install
+)
+
+ExternalProject_Add(
     giflib
     URL                   http://sourceforge.net/projects/giflib/files/giflib-5.x/giflib-5.0.5.tar.gz/download
     URL_MD5               7c1c9434ce892d57a78c63cf15bbfbcc
@@ -397,10 +406,10 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libass
-	URL 				http://libass.googlecode.com/files/libass-0.10.2.tar.gz
-	URL_MD5 			167b784dacded3a65224925c610084cc
-	CONFIGURE_COMMAND 	${BASIC_CONF}
-	DEPENDS libpng libenca
+	GIT_REPOSITORY   	https://github.com/libass/libass.git
+	PATCH_COMMAND       ./autogen.sh
+	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules
+	DEPENDS libpng libenca fribidi freetype2 fontconfig yasm
 )
 # TODO:Fails due to libSDL
 ExternalProject_Add(
