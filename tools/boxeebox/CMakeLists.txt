@@ -126,7 +126,7 @@ set(libs
 	libfribidi.so.0
 	libfreetype.so.6
 	libgcrypt.so.20
-	libcurl.so
+	libcurl.so.4
 	libfontconfig.so.1
 	libxml2.so
 	libxslt.so
