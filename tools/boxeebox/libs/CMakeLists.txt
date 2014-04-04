@@ -405,8 +405,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libass
-	GIT_REPOSITORY   	https://github.com/libass/libass.git
-	PATCH_COMMAND       ./autogen.sh
+	URL 			http://libass.googlecode.com/files/libass-0.10.2.tar.gz
+	URL_MD5 		167b784dacded3a65224925c610084cc
 	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules
 	DEPENDS libpng libenca fribidi freetype2 fontconfig yasm
 )
