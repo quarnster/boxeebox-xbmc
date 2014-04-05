@@ -438,7 +438,7 @@ bool XBPython::InitializeEngine()
 
 
 // Darwin packs .pyo files, we need PYTHONOPTIMIZE on in order to load them.
-#if defined(TARGET_DARWIN)
+#if defined(TARGET_DARWIN) && !defined(TARGET_BOXEE)
    setenv("PYTHONOPTIMIZE", "1", 1);
 #endif
       // Info about interesting python envvars available
