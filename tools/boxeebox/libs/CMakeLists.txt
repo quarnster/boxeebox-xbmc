@@ -61,15 +61,15 @@ ExternalProject_Add(
 
 ExternalProject_Add(
     libshairplay
-    GIT_REPOSITORY        https://github.com/juhovh/shairplay.git  
-	PATCH_COMMAND         ./autogen.sh
-	    COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/xcode-llmvfix.patch
-        COMMAND           patch -p0 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/01-add_fairplay_handshake.patch
+    GIT_REPOSITORY        https://github.com/juhovh/shairplay.git
+    PATCH_COMMAND         ./autogen.sh
+	COMMAND            patch -p1 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/xcode-llmvfix.patch
+	COMMAND            patch -p0 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/01-add_fairplay_handshake.patch
     CONFIGURE_COMMAND     ${BASIC_CONF} --sysconfdir=/
       BUILD_COMMAND       make
-	    COMMAND           make install
+	COMMAND            make install
     INSTALL_COMMAND       cp -P ${CMAKE_BINARY_DIR}/libshairplay-prefix/src/libshairplay/airport.key ${SYSROOT}/usr/local/lib
-	DEPENDS               libxml2 libplist
+    DEPENDS               libxml2 libplist
 )
 
 ExternalProject_Add(
@@ -79,41 +79,41 @@ ExternalProject_Add(
 	PATCH_COMMAND
 	    COMMAND patch -Np1  < ${CMAKE_SOURCE_DIR}/01-mysqlclient-cross-compile.patch
 	CONFIGURE_COMMAND <SOURCE_DIR>/configure CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib --prefix=${TARGET_DIR} --host=${TARGET} ac_cv_c_stack_direction=-1 ac_cv_sys_restartable_syscalls=yes --localstatedir=/storage/.mysql --with-unix-socket-path=/var/tmp/mysql.socket --with-tcp-port=3306 --enable-static --disable-shared --with-low-memory --enable-largefile --with-big-tables --with-mysqld-user=mysqld --with-extra-charsets=all --with-extra-charsets=complex --with-named-thread-libs=-lc --with-named-curses-libs=-lncurses --enable-thread-safe-client --enable-assembler --enable-local-infile --without-debug --without-docs --without-man --with-readline --without-libwrap --without-server --without-embedded-server --without-libedit --with-query-cache --with-pthread --with-named-thread-libs=-lpthread
-    BUILD_COMMAND make -C include my_config.h
+        BUILD_COMMAND make -C include my_config.h
 	    COMMAND   make -C mysys libmysys.a
-		COMMAND   make -C strings libmystrings.a
-		COMMAND   make -C vio libvio.a
-		COMMAND   make -C dbug libdbug.a
-		COMMAND   make -C regex libregex.a
-		COMMAND   make -C sql gen_lex_hash
-		COMMAND   make -C mysys libmysys.a
-		COMMAND   make -C scripts comp_sql
-		COMMAND   make -C extra comp_err
+	    COMMAND   make -C strings libmystrings.a
+	    COMMAND   make -C vio libvio.a
+	    COMMAND   make -C dbug libdbug.a
+	    COMMAND   make -C regex libregex.a
+	    COMMAND   make -C sql gen_lex_hash
+	    COMMAND   make -C mysys libmysys.a
+	    COMMAND   make -C scripts comp_sql
+	    COMMAND   make -C extra comp_err
 	INSTALL_COMMAND make -C libmysql
 	    COMMAND   make -C libmysql/ install
-		COMMAND   make -C scripts/ install-binSCRIPTS
-		COMMAND   make -C include/ install
-		COMMAND   sudo ln -sf ${SYSROOT}/usr/local/bin/mysql_config /usr/bin/mysql_config
+	    COMMAND   make -C scripts/ install-binSCRIPTS
+	    COMMAND   make -C include/ install
+	    COMMAND   sudo ln -sf ${SYSROOT}/usr/local/bin/mysql_config /usr/bin/mysql_config
 )
 
 ExternalProject_Add(
     libxslt
     URL               ftp://xmlsoft.org/libxslt/libxslt-1.1.28.tar.gz
-	PATCH_COMMAND     sed -ie "s|runtest$$(EXEEXT)||" "libxslt/Makefile.in"
-	   COMMAND        sed -ie "s|testrecurse$$(EXEEXT)||" "libxslt/Makefile.in"
-	   COMMAND        sed -ie "s|xsltproc||" "libxslt/Makefile.in"
-	URL_MD5           9667bf6f9310b957254fdcf6596600b7
+    URL_MD5           9667bf6f9310b957254fdcf6596600b7
+    PATCH_COMMAND     sed -ie "s|runtest$$(EXEEXT)||" "libxslt/Makefile.in"
+	COMMAND        sed -ie "s|testrecurse$$(EXEEXT)||" "libxslt/Makefile.in"
+	COMMAND        sed -ie "s|xsltproc||" "libxslt/Makefile.in"
     CONFIGURE_COMMAND ${BASIC_CONF} --without-python --with-debug --with-debugger --with-mem-debug --with-libxml-prefix=${TARGET_DIR} ac_cv_path_LIBGCRYPT_CONFIG=/usr/local/bin/
     BUILD_COMMAND     make
     INSTALL_COMMAND   make install
-	DEPENDS libxml2
+    DEPENDS libxml2
 )
 
 ExternalProject_Add(
 	libenca
-	URL				https://github.com/nijel/enca/archive/1.15.tar.gz
-	URL_MD5				c976da70571bea8a0ad83e150fcfa8d5
-	CONFIGURE_COMMAND   ${BASIC_CONF}
+	URL		    https://github.com/nijel/enca/archive/1.14.tar.gz
+	URL_MD5		    17e94759a1cb3e12cb8fe9e9439a1c18
+	CONFIGURE_COMMAND   ac_cv_file__dev_random=yes ac_cv_file__dev_urandom=no ac_cv_file__dev_srandom=no ac_cv_file__dev_arandom=no ${BASIC_CONF} --disable-external --without-librecode --disable-rpath --with-gnu-ld
 	BUILD_COMMAND       make
 	BUILD_IN_SOURCE     1
 )
