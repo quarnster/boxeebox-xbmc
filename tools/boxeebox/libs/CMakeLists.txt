@@ -168,8 +168,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	openssl
-	URL 				ftp://ftp.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.0.1e.tar.gz
-	URL_MD5 			66bf6f10f060d561929de96f9dfe5b8c
+	URL 				ftp://ftp.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.0.1g.tar.gz
+	URL_MD5 			de62b43dfcd858e66a74bee1c834e959
 	CONFIGURE_COMMAND 	CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib AR=${TARGET}-ar INSTALL_PREFIX=${TARGET_DIR} <SOURCE_DIR>/Configure linux-elf --openssldir=/
 	DEPENDS zlib
 	BUILD_IN_SOURCE 	1
