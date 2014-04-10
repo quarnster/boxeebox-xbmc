@@ -184,8 +184,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	flex
-	URL 				http://sourceforge.net/projects/flex/files/flex-2.5.37.tar.bz2/download
-	URL_MD5 			c75940e1fc25108f2a7b3ef42abdae06
+	URL 				http://sourceforge.net/projects/flex/files/flex-2.5.39.tar.bz2/download
+	URL_MD5 			77d44c6bb8c0705e0017ab9a84a1502b
 	PATCH_COMMAND 		sed -e "s/AR\ =\ ar/AR\ =\ ${TARGET}-ar/g" -i Makefile.in
 	CONFIGURE_COMMAND	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
@@ -260,8 +260,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	pcre
-	URL 				http://sourceforge.net/projects/pcre/files/pcre/8.33/pcre-8.33.tar.bz2/download
-	URL_MD5 			21514018448ac10062ece7a668fca949
+	URL 				http://sourceforge.net/projects/pcre/files/pcre/8.35/pcre-8.35.tar.bz2/download
+	URL_MD5 			6aacb23986adccd9b3bc626c00979958
 	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-stack-for-recursion --enable-pcre8 --disable-pcre16 --disable-pcre32 --enable-jit --enable-utf --enable-unicode-properties --enable-newline-is-anycrlf
 )
 
@@ -284,16 +284,17 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	freetype2
-	URL 				http://sourceforge.net/projects/freetype/files/freetype2/2.5.0/freetype-2.5.0.1.tar.bz2/download
-	URL_MD5 			c72e9010b1d986d556fc0b2b5fcbf31a
-	CONFIGURE_COMMAND 	${BASIC_CONF} --without-png
+	URL 				http://sourceforge.net/projects/freetype/files/freetype2/2.5.3/freetype-2.5.3.tar.gz/download
+	URL_MD5 			cafe9f210e45360279c730d27bf071e9
+	CONFIGURE_COMMAND 	LIBPNG_CFLAGS=-I${SYSROOT}/usr/local/include LIBPNG_LDFLAGS=-L${SYSROOT}/usr/local/lib ${BASIC_CONF}
 	BUILD_COMMAND		make ${PARALLEL}
+	DEPENDS             libpng
 )
 
 ExternalProject_Add(
 	gdbm
-	URL 				ftp://ftp.gnu.org/gnu/gdbm/gdbm-1.8.3.tar.gz
-	URL_MD5 			1d1b1d5c0245b1c00aff92da751e9aa1
+	URL 				ftp://ftp.gnu.org/gnu/gdbm/gdbm-1.11.tar.gz
+	URL_MD5 			72c832680cf0999caedbe5b265c8c1bd
 	PATCH_COMMAND		sed -e "s,finish_cmds=.*,,g" -i configure
 		COMMAND 		sed -e "s,-o .(BINOWN) -g .(BINGRP),,g" -i Makefile.in
 	CONFIGURE_COMMAND 	${BASIC_CONF}
@@ -301,18 +302,18 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	fribidi
-	URL 				http://fribidi.org/download/fribidi-0.19.5.tar.bz2
-	URL_MD5 			925bafb97afee8a2fc2d0470c072a155
+	URL 				http://fribidi.org/download/fribidi-0.19.6.tar.bz2
+	URL_MD5 			ce93d862344991173dabb609bf93ca1d
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	DEPENDS				freetype2
 )
 
 ExternalProject_Add(
 	fontconfig
-	URL 				http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.10.93.tar.bz2
-	URL_MD5 			0f8e5c63c2d6931626185c02802375a3
-	CONFIGURE_COMMAND 	${BASIC_CONF}
-	DEPENDS fribidi
+	URL 				http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.11.1.tar.gz
+	URL_MD5 			e75e303b4f7756c2b16203a57ac87eba
+	CONFIGURE_COMMAND 	${BASIC_CONF} --with-default-fonts=/usr/share/fonts/liberation --disable-docs --without-add-fonts --disable-dependency-tracking ac_cv_path_FREETYPE_CONFIG=${SYSROOT}/usr/local/bin/freetype-config
+	DEPENDS fribidi freetype2 zlib expat libxml2 
 )
 
 ExternalProject_Add(
@@ -337,8 +338,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	fftw3
-	URL 				http://www.fftw.org/fftw-3.3.3.tar.gz
-	URL_MD5 			0a05ca9c7b3bfddc8278e7c40791a1c2
+	URL 				http://www.fftw.org/fftw-3.3.4.tar.gz
+	URL_MD5 			2edab8c06b24feeb3b82bbb3ebf3e7b3
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 )
@@ -380,8 +381,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	curl
-	URL 				http://curl.haxx.se/download/curl-7.35.0.tar.gz
-	URL_MD5 			f5ae45ed6e86debb721b68392b5ce13c
+	URL 				http://curl.haxx.se/download/curl-7.36.0.tar.gz
+	URL_MD5 			643a7030b27449e76413d501d4b8eb57
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 	DEPENDS openssl zlib bzip2
@@ -389,8 +390,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libao
-	URL 				http://downloads.xiph.org/releases/ao/libao-1.1.0.tar.gz
-	URL_MD5 			2b2508c29bc97e4dc218fa162cf883c8
+	URL 				http://downloads.xiph.org/releases/ao/libao-1.2.0.tar.gz
+	URL_MD5 			9f5dd20d7e95fd0dd72df5353829f097
 	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-pulse
 	BUILD_COMMAND 		make ${PARALLEL}
 )
@@ -425,8 +426,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libmodplug
-	URL 				http://sourceforge.net/projects/modplug-xmms/files/libmodplug/0.8.8.4/libmodplug-0.8.8.4.tar.gz/download
-	URL_MD5 			fddc3c704c5489de2a3cf0fedfec59db
+	URL 				http://sourceforge.net/projects/modplug-xmms/files/libmodplug/0.8.8.5/libmodplug-0.8.8.5.tar.gz/download
+	URL_MD5 			5f30241db109d647781b784e62ddfaa1
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 )
 
@@ -439,8 +440,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libgcrypt
-	URL 				ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.6.0.tar.gz
-	URL_MD5 			d698fe863cb7b351316f840fee972512
+	URL 				ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.6.1.tar.gz
+	URL_MD5 			d155aa1b06fa879175922ba28f6a6509
 	CONFIGURE_COMMAND 	GPG_ERROR_CONFIG=${TARGET_DIR}/bin/gpg-error-config ${BASIC_CONF} --disable-asm
 	DEPENDS libgpg-error
 )
@@ -468,8 +469,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	util-linux
-	URL					https://www.kernel.org/pub/linux/utils/util-linux/v2.23/util-linux-2.23.2.tar.bz2
-	URL_MD5				39a02ad0b3b37824c394f40930b7aa38
+	URL					https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.1.tar.gz
+	URL_MD5				ec45435f9d3d4a2590f4837e6acc9e73
 	CONFIGURE_COMMAND	${BASIC_CONF} --without-ncurses
 	BUILD_COMMAND		""
 	INSTALL_COMMAND		make install-uuidincHEADERS
