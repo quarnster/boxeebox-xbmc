@@ -492,13 +492,13 @@ ExternalProject_Add(
         INSTALL_COMMAND   make install
         BUILD_IN_SOURCE   1
 )
-# TODO:Enable SSL in rtmpdump,fails to compile due to making OpenSSl a shared library. Disabled for now by using 'CRYPTO='
+
 ExternalProject_Add(
         rtmpdump
         GIT_REPOSITORY https://github.com/BurntSushi/rtmpdump-ksv.git
         CONFIGURE_COMMAND ""
-        BUILD_COMMAND make prefix={TARGET_DIR} DESTDIR=${SYSROOT}/usr/local XCFLAGS=-L${TARGET_DIR}/lib  XLDFLAGS=-I${TARGET_DIR}/include CRYPTO= CROSS_COMPILE=${TARGET}-
-        INSTALL_COMMAND make install DESTDIR=${SYSROOT}/usr/local
+        BUILD_COMMAND make DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
+        INSTALL_COMMAND make install DESTDIR=${SYSROOT}
         BUILD_IN_SOURCE 1
         DEPENDS zlib openssl
 )
@@ -508,7 +508,7 @@ ExternalProject_Add(
 	URL 				http://curl.haxx.se/download/curl-7.36.0.tar.gz
 	URL_MD5 			643a7030b27449e76413d501d4b8eb57
 	PATCH_COMMAND       patch -p1 < ${CMAKE_SOURCE_DIR}/curl-01-disable-manual.patch        
-	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn 
+	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn 
 	BUILD_COMMAND 		make
 	DEPENDS openssl zlib bzip2 rtmpdump
 )
