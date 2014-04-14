@@ -170,9 +170,13 @@ ExternalProject_Add(
 	openssl
 	URL 				ftp://ftp.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.0.1g.tar.gz
 	URL_MD5 			de62b43dfcd858e66a74bee1c834e959
-	CONFIGURE_COMMAND 	CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib AR=${TARGET}-ar INSTALL_PREFIX=${TARGET_DIR} <SOURCE_DIR>/Configure linux-elf --openssldir=/
-	DEPENDS zlib
+	PATCH_COMMAND       patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-cflags.patch
+	  COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-nodocs.patch
+	CONFIGURE_COMMAND 	CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib AR=${TARGET}-ar <SOURCE_DIR>/Configure --prefix=${SYSROOT}/usr/local shared --openssldir=/ --libdir=lib linux-elf threads enable-camellia enable-seed enable-tlsext enable-rfc3779 enable-cms enable-md2 no-krb5 no-mdc2 no-rc5 no-ec no-ec2mno-ecdh no-ecdsa no-srp
+	BUILD_COMMAND       make 
+	INSTALL_COMMAND 	make install
 	BUILD_IN_SOURCE 	1
+	DEPENDS zlib
 )
 
 ExternalProject_Add(
@@ -380,15 +384,6 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-	curl
-	URL 				http://curl.haxx.se/download/curl-7.36.0.tar.gz
-	URL_MD5 			643a7030b27449e76413d501d4b8eb57
-	CONFIGURE_COMMAND 	${BASIC_CONF}
-	BUILD_COMMAND 		make ${PARALLEL}
-	DEPENDS openssl zlib bzip2
-)
-
-ExternalProject_Add(
 	libao
 	URL 				http://downloads.xiph.org/releases/ao/libao-1.2.0.tar.gz
 	URL_MD5 			9f5dd20d7e95fd0dd72df5353829f097
@@ -497,15 +492,25 @@ ExternalProject_Add(
         INSTALL_COMMAND   make install
         BUILD_IN_SOURCE   1
 )
-
+# TODO:Enable SSL in rtmpdump,fails to compile due to making OpenSSl a shared library. Disabled for now by using 'CRYPTO='
 ExternalProject_Add(
         rtmpdump
         GIT_REPOSITORY https://github.com/BurntSushi/rtmpdump-ksv.git
         CONFIGURE_COMMAND ""
-        BUILD_COMMAND make DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
-        INSTALL_COMMAND make install DESTDIR=${SYSROOT}
+        BUILD_COMMAND make prefix={TARGET_DIR} DESTDIR=${SYSROOT}/usr/local XCFLAGS=-L${TARGET_DIR}/lib  XLDFLAGS=-I${TARGET_DIR}/include CRYPTO= CROSS_COMPILE=${TARGET}-
+        INSTALL_COMMAND make install DESTDIR=${SYSROOT}/usr/local
         BUILD_IN_SOURCE 1
         DEPENDS zlib openssl
+)
+
+ExternalProject_Add(
+	curl
+	URL 				http://curl.haxx.se/download/curl-7.36.0.tar.gz
+	URL_MD5 			643a7030b27449e76413d501d4b8eb57
+	PATCH_COMMAND       patch -p1 < ${CMAKE_SOURCE_DIR}/curl-01-disable-manual.patch        
+	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn 
+	BUILD_COMMAND 		make
+	DEPENDS openssl zlib bzip2 rtmpdump
 )
 
 ExternalProject_Add(
