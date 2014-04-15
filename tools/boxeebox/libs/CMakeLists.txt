@@ -74,7 +74,7 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	mysql
-	URL 				http://ftp.gwdg.de/pub/misc/mysql/Downloads/MySQL-5.1/mysql-5.1.72.tar.gz
+	URL 				http://mysql.mirrors.pair.com/Downloads/MySQL-5.1/mysql-5.1.72.tar.gz
 	URL_MD5 			ed79cd48e3e7402143548917813cdb80
 	PATCH_COMMAND
 	    COMMAND patch -Np1  < ${CMAKE_SOURCE_DIR}/01-mysqlclient-cross-compile.patch
