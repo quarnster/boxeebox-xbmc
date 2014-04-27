@@ -638,3 +638,12 @@ add_custom_command(OUTPUT ${TARGET_DIR}/lib/libGLESv2.so
 )
 
 add_custom_target(dummylibs ALL DEPENDS DEPENDS ${TARGET_DIR}/lib/libEGL.so ${TARGET_DIR}/lib/libGLESv2.so)
+
+ExternalProject_Add(
+	ffmpeg
+	GIT_REPOSITORY 		   https://github.com/xbmc/FFmpeg.git
+	GIT_TAG                     2.2-Helix-alpha1
+	CONFIGURE_COMMAND 	   <SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --disable-shared --enable-static --disable-programs --enable-gpl
+	BUILD_COMMAND 		   make ${PARALLEL}
+)
+
