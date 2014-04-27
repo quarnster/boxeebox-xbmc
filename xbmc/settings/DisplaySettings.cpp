@@ -660,7 +660,6 @@ void CDisplaySettings::SettingOptionsScreensFiller(const CSetting *setting, std:
 void CDisplaySettings::SettingOptionsVerticalSyncsFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current)
 {
   // This ifdef is intended to catch everything except Linux and FreeBSD
-#if defined(TARGET_POSIX) && !defined(TARGET_DARWIN)
 #if defined(TARGET_LINUX) && !defined(TARGET_DARWIN) && !defined(TARGET_ANDROID) && !defined(TARGET_RASPBERRY_PI) && !defined(TARGET_BOXEE)
   list.push_back(make_pair(g_localizeStrings.Get(13101), VSYNC_DRIVER));
 #endif
