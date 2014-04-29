@@ -194,9 +194,7 @@ final_message="\n$dashes$final_message\n$dashes"
 
 AC_ARG_WITH([ffmpeg],
   [AS_HELP_STRING([--with-ffmpeg],
-  [ffmpeg options: auto (search pkg-config or auto build), force (always build ffmpeg), shared (link dynamically), path_to_ffmpeg [default=auto]])],
   [ffmpeg_dir=$with_ffmpeg],
-  [with_ffmpeg=auto])
 
 AC_ARG_ENABLE([shared-lib],
   [AS_HELP_STRING([--enable-shared-lib],
