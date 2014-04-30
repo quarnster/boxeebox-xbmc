@@ -202,11 +202,14 @@ bool DVDPlayerCodec::Init(const CStdString &strFile, unsigned int filecache)
   }
   else
   {
-    m_pInputStream->Seek(0, SEEK_SET);
-    m_pDemuxer->Reset();
+    if (m_pInputStream->Seek(0, SEEK_POSSIBLE))
+    {
+      m_pInputStream->Seek(0, SEEK_SET);
+      m_pDemuxer->Reset();
+    }
     m_bCanSeek = false;
   }
-
+	
   if (m_Channels == 0) // no data - just guess and hope for the best
     m_Channels = 2;
 
