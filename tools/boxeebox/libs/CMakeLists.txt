@@ -321,16 +321,6 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-	libmad
-	URL 				http://sourceforge.net/projects/mad/files/libmad/0.15.1b/libmad-0.15.1b.tar.gz/download
-	URL_MD5 			1be543bc30c56fb6bea1d7bf6a64e66c
-	PATCH_COMMAND 		sed -e "s/-fforce-mem//g" -i configure
-	    COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmad-patches/01-libmad-pkgconfig.patch
-	    COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmad-patches/02-libmad-thumb-fix.patch
-	CONFIGURE_COMMAND 	${BASIC_CONF}
-)
-
-ExternalProject_Add(
 	libjpeg-turbo
 	URL 				http://sourceforge.net/projects/libjpeg-turbo/files/1.3.0/libjpeg-turbo-1.3.0.tar.gz/download
 	URL_MD5 			e1e65cc711a1ade1322c06ad4a647741
