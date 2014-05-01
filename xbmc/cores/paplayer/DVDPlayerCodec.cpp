@@ -194,22 +194,23 @@ bool DVDPlayerCodec::Init(const CStdString &strFile, unsigned int filecache)
   }
 
   // test if seeking is supported
-  if (Seek(1) != DVD_NOPTS_VALUE)
+  m_bCanSeek = false;
+  if (m_pInputStream->Seek(0, SEEK_POSSIBLE))
   {
-    // rewind stream to beginning
-    Seek(0);
-    m_bCanSeek = true;
-  }
-  else
-  {
-    if (m_pInputStream->Seek(0, SEEK_POSSIBLE))
+    // reset eof flag of stream, with eof set seek returns always success
+    m_pInputStream->Seek(0, SEEK_SET);
+    if (Seek(1) != DVD_NOPTS_VALUE)
+    {
+      // rewind stream to beginning
+      Seek(0);
+    }
+    else
     {
       m_pInputStream->Seek(0, SEEK_SET);
       m_pDemuxer->Reset();
     }
-    m_bCanSeek = false;
   }
-	
+
   if (m_Channels == 0) // no data - just guess and hope for the best
     m_Channels = 2;
 
@@ -273,11 +274,18 @@ void DVDPlayerCodec::DeInit()
 
 int64_t DVDPlayerCodec::Seek(int64_t iSeekTime)
 {
+  // default to announce backwards seek if !m_pPacket to not make FFmpeg
+  // skip mpeg audio frames at playback start
+  bool seekback = true;
+
   if (m_pPacket)
+  {
+    seekback = (DVD_MSEC_TO_TIME(iSeekTime) > m_pPacket->pts);
     CDVDDemuxUtils::FreeDemuxPacket(m_pPacket);
+  }
   m_pPacket = NULL;
 
-  bool ret = m_pDemuxer->SeekTime((int)iSeekTime, false);
+  bool ret = m_pDemuxer->SeekTime((int)iSeekTime, seekback);
   m_pAudioCodec->Reset();
 
   m_decoded = NULL;
