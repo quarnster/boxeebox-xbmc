@@ -31,7 +31,7 @@ sudo apt-get install cmake make gcc texinfo gawk bison flex swig default-jre gpe
 3.  Building
 -----------------------------------------------------------------------------
 #to be performed in bash
-git clone https://github.com/quarnster/boxeebox-xbmc.git -b Gotham
+git clone https://github.com/quasar1/boxeebox-xbmc.git -b Gotham
 cd boxeebox-xbmc
 ./bootstrap
 automake --add-missing
