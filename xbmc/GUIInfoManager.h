@@ -288,7 +288,7 @@ namespace INFO
 #define CONTAINER_STATIC            347
 #define CONTAINER_MOVE_NEXT         348
 #define CONTAINER_SCROLL_NEXT       349
-
+#define CONTAINER_ISUPDATING        350
 #define CONTAINER_HASFILES          351
 #define CONTAINER_HASFOLDERS        352
 #define CONTAINER_STACKED           353
@@ -496,9 +496,9 @@ namespace INFO
 #define CONTROL_GROUP_HAS_FOCUS     29999
 #define CONTROL_HAS_FOCUS           30000
 
-#define VERSION_MAJOR               13
+#define VERSION_MAJOR               14
 #define VERSION_MINOR               0
-#define VERSION_TAG                 ""
+#define VERSION_TAG                 "-ALPHA1"
 
 #define LISTITEM_START              35000
 #define LISTITEM_THUMB              (LISTITEM_START)
@@ -647,6 +647,7 @@ namespace INFO
 #define LISTITEM_VOTES              (LISTITEM_START + 139)
 #define LISTITEM_STEREOSCOPIC_MODE  (LISTITEM_START + 140)
 #define LISTITEM_IS_STEREOSCOPIC    (LISTITEM_START + 141)
+#define LISTITEM_INPROGRESS         (LISTITEM_START + 142)
 
 #define LISTITEM_PROPERTY_START     (LISTITEM_START + 200)
 #define LISTITEM_PROPERTY_END       (LISTITEM_PROPERTY_START + 1000)

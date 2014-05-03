@@ -142,7 +142,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\;..\..\xbmc\;..\..\xbmc\cores\dvdplayer;..\..\xbmc\win32;..\..\lib;..\..\lib\ffmpeg;..\..\lib\ffmpeg\include-xbmc-win32;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32;..\..\lib\win32\pcre;..\..\lib\win32;..\..\xbmc\cores\AudioEngine\;..\..\addons\library.xbmc.gui;..\..\addons\library.xbmc.addon;..\..\addons\library.xbmc.pvr;..\..\addons\library.xbmc.codec;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\;..\..\xbmc\;..\..\xbmc\cores\dvdplayer;..\..\xbmc\win32;..\..\lib;..\..\lib\win32\ffmpeg;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32;..\..\lib\win32\pcre;..\..\lib\win32;..\..\xbmc\cores\AudioEngine\;..\..\addons\library.xbmc.gui;..\..\addons\library.xbmc.addon;..\..\addons\library.xbmc.pvr;..\..\addons\library.xbmc.codec;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_USE_32BIT_TIME_T;HAS_DX;D3D_DEBUG_INFO;__STDC_CONSTANT_MACROS;_SECURE_SCL=0;TAGLIB_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -158,12 +158,13 @@
       <IgnoreSpecificDefaultLibraries>libc;msvcrt;libcmt;msvcrtd;msvcprtd;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
-      <DelayLoadDLLs>libxslt.dll;dnssd.dll;dwmapi.dll;libmicrohttpd-5.dll;ssh.dll;sqlite3.dll;libsamplerate-0.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>libxslt.dll;dnssd.dll;dwmapi.dll;libmicrohttpd-5.dll;ssh.dll;sqlite3.dll;libsamplerate-0.dll;avcodec-55.dll;avfilter-4.dll;avformat-55.dll;avutil-52.dll;postproc-52.dll;swresample-0.dll;swscale-2.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <ProgramDatabaseFile>$(OutDir)XBMC.pdb</ProgramDatabaseFile>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
+      <AdditionalLibraryDirectories>..\..\lib\win32\ffmpeg\.libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>VC90.CRT.x86.manifest;win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -206,7 +207,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>..\..\;..\..\xbmc\;..\..\xbmc\cores\dvdplayer;..\..\xbmc\win32;..\..\lib;..\..\lib\ffmpeg;..\..\lib\ffmpeg\include-xbmc-win32;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32;..\..\lib\win32\pcre;..\..\lib\win32;..\..\xbmc\cores\AudioEngine\;..\..\addons\library.xbmc.gui;..\..\addons\library.xbmc.addon;..\..\addons\library.xbmc.pvr;..\..\addons\library.xbmc.codec;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\;..\..\xbmc\;..\..\xbmc\cores\dvdplayer;..\..\xbmc\win32;..\..\lib;..\..\lib\win32\ffmpeg;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32;..\..\lib\win32\pcre;..\..\lib\win32;..\..\xbmc\cores\AudioEngine\;..\..\addons\library.xbmc.gui;..\..\addons\library.xbmc.addon;..\..\addons\library.xbmc.pvr;..\..\addons\library.xbmc.codec;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_USE_32BIT_TIME_T;HAS_DX;__STDC_CONSTANT_MACROS;TAGLIB_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -220,11 +221,12 @@
       <AdditionalDependencies>D3dx9.lib;DInput8.lib;DSound.lib;winmm.lib;Mpr.lib;Iphlpapi.lib;PowrProf.lib;setupapi.lib;dwmapi.lib;yajl.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)XBMC.exe</OutputFile>
       <IgnoreSpecificDefaultLibraries>libc;msvcrt;libci;msvcprt;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <DelayLoadDLLs>libxslt.dll;dnssd.dll;dwmapi.dll;libmicrohttpd-5.dll;ssh.dll;sqlite3.dll;libsamplerate-0.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>libxslt.dll;dnssd.dll;dwmapi.dll;libmicrohttpd-5.dll;ssh.dll;sqlite3.dll;libsamplerate-0.dll;avcodec-55.dll;avfilter-4.dll;avformat-55.dll;avutil-52.dll;postproc-52.dll;swresample-0.dll;swscale-2.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)XBMC.pdb</ProgramDatabaseFile>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
+      <AdditionalLibraryDirectories>..\..\lib\win32\ffmpeg\.libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>VC90.CRT.x86.manifest;win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -323,6 +325,7 @@
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxPVRClient.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamBluray.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamPVRManager.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\FFmpeg.cpp" />
     <ClCompile Include="..\..\xbmc\cores\paplayer\PCMCodec.cpp" />
     <ClCompile Include="..\..\xbmc\cores\VideoRenderers\OverlayRendererGUI.cpp" />
     <ClCompile Include="..\..\xbmc\cores\VideoRenderers\RenderCapture.cpp" />
@@ -712,6 +715,7 @@
     <ClCompile Include="..\..\xbmc\listproviders\DirectoryProvider.cpp" />
     <ClCompile Include="..\..\xbmc\listproviders\StaticProvider.cpp" />
     <ClCompile Include="..\..\xbmc\MediaSource.cpp" />
+    <ClCompile Include="..\..\xbmc\media\MediaType.cpp" />
     <ClCompile Include="..\..\xbmc\music\Album.cpp" />
     <ClCompile Include="..\..\xbmc\music\Artist.cpp" />
     <ClCompile Include="..\..\xbmc\music\dialogs\GUIDialogMusicInfo.cpp" />
@@ -994,6 +998,7 @@
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecPassthrough.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxBXA.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxCDDA.h" />
+    <ClInclude Include="..\..\xbmc\cores\FFmpeg.h" />
     <ClInclude Include="..\..\xbmc\cores\paplayer\PCMCodec.h" />
     <ClInclude Include="..\..\xbmc\cores\VideoRenderers\OverlayRendererGUI.h" />
     <ClInclude Include="..\..\xbmc\dialogs\GUIDialogKeyboardGeneric.h" />
@@ -1083,6 +1088,7 @@
     <ClInclude Include="..\..\xbmc\interfaces\python\PyContext.h" />
     <ClInclude Include="..\..\xbmc\interfaces\python\PythonInvoker.h" />
     <ClInclude Include="..\..\xbmc\interfaces\python\pythreadstate.h" />
+    <ClInclude Include="..\..\xbmc\media\MediaType.h" />
     <ClInclude Include="..\..\xbmc\music\karaoke\karaokevideobackground.h" />
     <ClInclude Include="..\..\xbmc\network\NetworkServices.h" />
     <ClInclude Include="..\..\xbmc\peripherals\bus\virtual\PeripheralBusCEC.h" />
@@ -1735,7 +1741,6 @@
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\DVDCodecUtils.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\DVDFactoryCodec.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecFFmpeg.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecLibMad.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecLPcm.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecPcm.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Video\DVDVideoCodecCrystalHD.cpp" />
@@ -1790,7 +1795,6 @@
     <ClCompile Include="..\..\xbmc\cores\paplayer\CodecFactory.cpp" />
     <ClCompile Include="..\..\xbmc\cores\paplayer\DVDPlayerCodec.cpp" />
     <ClCompile Include="..\..\xbmc\cores\paplayer\ModplugCodec.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\paplayer\MP3codec.cpp" />
     <ClCompile Include="..\..\xbmc\cores\paplayer\NSFCodec.cpp" />
     <ClCompile Include="..\..\xbmc\cores\paplayer\OggCallback.cpp" />
     <ClCompile Include="..\..\xbmc\cores\paplayer\OGGcodec.cpp" />
@@ -2520,10 +2524,8 @@
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\DVDCodecs.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\DVDCodecUtils.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\DVDFactoryCodec.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DllLibMad.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodec.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecFFmpeg.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecLibMad.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecLPcm.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecPcm.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Video\DllLibMpeg2.h" />
@@ -2606,7 +2608,6 @@
     <ClInclude Include="..\..\xbmc\cores\paplayer\DVDPlayerCodec.h" />
     <ClInclude Include="..\..\xbmc\cores\paplayer\ICodec.h" />
     <ClInclude Include="..\..\xbmc\cores\paplayer\ModplugCodec.h" />
-    <ClInclude Include="..\..\xbmc\cores\paplayer\MP3codec.h" />
     <ClInclude Include="..\..\xbmc\cores\paplayer\NSFCodec.h" />
     <ClInclude Include="..\..\xbmc\cores\paplayer\OggCallback.h" />
     <ClInclude Include="..\..\xbmc\cores\paplayer\OGGcodec.h" />
@@ -2900,6 +2901,94 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="..\..\xbmc\interfaces\json-rpc\schema\license.txt">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\xbmc\interfaces\json-rpc\schema\methods.json">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\xbmc\interfaces\json-rpc\schema\notifications.json">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\xbmc\interfaces\json-rpc\schema\types.json">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\xbmc\interfaces\json-rpc\schema\version.txt">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">Generating ServiceDescription.h for JSON-RPC API</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">CALL ..\BuildDependencies\bin\json-rpc\JsonSchemaBuilder.bat</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug (OpenGL)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release (DirectX)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release (OpenGL)|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
+    </CustomBuild>
     <None Include="..\..\xbmc\interfaces\swig\ControlListAddItemMethods.i" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

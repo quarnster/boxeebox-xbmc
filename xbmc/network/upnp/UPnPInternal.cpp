@@ -244,7 +244,7 @@ PopulateObjectFromTag(CMusicInfoTag&         tag,
     if (object.m_ReferenceID == object.m_ObjectID)
         object.m_ReferenceID = "";
 
-    object.m_MiscInfo.last_time = tag.GetLastPlayed().GetAsDBDate();
+    object.m_MiscInfo.last_time = tag.GetLastPlayed().GetAsW3CDateTime();
     object.m_MiscInfo.play_count = tag.GetPlayCount();
 
     if (resource) resource->m_Duration = tag.GetDuration();
@@ -269,15 +269,15 @@ PopulateObjectFromTag(CVideoInfoTag&         tag,
       *file_path = tag.m_strFileNameAndPath;
 
     if (tag.m_iDbId != -1 ) {
-        if (tag.m_type == "musicvideo") {
+        if (tag.m_type == MediaTypeMusicVideo) {
           object.m_ObjectClass.type = "object.item.videoItem.musicVideoClip";
           object.m_Creator = StringUtils::Join(tag.m_artist, g_advancedSettings.m_videoItemSeparator);
           object.m_Title = tag.m_strTitle;
           object.m_ReferenceID = NPT_String::Format("videodb://musicvideos/titles/%i", tag.m_iDbId);
-        } else if (tag.m_type == "movie") {
+        } else if (tag.m_type == MediaTypeMovie) {
           object.m_ObjectClass.type = "object.item.videoItem.movie";
           object.m_Title = tag.m_strTitle;
-          object.m_Date = NPT_String::FromInteger(tag.m_iYear) + "-01-01";
+          object.m_Date = CDateTime(tag.m_iYear, 0, 0, 0, 0, 0).GetAsW3CDate();
           object.m_ReferenceID = NPT_String::Format("videodb://movies/titles/%i", tag.m_iDbId);
         } else {
           object.m_ObjectClass.type = "object.item.videoItem.videoBroadcast";
@@ -288,7 +288,7 @@ PopulateObjectFromTag(CVideoInfoTag&         tag,
           int season = tag.m_iSeason > 1 ? tag.m_iSeason : 1;
           object.m_Recorded.episode_number = season * 100 + tag.m_iEpisode;
           object.m_Title = object.m_Recorded.series_title + " - " + object.m_Recorded.program_title;
-          object.m_Date = tag.m_firstAired.GetAsDBDate();
+          object.m_Date = tag.m_firstAired.GetAsW3CDate();
           if(tag.m_iSeason != -1)
               object.m_ReferenceID = NPT_String::Format("videodb://tvshows/0/%i", tag.m_iDbId);
         }
@@ -317,7 +317,7 @@ PopulateObjectFromTag(CVideoInfoTag&         tag,
     object.m_Description.long_description = tag.m_strPlot;
     object.m_Description.rating = tag.m_strMPAARating;
     object.m_MiscInfo.last_position = (NPT_UInt32)tag.m_resumePoint.timeInSeconds;
-    object.m_MiscInfo.last_time = tag.m_lastPlayed.GetAsDBDate();
+    object.m_MiscInfo.last_time = tag.m_lastPlayed.GetAsW3CDateTime();
     object.m_MiscInfo.play_count = tag.m_playCount;
     if (resource) {
         resource->m_Duration = tag.GetDuration();
@@ -627,12 +627,18 @@ PopulateTagFromObject(CMusicInfoTag&          tag,
     }
     tag.SetTrackNumber(object.m_MiscInfo.original_track_number);
 
-    for (NPT_List<NPT_String>::Iterator it = object.m_Affiliation.genres.GetFirstItem(); it; it++)
+    for (NPT_List<NPT_String>::Iterator it = object.m_Affiliation.genres.GetFirstItem(); it; it++) {
+        // ignore single "Unknown" genre inserted by Platinum
+        if (it == object.m_Affiliation.genres.GetFirstItem() && object.m_Affiliation.genres.GetItemCount() == 1 &&
+            *it == "Unknown")
+            break;
+
         tag.SetGenre((const char*) *it);
+    }
 
     tag.SetAlbum((const char*)object.m_Affiliation.album);
     CDateTime last;
-    last.SetFromDateString((const char*)object.m_MiscInfo.last_time);
+    last.SetFromW3CDateTime((const char*)object.m_MiscInfo.last_time);
     tag.SetLastPlayed(last);
     tag.SetPlayCount(object.m_MiscInfo.play_count);
     if(resource)
@@ -651,7 +657,7 @@ PopulateTagFromObject(CVideoInfoTag&         tag,
 
     if(!object.m_Recorded.program_title.IsEmpty())
     {
-        tag.m_type = "episode";
+        tag.m_type = MediaTypeEpisode;
         int episode;
         int season;
         int title = object.m_Recorded.program_title.Find(" : ");
@@ -667,24 +673,31 @@ PopulateTagFromObject(CVideoInfoTag&         tag,
         tag.m_firstAired = date;
     }
     else if (!object.m_Recorded.series_title.IsEmpty()) {
-        tag.m_type= "season";
+        tag.m_type= MediaTypeSeason;
         tag.m_strTitle = object.m_Title; // because could be TV show Title, or Season 1 etc
         tag.m_iSeason  = object.m_Recorded.episode_number / 100;
         tag.m_iEpisode = object.m_Recorded.episode_number % 100;
         tag.m_premiered = date;
     }
     else if(object.m_ObjectClass.type == "object.item.videoItem.musicVideoClip") {
-        tag.m_type = "musicvideo";
+        tag.m_type = MediaTypeMusicVideo;
     }
     else
     {
-        tag.m_type         = "movie";
+        tag.m_type         = MediaTypeMovie;
         tag.m_strTitle     = object.m_Title;
         tag.m_premiered    = date;
     }
     tag.m_iYear       = date.GetYear();
     for (unsigned int index = 0; index < object.m_Affiliation.genres.GetItemCount(); index++)
+    {
+      // ignore single "Unknown" genre inserted by Platinum
+      if (index == 0 && object.m_Affiliation.genres.GetItemCount() == 1 &&
+          *object.m_Affiliation.genres.GetItem(index) == "Unknown")
+          break;
+
       tag.m_genre.push_back(object.m_Affiliation.genres.GetItem(index)->GetChars());
+    }
     for (unsigned int index = 0; index < object.m_People.directors.GetItemCount(); index++)
       tag.m_director.push_back(object.m_People.directors.GetItem(index)->name.GetChars());
     for (unsigned int index = 0; index < object.m_People.authors.GetItemCount(); index++)
@@ -693,7 +706,7 @@ PopulateTagFromObject(CVideoInfoTag&         tag,
     tag.m_strPlot     = object.m_Description.long_description;
     tag.m_strMPAARating = object.m_Description.rating;
     tag.m_strShowTitle = object.m_Recorded.series_title;
-    tag.m_lastPlayed.SetFromDateString((const char*)object.m_MiscInfo.last_time);
+    tag.m_lastPlayed.SetFromW3CDateTime((const char*)object.m_MiscInfo.last_time);
     tag.m_playCount = object.m_MiscInfo.play_count;
 
     if(resource)
@@ -812,14 +825,14 @@ CFileItemPtr BuildObject(PLT_MediaObject* entry)
     int played   = pItem->GetVideoInfoTag()->m_playCount;
     const std::string& type = pItem->GetVideoInfoTag()->m_type;
     bool watched(false);
-    if (type == "tvshow" || type == "season") {
+    if (type == MediaTypeTvShow || type == MediaTypeSeason) {
       pItem->SetProperty("totalepisodes", episodes);
       pItem->SetProperty("numepisodes", episodes);
       pItem->SetProperty("watchedepisodes", played);
       pItem->SetProperty("unwatchedepisodes", episodes - played);
       watched = (episodes && played == episodes);
     }
-    else if (type == "episode" || type == "movie")
+    else if (type == MediaTypeEpisode || type == MediaTypeMovie)
       watched = (played > 0);
     pItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, watched);
   }

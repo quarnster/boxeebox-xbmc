@@ -18,6 +18,7 @@ ARCHIVE_TOOL_NATIVE=$(NATIVEPREFIX)/bin/tar
 OS=@platform_os@
 CROSS_COMPILING=@cross_compiling@
 ARCH_DEFINES=@ARCH_DEFINES@
+TARGET_PLATFORM=@use_platform@
 
 HAS_ZLIB=@has_zlib@
 NEED_LIBICONV=@need_libiconv@
@@ -83,4 +84,5 @@ export LIBTOOL=@prefix@/@tool_dir@/bin/libtool
 export LIBTOOLIZE=@prefix@/@tool_dir@/bin/libtoolize
 
 export AUTORECONF=@prefix@/@tool_dir@/bin/autoreconf
+export JSON_BUILDER=$(NATIVEPREFIX)/bin/JsonSchemaBuilder
 

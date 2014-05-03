@@ -313,6 +313,12 @@
     <Filter Include="settings\lib">
       <UniqueIdentifier>{4de9ae04-448d-4ebe-bde5-5ec2a61270c0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="interfaces\json-rpc\schema">
+      <UniqueIdentifier>{e04e47ca-d34d-41e7-aaea-5f18cd802cd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="media">
+      <UniqueIdentifier>{fe89da97-8cd1-4ba3-8ef2-ae4ae5498d59}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\xbmc\win32\pch.cpp">
@@ -397,9 +403,6 @@
       <Filter>cores\dvdplayer\DVDCodecs</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecFFmpeg.cpp">
-      <Filter>cores\dvdplayer\DVDCodecs\Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecLibMad.cpp">
       <Filter>cores\dvdplayer\DVDCodecs\Audio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecLPcm.cpp">
@@ -538,9 +541,6 @@
       <Filter>cores\paplayer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\paplayer\ModplugCodec.cpp">
-      <Filter>cores\paplayer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\cores\paplayer\MP3codec.cpp">
       <Filter>cores\paplayer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\paplayer\NSFCodec.cpp">
@@ -3104,6 +3104,12 @@
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Video\DVDVideoCodec.cpp">
       <Filter>cores\dvdplayer\DVDCodecs\Video</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\xbmc\cores\FFmpeg.cpp">
+      <Filter>cores</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\media\MediaType.cpp">
+      <Filter>media</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\xbmc\win32\pch.h">
@@ -3196,16 +3202,10 @@
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\DVDFactoryCodec.h">
       <Filter>cores\dvdplayer\DVDCodecs</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DllLibMad.h">
-      <Filter>cores\dvdplayer\DVDCodecs\Audio</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodec.h">
       <Filter>cores\dvdplayer\DVDCodecs\Audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecFFmpeg.h">
-      <Filter>cores\dvdplayer\DVDCodecs\Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecLibMad.h">
       <Filter>cores\dvdplayer\DVDCodecs\Audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecLPcm.h">
@@ -3446,9 +3446,6 @@
       <Filter>cores\paplayer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\paplayer\ModplugCodec.h">
-      <Filter>cores\paplayer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\cores\paplayer\MP3codec.h">
       <Filter>cores\paplayer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\paplayer\NSFCodec.h">
@@ -6094,6 +6091,12 @@
     <ClInclude Include="..\..\xbmc\win32\IMMNotificationClient.h">
       <Filter>win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\xbmc\cores\FFmpeg.h">
+      <Filter>cores</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\media\MediaType.h">
+      <Filter>media</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\xbmc\win32\XBMC_PC.rc">
@@ -6117,6 +6120,21 @@
       <Filter>interfaces\swig</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\xbmc\GitRevision.h" />
+    <CustomBuild Include="..\..\xbmc\interfaces\json-rpc\schema\types.json">
+      <Filter>interfaces\json-rpc\schema</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\xbmc\interfaces\json-rpc\schema\notifications.json">
+      <Filter>interfaces\json-rpc\schema</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\xbmc\interfaces\json-rpc\schema\methods.json">
+      <Filter>interfaces\json-rpc\schema</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\xbmc\interfaces\json-rpc\schema\version.txt">
+      <Filter>interfaces\json-rpc\schema</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\xbmc\interfaces\json-rpc\schema\license.txt">
+      <Filter>interfaces\json-rpc\schema</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\xbmc\interfaces\swig\ControlListAddItemMethods.i">

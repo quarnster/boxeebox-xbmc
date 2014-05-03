@@ -55,7 +55,6 @@
 #include "network/WakeOnAccess.h"
 #if defined(TARGET_DARWIN_OSX)
 #include "osx/XBMCHelper.h"
-#include "cores/AudioEngine/Engines/CoreAudio/CoreAudioHardware.h"
 #endif // defined(TARGET_DARWIN_OSX)
 #if defined(TARGET_DARWIN)
 #include "osx/DarwinUtils.h"
@@ -407,6 +406,7 @@ void CSettings::Uninitialize()
   m_settingsManager->UnregisterSettingOptionsFiller("screens");
   m_settingsManager->UnregisterSettingOptionsFiller("stereoscopicmodes");
   m_settingsManager->UnregisterSettingOptionsFiller("preferedstereoscopicviewmodes");
+  m_settingsManager->UnregisterSettingOptionsFiller("monitors");
   m_settingsManager->UnregisterSettingOptionsFiller("shutdownstates");
   m_settingsManager->UnregisterSettingOptionsFiller("startupwindows");
   m_settingsManager->UnregisterSettingOptionsFiller("streamlanguages");
@@ -841,6 +841,7 @@ void CSettings::InitializeOptionFillers()
   m_settingsManager->RegisterSettingOptionsFiller("screens", CDisplaySettings::SettingOptionsScreensFiller);
   m_settingsManager->RegisterSettingOptionsFiller("stereoscopicmodes", CDisplaySettings::SettingOptionsStereoscopicModesFiller);
   m_settingsManager->RegisterSettingOptionsFiller("preferedstereoscopicviewmodes", CDisplaySettings::SettingOptionsPreferredStereoscopicViewModesFiller);
+  m_settingsManager->RegisterSettingOptionsFiller("monitors", CDisplaySettings::SettingOptionsMonitorsFiller);
   m_settingsManager->RegisterSettingOptionsFiller("shutdownstates", CPowerManager::SettingOptionsShutdownStatesFiller);
   m_settingsManager->RegisterSettingOptionsFiller("startupwindows", ADDON::CSkinInfo::SettingOptionsStartupWindowsFiller);
   m_settingsManager->RegisterSettingOptionsFiller("streamlanguages", CLangInfo::SettingOptionsStreamLanguagesFiller);
@@ -873,6 +874,9 @@ void CSettings::InitializeConditions()
 #endif
 #ifdef HAS_GL
   m_settingsManager->AddCondition("has_gl");
+#endif
+#ifdef HAS_GLX
+  m_settingsManager->AddCondition("has_glx");
 #endif
 #ifdef HAS_GLES
   m_settingsManager->AddCondition("has_gles");
@@ -1030,6 +1034,7 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert("videoscreen.resolution");
   settingSet.insert("videoscreen.screenmode");
   settingSet.insert("videoscreen.vsync");
+  settingSet.insert("videoscreen.monitor");
   m_settingsManager->RegisterCallback(&CDisplaySettings::Get(), settingSet);
 
   settingSet.clear();
@@ -1104,12 +1109,6 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.clear();
   settingSet.insert("input.enablemouse");
   m_settingsManager->RegisterCallback(&g_Mouse, settingSet);
-
-#if defined(HAS_GL) && defined(HAVE_X11)
-  settingSet.clear();
-  settingSet.insert("input.enablesystemkeys");
-  m_settingsManager->RegisterCallback(&g_Windowing, settingSet);
-#endif
 
   settingSet.clear();
   settingSet.insert("services.webserver");

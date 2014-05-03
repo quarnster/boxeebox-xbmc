@@ -321,16 +321,6 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-	libmad
-	URL 				http://sourceforge.net/projects/mad/files/libmad/0.15.1b/libmad-0.15.1b.tar.gz/download
-	URL_MD5 			1be543bc30c56fb6bea1d7bf6a64e66c
-	PATCH_COMMAND 		sed -e "s/-fforce-mem//g" -i configure
-	    COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmad-patches/01-libmad-pkgconfig.patch
-	    COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmad-patches/02-libmad-thumb-fix.patch
-	CONFIGURE_COMMAND 	${BASIC_CONF}
-)
-
-ExternalProject_Add(
 	libjpeg-turbo
 	URL 				http://sourceforge.net/projects/libjpeg-turbo/files/1.3.0/libjpeg-turbo-1.3.0.tar.gz/download
 	URL_MD5 			e1e65cc711a1ade1322c06ad4a647741
@@ -638,3 +628,12 @@ add_custom_command(OUTPUT ${TARGET_DIR}/lib/libGLESv2.so
 )
 
 add_custom_target(dummylibs ALL DEPENDS DEPENDS ${TARGET_DIR}/lib/libEGL.so ${TARGET_DIR}/lib/libGLESv2.so)
+
+ExternalProject_Add(
+	ffmpeg
+	GIT_REPOSITORY           https://github.com/xbmc/FFmpeg.git
+	GIT_TAG                  2.2-Helix-alpha1
+	CONFIGURE_COMMAND        <SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --disable-shared --enable-static --disable-programs --enable-gpl --disable-devices --disable-doc --disable-ffplay --disable-ffmpeg --disable-ffprobe --disable-ffserver --enable-runtime-cpudetect --enable-postproc --enable-pthreads --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=ipod --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2 --enable-protocol=http --enable-zlib --extra-version="xbmc-2.2-Helix-alpha1"
+	BUILD_COMMAND            make ${PARALLEL}
+)
+

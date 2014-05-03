@@ -22,12 +22,17 @@
 
 #include "DVDVideoCodec.h"
 #include "DVDResource.h"
-#include "DllAvCodec.h"
-#include "DllAvFormat.h"
-#include "DllAvUtil.h"
-#include "DllSwScale.h"
-#include "DllAvFilter.h"
-#include "DllPostProc.h"
+#include <string>
+#include "utils/StdString.h"
+
+extern "C" {
+#include "libavfilter/avfilter.h"
+#include "libavcodec/avcodec.h"
+#include "libavformat/avformat.h"
+#include "libavutil/avutil.h"
+#include "libswscale/swscale.h"
+#include "libpostproc/postprocess.h"
+}
 
 class CCriticalSection;
 
@@ -98,11 +103,7 @@ protected:
   AVFilterGraph*   m_pFilterGraph;
   AVFilterContext* m_pFilterIn;
   AVFilterContext* m_pFilterOut;
-#if defined(LIBAVFILTER_AVFRAME_BASED)
   AVFrame*         m_pFilterFrame;
-#else
-  AVFilterBufferRef* m_pBufferRef;
-#endif
 
   int m_iPictureWidth;
   int m_iPictureHeight;
@@ -113,15 +114,9 @@ protected:
 
   unsigned int m_uSurfacesCount;
 
-  DllAvCodec m_dllAvCodec;
-  DllAvUtil  m_dllAvUtil;
-  DllSwScale m_dllSwScale;
-  DllAvFilter m_dllAvFilter;
-  DllPostProc m_dllPostProc;
-
   std::string m_name;
   bool              m_bSoftware;
-  bool  m_isHi10p;
+  bool  m_isSWCodec;
   IHardwareDecoder *m_pHardware;
   int m_iLastKeyframe;
   double m_dts;

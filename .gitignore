@@ -185,6 +185,9 @@ lib/cpluff/libtool
 lib/cpluff/po/POTFILES
 lib/cpluff/stamp-h1
 
+# /lib/ffmpeg/
+/lib/ffmpeg/
+
 # /lib/libcec
 /lib/libcec/libcec
 
@@ -358,6 +361,7 @@ lib/cpluff/stamp-h1
 /project/BuildDependencies/scripts/tmp
 /project/BuildDependencies/bin/swig
 /project/BuildDependencies/bin/doxygen
+/project/BuildDependencies/bin/json-rpc
 
 # /project/VS2008Express
 /project/VS2008Express/Debug
@@ -419,9 +423,9 @@ lib/cpluff/stamp-h1
 /system/cdrip/vorbisenc.dll
 
 # /system/players/dvdplayer
-/system/players/dvdplayer/avcodec-54.dll
-/system/players/dvdplayer/avfilter-3.dll
-/system/players/dvdplayer/avformat-54.dll
+/system/players/dvdplayer/avcodec-55.dll
+/system/players/dvdplayer/avfilter-4.dll
+/system/players/dvdplayer/avformat-55.dll
 /system/players/dvdplayer/avutil-52.dll
 /system/players/dvdplayer/freetype6.dll
 /system/players/dvdplayer/libass.dll
@@ -440,7 +444,6 @@ lib/cpluff/stamp-h1
 /system/players/dvdplayer/swscale-2.dll
 /system/players/dvdplayer/libbluray.dll
 /system/players/dvdplayer/libmpeg2-0.dll
-/system/players/dvdplayer/libmad.dll
 
 # /system/players/paplayer
 /system/players/paplayer/libmodplug.dll
@@ -611,6 +614,7 @@ lib/cpluff/stamp-h1
 
 # /xbmc/interfaces/
 /xbmc/interfaces/Makefile
+/xbmc/interfaces/json-rpc/ServiceDescription.h
 /xbmc/interfaces/python/Makefile
 /xbmc/interfaces/python/generated/
 /xbmc/interfaces/python/test/Makefile
@@ -787,30 +791,42 @@ lib/cpluff/stamp-h1
 
 # /lib/libdvd/libdvdcss/
 /lib/libdvd/libdvdcss/.auto/
+/lib/libdvd/libdvdcss/Makefile
 /lib/libdvd/libdvdcss/Makefile.in
 /lib/libdvd/libdvdcss/aclocal.m4
 /lib/libdvd/libdvdcss/autom4te.cache/
+/lib/libdvd/libdvdcss/config.guess
+/lib/libdvd/libdvdcss/config.h
+/lib/libdvd/libdvdcss/config.h.in
 /lib/libdvd/libdvdcss/config.h.in~
-/lib/libdvd/libdvdcss/configure
-/lib/libdvd/libdvdcss/doc/Makefile.in
-/lib/libdvd/libdvdcss/src/Makefile.in
-/lib/libdvd/libdvdcss/src/dvdcss/Makefile.in
-/lib/libdvd/libdvdcss/test/Makefile.in
+/lib/libdvd/libdvdcss/config.status
+/lib/libdvd/libdvdcss/config.sub
 /lib/libdvd/libdvdcss/config.log
 /lib/libdvd/libdvdcss/config.st
-/lib/libdvd/libdvdcss/stamp-h1
-/lib/libdvd/libdvdcss/config.h
-/lib/libdvd/libdvdcss/libtool
+/lib/libdvd/libdvdcss/configure
 /lib/libdvd/libdvdcss/configure.lineno
-/lib/libdvd/libdvdcss/Makefile
-/lib/libdvd/libdvdcss/config.status
-/lib/libdvd/libdvdcss/config.h.in
-/lib/libdvd/libdvdcss/doc/Makefile
+/lib/libdvd/libdvdcss/depcomp
+/lib/libdvd/libdvdcss/install-sh
+/lib/libdvd/libdvdcss/libtool
+/lib/libdvd/libdvdcss/ltmain.sh
+/lib/libdvd/libdvdcss/missing
+/lib/libdvd/libdvdcss/stamp-h1
+/lib/libdvd/libdvdcss/m4/libtool.m4
+/lib/libdvd/libdvdcss/m4/ltoptions.m4
+/lib/libdvd/libdvdcss/m4/ltsugar.m4
+/lib/libdvd/libdvdcss/m4/ltversion.m4
+/lib/libdvd/libdvdcss/m4/lt~obsolete.m4
 /lib/libdvd/libdvdcss/src/d
 /lib/libdvd/libdvdcss/src/Makefile
 /lib/libdvd/libdvdcss/src/dvdcss/Makefile
+/lib/libdvd/libdvdcss/src/.dirstamp
+/lib/libdvd/libdvdcss/src/Makefile.in
+/lib/libdvd/libdvdcss/src/dvdcss/Makefile.in
 /lib/libdvd/libdvdcss/test/Makefile
 /lib/libdvd/libdvdcss/doc/doxygen.cfg
+/lib/libdvd/libdvdcss/doc/Makefile
+/lib/libdvd/libdvdcss/doc/Makefile.in
+/lib/libdvd/libdvdcss/test/Makefile.in
 /lib/libdvd/libdvdcss/test/csstest
 /lib/libdvd/libdvdcss/test/csstest.exe
 
@@ -860,23 +876,6 @@ lib/cpluff/stamp-h1
 /lib/libdvd/libdvdread/INSTALL
 /lib/libdvd/libdvdread/autom4te.cache
 /lib/libdvd/libdvdread/config.h.in~
-
-# /lib/libmad/
-/lib/libmad/config.h
-/lib/libmad/Makefile
-/lib/libmad/config.status
-/lib/libmad/libmad.list
-/lib/libmad/libtool
-/lib/libmad/config.log
-/lib/libmad/stamp-h1
-/lib/libmad/configure.lineno
-/lib/libmad/mad.h
-
-# /lib/libmad/msvc++/
-/lib/libmad/msvc++/Makefile
-/lib/libmad/msvc++/libmad.lib
-/lib/libmad/msvc++/Debug
-/lib/libmad/msvc++/Release
 
 # /lib/libmpeg2/
 /lib/libmpeg2/config.log
@@ -1091,6 +1090,12 @@ lib/cpluff/stamp-h1
 /lib/vgmstream/win32/win32.ncb
 /lib/vgmstream/win32/win32.suo
 /lib/vgmstream/win32/win32.lib
+
+#/lib/win32
+/lib/win32/2.2-Helix-alpha1.tar*
+
+#/lib/win32/ffmpeg
+/lib/win32/ffmpeg/
 
 # /lib/win32/libmms_win32/
 /lib/win32/libmms_win32/msvc++/Debug

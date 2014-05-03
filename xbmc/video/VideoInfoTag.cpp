@@ -477,6 +477,8 @@ void CVideoInfoTag::Serialize(CVariant& value) const
   value["dateadded"] = m_dateAdded.IsValid() ? m_dateAdded.GetAsDBDateTime() : StringUtils::EmptyString;
   value["type"] = m_type;
   value["seasonid"] = m_iIdSeason;
+  value["specialsortseason"] = m_iSpecialSortSeason;
+  value["specialsortepisode"] = m_iSpecialSortEpisode;
 }
 
 void CVideoInfoTag::ToSortable(SortItem& sortable, Field field) const
@@ -546,7 +548,7 @@ void CVideoInfoTag::ToSortable(SortItem& sortable, Field field) const
 
   case FieldInProgress:               sortable[FieldInProgress] = m_resumePoint.IsPartWay(); break;
   case FieldDateAdded:                sortable[FieldDateAdded] = m_dateAdded.IsValid() ? m_dateAdded.GetAsDBDateTime() : StringUtils::EmptyString; break;
-  case FieldMediaType:                sortable[FieldMediaType] = DatabaseUtils::MediaTypeFromString(m_type); break;
+  case FieldMediaType:                sortable[FieldMediaType] = m_type; break;
   default: break;
   }
 }
