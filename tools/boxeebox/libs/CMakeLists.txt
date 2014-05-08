@@ -339,13 +339,6 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-	libsamplerate
-	URL 				http://www.mega-nerd.com/SRC/libsamplerate-0.1.8.tar.gz
-	URL_MD5 			1c7fb25191b4e6e3628d198a66a84f47
-	CONFIGURE_COMMAND 	${BASIC_CONF}
-)
-
-ExternalProject_Add(
 	libogg
 	URL 				http://downloads.xiph.org/releases/ogg/libogg-1.3.1.tar.gz
 	URL_MD5 			ba526cd8f4403a5d351a9efaa8608fbc
