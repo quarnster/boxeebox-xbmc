@@ -457,6 +457,7 @@ CAESinkPULSE::CAESinkPULSE()
   m_Channels = 0;
   m_Stream = NULL;
   m_Context = NULL;
+  m_IsStreamPaused = false;
 }
 
 CAESinkPULSE::~CAESinkPULSE()
@@ -694,6 +695,10 @@ bool CAESinkPULSE::Initialize(AEAudioFormat &format, std::string &device)
   m_format = format;
   format.m_dataFormat = m_passthrough ? AE_FMT_S16NE : format.m_dataFormat;
 
+  CLog::Log(LOGNOTICE, "PulseAudio: Opened device %s in %s mode with Buffersize %u ms",
+                      device.c_str(), m_passthrough ? "passthrough" : "pcm",
+                      (unsigned int) ((m_BufferSize / (float) m_BytesPerSecond) * 1000));
+
   // Cork stream will resume when adding first package
   Pause(true);
   {
@@ -721,6 +726,7 @@ void CAESinkPULSE::Deinitialize()
     pa_stream_disconnect(m_Stream);
     pa_stream_unref(m_Stream);
     m_Stream = NULL;
+    m_IsStreamPaused = false;
   }
 
   if (m_Context)
