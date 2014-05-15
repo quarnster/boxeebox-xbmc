@@ -203,9 +203,9 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-	yayl
+	yajl
 	GIT_REPOSITORY  	https://github.com/lloyd/yajl.git
-	GIT_TAG				2.0.1
+	GIT_TAG				2.1.0
 	CONFIGURE_COMMAND 	${BASIC_CMAKE}
 )
 
