@@ -384,9 +384,10 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libass
-	URL 			http://libass.googlecode.com/files/libass-0.10.2.tar.gz
-	URL_MD5 		167b784dacded3a65224925c610084cc
-	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules
+	GIT_REPOSITORY   	https://github.com/libass/libass.git
+	GIT_TAG 		    0.11.2
+	PATCH_COMMAND       ./autogen.sh
+	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules --enable-asm --disable-test
 	DEPENDS libpng libenca fribidi freetype2 fontconfig yasm
 )
 # TODO:Fails due to libSDL
