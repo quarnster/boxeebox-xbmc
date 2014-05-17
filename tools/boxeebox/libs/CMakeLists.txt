@@ -30,6 +30,21 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
+	libgpg-error
+	URL 				ftp://ftp.gnupg.org/gcrypt/libgpg-error/libgpg-error-1.12.tar.bz2
+	URL_MD5 			8f0eb41a344d19ac2aa9bd101dfb9ce6
+	CONFIGURE_COMMAND 	${BASIC_CONF}
+)
+
+ExternalProject_Add(
+	libgcrypt
+	URL 				ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.6.1.tar.gz
+	URL_MD5 			d155aa1b06fa879175922ba28f6a6509
+	CONFIGURE_COMMAND 	GPG_ERROR_CONFIG=${TARGET_DIR}/bin/gpg-error-config ${BASIC_CONF} --disable-asm
+	DEPENDS libgpg-error
+)
+
+ExternalProject_Add(
     giflib
     URL                   http://sourceforge.net/projects/giflib/files/giflib-5.x/giflib-5.0.5.tar.gz/download
     URL_MD5               7c1c9434ce892d57a78c63cf15bbfbcc
@@ -103,7 +118,7 @@ ExternalProject_Add(
     PATCH_COMMAND     sed -ie "s|runtest$$(EXEEXT)||" "libxslt/Makefile.in"
 	COMMAND        sed -ie "s|testrecurse$$(EXEEXT)||" "libxslt/Makefile.in"
 	COMMAND        sed -ie "s|xsltproc||" "libxslt/Makefile.in"
-    CONFIGURE_COMMAND ${BASIC_CONF} --without-python --with-debug --with-debugger --with-mem-debug --with-libxml-prefix=${TARGET_DIR} ac_cv_path_LIBGCRYPT_CONFIG=/usr/local/bin/
+    CONFIGURE_COMMAND ${BASIC_CONF} --without-python --with-debug --with-debugger --with-mem-debug --without-crypto --with-libxml-prefix=${TARGET_DIR} 
     BUILD_COMMAND     make
     INSTALL_COMMAND   make install
     DEPENDS libxml2
@@ -282,8 +297,8 @@ ExternalProject_Add(
 	URL 				ftp://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.28.tar.gz
 	URL_MD5 			16c3cb66c839c6f929677471401a5b53
 	PATCH_COMMAND 		sed -e "s,#ifdef LINUX,#ifdef LINUX\\n#define SOCK_NONBLOCK	O_NONBLOCK\\n#define EPOLL_CLOEXEC O_CLOEXEC," -e "s,epoll_create1,epoll_create,g" -i src/microhttpd/daemon.c
-	CONFIGURE_COMMAND 	CFLAGS=-I{TARGET_DIR}/include LDFLAGS=-lc ${BASIC_CONF}
-	DEPENDS 			openssl
+	CONFIGURE_COMMAND 	CFLAGS=-I{TARGET_DIR}/include LDFLAGS=-lc ac_cv_path_LIBGCRYPT_CONFIG=${SYSROOT}/usr/local/bin/ <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-curl --disable-https
+	DEPENDS 			libgcrypt
 )
 
 ExternalProject_Add(
@@ -409,21 +424,6 @@ ExternalProject_Add(
 	URL 				http://sourceforge.net/projects/modplug-xmms/files/libmodplug/0.8.8.5/libmodplug-0.8.8.5.tar.gz/download
 	URL_MD5 			5f30241db109d647781b784e62ddfaa1
 	CONFIGURE_COMMAND 	${BASIC_CONF}
-)
-
-ExternalProject_Add(
-	libgpg-error
-	URL 				ftp://ftp.gnupg.org/gcrypt/libgpg-error/libgpg-error-1.12.tar.bz2
-	URL_MD5 			8f0eb41a344d19ac2aa9bd101dfb9ce6
-	CONFIGURE_COMMAND 	${BASIC_CONF}
-)
-
-ExternalProject_Add(
-	libgcrypt
-	URL 				ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.6.1.tar.gz
-	URL_MD5 			d155aa1b06fa879175922ba28f6a6509
-	CONFIGURE_COMMAND 	GPG_ERROR_CONFIG=${TARGET_DIR}/bin/gpg-error-config ${BASIC_CONF} --disable-asm
-	DEPENDS libgpg-error
 )
 
 ExternalProject_Add(

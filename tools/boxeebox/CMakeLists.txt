@@ -97,7 +97,6 @@ set(libs
 	libpng15.so.15	
 	libyajl.so.2
 	libssh.so.4
-	libmicrohttpd.so.10
 	liblzo2.so.2
 	libtiff.so.5
 	libpython2.7.so.1.0
