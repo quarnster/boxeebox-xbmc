@@ -323,7 +323,7 @@ ExternalProject_Add(
 ExternalProject_Add(
 	libjpeg-turbo
 	URL 				http://sourceforge.net/projects/libjpeg-turbo/files/1.3.1/libjpeg-turbo-1.3.1.tar.gz/download
-	URL_MD5 			e1e65cc711a1ade1322c06ad4a647741
+	URL_MD5 			2c3a68129dac443a72815ff5bb374b05
     CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-nls --with-jpeg8 --without-simd
     BUILD_COMMAND       make
     INSTALL_COMMAND     make install
