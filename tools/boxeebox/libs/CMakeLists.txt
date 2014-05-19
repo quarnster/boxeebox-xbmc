@@ -30,6 +30,21 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
+	libgpg-error
+	URL 				ftp://ftp.gnupg.org/gcrypt/libgpg-error/libgpg-error-1.12.tar.bz2
+	URL_MD5 			8f0eb41a344d19ac2aa9bd101dfb9ce6
+	CONFIGURE_COMMAND 	${BASIC_CONF}
+)
+
+ExternalProject_Add(
+	libgcrypt
+	URL 				ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.6.1.tar.gz
+	URL_MD5 			d155aa1b06fa879175922ba28f6a6509
+	CONFIGURE_COMMAND 	GPG_ERROR_CONFIG=${TARGET_DIR}/bin/gpg-error-config ${BASIC_CONF} --disable-asm
+	DEPENDS libgpg-error
+)
+
+ExternalProject_Add(
     giflib
     URL                   http://sourceforge.net/projects/giflib/files/giflib-5.x/giflib-5.0.5.tar.gz/download
     URL_MD5               7c1c9434ce892d57a78c63cf15bbfbcc
@@ -103,7 +118,7 @@ ExternalProject_Add(
     PATCH_COMMAND     sed -ie "s|runtest$$(EXEEXT)||" "libxslt/Makefile.in"
 	COMMAND        sed -ie "s|testrecurse$$(EXEEXT)||" "libxslt/Makefile.in"
 	COMMAND        sed -ie "s|xsltproc||" "libxslt/Makefile.in"
-    CONFIGURE_COMMAND ${BASIC_CONF} --without-python --with-debug --with-debugger --with-mem-debug --with-libxml-prefix=${TARGET_DIR} ac_cv_path_LIBGCRYPT_CONFIG=/usr/local/bin/
+    CONFIGURE_COMMAND ${BASIC_CONF} --without-python --with-debug --with-debugger --with-mem-debug --without-crypto --with-libxml-prefix=${TARGET_DIR} 
     BUILD_COMMAND     make
     INSTALL_COMMAND   make install
     DEPENDS libxml2
@@ -203,9 +218,9 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-	yayl
+	yajl
 	GIT_REPOSITORY  	https://github.com/lloyd/yajl.git
-	GIT_TAG				2.0.1
+	GIT_TAG				2.1.0
 	CONFIGURE_COMMAND 	${BASIC_CMAKE}
 )
 
@@ -282,8 +297,8 @@ ExternalProject_Add(
 	URL 				ftp://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.28.tar.gz
 	URL_MD5 			16c3cb66c839c6f929677471401a5b53
 	PATCH_COMMAND 		sed -e "s,#ifdef LINUX,#ifdef LINUX\\n#define SOCK_NONBLOCK	O_NONBLOCK\\n#define EPOLL_CLOEXEC O_CLOEXEC," -e "s,epoll_create1,epoll_create,g" -i src/microhttpd/daemon.c
-	CONFIGURE_COMMAND 	CFLAGS=-I{TARGET_DIR}/include LDFLAGS=-lc ${BASIC_CONF}
-	DEPENDS 			openssl
+	CONFIGURE_COMMAND 	CFLAGS=-I{TARGET_DIR}/include LDFLAGS=-lc ac_cv_path_LIBGCRYPT_CONFIG=${SYSROOT}/usr/local/bin/ <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-curl --disable-https
+	DEPENDS 			libgcrypt
 )
 
 ExternalProject_Add(
@@ -322,12 +337,13 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libjpeg-turbo
-	URL 				http://sourceforge.net/projects/libjpeg-turbo/files/1.3.0/libjpeg-turbo-1.3.0.tar.gz/download
-	URL_MD5 			e1e65cc711a1ade1322c06ad4a647741
+	URL 				http://sourceforge.net/projects/libjpeg-turbo/files/1.3.1/libjpeg-turbo-1.3.1.tar.gz/download
+	URL_MD5 			2c3a68129dac443a72815ff5bb374b05
     CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-nls --with-jpeg8 --without-simd
     BUILD_COMMAND       make
     INSTALL_COMMAND     make install
     BUILD_IN_SOURCE     1
+	DEPENDS             yasm
 )
 
 ExternalProject_Add(
@@ -336,13 +352,6 @@ ExternalProject_Add(
 	URL_MD5 			2edab8c06b24feeb3b82bbb3ebf3e7b3
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
-)
-
-ExternalProject_Add(
-	libsamplerate
-	URL 				http://www.mega-nerd.com/SRC/libsamplerate-0.1.8.tar.gz
-	URL_MD5 			1c7fb25191b4e6e3628d198a66a84f47
-	CONFIGURE_COMMAND 	${BASIC_CONF}
 )
 
 ExternalProject_Add(
@@ -391,9 +400,10 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libass
-	URL 			http://libass.googlecode.com/files/libass-0.10.2.tar.gz
-	URL_MD5 		167b784dacded3a65224925c610084cc
-	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules
+	GIT_REPOSITORY   	https://github.com/libass/libass.git
+	GIT_TAG 		    0.11.2
+	PATCH_COMMAND       ./autogen.sh
+	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules --enable-asm --disable-test
 	DEPENDS libpng libenca fribidi freetype2 fontconfig yasm
 )
 # TODO:Fails due to libSDL
@@ -414,21 +424,6 @@ ExternalProject_Add(
 	URL 				http://sourceforge.net/projects/modplug-xmms/files/libmodplug/0.8.8.5/libmodplug-0.8.8.5.tar.gz/download
 	URL_MD5 			5f30241db109d647781b784e62ddfaa1
 	CONFIGURE_COMMAND 	${BASIC_CONF}
-)
-
-ExternalProject_Add(
-	libgpg-error
-	URL 				ftp://ftp.gnupg.org/gcrypt/libgpg-error/libgpg-error-1.12.tar.bz2
-	URL_MD5 			8f0eb41a344d19ac2aa9bd101dfb9ce6
-	CONFIGURE_COMMAND 	${BASIC_CONF}
-)
-
-ExternalProject_Add(
-	libgcrypt
-	URL 				ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.6.1.tar.gz
-	URL_MD5 			d155aa1b06fa879175922ba28f6a6509
-	CONFIGURE_COMMAND 	GPG_ERROR_CONFIG=${TARGET_DIR}/bin/gpg-error-config ${BASIC_CONF} --disable-asm
-	DEPENDS libgpg-error
 )
 
 ExternalProject_Add(
@@ -632,8 +627,9 @@ add_custom_target(dummylibs ALL DEPENDS DEPENDS ${TARGET_DIR}/lib/libEGL.so ${TA
 ExternalProject_Add(
 	ffmpeg
 	GIT_REPOSITORY           https://github.com/xbmc/FFmpeg.git
-	GIT_TAG                  2.2-Helix-alpha1
-	CONFIGURE_COMMAND        <SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --disable-shared --enable-static --disable-programs --enable-gpl --disable-devices --disable-doc --disable-ffplay --disable-ffmpeg --disable-ffprobe --disable-ffserver --enable-runtime-cpudetect --enable-postproc --enable-pthreads --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=ipod --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2 --enable-protocol=http --enable-zlib --extra-version="xbmc-2.2-Helix-alpha1"
+	GIT_TAG                  2.2-Helix-alpha1.1
+	CONFIGURE_COMMAND        <SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --disable-shared --enable-static --disable-programs --enable-gpl --disable-devices --disable-doc --disable-ffplay --disable-ffmpeg --disable-ffprobe --disable-ffserver --enable-runtime-cpudetect --enable-postproc --enable-pthreads --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=ipod --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2 --enable-protocol=http --enable-zlib --extra-version="xbmc-2.2-Helix-alpha1.1"
 	BUILD_COMMAND            make ${PARALLEL}
+	DEPENDS                  yasm
 )
 

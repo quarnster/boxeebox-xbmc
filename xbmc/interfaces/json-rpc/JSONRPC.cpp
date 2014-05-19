@@ -215,12 +215,12 @@ JSONRPC_STATUS CJSONRPC::SetConfiguration(const CStdString &method, ITransportLa
 JSONRPC_STATUS CJSONRPC::NotifyAll(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant& parameterObject, CVariant &result)
 {
   if (parameterObject["data"].isNull())
-    CAnnouncementManager::Announce(Other, parameterObject["sender"].asString().c_str(),  
+    CAnnouncementManager::Get().Announce(Other, parameterObject["sender"].asString().c_str(),  
       parameterObject["message"].asString().c_str());
   else
   {
     CVariant data = parameterObject["data"];
-    CAnnouncementManager::Announce(Other, parameterObject["sender"].asString().c_str(),  
+    CAnnouncementManager::Get().Announce(Other, parameterObject["sender"].asString().c_str(),  
       parameterObject["message"].asString().c_str(), data);
   }
 
@@ -232,7 +232,7 @@ CStdString CJSONRPC::MethodCall(const CStdString &inputString, ITransportLayer *
   CVariant inputroot, outputroot, result;
   bool hasResponse = false;
 
-  if(g_advancedSettings.m_extraLogLevels & LOGJSONRPC)
+  if(g_advancedSettings.CanLogComponent(LOGJSONRPC))
     CLog::Log(LOGDEBUG, "JSONRPC: Incoming request: %s", inputString.c_str());
 
   inputroot = CJSONVariantParser::Parse((unsigned char *)inputString.c_str(), inputString.length());

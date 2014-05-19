@@ -50,7 +50,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\lib\libUPnP;..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_LIB;NPT_CONFIG_ENABLE_LOGGING;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -63,7 +63,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\lib\libUPnP;..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;NPT_CONFIG_ENABLE_LOGGING;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -80,7 +80,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\lib\libUPnP;..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_LIB;NPT_CONFIG_ENABLE_LOGGING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -91,9 +91,17 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\lib\libUPnP\Neptune\Source\Core\NptAutomaticCleaner.h" />
+    <ClInclude Include="..\..\lib\libUPnP\Neptune\Source\Core\NptAutoreleasePool.h" />
+    <ClInclude Include="..\..\lib\libUPnP\Neptune\Source\Core\NptCrypto.h" />
+    <ClInclude Include="..\..\lib\libUPnP\Neptune\Source\Core\NptDigest.h" />
     <ClInclude Include="..\..\lib\libUPnP\Neptune\Source\Core\NptHash.h" />
+    <ClInclude Include="..\..\lib\libUPnP\Neptune\Source\Core\NptJson.h" />
+    <ClInclude Include="..\..\lib\libUPnP\Neptune\Source\Core\NptTlsDefaultTrustAnchorsBase.h" />
+    <ClInclude Include="..\..\lib\libUPnP\Neptune\Source\Core\NptTlsDefaultTrustAnchorsExtended.h" />
     <ClInclude Include="..\..\lib\libUPnP\Platinum\Source\Core\PltMimeType.h" />
     <ClInclude Include="..\..\lib\libUPnP\Platinum\Source\Core\PltProtocolInfo.h" />
+    <ClInclude Include="..\..\lib\libUPnP\Platinum\Source\Core\PltUtilities.h" />
     <ClInclude Include="..\..\lib\libUPnP\Platinum\Source\Platinum\Platinum.h" />
     <ClInclude Include="..\..\lib\libUPnP\Platinum\Source\Core\PltAction.h" />
     <ClInclude Include="..\..\lib\libUPnP\Platinum\Source\Core\PltArgument.h" />
@@ -177,9 +185,16 @@
     <ClInclude Include="..\..\lib\libUPnP\Neptune\Source\System\Win32\NptWin32Threads.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\lib\libUPnP\Neptune\Source\Core\NptAutomaticCleaner.cpp" />
+    <ClCompile Include="..\..\lib\libUPnP\Neptune\Source\Core\NptCrypto.cpp" />
+    <ClCompile Include="..\..\lib\libUPnP\Neptune\Source\Core\NptDigest.cpp" />
     <ClCompile Include="..\..\lib\libUPnP\Neptune\Source\Core\NptHash.cpp" />
+    <ClCompile Include="..\..\lib\libUPnP\Neptune\Source\Core\NptJson.cpp" />
+    <ClCompile Include="..\..\lib\libUPnP\Neptune\Source\System\Bsd\NptBsdResolver.cpp" />
     <ClCompile Include="..\..\lib\libUPnP\Neptune\Source\System\Posix\NptPosixEnvironment.cpp" />
-    <ClCompile Include="..\..\lib\libUPnP\Neptune\Source\System\Posix\NptPosixTime.cpp" />
+    <ClCompile Include="..\..\lib\libUPnP\Neptune\Source\System\Win32\NptWin32Console.cpp" />
+    <ClCompile Include="..\..\lib\libUPnP\Neptune\Source\System\Win32\NptWin32SerialPort.cpp" />
+    <ClCompile Include="..\..\lib\libUPnP\Neptune\Source\System\Win32\NptWin32Time.cpp" />
     <ClCompile Include="..\..\lib\libUPnP\Platinum\Source\Core\PltAction.cpp" />
     <ClCompile Include="..\..\lib\libUPnP\Platinum\Source\Core\PltArgument.cpp" />
     <ClCompile Include="..\..\lib\libUPnP\Platinum\Source\Core\PltConstants.cpp" />

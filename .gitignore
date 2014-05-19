@@ -9,6 +9,8 @@ testMain
 *.cproject
 .classpath
 *.sublime-*
+# KDevelop 4
+*.kdev4
 
 # generated files etc
 config.cache
@@ -117,12 +119,14 @@ config.log
 /addons/visualization.milkdrop/MilkDrop_win32dx.vis
 /addons/visualization.projectm/projectM.vis
 /addons/visualization.projectm/resources/presets.zip
+/addons/visualization.vortex/Vortex_win32dx.vis
 /addons/visualization.waveform/Waveform.vis
 /addons/visualization.waveform/Waveform_win32.vis
 /addons/visualization.itunes/iTunes.mvis
 /addons/visualization.fishbmc/fishbmc.vis
 /addons/script.module.pil/
 /addons/pvr.*
+/addons/xbmc.json/addon.xml
 
 # /lib/
 /lib/Makefile
@@ -349,6 +353,9 @@ lib/cpluff/stamp-h1
 /project/Win32BuildSetup/languages.nsi
 /project/Win32BuildSetup/skins.nsi
 /project/Win32BuildSetup/xbmc-pvr-addons.nsi
+/project/Win32BuildSetup/bgprocess
+/project/Win32BuildSetup/makeclean
+/project/Win32BuildSetup/noprompt
 /project/Win32BuildSetup/BUILD_WIN32/
 /project/Win32BuildSetup/dependencies
 
@@ -409,7 +416,6 @@ lib/cpluff/stamp-h1
 /system/hdhomerun.dll
 /system/ssh.dll
 /system/sqlite3.dll
-/system/libsamplerate-0.dll
 /system/libnfs.dll
 /system/dnssd.dll
 /system/libcec.dll
@@ -723,6 +729,7 @@ lib/cpluff/stamp-h1
 /xbmc/visualizations/Milkdrop/Debug
 /xbmc/visualizations/Milkdrop/Release
 /xbmc/visualizations/OpenGLSpectrum/Makefile
+/xbmc/visualizations/Vortex/Vortex/Vortex.vcxproj.metaproj
 /xbmc/visualizations/WaveForm/Makefile
 /xbmc/visualizations/WaveForm/Debug (DirectX)
 /xbmc/visualizations/WaveForm/Release (DirectX)
@@ -1093,6 +1100,7 @@ lib/cpluff/stamp-h1
 
 #/lib/win32
 /lib/win32/2.2-Helix-alpha1.tar*
+/lib/win32/pax_global_header
 
 #/lib/win32/ffmpeg
 /lib/win32/ffmpeg/
@@ -1100,10 +1108,6 @@ lib/cpluff/stamp-h1
 # /lib/win32/libmms_win32/
 /lib/win32/libmms_win32/msvc++/Debug
 /lib/win32/libmms_win32/msvc++/Release
-
-# /lib/win32/libsamplerate
-/lib/win32/libsamplerate/libsamplerate_win32/Debug
-/lib/win32/libsamplerate/libsamplerate_win32/Release
 
 # /lib/win32/sqlite
 /lib/win32/sqlite/libsqlite_win32/Debug

@@ -274,7 +274,7 @@ bool CPVRClient::CheckAPIVersion(void)
 
   if (!IsCompatibleAPIVersion(minVersion, m_apiVersion))
   {
-    CLog::Log(LOGERROR, "PVR - Add-on '%s' is using an incompatible API version. XBMC minimum API version = '%s', add-on API version '%s'", Name().c_str(), minVersion.c_str(), m_apiVersion.c_str());
+    CLog::Log(LOGERROR, "PVR - Add-on '%s' is using an incompatible API version. XBMC minimum API version = '%s', add-on API version '%s'", Name().c_str(), minVersion.asString().c_str(), m_apiVersion.asString().c_str());
     return false;
   }
 
@@ -286,7 +286,7 @@ bool CPVRClient::CheckAPIVersion(void)
 
   if (!IsCompatibleGUIAPIVersion(minVersion, guiVersion))
   {
-    CLog::Log(LOGERROR, "PVR - Add-on '%s' is using an incompatible GUI API version. XBMC minimum GUI API version = '%s', add-on GUI API version '%s'", Name().c_str(), minVersion.c_str(), guiVersion.c_str());
+    CLog::Log(LOGERROR, "PVR - Add-on '%s' is using an incompatible GUI API version. XBMC minimum GUI API version = '%s', add-on GUI API version '%s'", Name().c_str(), minVersion.asString().c_str(), guiVersion.asString().c_str());
     return false;
   }
 
@@ -409,7 +409,7 @@ void CPVRClient::CallMenuHook(const PVR_MENUHOOK &hook, const CFileItem *item)
       if (item->IsEPG())
       {
         hookData.cat = PVR_MENUHOOK_EPG;
-        hookData.data.iEpgUid = item->GetEPGInfoTag()->BroadcastId();
+        hookData.data.iEpgUid = item->GetEPGInfoTag()->UniqueBroadcastID();
       }
       else if (item->IsPVRChannel())
       {

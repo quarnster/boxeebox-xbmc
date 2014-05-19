@@ -30,6 +30,7 @@
 #include "profiles/ProfilesManager.h"
 #include "settings/lib/Setting.h"
 #include "settings/Settings.h"
+#include "settings/SettingUtils.h"
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
 #include "utils/URIUtils.h"
@@ -50,6 +51,7 @@ using namespace std;
 CAdvancedSettings::CAdvancedSettings()
 {
   m_initialized = false;
+  m_fullScreen = false;
 }
 
 void CAdvancedSettings::OnSettingsLoaded()
@@ -74,6 +76,9 @@ void CAdvancedSettings::OnSettingsLoaded()
     CLog::Log(LOGNOTICE, "Disabled debug logging due to GUI setting. Level %d.", m_logLevel);
   }
   CLog::SetLogLevel(m_logLevel);
+
+  m_extraLogEnabled = CSettings::Get().GetBool("debug.extralogging");
+  setExtraLogLevel(CSettings::Get().GetList("debug.setextraloglevel"));
 }
 
 void CAdvancedSettings::OnSettingsUnloaded()
@@ -89,21 +94,10 @@ void CAdvancedSettings::OnSettingChanged(const CSetting *setting)
   const std::string &settingId = setting->GetId();
   if (settingId == "debug.showloginfo")
     SetDebugMode(((CSettingBool*)setting)->GetValue());
-}
-
-void CAdvancedSettings::OnSettingAction(const CSetting *setting)
-{
-  if (setting == NULL)
-    return;
-
-  const std::string settingId = setting->GetId();
-  if (settingId == "debug.setextraloglevel")
-  {
-    AddonPtr addon;
-    CAddonMgr::Get().GetAddon("xbmc.debug", addon);
-    CGUIDialogAddonSettings::ShowAndGetInput(addon, true);
-    SetExtraLogsFromAddon(addon.get());
-  }
+  else if (settingId == "debug.extralogging")
+    m_extraLogEnabled = static_cast<const CSettingBool*>(setting)->GetValue();
+  else if (settingId == "debug.setextraloglevel")
+    setExtraLogLevel(CSettingUtils::GetList(static_cast<const CSettingList*>(setting)));
 }
 
 void CAdvancedSettings::Initialize()
@@ -178,6 +172,8 @@ void CAdvancedSettings::Initialize()
   m_stagefrightConfig.useMPEG2codec = -1;
   m_stagefrightConfig.useSwRenderer = false;
   m_stagefrightConfig.useInputDTS = false;
+
+  m_mediacodecForceSoftwareRendring = false;
 
   m_videoDefaultLatency = 0.0;
   m_videoDisableSWMultithreading = false;
@@ -325,7 +321,7 @@ void CAdvancedSettings::Initialize()
   m_curlDisableIPV6 = false;      //Certain hardware/OS combinations have trouble
                                   //with ipv6.
 
-  m_fullScreen = m_startFullScreen = false;
+  m_startFullScreen = false;
   m_showExitButton = false;
   m_splashImage = true;
 
@@ -384,7 +380,6 @@ void CAdvancedSettings::Initialize()
   m_guiVisualizeDirtyRegions = false;
   m_guiAlgorithmDirtyRegions = 3;
   m_guiDirtyRegionNoFlipTimeout = 0;
-  m_logEnableAirtunes = false;
   m_airTunesPort = 36666;
   m_airPlayPort = 36667;
 
@@ -406,6 +401,7 @@ void CAdvancedSettings::Initialize()
   m_stereoscopicregex_tab = "[-. _]h?tab[-. _]";
 
   m_logLevelHint = m_logLevel = LOG_LEVEL_NORMAL;
+  m_extraLogEnabled = false;
   m_extraLogLevels = 0;
 
   #if defined(TARGET_DARWIN)
@@ -614,6 +610,8 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
       XMLUtils::GetBoolean(pStagefrightElem,"useswrenderer",m_stagefrightConfig.useSwRenderer);
       XMLUtils::GetBoolean(pStagefrightElem,"useinputdts",m_stagefrightConfig.useInputDTS);
     }
+
+    XMLUtils::GetBoolean(pElement,"mediacodecforcesoftwarerendering",m_mediacodecForceSoftwareRendring);
 
     TiXmlElement* pAdjustRefreshrate = pElement->FirstChildElement("adjustrefreshrate");
     if (pAdjustRefreshrate)
@@ -853,7 +851,6 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
   XMLUtils::GetString(pRootElement, "cddbaddress", m_cddbAddress);
 
   //airtunes + airplay
-  XMLUtils::GetBoolean(pRootElement, "enableairtunesdebuglog", m_logEnableAirtunes);
   XMLUtils::GetInt(pRootElement,     "airtunesport", m_airTunesPort);
   XMLUtils::GetInt(pRootElement,     "airplayport", m_airPlayPort);  
 
@@ -1362,14 +1359,48 @@ void CAdvancedSettings::SetDebugMode(bool debug)
   }
 }
 
-void CAdvancedSettings::SetExtraLogsFromAddon(ADDON::IAddon* addon)
+bool CAdvancedSettings::CanLogComponent(int component) const
+{
+  if (!m_extraLogEnabled || component <= 0)
+    return false;
+
+  return ((m_extraLogLevels & component) == component);
+}
+
+void CAdvancedSettings::SettingOptionsLoggingComponentsFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data)
+{
+  list.push_back(std::make_pair(g_localizeStrings.Get(669), LOGSAMBA));
+  list.push_back(std::make_pair(g_localizeStrings.Get(670), LOGCURL));
+  list.push_back(std::make_pair(g_localizeStrings.Get(671), LOGCMYTH));
+  list.push_back(std::make_pair(g_localizeStrings.Get(672), LOGFFMPEG));
+#ifdef HAS_LIBRTMP
+  list.push_back(std::make_pair(g_localizeStrings.Get(673), LOGRTMP));
+#endif
+#ifdef HAS_DBUS
+  list.push_back(std::make_pair(g_localizeStrings.Get(674), LOGDBUS));
+#endif
+#ifdef HAS_JSONRPC
+  list.push_back(std::make_pair(g_localizeStrings.Get(675), LOGJSONRPC));
+#endif
+#ifdef HAS_ALSA
+  list.push_back(std::make_pair(g_localizeStrings.Get(676), LOGAUDIO));
+#endif
+#ifdef HAS_AIRTUNES
+  list.push_back(std::make_pair(g_localizeStrings.Get(677), LOGAIRTUNES));
+#endif
+#ifdef HAS_UPNP
+  list.push_back(std::make_pair(g_localizeStrings.Get(678), LOGUPNP));
+#endif
+}
+
+void CAdvancedSettings::setExtraLogLevel(const std::vector<CVariant> &components)
 {
   m_extraLogLevels = 0;
-  for (int i=LOGMASKBIT;i<31;++i)
+  for (std::vector<CVariant>::const_iterator it = components.begin(); it != components.end(); ++it)
   {
-    CStdString str = StringUtils::Format("bit%i", i-LOGMASKBIT+1);
-    if (addon->GetSetting(str) == "true")
-      m_extraLogLevels |= (1 << i);
+    if (!it->isInteger())
+      continue;
+
+    m_extraLogLevels |= static_cast<int>(it->asInteger());
   }
-  CLog::SetExtraLogLevels(m_extraLogLevels);
 }

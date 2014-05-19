@@ -81,13 +81,13 @@ CPVRManager::CPVRManager(void) :
     m_managerState(ManagerStateStopped),
     m_bOpenPVRWindow(false)
 {
-  CAnnouncementManager::AddAnnouncer(this);
+  CAnnouncementManager::Get().AddAnnouncer(this);
   ResetProperties();
 }
 
 CPVRManager::~CPVRManager(void)
 {
-  CAnnouncementManager::RemoveAnnouncer(this);
+  CAnnouncementManager::Get().RemoveAnnouncer(this);
   Stop();
   CLog::Log(LOGDEBUG,"PVRManager - destroyed");
 }
@@ -144,7 +144,7 @@ void CPVRManager::OnSettingAction(const CSetting *setting)
   if (settingId == "pvrmenu.searchicons")
   {
     if (IsStarted())
-      SearchMissingChannelIcons();
+      TriggerSearchMissingChannelIcons();
   }
   else if (settingId == "pvrmanager.resetdb")
   {
@@ -449,13 +449,18 @@ void CPVRManager::Process(void)
   bool bRestart(false);
   while (IsStarted() && m_addons && m_addons->HasConnectedClients() && !bRestart)
   {
-    /* continue last watched channel after first startup */
+    /* first startup */
     if (m_bFirstStart)
     {
       {
         CSingleLock lock(m_critSection);
         m_bFirstStart = false;
       }
+      
+      /* start job to search for missing channel icons */
+      TriggerSearchMissingChannelIcons();
+      
+      /* continue last watched channel */
       ContinueLastChannel();
     }
     /* execute the next pending jobs if there are any */
@@ -663,7 +668,9 @@ bool CPVRManager::ContinueLastChannel(void)
   if (channel && channel->HasPVRChannelInfoTag())
   {
     CLog::Log(LOGNOTICE, "PVRManager - %s - continue playback on channel '%s'", __FUNCTION__, channel->GetPVRChannelInfoTag()->ChannelName().c_str());
-    return StartPlayback(channel->GetPVRChannelInfoTag(), (CSettings::Get().GetInt("pvrplayback.startlast") == START_LAST_CHANNEL_MIN));
+    SetPlayingGroup(m_channelGroups->GetLastPlayedGroup());
+    StartPlayback(channel->GetPVRChannelInfoTag(), (CSettings::Get().GetInt("pvrplayback.startlast") == START_LAST_CHANNEL_MIN));
+    return true;
   }
 
   return false;
@@ -973,7 +980,8 @@ bool CPVRManager::OpenLiveStream(const CFileItem &channel)
     return bReturn;
 
   CPVRChannelPtr playingChannel;
-  bool bPersistChannel(false);
+  CPVRChannelGroupPtr group;
+  bool bPersistChanges(false);
   if ((bReturn = m_addons->OpenStream(*channel.GetPVRChannelInfoTag(), false)) != false)
   {
     CSingleLock lock(m_critSection);
@@ -983,18 +991,28 @@ bool CPVRManager::OpenLiveStream(const CFileItem &channel)
 
     if (m_addons->GetPlayingChannel(playingChannel))
     {
-      /* store current time in iLastWatched */
       time_t tNow;
       CDateTime::GetCurrentDateTime().GetAsTime(tNow);
-      playingChannel->SetLastWatched(tNow);
-      bPersistChannel = true;
 
-      m_channelGroups->SetLastPlayedGroup(GetPlayingGroup(playingChannel->IsRadio()));
+      /* update last watched timestamp for channel */
+      playingChannel->SetLastWatched(tNow);
+
+      /* update last watched timestamp for group */
+      group = g_PVRManager.GetPlayingGroup(playingChannel->IsRadio());
+      group->SetLastWatched(tNow);
+
+      /* update last played group */
+      m_channelGroups->SetLastPlayedGroup(group);
+
+      bPersistChanges = true;
     }
   }
 
-  if (bPersistChannel)
+  if (bPersistChanges)
+  {
     playingChannel->Persist();
+    group->Persist();
+  }
 
   return bReturn;
 }
@@ -1016,28 +1034,39 @@ bool CPVRManager::OpenRecordedStream(const CPVRRecording &tag)
 void CPVRManager::CloseStream(void)
 {
   CPVRChannelPtr channel;
-  bool bPersistChannel(false);
+  CPVRChannelGroupPtr group;
+  bool bPersistChanges(false);
 
   {
     CSingleLock lock(m_critSection);
 
     if (m_addons->GetPlayingChannel(channel))
     {
-      /* store current time in iLastWatched */
       time_t tNow;
       CDateTime::GetCurrentDateTime().GetAsTime(tNow);
-      channel->SetLastWatched(tNow);
-      bPersistChannel = true;
 
-      m_channelGroups->SetLastPlayedGroup(GetPlayingGroup(channel->IsRadio()));
+      /* update last watched timestamp for channel */
+      channel->SetLastWatched(tNow);
+
+      /* update last watched timestamp for group */
+      group = g_PVRManager.GetPlayingGroup(channel->IsRadio());
+      group->SetLastWatched(tNow);
+
+      /* update last played group */
+      m_channelGroups->SetLastPlayedGroup(group);
+
+      bPersistChanges = true;
     }
 
     m_addons->CloseStream();
     SAFE_DELETE(m_currentFile);
   }
 
-  if (bPersistChannel)
+  if (bPersistChanges)
+  {
     channel->Persist();
+    group->Persist();
+  }
 }
 
 void CPVRManager::UpdateCurrentFile(void)
@@ -1455,6 +1484,11 @@ void CPVRManager::TriggerSaveChannelSettings(void)
   QueueJob(new CPVRChannelSettingsSaveJob());
 }
 
+void CPVRManager::TriggerSearchMissingChannelIcons(void)
+{
+  CJobManager::GetInstance().AddJob(new CPVRSearchMissingChannelIconsJob(), NULL);
+}
+
 void CPVRManager::ExecutePendingJobs(void)
 {
   CSingleLock lock(m_critSectionTriggers);
@@ -1510,7 +1544,7 @@ bool CPVRManager::OnAction(const CAction &action)
   return false;
 }
 
-void CPVRManager::SettingOptionsPvrStartLastChannelFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current)
+void CPVRManager::SettingOptionsPvrStartLastChannelFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data)
 {
   list.push_back(make_pair(g_localizeStrings.Get(106),   PVR::START_LAST_CHANNEL_OFF));
   list.push_back(make_pair(g_localizeStrings.Get(19190), PVR::START_LAST_CHANNEL_MIN));
@@ -1524,7 +1558,7 @@ bool CPVRChannelSwitchJob::DoWork(void)
   {
     CVariant data(CVariant::VariantTypeObject);
     data["end"] = true;
-    ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::Player, "xbmc", "OnStop", CFileItemPtr(m_previous), data);
+    ANNOUNCEMENT::CAnnouncementManager::Get().Announce(ANNOUNCEMENT::Player, "xbmc", "OnStop", CFileItemPtr(m_previous), data);
   }
 
   // announce OnPlay if the switch was successful
@@ -1533,9 +1567,15 @@ bool CPVRChannelSwitchJob::DoWork(void)
     CVariant param;
     param["player"]["speed"] = 1;
     param["player"]["playerid"] = g_playlistPlayer.GetCurrentPlaylist();
-    ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::Player, "xbmc", "OnPlay", CFileItemPtr(new CFileItem(*m_next)), param);
+    ANNOUNCEMENT::CAnnouncementManager::Get().Announce(ANNOUNCEMENT::Player, "xbmc", "OnPlay", CFileItemPtr(new CFileItem(*m_next)), param);
   }
 
+  return true;
+}
+
+bool CPVRSearchMissingChannelIconsJob::DoWork(void)
+{
+  g_PVRManager.SearchMissingChannelIcons();
   return true;
 }
 

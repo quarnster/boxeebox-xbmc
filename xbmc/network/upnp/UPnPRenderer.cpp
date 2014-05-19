@@ -17,11 +17,12 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
+#include <Platinum/Source/Platinum/Platinum.h>
+
 #include "network/Network.h"
 #include "UPnPRenderer.h"
 #include "UPnP.h"
 #include "UPnPInternal.h"
-#include "Platinum.h"
 #include "Application.h"
 #include "ApplicationMessenger.h"
 #include "FileItem.h"
@@ -42,6 +43,8 @@
 #include "playlists/PlayList.h"
 #include "GUIUserMessages.h"
 
+NPT_SET_LOCAL_LOGGER("xbmc.upnp.renderer")
+
 using namespace ANNOUNCEMENT;
 
 namespace UPNP
@@ -54,7 +57,7 @@ CUPnPRenderer::CUPnPRenderer(const char* friendly_name, bool show_ip /*= false*/
                              const char* uuid /*= NULL*/, unsigned int port /*= 0*/)
     : PLT_MediaRenderer(friendly_name, show_ip, uuid, port)
 {
-    CAnnouncementManager::AddAnnouncer(this);
+    CAnnouncementManager::Get().AddAnnouncer(this);
 }
 
 /*----------------------------------------------------------------------
@@ -62,7 +65,7 @@ CUPnPRenderer::CUPnPRenderer(const char* friendly_name, bool show_ip /*= false*/
 +---------------------------------------------------------------------*/
 CUPnPRenderer::~CUPnPRenderer()
 {
-    CAnnouncementManager::RemoveAnnouncer(this);
+    CAnnouncementManager::Get().RemoveAnnouncer(this);
 }
 
 /*----------------------------------------------------------------------

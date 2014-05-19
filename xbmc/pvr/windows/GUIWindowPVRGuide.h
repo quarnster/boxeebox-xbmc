@@ -48,6 +48,7 @@ namespace PVR
     CGUIWindowPVRGuide(CGUIWindowPVR *parent);
     virtual ~CGUIWindowPVRGuide(void);
 
+    bool OnAction(const CAction &action);
     void GetContextButtons(int itemNumber, CContextButtons &buttons) const;
     bool OnContextButton(int itemNumber, CONTEXT_BUTTON button);
     void UpdateData(bool bUpdateSelectedFile = true);
@@ -56,7 +57,7 @@ namespace PVR
     void UnregisterObservers(void);
     void ResetObservers(void);
     
-    static void SettingOptionsEpgGuideViewFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
+    static void SettingOptionsEpgGuideViewFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
 
   private:
     bool SelectPlayingFile(void);

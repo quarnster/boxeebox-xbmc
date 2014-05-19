@@ -18,12 +18,13 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
+#include <math.h>
+
 #include "Addon.h"
 #include "DllAddon.h"
 #include "AddonManager.h"
 #include "AddonStatusHandler.h"
 #include "AddonCallbacks.h"
-#include "settings/dialogs/GUIDialogSettings.h"
 #include "utils/URIUtils.h"
 #include "filesystem/File.h"
 #include "filesystem/SpecialProtocol.h"
@@ -244,7 +245,7 @@ ADDON_STATUS CAddonDll<TheDll, TheStruct, TheProps>::Create()
     if (status == ADDON_STATUS_OK)
     {
       m_initialized = true;
-      ANNOUNCEMENT::CAnnouncementManager::AddAnnouncer(this);
+      ANNOUNCEMENT::CAnnouncementManager::Get().AddAnnouncer(this);
     }
     else if ((status == ADDON_STATUS_NEED_SETTINGS) || (status == ADDON_STATUS_NEED_SAVEDSETTINGS))
     {
@@ -310,7 +311,7 @@ void CAddonDll<TheDll, TheStruct, TheProps>::Stop()
 template<class TheDll, typename TheStruct, typename TheProps>
 void CAddonDll<TheDll, TheStruct, TheProps>::Destroy()
 {
-  ANNOUNCEMENT::CAnnouncementManager::RemoveAnnouncer(this);
+  ANNOUNCEMENT::CAnnouncementManager::Get().RemoveAnnouncer(this);
 
   /* Unload library file */
   try

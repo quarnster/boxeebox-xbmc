@@ -86,12 +86,12 @@ void CGUIDialogNumeric::OnInitWindow()
     break;
   }
 
-  const CGUILabelControl *control = (const CGUILabelControl *)GetControl(CONTROL_HEADING_LABEL);
+  const CGUIControl *control = GetControl(CONTROL_HEADING_LABEL);
   if (control != NULL)
     data["title"] = control->GetDescription();
 
   data["value"] = GetOutput();
-  ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::Input, "xbmc", "OnInputRequested", data);
+  ANNOUNCEMENT::CAnnouncementManager::Get().Announce(ANNOUNCEMENT::Input, "xbmc", "OnInputRequested", data);
 }
 
 void CGUIDialogNumeric::OnDeinitWindow(int nextWindowID)
@@ -99,7 +99,7 @@ void CGUIDialogNumeric::OnDeinitWindow(int nextWindowID)
   // call base class
   CGUIDialog::OnDeinitWindow(nextWindowID);
 
-  ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::Input, "xbmc", "OnInputFinished");
+  ANNOUNCEMENT::CAnnouncementManager::Get().Announce(ANNOUNCEMENT::Input, "xbmc", "OnInputFinished");
 }
 
 bool CGUIDialogNumeric::OnAction(const CAction &action)
@@ -235,10 +235,20 @@ void CGUIDialogNumeric::OnBackSpace()
   }
   else if (m_mode == INPUT_TIME_SECONDS)
   {
-    if (m_block == 0) // minutes
-      m_datetime.wMinute /= 10;
+    if (m_block == 0)
+      m_datetime.wHour /= 10;
+    else if (m_block == 1)
+    {
+      if (m_datetime.wMinute)
+        m_datetime.wMinute /= 10;
+      else
+      {
+        m_block = 0;
+        m_dirty = false;
+      }
+    }
     else if (m_datetime.wSecond)
-      m_datetime.wSecond /= 10;
+      m_datetime.wMinute /= 10;
     else
     {
       m_block = 0;
@@ -310,7 +320,7 @@ void CGUIDialogNumeric::FrameMove()
   }
   else if (m_mode == INPUT_TIME_SECONDS)
   { // format up the time
-    strLabel = StringUtils::Format("%2d:%02d", m_datetime.wMinute, m_datetime.wSecond);
+    strLabel = StringUtils::Format("%2d:%02d:%02d", m_datetime.wHour, m_datetime.wMinute, m_datetime.wSecond);
     start = m_block * 3;
     end = m_block * 3 + 2;
   }
@@ -328,7 +338,7 @@ void CGUIDialogNumeric::FrameMove()
     start = m_block * 4;
     end = m_block * 4 + 3;
   }
-  CGUILabelControl *pLabel = (CGUILabelControl *)GetControl(CONTROL_INPUT_LABEL);
+  CGUILabelControl *pLabel = dynamic_cast<CGUILabelControl *>(GetControl(CONTROL_INPUT_LABEL));
   if (pLabel)
   {
     pLabel->SetLabel(strLabel);
@@ -397,19 +407,40 @@ void CGUIDialogNumeric::OnNumber(unsigned int num)
   }
   else if (m_mode == INPUT_TIME_SECONDS)
   {
-    if (m_block == 0) // minute
+    if (m_block == 0) // hour
+    {
+      if (m_dirty) // have input the first digit
+      {
+        m_datetime.wHour *= 10;
+        m_datetime.wHour += num;
+        m_block = 1;             // move to minutes - allows up to 99 hours
+        m_dirty = false;
+      }
+      else  // this is the first digit
+      {
+        m_datetime.wHour = num;
+        m_dirty = true;
+      }
+    }
+    else if (m_block == 1) // minute
     {
       if (m_dirty) // have input the first digit
       {
         m_datetime.wMinute *= 10;
         m_datetime.wMinute += num;
-        m_block = 1;             // move to seconds - allows up to 99 minutes
+        m_block = 2;             // move to seconds - allows up to 99 minutes
         m_dirty = false;
       }
       else  // this is the first digit
       {
         m_datetime.wMinute = num;
-        m_dirty = true;
+        if (num > 5)
+        {
+          m_block = 2;           // move to seconds
+          m_dirty = false;
+        }
+        else
+          m_dirty = true;
       }
     }
     else  // seconds
@@ -418,7 +449,7 @@ void CGUIDialogNumeric::OnNumber(unsigned int num)
       {
         m_datetime.wSecond *= 10;
         m_datetime.wSecond += num;
-        m_block = 0;             // move to minutes
+        m_block = 0;             // move to hours
         m_dirty = false;
       }
       else  // this is the first digit
@@ -426,7 +457,7 @@ void CGUIDialogNumeric::OnNumber(unsigned int num)
         m_datetime.wSecond = num;
         if (num > 5)
         {
-          m_block = 0;           // move to minutes
+          m_block = 0;           // move to hours
           m_dirty = false;
         }
         else
@@ -518,7 +549,7 @@ void CGUIDialogNumeric::SetMode(INPUT_MODE mode, void *initial)
   if (m_mode == INPUT_TIME || m_mode == INPUT_TIME_SECONDS || m_mode == INPUT_DATE)
   {
     m_datetime = *(SYSTEMTIME *)initial;
-    m_lastblock = (m_mode == INPUT_DATE) ? 2 : 1;
+    m_lastblock = (m_mode != INPUT_TIME) ? 2 : 1;
   }
   else if (m_mode == INPUT_IP_ADDRESS)
   {
@@ -608,7 +639,7 @@ CStdString CGUIDialogNumeric::GetOutput() const
   else if (m_mode == INPUT_TIME)
     output = StringUtils::Format("%i:%02i", m_datetime.wHour, m_datetime.wMinute);
   else if (m_mode == INPUT_TIME_SECONDS)
-    output = StringUtils::Format("%i:%02i", m_datetime.wMinute, m_datetime.wSecond);
+    output = StringUtils::Format("%i:%02i:%02i", m_datetime.wHour, m_datetime.wMinute, m_datetime.wSecond);
   else
     GetOutput(&output);
   return output;

@@ -202,6 +202,7 @@ struct CVdpauProcessedPicture
   DVDVideoPicture DVDPic;
   VdpVideoSurface videoSurface;
   VdpOutputSurface outputSurface;
+  bool crop;
 };
 
 /**
@@ -608,6 +609,7 @@ protected:
   } m_DisplayState;
   CCriticalSection m_DecoderSection;
   CEvent         m_DisplayEvent;
+  int m_ErrorCount;
 
   ThreadIdentifier m_decoderThread;
   bool          m_vdpauConfigured;

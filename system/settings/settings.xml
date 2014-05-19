@@ -949,6 +949,11 @@
           <default>true</default>
           <control type="toggle" />
         </setting>
+        <setting id="subtitles.downloadfirst" type="boolean" label="24126" help="24127">
+          <level>2</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
         <setting id="subtitles.tv" type="addon" label="24116" help="24117">
           <level>1</level>
           <default>-</default>
@@ -2770,12 +2775,25 @@
           <default>false</default>
           <control type="toggle" />
         </setting>
-        <setting id="debug.setextraloglevel" type="action" parent="debug.showloginfo" label="666" help="36394">
+        <setting id="debug.extralogging" type="boolean" label="666" help="36394">
           <level>1</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="debug.setextraloglevel" type="list[integer]" parent="debug.extralogging" label="668" help="36510">
+          <level>1</level>
+          <default></default>
+          <constraints>
+            <options>loggingcomponents</options>
+            <delimiter>,</delimiter>
+          </constraints>
           <dependencies>
-            <dependency type="enable" setting="debug.showloginfo">true</dependency>
+            <dependency type="enable" setting="debug.extralogging" operator="is">true</dependency>
           </dependencies>
-          <control type="button" format="action" />
+          <control type="list" format="string">
+            <multiselect>true</multiselect>
+            <hidevalue>true</hidevalue>
+          </control>
         </setting>
         <setting id="debug.screenshotpath" type="path" label="20004" help="36393">
           <level>1</level>
