@@ -69,7 +69,9 @@ protected:
 
   CRect                     m_src_rect;
   CRect                     m_dst_rect;
-
+  RENDER_STEREO_MODE        m_video_stereo_mode;
+  RENDER_STEREO_MODE        m_display_stereo_mode;
+  bool                      m_StereoInvert;
   uint32_t                  m_history_valid_pts;
   DllBcmHost                m_DllBcmHost;
 
@@ -125,7 +127,7 @@ public:
   int GetFreeSpace();
   void  SetVideoRect(const CRect &SrcRect, const CRect &DestRect);
   static void RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect);
-  void ResolutionUpdateCallBack(uint32_t width, uint32_t height, float pixel_aspect);
-  static void ResolutionUpdateCallBack(void *ctx, uint32_t width, uint32_t height, float pixel_aspect);
+  void ResolutionUpdateCallBack(uint32_t width, uint32_t height, float framerate, float pixel_aspect);
+  static void ResolutionUpdateCallBack(void *ctx, uint32_t width, uint32_t height, float framerate, float pixel_aspect);
 };
 #endif
