@@ -843,7 +843,7 @@ unsigned int CAESinkIntelSMD::AddPackets(uint8_t **data, unsigned int frames, un
 {
   VERBOSE();
   // Len is in frames, we want it in bytes
-  len *= m_frameSize;
+  frames *= m_frameSize;
 
 
   // // Let it drain for a bit before we lock the pipe down
@@ -870,30 +870,30 @@ unsigned int CAESinkIntelSMD::AddPackets(uint8_t **data, unsigned int frames, un
   if (!m_bIsAllocated)
   {
     CLog::Log(LOGERROR,"%s - sanity failed. no valid play handle!", __DEBUG_ID__);
-    return len;
+    return frames;
   }
 
-  pBuffer = (unsigned char*)data;
-  total = len;
+  pBuffer = (unsigned char*)data[0] + offset * m_frameSize;
+  total = frames;
 
   //printf("len %d chunksize %d m_bTimed %d\n", len, m_dwChunkSize, m_bTimed);
   
-  while (len)
+  while (frames)
   {
-    unsigned int bytes_to_copy = len > block_size ? block_size : len;
+    unsigned int bytes_to_copy = frames > block_size ? block_size : frames;
     unsigned int dataSent = SendDataToInput(pBuffer, bytes_to_copy);
 
     if(dataSent != bytes_to_copy)
     {
-      CLog::Log(LOGERROR, "%s SendDataToInput failed. req %d actual %d", __DEBUG_ID__, len, dataSent);
+      CLog::Log(LOGERROR, "%s SendDataToInput failed. req %d actual %d", __DEBUG_ID__, frames, dataSent);
       return 0;
     }
 
     pBuffer += dataSent; // Update buffer pointer
-    len -= dataSent; // Update remaining data len
+    frames -= dataSent; // Update remaining data len
   }
 
-  return (total - len)/m_frameSize; // frames used
+  return (total - frames)/m_frameSize; // frames used
 }
 
 void CAESinkIntelSMD::Drain()
