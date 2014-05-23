@@ -839,7 +839,7 @@ unsigned int CAESinkIntelSMD::SendDataToInput(unsigned char* buffer_data, unsign
 }
 
 
-unsigned int CAESinkIntelSMD::AddPackets(uint8_t* data, unsigned int len, bool hasAudio, bool blocking)
+unsigned int CAESinkIntelSMD::AddPackets(uint8_t **data, unsigned int frames, unsigned int offset)
 {
   VERBOSE();
   // Len is in frames, we want it in bytes

@@ -45,7 +45,7 @@ public:
   virtual double        GetDelay        ();
   virtual double        GetCacheTime    ();
   virtual double        GetCacheTotal   ();
-  virtual unsigned int  AddPackets      (uint8_t *data, unsigned int frames, bool hasAudio, bool blocking = false);
+  virtual unsigned int  AddPackets      (uint8_t **data, unsigned int frames, unsigned int offset);
   virtual void          Drain           ();
   virtual double GetLatency() { return m_latency; };
   //virtual bool          HasVolume() { return true; }
