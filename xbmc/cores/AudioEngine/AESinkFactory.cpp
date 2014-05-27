@@ -26,7 +26,7 @@
 #elif defined(TARGET_BOXEE)
   #include "Sinks/AESinkIntelSMD.h" 
 #elif defined(TARGET_ANDROID)
-  #include "Sinks/AESinkAUDIOTRACK.h"  
+  #include "Sinks/AESinkAUDIOTRACK.h"
 #elif defined(TARGET_RASPBERRY_PI)
   #include "Sinks/AESinkPi.h"
 #elif defined(TARGET_DARWIN_IOS)
@@ -67,7 +67,7 @@ void CAESinkFactory::ParseDevice(std::string &device, std::string &driver)
 #elif defined(TARGET_BOXEE)
         driver == "INTELSMD" ||		
 #elif defined(TARGET_ANDROID)
-        driver == "AUDIOTRACK"  ||		
+        driver == "AUDIOTRACK"  ||
 #elif defined(TARGET_RASPBERRY_PI)
         driver == "PI"          ||
 #elif defined(TARGET_DARWIN_IOS)
@@ -99,34 +99,36 @@ IAESink *CAESinkFactory::TrySink(std::string &driver, std::string &device, AEAud
 
   if (driver == "NULL")
     sink = new CAESinkNULL();
-
+  else
+  {
 #if defined(TARGET_WINDOWS)
-  else if (driver == "WASAPI")
-    sink = new CAESinkWASAPI();
-  else if (driver == "DIRECTSOUND")
-    sink = new CAESinkDirectSound();
+    if (driver == "WASAPI")
+      sink = new CAESinkWASAPI();
+    if (driver == "DIRECTSOUND")
+      sink = new CAESinkDirectSound();
 #elif defined(TARGET_BOXEE)
-    sink = new CAESinkIntelSMD();	
+    sink = new CAESinkIntelSMD();
 #elif defined(TARGET_ANDROID)
-	sink = new CAESinkAUDIOTRACK();
+    sink = new CAESinkAUDIOTRACK();
 #elif defined(TARGET_RASPBERRY_PI)
-  sink = new CAESinkPi();
+    sink = new CAESinkPi();
 #elif defined(TARGET_DARWIN_IOS)
-  sink = new CAESinkDARWINIOS();
+    sink = new CAESinkDARWINIOS();
 #elif defined(TARGET_DARWIN_OSX)
-  sink = new CAESinkDARWINOSX();
+    sink = new CAESinkDARWINOSX();
 #elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
-#if defined(HAS_PULSEAUDIO)
-  else if (driver == "PULSE")
-    sink = new CAESinkPULSE();
+ #if defined(HAS_PULSEAUDIO)
+    if (driver == "PULSE")
+      sink = new CAESinkPULSE();
+ #endif
+ #if defined(HAS_ALSA)
+    if (driver == "ALSA")
+      sink = new CAESinkALSA();
+ #endif
+    if (driver == "OSS")
+      sink = new CAESinkOSS();
 #endif
-#if defined(HAS_ALSA)
-  else if (driver == "ALSA")
-    sink = new CAESinkALSA();
-#endif
-  else if (driver == "OSS")
-    sink = new CAESinkOSS();
-#endif
+  }
 
   if (!sink)
     return NULL;
