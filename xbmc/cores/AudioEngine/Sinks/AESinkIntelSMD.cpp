@@ -962,7 +962,6 @@ ismd_audio_format_t CAESinkIntelSMD::GetISMDFormat(AEDataFormat audioMediaFormat
   switch (audioMediaFormat)
     {
      case AE_FMT_U8:
-     case AE_FMT_S8:
      case AE_FMT_S16BE:
      case AE_FMT_S16LE:
      case AE_FMT_S16NE:
