@@ -1223,7 +1223,11 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
   int buffer = g_renderManager.WaitForBuffer(m_bStop, std::max(DVD_TIME_TO_MSEC(iSleepTime) + 500, 1));
   if (buffer < 0)
     return EOS_DROPPED;
-
+	
+#ifdef HAS_INTEL_SMD
+  pts = iPlayingClock;
+  pPicture->pts += m_iVideoDelay - DVD_SEC_TO_TIME(g_renderManager.GetDisplayLatency());
+#endif
   ProcessOverlays(pPicture, pts);
 
   int index = g_renderManager.AddVideoPicture(*pPicture);
