@@ -1092,15 +1092,6 @@ void CActiveAE::Configure(AEAudioFormat *desiredFmt)
     std::list<CActiveAEStream*>::iterator it;
     for(it=m_streams.begin(); it!=m_streams.end(); ++it)
     {
-      // check if we support input format of stream
-      if (!AE_IS_RAW((*it)->m_format.m_dataFormat) && 
-          CActiveAEResample::GetAVSampleFormat((*it)->m_format.m_dataFormat) == AV_SAMPLE_FMT_FLT &&
-          (*it)->m_format.m_dataFormat != AE_FMT_FLOAT)
-      {
-        (*it)->m_convertFn = CAEConvert::ToFloat((*it)->m_format.m_dataFormat);
-        (*it)->m_format.m_dataFormat = AE_FMT_FLOAT;
-      }
-
       if (!(*it)->m_inputBuffers)
       {
         // align input buffers with period of sink or encoder
@@ -1417,6 +1408,7 @@ void CActiveAE::ApplySettingsToFormat(AEAudioFormat &format, AudioSettings &sett
   {
     format.m_dataFormat = AE_FMT_AC3;
     format.m_sampleRate = 48000;
+    format.m_encodedRate = 48000;
     format.m_channelLayout = AE_CH_LAYOUT_2_0;
     if (mode)
       *mode = MODE_TRANSCODE;
@@ -1641,13 +1633,15 @@ bool CActiveAE::RunStages()
     CSampleBuffer *buffer;
     if (!(*it)->m_drain)
     {
+      float buftime = (float)(*it)->m_inputBuffers->m_format.m_frames / (*it)->m_inputBuffers->m_format.m_sampleRate;
+      time += buftime * (*it)->m_processingSamples.size();
       while (time < MAX_CACHE_LEVEL && !(*it)->m_inputBuffers->m_freeSamples.empty())
       {
         buffer = (*it)->m_inputBuffers->GetFreeBuffer();
         (*it)->m_processingSamples.push_back(buffer);
         (*it)->m_streamPort->SendInMessage(CActiveAEDataProtocol::STREAMBUFFER, &buffer, sizeof(CSampleBuffer*));
         (*it)->IncFreeBuffers();
-        time += (float)buffer->pkt->max_nb_samples / buffer->pkt->config.sample_rate;
+        time += buftime;
       }
     }
     else
@@ -1970,7 +1964,7 @@ bool CActiveAE::RunStages()
       CSampleBuffer *buffer;
       for (it = m_streams.begin(); it != m_streams.end(); ++it)
       {
-        if (!(*it)->m_resampleBuffers->m_outputSamples.empty())
+        if (!(*it)->m_resampleBuffers->m_outputSamples.empty() && !(*it)->m_paused)
         {
           buffer =  (*it)->m_resampleBuffers->m_outputSamples.front();
           (*it)->m_resampleBuffers->m_outputSamples.pop_front();
@@ -2590,6 +2584,7 @@ bool CActiveAE::ResampleSound(CActiveAESound *sound)
   dst_config.sample_rate = m_internalFormat.m_sampleRate;
   dst_config.fmt = CActiveAEResample::GetAVSampleFormat(m_internalFormat.m_dataFormat);
   dst_config.bits_per_sample = CAEUtil::DataFormatToUsedBits(m_internalFormat.m_dataFormat);
+  dst_config.dither_bits = CAEUtil::DataFormatToDitherBits(m_internalFormat.m_dataFormat);
 
   CActiveAEResample *resampler = new CActiveAEResample();
   resampler->Init(dst_config.channel_layout,
@@ -2597,11 +2592,13 @@ bool CActiveAE::ResampleSound(CActiveAESound *sound)
                   dst_config.sample_rate,
                   dst_config.fmt,
                   dst_config.bits_per_sample,
+                  dst_config.dither_bits,
                   orig_config.channel_layout,
                   orig_config.channels,
                   orig_config.sample_rate,
                   orig_config.fmt,
                   orig_config.bits_per_sample,
+                  orig_config.dither_bits,
                   false,
                   true,
                   NULL,

@@ -99,10 +99,10 @@ static void EnumerateDevices(CADeviceList &list)
     {
       for (AudioStreamIdList::iterator j = streams.begin(); j != streams.end(); ++j)
       {
-        StreamFormatList streams;
-        if (CCoreAudioStream::GetAvailablePhysicalFormats(*j, &streams))
+        StreamFormatList streamFormats;
+        if (CCoreAudioStream::GetAvailablePhysicalFormats(*j, &streamFormats))
         {
-          for (StreamFormatList::iterator i = streams.begin(); i != streams.end(); ++i)
+          for (StreamFormatList::iterator i = streamFormats.begin(); i != streamFormats.end(); ++i)
           {
             AudioStreamBasicDescription desc = i->mFormat;
             std::string formatString;
@@ -199,12 +199,12 @@ static void EnumerateDevices(CADeviceList &list)
             }
 
             // add sample rate info
-            // quirk devices which don't report a valid samplerate
-            // add 44.1khz and 48khz in that case - user can use
+            // for devices which return kAudioStreamAnyRatee
+            // we add 44.1khz and 48khz - user can use
             // the "fixed" audio config to force one of them
-            if (desc.mSampleRate == 0)
+            if (desc.mSampleRate == kAudioStreamAnyRate)
             {
-              CLog::Log(LOGWARNING, "%s no valid samplerate - adding 44.1khz and 48khz quirk", __FUNCTION__);
+              CLog::Log(LOGINFO, "%s reported samplerate is kAudioStreamAnyRate adding 44.1khz and 48khz", __FUNCTION__);
               desc.mSampleRate = 44100;
               if (!HasSampleRate(device.m_sampleRates, desc.mSampleRate))
                 device.m_sampleRates.push_back(desc.mSampleRate);
@@ -304,16 +304,45 @@ OSStatus deviceChangedCB(AudioObjectID                       inObjectID,
                          const AudioObjectPropertyAddress    inAddresses[],
                          void*                               inClientData)
 {
-  CLog::Log(LOGDEBUG, "CoreAudio: audiodevicelist changed - reenumerating");
-  CAEFactory::DeviceChange();
-  CLog::Log(LOGDEBUG, "CoreAudio: audiodevicelist changed - done");
+  bool deviceChanged = false;
+  static AudioDeviceID oldDefaultDevice = 0;
+  AudioDeviceID currentDefaultOutputDevice = 0;
+
+  for (unsigned int i = 0; i < inNumberAddresses; i++)
+  {
+    switch (inAddresses[i].mSelector)
+    {
+      case kAudioHardwarePropertyDefaultOutputDevice:
+        currentDefaultOutputDevice = CCoreAudioHardware::GetDefaultOutputDevice();
+        // This listener is called on every change of the hardware
+        // device. So check if the default device has really changed.
+        if (oldDefaultDevice != currentDefaultOutputDevice)
+        {
+          deviceChanged = true;
+          oldDefaultDevice = currentDefaultOutputDevice;
+        }
+        break;
+      default:
+        deviceChanged = true;
+        break;
+    }
+    if (deviceChanged)
+      break;
+  }
+
+  if  (deviceChanged)
+  {
+    CLog::Log(LOGDEBUG, "CoreAudio: audiodevicelist changed - reenumerating");
+    CAEFactory::DeviceChange();
+    CLog::Log(LOGDEBUG, "CoreAudio: audiodevicelist changed - done");
+  }
   return noErr;
 }
 
 void RegisterDeviceChangedCB(bool bRegister, void *ref)
 {
   OSStatus ret = noErr;
-  const AudioObjectPropertyAddress inAdr =
+  AudioObjectPropertyAddress inAdr =
   {
     kAudioHardwarePropertyDevices,
     kAudioObjectPropertyScopeGlobal,
@@ -321,9 +350,17 @@ void RegisterDeviceChangedCB(bool bRegister, void *ref)
   };
 
   if (bRegister)
+  {
     ret = AudioObjectAddPropertyListener(kAudioObjectSystemObject, &inAdr, deviceChangedCB, ref);
+    inAdr.mSelector = kAudioHardwarePropertyDefaultOutputDevice;
+    ret = AudioObjectAddPropertyListener(kAudioObjectSystemObject, &inAdr, deviceChangedCB, ref);
+  }
   else
+  {
     ret = AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &inAdr, deviceChangedCB, ref);
+    inAdr.mSelector = kAudioHardwarePropertyDefaultOutputDevice;
+    ret = AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &inAdr, deviceChangedCB, ref);
+  }
 
   if (ret != noErr)
     CLog::Log(LOGERROR, "CCoreAudioAE::Deinitialize - error %s a listener callback for device changes!", bRegister?"attaching":"removing");
@@ -332,7 +369,13 @@ void RegisterDeviceChangedCB(bool bRegister, void *ref)
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 CAESinkDARWINOSX::CAESinkDARWINOSX()
-: m_latentFrames(0), m_outputBitstream(false), m_outputBuffer(NULL), m_planar(false), m_planarBuffer(NULL), m_buffer(NULL)
+: m_latentFrames(0),
+  m_outputBitstream(false),
+  m_planes(1),
+  m_frameSizePerPlane(0),
+  m_framesPerSecond(0),
+  m_buffer(NULL),
+  m_started(false)
 {
   // By default, kAudioHardwarePropertyRunLoop points at the process's main thread on SnowLeopard,
   // If your process lacks such a run loop, you can set kAudioHardwarePropertyRunLoop to NULL which
@@ -351,8 +394,6 @@ CAESinkDARWINOSX::CAESinkDARWINOSX()
     CLog::Log(LOGERROR, "CCoreAudioAE::constructor: kAudioHardwarePropertyRunLoop error.");
   }
   RegisterDeviceChangedCB(true, this);
-  m_started = false;
-  m_planar = false;
 }
 
 CAESinkDARWINOSX::~CAESinkDARWINOSX()
@@ -478,11 +519,11 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
     {
       AudioStreamBasicDescription desc = j->mFormat;
 
-      // quirk devices with invalid sample rate
+      // for devices with kAudioStreamAnyRate
       // assume that the user uses a fixed config
       // and knows what he is doing - so we use
       // the requested samplerate here
-      if (desc.mSampleRate == 0)
+      if (desc.mSampleRate == kAudioStreamAnyRate)
         desc.mSampleRate = format.m_sampleRate;
 
       float score = ScoreStream(desc, format);
@@ -502,12 +543,12 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
     index++;
   }
 
-  m_planar = false;
+  m_planes = 1;
   if (streams.size() > 1 && outputFormat.mChannelsPerFrame == 1)
   {
     CLog::Log(LOGDEBUG, "%s Found planar audio with %u channels?", __FUNCTION__, (unsigned int)streams.size());
     outputFormat.mChannelsPerFrame = std::min((size_t)format.m_channelLayout.Count(), streams.size());
-    m_planar = true;
+    m_planes = outputFormat.mChannelsPerFrame;
   }
 
   if (!outputFormat.mFormatID)
@@ -529,7 +570,7 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
   m_outputBitstream   = passthrough && outputFormat.mFormatID == kAudioFormatLinearPCM;
 
   std::string formatString;
-  CLog::Log(LOGDEBUG, "%s: Selected stream[%u] - id: 0x%04X, Physical Format: %s %s", __FUNCTION__, outputIndex, outputStream, StreamDescriptionToString(outputFormat, formatString), m_outputBitstream ? "bitstreamed passthrough" : "");
+  CLog::Log(LOGDEBUG, "%s: Selected stream[%u] - id: 0x%04X, Physical Format: %s %s", __FUNCTION__, (unsigned int)outputIndex, (unsigned int)outputStream, StreamDescriptionToString(outputFormat, formatString), m_outputBitstream ? "bitstreamed passthrough" : "");
 
   SetHogMode(passthrough);
 
@@ -555,25 +596,22 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
   format.m_frames        = m_device.GetBufferSize();
   format.m_frameSamples  = format.m_frames * format.m_channelLayout.Count();
 
+  m_frameSizePerPlane = format.m_frameSize / m_planes;
+  m_framesPerSecond   = format.m_sampleRate;
+
   if (m_outputBitstream)
-  {
-    m_outputBuffer = new int16_t[format.m_frameSamples];
-    /* TODO: Do we need this? */
+  { /* TODO: Do we need this? */
     m_device.SetNominalSampleRate(format.m_sampleRate);
   }
 
-  if (m_planar)
-    m_planarBuffer = new float[format.m_frameSamples];
-
   unsigned int num_buffers = 4;
-  m_buffer = new AERingBuffer(num_buffers * format.m_frames * format.m_frameSize);
-  CLog::Log(LOGDEBUG, "%s: using buffer size: %u (%f ms)", __FUNCTION__, m_buffer->GetMaxSize(), (float)m_buffer->GetMaxSize() / (format.m_sampleRate * format.m_frameSize));
+  m_buffer = new AERingBuffer(num_buffers * format.m_frames * m_frameSizePerPlane, m_planes);
+  CLog::Log(LOGDEBUG, "%s: using buffer size: %u (%f ms)", __FUNCTION__, m_buffer->GetMaxSize(), (float)m_buffer->GetMaxSize() / (m_framesPerSecond * m_frameSizePerPlane));
 
-  m_format = format;
   if (passthrough)
     format.m_dataFormat = AE_FMT_S16NE;
   else
-    format.m_dataFormat = AE_FMT_FLOAT;
+    format.m_dataFormat = (m_planes > 1) ? AE_FMT_FLOATP : AE_FMT_FLOAT;
 
   // Register for data request callbacks from the driver and start
   m_device.AddIOProc(renderCallback, this);
@@ -619,22 +657,9 @@ void CAESinkDARWINOSX::Deinitialize()
     m_buffer = NULL;
   }
   m_outputBitstream = false;
-
-  delete[] m_outputBuffer;
-  m_outputBuffer = NULL;
-
-  m_planar = false;
-  delete[] m_planarBuffer;
-  m_planarBuffer = NULL;
+  m_planes = 1;
 
   m_started = false;
-}
-
-bool CAESinkDARWINOSX::IsCompatible(const AEAudioFormat &format, const std::string &device)
-{
-  return ((m_format.m_sampleRate    == format.m_sampleRate) &&
-          (m_format.m_dataFormat    == format.m_dataFormat) &&
-          (m_format.m_channelLayout == format.m_channelLayout));
 }
 
 double CAESinkDARWINOSX::GetDelay()
@@ -642,9 +667,9 @@ double CAESinkDARWINOSX::GetDelay()
   if (m_buffer)
   {
     // Calculate the duration of the data in the cache
-    double delay = (double)m_buffer->GetReadSize() / (double)m_format.m_frameSize;
+    double delay = (double)m_buffer->GetReadSize() / (double)m_frameSizePerPlane;
     delay += (double)m_latentFrames;
-    delay /= (double)m_format.m_sampleRate;
+    delay /= (double)m_framesPerSecond;
     return delay;
   }
   return 0.0;
@@ -652,18 +677,18 @@ double CAESinkDARWINOSX::GetDelay()
 
 double CAESinkDARWINOSX::GetCacheTotal()
 {
-  return (double)m_buffer->GetMaxSize() / (double)(m_format.m_frameSize * m_format.m_sampleRate);
+  return (double)m_buffer->GetMaxSize() / (double)(m_frameSizePerPlane * m_framesPerSecond);
 }
 
 CCriticalSection mutex;
 XbmcThreads::ConditionVariable condVar;
 
-unsigned int CAESinkDARWINOSX::AddPackets(uint8_t *data, unsigned int frames, bool hasAudio, bool blocking)
+unsigned int CAESinkDARWINOSX::AddPackets(uint8_t **data, unsigned int frames, unsigned int offset)
 {
-  if (m_buffer->GetWriteSize() < frames * m_format.m_frameSize)
+  if (m_buffer->GetWriteSize() < frames * m_frameSizePerPlane)
   { // no space to write - wait for a bit
     CSingleLock lock(mutex);
-    unsigned int timeout = 900 * frames / m_format.m_sampleRate;
+    unsigned int timeout = 900 * frames / m_framesPerSecond;
     if (!m_started)
       timeout = 4500;
 
@@ -678,10 +703,12 @@ unsigned int CAESinkDARWINOSX::AddPackets(uint8_t *data, unsigned int frames, bo
     }
   }
 
-  unsigned int write_frames = std::min(frames, m_buffer->GetWriteSize() / m_format.m_frameSize);
+  unsigned int write_frames = std::min(frames, m_buffer->GetWriteSize() / m_frameSizePerPlane);
   if (write_frames)
-    m_buffer->Write(data, write_frames * m_format.m_frameSize);
-
+  {
+    for (unsigned int i = 0; i < m_buffer->NumPlanes(); i++)
+      m_buffer->Write(data[i] + offset * m_frameSizePerPlane, write_frames * m_frameSizePerPlane, i);
+  }
   return write_frames;
 }
 
@@ -690,7 +717,7 @@ void CAESinkDARWINOSX::Drain()
   int bytes = m_buffer->GetReadSize();
   int totalBytes = bytes;
   int maxNumTimeouts = 3;
-  unsigned int timeout = 900 * bytes / (m_format.m_sampleRate * m_format.m_frameSize);
+  unsigned int timeout = 900 * bytes / (m_framesPerSecond * m_frameSizePerPlane);
   while (bytes && maxNumTimeouts > 0)
   {
     CSingleLock lock(mutex);
@@ -734,58 +761,49 @@ OSStatus CAESinkDARWINOSX::renderCallback(AudioDeviceID inDevice, const AudioTim
   CAESinkDARWINOSX *sink = (CAESinkDARWINOSX*)inClientData;
 
   sink->m_started = true;
-  if (sink->m_planar)
+  if (outOutputData->mNumberBuffers)
   {
-    unsigned int channels = std::min((unsigned int)outOutputData->mNumberBuffers, sink->m_format.m_channelLayout.Count());
-    unsigned int wanted = outOutputData->mBuffers[0].mDataByteSize;
-    unsigned int bytes = std::min(sink->m_buffer->GetReadSize() / channels, wanted);
-    sink->m_buffer->Read((unsigned char *)sink->m_planarBuffer, bytes * channels);
-    // transform from interleaved to planar
-    const float *src = sink->m_planarBuffer;
-    for (unsigned int i = 0; i < bytes / sizeof(float); i++)
+    /* NOTE: We assume that the buffers are all the same size... */
+    if (sink->m_outputBitstream)
     {
-      for (unsigned int j = 0; j < channels; j++)
-      {
-        float *dst = (float *)outOutputData->mBuffers[j].mData;
-        dst[i] = *src++;
-      }
-    }
-    LogLevel(bytes, wanted);
-    // tell the sink we're good for more data
-    condVar.notifyAll();
-  }
-  else
-  {
-    for (unsigned int i = 0; i < outOutputData->mNumberBuffers; i++)
-    {
-      if (sink->m_outputBitstream)
-      {
-        /* HACK for bitstreaming AC3/DTS via PCM.
-         We reverse the float->S16LE conversion done in the stream or device */
-        static const float mul = 1.0f / (INT16_MAX + 1);
+      /* HACK for bitstreaming AC3/DTS via PCM.
+       We reverse the float->S16LE conversion done in the stream or device */
+      static const float mul = 1.0f / (INT16_MAX + 1);
 
-        unsigned int wanted = std::min(outOutputData->mBuffers[i].mDataByteSize / sizeof(float), (size_t)sink->m_format.m_frameSamples)  * sizeof(int16_t);
-        if (wanted <= sink->m_buffer->GetReadSize())
+      size_t wanted = outOutputData->mBuffers[0].mDataByteSize / sizeof(float) * sizeof(int16_t);
+      size_t bytes = std::min((size_t)sink->m_buffer->GetReadSize(), wanted);
+      for (unsigned int j = 0; j < bytes / sizeof(int16_t); j++)
+      {
+        for (unsigned int i = 0; i < sink->m_buffer->NumPlanes(); i++)
         {
-          sink->m_buffer->Read((unsigned char *)sink->m_outputBuffer, wanted);
-          int16_t *src = sink->m_outputBuffer;
-          float  *dest = (float*)outOutputData->mBuffers[i].mData;
-          for (unsigned int i = 0; i < wanted / 2; i++)
-            *dest++ = *src++ * mul;
+          int16_t src;
+          sink->m_buffer->Read((unsigned char *)&src, sizeof(int16_t), i);
+          if (i < outOutputData->mNumberBuffers && outOutputData->mBuffers[i].mData)
+          {
+            float *dest = (float *)outOutputData->mBuffers[i].mData;
+            dest[j] = src * mul;
+          }
         }
       }
-      else
-      {
-        /* buffers appear to come from CA already zero'd, so just copy what is wanted */
-        unsigned int wanted = outOutputData->mBuffers[i].mDataByteSize;
-        unsigned int bytes = std::min(sink->m_buffer->GetReadSize(), wanted);
-        sink->m_buffer->Read((unsigned char*)outOutputData->mBuffers[i].mData, bytes);
-        LogLevel(bytes, wanted);
-      }
-
-      // tell the sink we're good for more data
-      condVar.notifyAll();
+      LogLevel(bytes, wanted);
     }
+    else
+    {
+      /* buffers appear to come from CA already zero'd, so just copy what is wanted */
+      unsigned int wanted = outOutputData->mBuffers[0].mDataByteSize;
+      unsigned int bytes = std::min(sink->m_buffer->GetReadSize(), wanted);
+      for (unsigned int i = 0; i < sink->m_buffer->NumPlanes(); i++)
+      {
+        if (i < outOutputData->mNumberBuffers && outOutputData->mBuffers[i].mData)
+          sink->m_buffer->Read((unsigned char *)outOutputData->mBuffers[i].mData, bytes, i);
+        else
+          sink->m_buffer->Read(NULL, bytes, i);
+      }
+      LogLevel(bytes, wanted);
+    }
+
+    // tell the sink we're good for more data
+    condVar.notifyAll();
   }
   return noErr;
 }

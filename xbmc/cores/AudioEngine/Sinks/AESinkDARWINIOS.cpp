@@ -685,13 +685,6 @@ void CAESinkDARWINIOS::Deinitialize()
   m_audioSink = NULL;
 }
 
-bool CAESinkDARWINIOS::IsCompatible(const AEAudioFormat &format, const std::string &device)
-{
-  return ((m_format.m_sampleRate    == format.m_sampleRate) &&
-          (m_format.m_dataFormat    == format.m_dataFormat) &&
-          (m_format.m_channelLayout == format.m_channelLayout));
-}
-
 double CAESinkDARWINIOS::GetDelay()
 {
   if (m_audioSink)
@@ -706,13 +699,13 @@ double CAESinkDARWINIOS::GetCacheTotal()
   return 0.0;
 }
 
-unsigned int CAESinkDARWINIOS::AddPackets(uint8_t *data, unsigned int frames, bool hasAudio, bool blocking)
+unsigned int CAESinkDARWINIOS::AddPackets(uint8_t **data, unsigned int frames, unsigned int offset)
 {
-  
+  uint8_t *buffer = data[0]+offset*m_format.m_frameSize;
 #if DO_440HZ_TONE_TEST
   if (m_format.m_dataFormat == AE_FMT_FLOAT)
   {
-    float *samples = (float*)data;
+    float *samples = (float*)buffer;
     for (unsigned int j = 0; j < frames ; j++)
     {
       float sample = SineWaveGeneratorNextSampleFloat(&m_SineWaveGenerator);
@@ -723,7 +716,7 @@ unsigned int CAESinkDARWINIOS::AddPackets(uint8_t *data, unsigned int frames, bo
   }
   else
   {
-    int16_t *samples = (int16_t*)data;
+    int16_t *samples = (int16_t*)buffer;
     for (unsigned int j = 0; j < frames ; j++)
     {
       int16_t sample = SineWaveGeneratorNextSampleInt16(&m_SineWaveGenerator);
@@ -733,7 +726,7 @@ unsigned int CAESinkDARWINIOS::AddPackets(uint8_t *data, unsigned int frames, bo
   }
 #endif
   if (m_audioSink)
-    return m_audioSink->write(data, frames);
+    return m_audioSink->write(buffer, frames);
   return 0;
 }
 

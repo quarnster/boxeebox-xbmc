@@ -32,13 +32,14 @@
 #include "DVDDemuxers/DVDDemux.h"
 #include "xbmc/settings/VideoSettings.h"
 #include "threads/CriticalSection.h"
+#include "xbmc/rendering/RenderSystem.h"
 #include <string>
 
 #define VIDEO_BUFFERS 60
 
 #define CLASSNAME "COMXVideo"
 
-typedef void (*ResolutionUpdateCallBackFn)(void *ctx, uint32_t width, uint32_t height, float display_aspect);
+typedef void (*ResolutionUpdateCallBackFn)(void *ctx, uint32_t width, uint32_t height, float framerate, float display_aspect);
 
 class COMXVideo
 {
@@ -58,7 +59,7 @@ public:
   void Reset(void);
   void SetDropState(bool bDrop);
   std::string GetDecoderName() { return m_video_codec_name; };
-  void SetVideoRect(const CRect& SrcRect, const CRect& DestRect);
+  void SetVideoRect(const CRect& SrcRect, const CRect& DestRect, RENDER_STEREO_MODE video_mode, RENDER_STEREO_MODE display_mode);
   int GetInputBufferSize();
   void SubmitEOS();
   bool IsEOS();
