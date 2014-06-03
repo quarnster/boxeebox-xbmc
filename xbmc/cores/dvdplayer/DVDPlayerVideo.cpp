@@ -1152,21 +1152,26 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
     iFrameSleep = 0;
   }
 
-  if( m_started == false )
-    iSleepTime = 0.0;
-  else if( m_stalled || m_pClock->GetMaster() == MASTER_CLOCK_VIDEO)
+  // dropping to a very low framerate is not correct (it should not happen at all) // L1155-L1159 Re-added by quasar. Initially this commit was reverted (https://github.com/quasar1/boxeebox-xbmc/commit/db1fb741700a231bf1d627a2564dcf6adad2556c) it caused bad seek and video to stutter on start, CPU spike. Now having to re-revert as the merge picked up the previous commit when a new commit was added. http://boxeed.in/forums/viewtopic.php?f=14&t=483
+  iClockSleep = min(iClockSleep, DVD_MSEC_TO_TIME(500));
+  iFrameSleep = min(iFrameSleep, DVD_MSEC_TO_TIME(500));
+  
+  if( m_stalled )
+//  if( m_started == false ) // Removed by quasar, reasons as above.
+//    iSleepTime = 0.0;
+//  else if( m_stalled || m_pClock->GetMaster() == MASTER_CLOCK_VIDEO)
     iSleepTime = iFrameSleep;
   else
     iSleepTime = iClockSleep;
 
-  // sync clock if we are master
-  if(m_pClock->GetMaster() == MASTER_CLOCK_VIDEO)
-  {
-    m_pClock->Update( iPlayingClock + iClockSleep - iFrameSleep
-                    , iCurrentClock
-                    , DVD_MSEC_TO_TIME(10)
-                    , "CDVDPlayerVideo::OutputPicture");
-  }
+  // sync clock if we are master  // Removed by quasar, reasons as above.
+//  if(m_pClock->GetMaster() == MASTER_CLOCK_VIDEO)
+//  {
+//    m_pClock->Update( iPlayingClock + iClockSleep - iFrameSleep
+//                    , iCurrentClock
+//                    , DVD_MSEC_TO_TIME(10)
+//                    , "CDVDPlayerVideo::OutputPicture");
+//  }
 
   // present the current pts of this frame to user, and include the actual
   // presentation delay, to allow him to adjust for it
@@ -1220,7 +1225,7 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
 
   AutoCrop(pPicture);
 
-  int buffer = g_renderManager.WaitForBuffer(m_bStop, std::max(DVD_TIME_TO_MSEC(iSleepTime) + 500, 1));
+  int buffer = g_renderManager.WaitForBuffer(m_bStop, std::max(DVD_TIME_TO_MSEC(iSleepTime) + 500, 0)); // changed from 1 by quasar
   if (buffer < 0)
     return EOS_DROPPED;
 	
