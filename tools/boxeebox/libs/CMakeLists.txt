@@ -168,8 +168,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	openssl
-	URL 				ftp://ftp.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.0.1g.tar.gz
-	URL_MD5 			de62b43dfcd858e66a74bee1c834e959
+	URL 				ftp://ftp.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.0.1h.tar.gz
+	URL_MD5 			8d6d684a9430d5cc98a62a5d8fbda8cf
 	PATCH_COMMAND       patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-cflags.patch
 	  COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-nodocs.patch
 	CONFIGURE_COMMAND 	CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib AR=${TARGET}-ar <SOURCE_DIR>/Configure --prefix=${SYSROOT}/usr/local shared --openssldir=/ --libdir=lib linux-elf threads enable-camellia enable-seed enable-tlsext enable-rfc3779 enable-cms enable-md2 no-krb5 no-mdc2 no-rc5 no-ec no-ec2mno-ecdh no-ecdsa no-srp
@@ -224,8 +224,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	sqlite
-	URL 		    http://sqlite.org/2014/sqlite-autoconf-3080403.tar.gz
-	URL_MD5 	    0f5459cde43cb269e5120ecd2c671ced
+	URL 		    http://www.sqlite.org/2014/sqlite-autoconf-3080500.tar.gz
+	URL_MD5 	    0544ef6d7afd8ca797935ccc2685a9ed
 	CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET}  --disable-shared --enable-static --enable-threadsafe --disable-readline --enable-dynamic-extensions
 	BUILD_COMMAND       make CXXFLAGS+=-DSQLITE_ENABLE_COLUMN_METADATA=1 CFLAGS+=-DSQLITE_TEMP_STORE=3  CFLAGS+=-DSQLITE_ENABLE_STAT3 CFLAGS+=-DSQLITE_DEFAULT_MMAP_SIZE=268435456
 )
@@ -332,8 +332,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libjpeg-turbo
-	URL 				http://sourceforge.net/projects/libjpeg-turbo/files/1.3.0/libjpeg-turbo-1.3.0.tar.gz/download
-	URL_MD5 			e1e65cc711a1ade1322c06ad4a647741
+	URL 				http://sourceforge.net/projects/libjpeg-turbo/files/1.3.1/libjpeg-turbo-1.3.1.tar.gz/download
+	URL_MD5 			2c3a68129dac443a72815ff5bb374b05
     CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-nls --with-jpeg8 --without-simd
     BUILD_COMMAND       make
     INSTALL_COMMAND     make install
@@ -443,8 +443,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
     libbluray
-    URL                   ftp://ftp.videolan.org/pub/videolan/libbluray/0.5.0/libbluray-0.5.0.tar.bz2
-    URL_MD5               04cf15d0f3581a955d3a2ccb9dc06e9e
+    URL                   ftp://ftp.videolan.org/pub/videolan/libbluray/0.6.0/libbluray-0.6.0.tar.bz2
+    URL_MD5               697886c09ef058bb9a2954ee5ee4f140
     CONFIGURE_COMMAND     ${BASIC_CONF} --disable-examples --disable-doxygen-doc
     BUILD_COMMAND         make
     INSTALL_COMMAND       make install
