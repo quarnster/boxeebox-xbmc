@@ -261,7 +261,7 @@ add_custom_target(
 pvr
 cd ${CMAKE_SOURCE_DIR}
 COMMAND rm -rf ${CMAKE_SOURCE_DIR}/../../pvr-addons
-COMMAND git clone https://github.com/opdenkamp/xbmc-pvr-addons.git
+COMMAND git clone https://github.com/opdenkamp/xbmc-pvr-addons.git -b Gotham
 COMMAND  ${CMAKE_COMMAND} -E copy  ${CMAKE_SOURCE_DIR}/pvr-addons.patch ${CMAKE_SOURCE_DIR}/build/xbmc-pvr-addons
 COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/build/xbmc-pvr-addons/pvr-addons.patch
 COMMAND mv  ${CMAKE_SOURCE_DIR}/build/xbmc-pvr-addons ${CMAKE_SOURCE_DIR}/../../pvr-addons
