@@ -109,7 +109,10 @@ static std::string getValueFromOs_release(std::string key)
   size_t len = fread(buf, 1, 10 * 1024, os_rel);
   fclose(os_rel);
   if (len == 0)
+  {
+    delete[] buf;
     return "";
+  }
 
   std::string content(buf, len);
   delete[] buf;
@@ -300,7 +303,7 @@ double CSysInfoJob::GetCPUFrequency()
 
 bool CSysInfoJob::SystemUpTime(int iInputMinutes, int &iMinutes, int &iHours, int &iDays)
 {
-  iMinutes=0;iHours=0;iDays=0;
+  iHours = 0; iDays = 0;
   iMinutes = iInputMinutes;
   if (iMinutes >= 60) // Hour's
   {
@@ -437,8 +440,10 @@ bool CSysInfo::GetDiskSpace(const CStdString& drive,int& iTotal, int& iTotalFree
 #ifdef TARGET_WINDOWS
     UINT uidriveType = GetDriveType(( drive + ":\\" ));
     if(uidriveType != DRIVE_UNKNOWN && uidriveType != DRIVE_NO_ROOT_DIR)
-#endif
       bRet= ( 0 != GetDiskFreeSpaceEx( ( drive + ":\\" ), NULL, &ULTotal, &ULTotalFree) );
+#elif defined(TARGET_POSIX)
+    bRet = (0 != GetDiskFreeSpaceEx(drive.c_str(), NULL, &ULTotal, &ULTotalFree));
+#endif
   }
   else
   {
@@ -465,14 +470,10 @@ bool CSysInfo::GetDiskSpace(const CStdString& drive,int& iTotal, int& iTotalFree
     }
     delete[] pcBuffer;
 #else // for linux and osx
-    static const char *drv_letter[] = { "C:\\", "E:\\", "F:\\", "G:\\", "X:\\", "Y:\\", "Z:\\", NULL };
-    for( int i = 0; drv_letter[i]; i++)
+    if( GetDiskFreeSpaceEx( "/", NULL, &ULTotal, &ULTotalFree ) )
     {
-      if( GetDiskFreeSpaceEx( drv_letter[i], NULL, &ULTotal, &ULTotalFree ) )
-      {
-        ULTotalTmp.QuadPart+= ULTotal.QuadPart;
-        ULTotalFreeTmp.QuadPart+= ULTotalFree.QuadPart;
-      }
+      ULTotalTmp.QuadPart+= ULTotal.QuadPart;
+      ULTotalFreeTmp.QuadPart+= ULTotalFree.QuadPart;
     }
 #endif
     if( ULTotalTmp.QuadPart || ULTotalFreeTmp.QuadPart )

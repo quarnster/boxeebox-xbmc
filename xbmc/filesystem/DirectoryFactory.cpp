@@ -24,7 +24,6 @@
 #include "network/Network.h"
 #include "system.h"
 #include "DirectoryFactory.h"
-#include "HDDirectory.h"
 #include "SpecialProtocolDirectory.h"
 #include "MultiPathDirectory.h"
 #include "StackDirectory.h"
@@ -48,6 +47,8 @@
 
 #ifdef TARGET_POSIX
 #include "posix/PosixDirectory.h"
+#elif defined(TARGET_WINDOWS)
+#include "win32/Win32Directory.h"
 #endif
 #ifdef HAS_FILESYSTEM_SMB
 #ifdef TARGET_WINDOWS
@@ -125,23 +126,24 @@ using namespace XFILE;
  \return IDirectory object to access the directories on the share.
  \sa IDirectory
  */
-IDirectory* CDirectoryFactory::Create(const CStdString& strPath)
+IDirectory* CDirectoryFactory::Create(const CURL& url)
 {
-  CURL url(strPath);
   if (!CWakeOnAccess::Get().WakeUpHost(url))
     return NULL;
 
-  CFileItem item(strPath, false);
-  IFileDirectory* pDir=CFileDirectoryFactory::Create(strPath, &item);
+  CFileItem item(url.Get(), false);
+  IFileDirectory* pDir=CFileDirectoryFactory::Create(url, &item);
   if (pDir)
     return pDir;
 
-  CStdString strProtocol = url.GetProtocol();
+  const CStdString &strProtocol = url.GetProtocol();
 
 #ifdef TARGET_POSIX
-  if (strProtocol.size() == 0 || strProtocol == "file") return new CPosixDirectory();
+  if (strProtocol.empty() || strProtocol == "file") return new CPosixDirectory();
+#elif defined(TARGET_WINDOWS)
+  if (strProtocol.empty() || strProtocol == "file") return new CWin32Directory();
 #else
-  if (strProtocol.size() == 0 || strProtocol == "file") return new CHDDirectory();
+#error Local directory access is not implemented for this platform
 #endif
   if (strProtocol == "special") return new CSpecialProtocolDirectory();
   if (strProtocol == "sources") return new CSourcesDirectory();
@@ -176,7 +178,10 @@ IDirectory* CDirectoryFactory::Create(const CStdString& strPath)
   if (strProtocol == "library") return new CLibraryDirectory();
   if (strProtocol == "favourites") return new CFavouritesDirectory();
   if (strProtocol == "filereader")
-    return CDirectoryFactory::Create(url.GetFileName());
+  {
+    CURL url2(url.GetFileName());
+    return CDirectoryFactory::Create(url2);
+  }
 #if defined(TARGET_ANDROID)
   if (strProtocol == "androidapp") return new CAndroidAppDirectory();
 #endif
