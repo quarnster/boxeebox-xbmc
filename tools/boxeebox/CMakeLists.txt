@@ -248,13 +248,11 @@ add_custom_target(refresh
 )
 
 add_custom_target(
-avahi
-COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/avahi-client ${SYSROOT}/usr/local/include/avahi-client
-COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/avahi-common ${SYSROOT}/usr/local/include/avahi-common
-COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/lib ${SYSROOT}/usr/local/lib
-COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/EGL ${SYSROOT}/usr/local/include/EGL
-COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/GLES2 ${SYSROOT}/usr/local/include/GLES2
-COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/KHR ${SYSROOT}/usr/local/include/KHR
+egl
+COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/egl/lib ${SYSROOT}/usr/local/lib
+COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/egl/EGL ${SYSROOT}/usr/local/include/EGL
+COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/egl/GLES2 ${SYSROOT}/usr/local/include/GLES2
+COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/egl/KHR ${SYSROOT}/usr/local/include/KHR
 )
 
 add_custom_target(
