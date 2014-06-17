@@ -1235,7 +1235,10 @@ CActiveAEStream* CActiveAE::CreateStream(MsgStreamNew *streamMsg)
   stream->m_started = false;
 
   if (streamMsg->options & AESTREAM_PAUSED)
+  {
     stream->m_paused = true;
+    stream->m_streamIsBuffering = true;
+  }
 
   if (streamMsg->options & AESTREAM_FORCE_RESAMPLE)
     stream->m_forceResampler = true;
@@ -1362,6 +1365,7 @@ void CActiveAE::DiscardSound(CActiveAESound *sound)
     if ((*it) == sound)
     {
       m_sounds.erase(it);
+      delete sound;
       return;
     }
   }
@@ -1421,6 +1425,7 @@ void CActiveAE::ApplySettingsToFormat(AEAudioFormat &format, AudioSettings &sett
   {
     format.m_dataFormat = AE_FMT_AC3;
     format.m_sampleRate = 48000;
+    format.m_encodedRate = 48000;
     format.m_channelLayout = AE_CH_LAYOUT_2_0;
     if (mode)
       *mode = MODE_TRANSCODE;
@@ -1645,13 +1650,15 @@ bool CActiveAE::RunStages()
     CSampleBuffer *buffer;
     if (!(*it)->m_drain)
     {
-      while (time < MAX_CACHE_LEVEL && !(*it)->m_inputBuffers->m_freeSamples.empty())
+      float buftime = (float)(*it)->m_inputBuffers->m_format.m_frames / (*it)->m_inputBuffers->m_format.m_sampleRate;
+      time += buftime * (*it)->m_processingSamples.size();
+      while ((time < MAX_CACHE_LEVEL || (*it)->m_streamIsBuffering) && !(*it)->m_inputBuffers->m_freeSamples.empty())
       {
         buffer = (*it)->m_inputBuffers->GetFreeBuffer();
         (*it)->m_processingSamples.push_back(buffer);
         (*it)->m_streamPort->SendInMessage(CActiveAEDataProtocol::STREAMBUFFER, &buffer, sizeof(CSampleBuffer*));
         (*it)->IncFreeBuffers();
-        time += (float)buffer->pkt->max_nb_samples / buffer->pkt->config.sample_rate;
+        time += buftime;
       }
     }
     else
@@ -1744,7 +1751,14 @@ bool CActiveAE::RunStages()
             if ((*it)->m_fadingSamples == -1)
             {
               (*it)->m_fadingSamples = m_internalFormat.m_sampleRate * (float)(*it)->m_fadingTime / 1000.0f;
-              (*it)->m_volume = (*it)->m_fadingBase;
+              if ((*it)->m_fadingSamples > 0)
+                (*it)->m_volume = (*it)->m_fadingBase;
+              else
+              {
+                (*it)->m_volume = (*it)->m_fadingTarget;
+                CSingleLock lock((*it)->m_streamLock);
+                (*it)->m_streamFading = false;
+              }
             }
             if ((*it)->m_fadingSamples > 0)
             {
@@ -1974,7 +1988,7 @@ bool CActiveAE::RunStages()
       CSampleBuffer *buffer;
       for (it = m_streams.begin(); it != m_streams.end(); ++it)
       {
-        if (!(*it)->m_resampleBuffers->m_outputSamples.empty())
+        if (!(*it)->m_resampleBuffers->m_outputSamples.empty() && !(*it)->m_paused)
         {
           buffer =  (*it)->m_resampleBuffers->m_outputSamples.front();
           (*it)->m_resampleBuffers->m_outputSamples.pop_front();

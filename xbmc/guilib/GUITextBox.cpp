@@ -104,7 +104,7 @@ void CGUITextBox::UpdateInfo(const CGUIListItem *item)
   ResetAutoScrolling();
 
   m_itemHeight = m_font ? m_font->GetLineHeight() : 10;
-  float textHeight = m_itemHeight * m_lines.size();
+  float textHeight = m_font ? m_font->GetTextHeight(m_lines.size()) : m_itemHeight * m_lines.size();
   float maxHeight = m_height ? m_height : textHeight;
   m_renderHeight = m_minHeight ? CLAMP(textHeight, m_minHeight, maxHeight) : m_height;
   m_itemsPerPage = (unsigned int)(m_renderHeight / m_itemHeight);
@@ -385,6 +385,11 @@ CStdString CGUITextBox::GetLabel(int info) const
     break;
   }
   return label;
+}
+
+CStdString CGUITextBox::GetDescription() const
+{
+  return GetText();
 }
 
 void CGUITextBox::UpdateVisibility(const CGUIListItem *item)

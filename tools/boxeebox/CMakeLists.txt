@@ -60,7 +60,7 @@ file(WRITE ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh
 #!/bin/sh
 PF=`${SYSROOT}/usr/bin/${TARGET}-pkg-config --libs python`
 export LDFLAGS=\"-L${local}/lib -lgcc -lm -ltinyxml -lgdl -lismd_core -lismd_viddec -lismd_vidpproc -lismd_audio -lismd_vidrend -lismd_demux -lismd_bufmon -losal -lplatform_config -Wl,-rpath=${SYSROOT}/usr/local/lib -Wl,-rpath=${SYSROOT}/lib -Wl,-rpath=${SYSROOT}/usr/lib\"
-export CFLAGS=\"-DTARGET_BOXEE=1 -DTIXML_USE_STL -mmmx -msse -msse2 -I${local}/include -DHAS_INTEL_SMD\"
+export CFLAGS=\"-DTARGET_BOXEE=1 -DTIXML_USE_STL -mmmx -msse -msse2 -I${local}/include -DHAS_INTEL_SMD -march=i686\"
 export CXXFLAGS=\"$CFLAGS\"
 export FREETYPE2_CFLAGS=\"-I${local}/include/freetype2\"
 export PYTHON_VERSION=\"2.7.2\"
@@ -248,13 +248,11 @@ add_custom_target(refresh
 )
 
 add_custom_target(
-avahi
-COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/avahi-client ${SYSROOT}/usr/local/include/avahi-client
-COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/avahi-common ${SYSROOT}/usr/local/include/avahi-common
-COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/lib ${SYSROOT}/usr/local/lib
-COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/EGL ${SYSROOT}/usr/local/include/EGL
-COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/GLES2 ${SYSROOT}/usr/local/include/GLES2
-COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/avahi/KHR ${SYSROOT}/usr/local/include/KHR
+egl
+COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/egl/lib ${SYSROOT}/usr/local/lib
+COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/egl/EGL ${SYSROOT}/usr/local/include/EGL
+COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/egl/GLES2 ${SYSROOT}/usr/local/include/GLES2
+COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/egl/KHR ${SYSROOT}/usr/local/include/KHR
 )
 
 add_custom_target(

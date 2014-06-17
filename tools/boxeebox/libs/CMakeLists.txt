@@ -308,7 +308,7 @@ ExternalProject_Add(
 	fribidi
 	URL 				http://fribidi.org/download/fribidi-0.19.6.tar.bz2
 	URL_MD5 			ce93d862344991173dabb609bf93ca1d
-	CONFIGURE_COMMAND 	${BASIC_CONF}
+	CONFIGURE_COMMAND 	${BASIC_CONF} --without-glib --disable-debug --disable-deprecated --disable-silent-rules --enable-malloc --enable-charsets --with-gnu-ld
 	DEPENDS				freetype2
 )
 
@@ -585,6 +585,75 @@ ExternalProject_Add(
 	INSTALL_COMMAND 	HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make install
 	BUILD_IN_SOURCE 	1
 	DEPENDS zlib expat bzip2 gdbm openssl sqlite
+)
+
+ExternalProject_Add(
+    libdaemon
+    URL                   http://0pointer.de/lennart/projects/libdaemon/libdaemon-0.14.tar.gz
+    URL_MD5               509dc27107c21bcd9fbf2f95f5669563
+    CONFIGURE_COMMAND     ac_cv_func_setpgrp_void=no <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-static --disable-shared --disable-lynx
+    BUILD_COMMAND         make
+)
+
+ExternalProject_Add(
+    libffi
+    URL                   ftp://sourceware.org/pub/libffi/libffi-3.1.tar.gz
+    URL_MD5               f5898b29bbfd70502831a212d9249d10
+    CONFIGURE_COMMAND     ${BASIC_CONF} --disable-debug --enable-structs --enable-raw-api --disable-purify-safety --with-gnu-ld
+    BUILD_COMMAND         make
+)
+
+file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
+"
+export CFLAGS=-I${TARGET_DIR}/include
+export LDFLAGS=-L${TARGET_DIR}/lib
+export CFLAGS="-march=i686"
+export LIBS=\"-lpthread -lrt -lffi -lz\"
+export CFLAGS=\"-I${TARGET_DIR}/include\"
+export ac_cv_func_mmap_fixed_mapped=yes
+export ac_cv_func_posix_getpwuid_r=yes
+export ac_cv_func_posix_getgrgid_r=yes
+export ac_cv_func_printf_unix98=yes
+export ac_cv_func_snprintf_c99
+export ac_cv_func_vsnprintf_c99=yes
+export glib_cv_stack_grows=no
+export glib_cv_uscore=no
+export glib_cv_va_val_copy=no
+${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET}--build=${HOSTMACHINE} --target=${TARGET} CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --with-gnu-ld --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --disable-gtk-test
+")
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
+
+ExternalProject_Add(
+    glib
+    URL                   https://github.com/GNOME/glib/archive/2.41.0.tar.gz
+    URL_MD5               4d8539503fcffe778b6c2b4da2ee3688
+	PATCH_COMMAND         ./autogen.sh
+    CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
+    BUILD_COMMAND         make
+	BUILD_IN_SOURCE 	  1
+	DEPENDS               libffi python pcre zlib
+)
+
+file(WRITE ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh
+"
+export CC=${TARGET}-gcc
+export CXX=${TARGET}-g++
+export CFLAGS=-I${TARGET_DIR}/include
+export LDFLAGS=-L${TARGET_DIR}/lib
+export LIBS=\"-lpthread -lrt -lgdbm\"
+export CFLAGS=\"-I${TARGET_DIR}/include\"
+${CMAKE_BINARY_DIR}/avahi-prefix/src/avahi/configure --prefix=${TARGET_DIR} --host=${TARGET}--build=${HOSTMACHINE} --prefix=${TARGET_DIR} --host=${TARGET} py_cv_mod_gtk_=yes py_cv_mod_dbus_=yes ac_cv_func_chroot=no --with-distro=none --disable-glib --disable-qt3 --disable-qt4 --disable-gtk --disable-gtk3 --enable-dbus --disable-dbm --disable-gdbm --enable-libdaemon --disable-python --disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd --disable-doxygen-doc --disable-doxygen-dot --disable-doxygen-man --disable-doxygen-rtf --disable-doxygen-xml --disable-doxygen-chm --disable-doxygen-chi --disable-doxygen-html --disable-doxygen-ps --disable-doxygen-pdf --disable-core-docs --disable-manpages --disable-xmltoman --disable-tests --disable-compat-libdns_sd --disable-compat-howl --with-xml=expat --with-avahi-user=avahi --with-avahi-group=avahi --disable-gobject --disable-nls
+")
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh)
+
+ExternalProject_Add(
+    avahi
+    URL                   http://avahi.org/download/avahi-0.6.31.tar.gz
+    URL_MD5               2f22745b8f7368ad5a0a3fddac343f2d
+    CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh
+	BUILD_COMMAND 		  make
+	DEPENDS               libdaemon libffi glib dbus dbus_expat
+	BUILD_IN_SOURCE 	  1
 )
 
 ExternalProject_Add(
