@@ -44,9 +44,9 @@ CVideoDatabaseDirectory::~CVideoDatabaseDirectory(void)
 {
 }
 
-bool CVideoDatabaseDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items)
+bool CVideoDatabaseDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 {
-  CStdString path = CLegacyPathTranslation::TranslateVideoDbPath(strPath);
+  CStdString path = CLegacyPathTranslation::TranslateVideoDbPath(url);
   items.SetPath(path);
   auto_ptr<CDirectoryNode> pNode(CDirectoryNode::ParseURL(path));
 
@@ -221,7 +221,6 @@ bool CVideoDatabaseDirectory::GetLabel(const CStdString& strDirectory, CStdStrin
     case NODE_TYPE_EPISODES: // Episodes
       strLabel = g_localizeStrings.Get(20360); break;
     default:
-      CLog::Log(LOGWARNING, "%s - Unknown nodetype requested %d", __FUNCTION__, pNode->GetChildType());
       return false;
     }
   }
@@ -289,7 +288,6 @@ CStdString CVideoDatabaseDirectory::GetIcon(const CStdString &strDirectory)
   case NODE_TYPE_MUSICVIDEOS_ALBUM: // Music Videos - Albums
     return "DefaultMusicAlbums.png";
   default:
-    CLog::Log(LOGWARNING, "%s - Unknown nodetype requested %s", __FUNCTION__, strDirectory.c_str());
     break;
   }
 
@@ -303,9 +301,9 @@ bool CVideoDatabaseDirectory::ContainsMovies(const CStdString &path)
   return false;
 }
 
-bool CVideoDatabaseDirectory::Exists(const char* strPath)
+bool CVideoDatabaseDirectory::Exists(const CURL& url)
 {
-  CStdString path = CLegacyPathTranslation::TranslateVideoDbPath(strPath);
+  CStdString path = CLegacyPathTranslation::TranslateVideoDbPath(url);
   auto_ptr<CDirectoryNode> pNode(CDirectoryNode::ParseURL(path));
 
   if (!pNode.get())

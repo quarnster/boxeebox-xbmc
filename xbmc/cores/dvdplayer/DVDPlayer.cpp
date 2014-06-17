@@ -1706,9 +1706,11 @@ bool CDVDPlayer::CheckPlayerInit(CCurrentStream& current)
     {
       if(     current.player == DVDPLAYER_AUDIO)
         setclock = m_clock.GetMaster() == MASTER_CLOCK_AUDIO
-                || m_clock.GetMaster() == MASTER_CLOCK_AUDIO_VIDEOREF;
+                || m_clock.GetMaster() == MASTER_CLOCK_AUDIO_VIDEOREF
+                || !m_CurrentVideo.inited;
       else if(current.player == DVDPLAYER_VIDEO)
-        setclock = m_clock.GetMaster() == MASTER_CLOCK_VIDEO;
+        setclock = m_clock.GetMaster() == MASTER_CLOCK_VIDEO
+                || !m_CurrentAudio.inited;
     }
     else
     {
@@ -3555,7 +3557,15 @@ bool CDVDPlayer::OnAction(const CAction &action)
           pt.y *= rs.Height() / rd.Height();
           pt += CPoint(rs.x1, rs.y1);
           if (action.GetID() == ACTION_MOUSE_LEFT_CLICK)
-            return pMenus->OnMouseClick(pt);
+          {
+            if (pMenus->OnMouseClick(pt))
+              return true;
+            else
+            {
+              CApplicationMessenger::Get().SendAction(CAction(ACTION_TRIGGER_OSD), WINDOW_INVALID, false); // Trigger the osd
+              return false;
+            }
+          }
           return pMenus->OnMouseMove(pt);
         }
         break;

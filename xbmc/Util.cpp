@@ -131,31 +131,37 @@ CUtil::~CUtil(void)
 
 CStdString CUtil::GetTitleFromPath(const CStdString& strFileNameAndPath, bool bIsFolder /* = false */)
 {
+  CURL pathToUrl(strFileNameAndPath);
+  return GetTitleFromPath(pathToUrl, bIsFolder);
+}
+
+CStdString CUtil::GetTitleFromPath(const CURL& url, bool bIsFolder /* = false */)
+{
   // use above to get the filename
-  CStdString path(strFileNameAndPath);
+  CStdString path(url.Get());
   URIUtils::RemoveSlashAtEnd(path);
   CStdString strFilename = URIUtils::GetFileName(path);
 
-  CURL url(strFileNameAndPath);
   CStdString strHostname = url.GetHostName();
 
 #ifdef HAS_UPNP
   // UPNP
   if (url.GetProtocol() == "upnp")
-    strFilename = CUPnPDirectory::GetFriendlyName(strFileNameAndPath.c_str());
+    strFilename = CUPnPDirectory::GetFriendlyName(url);
 #endif
 
   if (url.GetProtocol() == "rss")
   {
     CRSSDirectory dir;
     CFileItemList items;
-    if(dir.GetDirectory(strFileNameAndPath, items) && !items.m_strTitle.empty())
+    if(dir.GetDirectory(url, items) && !items.m_strTitle.empty())
       return items.m_strTitle;
   }
 
   // Shoutcast
   else if (url.GetProtocol() == "shout")
   {
+    const CStdString strFileNameAndPath = url.Get();
     const int genre = strFileNameAndPath.find_first_of('=');
     if(genre <0)
       strFilename = g_localizeStrings.Get(260);
@@ -241,7 +247,7 @@ void CUtil::CleanString(const CStdString& strFileName, CStdString& strTitle, CSt
   if (strFileName.Equals(".."))
    return;
 
-  const CStdStringArray &regexps = g_advancedSettings.m_videoCleanStringRegExps;
+  const vector<string> &regexps = g_advancedSettings.m_videoCleanStringRegExps;
 
   CRegExp reTags(true, CRegExp::autoUtf8);
   CRegExp reYear(false, CRegExp::autoUtf8);
@@ -514,7 +520,7 @@ bool CUtil::IsPicture(const CStdString& strFile)
                   g_advancedSettings.m_pictureExtensions + "|.tbn|.dds");
 }
 
-bool CUtil::ExcludeFileOrFolder(const CStdString& strFileOrFolder, const CStdStringArray& regexps)
+bool CUtil::ExcludeFileOrFolder(const CStdString& strFileOrFolder, const vector<string>& regexps)
 {
   if (strFileOrFolder.empty())
     return false;
@@ -876,10 +882,12 @@ bool CUtil::CreateDirectoryEx(const CStdString& strPath)
     return false;
   }
 
-  CStdStringArray dirs = URIUtils::SplitPath(strPath);
+  vector<string> dirs = URIUtils::SplitPath(strPath);
+  if (dirs.empty())
+    return false;
   CStdString dir(dirs.front());
   URIUtils::AddSlashAtEnd(dir);
-  for (CStdStringArray::iterator it = dirs.begin() + 1; it != dirs.end(); it ++)
+  for (vector<string>::const_iterator it = dirs.begin() + 1; it != dirs.end(); it ++)
   {
     dir = URIUtils::AddFileToFolder(dir, *it);
     CDirectory::Create(dir);
@@ -924,13 +932,15 @@ CStdString CUtil::MakeLegalPath(const CStdString &strPathAndFile, int LegalType)
     return strPathAndFile; // we don't support writing anywhere except HD, SMB, NFS and AFP - no need to legalize path
 
   bool trailingSlash = URIUtils::HasSlashAtEnd(strPathAndFile);
-  CStdStringArray dirs = URIUtils::SplitPath(strPathAndFile);
+  vector<string> dirs = URIUtils::SplitPath(strPathAndFile);
+  if (dirs.empty())
+    return strPathAndFile;
   // we just add first token to path and don't legalize it - possible values: 
   // "X:" (local win32), "" (local unix - empty string before '/') or
   // "protocol://domain"
   CStdString dir(dirs.front());
   URIUtils::AddSlashAtEnd(dir);
-  for (CStdStringArray::iterator it = dirs.begin() + 1; it != dirs.end(); it ++)
+  for (vector<string>::const_iterator it = dirs.begin() + 1; it != dirs.end(); it ++)
     dir = URIUtils::AddFileToFolder(dir, MakeLegalFileName(*it, LegalType));
   if (trailingSlash) URIUtils::AddSlashAtEnd(dir);
   return dir;
@@ -1026,7 +1036,7 @@ bool CUtil::TestSplitExec()
 }
 #endif
 
-void CUtil::SplitExecFunction(const CStdString &execString, CStdString &function, vector<CStdString> &parameters)
+void CUtil::SplitExecFunction(const CStdString &execString, CStdString &function, vector<string> &parameters)
 {
   CStdString paramString;
 
@@ -1048,7 +1058,7 @@ void CUtil::SplitExecFunction(const CStdString &execString, CStdString &function
   SplitParams(paramString, parameters);
 }
 
-void CUtil::SplitParams(const CStdString &paramString, std::vector<CStdString> &parameters)
+void CUtil::SplitParams(const CStdString &paramString, std::vector<std::string> &parameters)
 {
   bool inQuotes = false;
   bool lastEscaped = false; // only every second character can be escaped
@@ -1225,7 +1235,7 @@ int CUtil::GetMatchingSource(const CStdString& strPath1, VECSOURCES& VECSOURCES,
     }
 
     // doesnt match a name, so try the source path
-    vector<CStdString> vecPaths;
+    vector<string> vecPaths;
 
     // add any concatenated paths if they exist
     if (share.vecPaths.size() > 0)
@@ -1319,7 +1329,7 @@ CStdString CUtil::TranslateSpecialSource(const CStdString &strSpecial)
 
 CStdString CUtil::MusicPlaylistsLocation()
 {
-  vector<CStdString> vec;
+  vector<string> vec;
   vec.push_back(URIUtils::AddFileToFolder(CSettings::Get().GetString("system.playlistspath"), "music"));
   vec.push_back(URIUtils::AddFileToFolder(CSettings::Get().GetString("system.playlistspath"), "mixed"));
   return XFILE::CMultiPathDirectory::ConstructMultiPath(vec);
@@ -1327,7 +1337,7 @@ CStdString CUtil::MusicPlaylistsLocation()
 
 CStdString CUtil::VideoPlaylistsLocation()
 {
-  vector<CStdString> vec;
+  vector<string> vec;
   vec.push_back(URIUtils::AddFileToFolder(CSettings::Get().GetString("system.playlistspath"), "video"));
   vec.push_back(URIUtils::AddFileToFolder(CSettings::Get().GetString("system.playlistspath"), "mixed"));
   return XFILE::CMultiPathDirectory::ConstructMultiPath(vec);
@@ -1363,32 +1373,29 @@ void CUtil::DeleteDirectoryCache(const CStdString &prefix)
 }
 
 
-void CUtil::GetRecursiveListing(const CStdString& strPath, CFileItemList& items, const CStdString& strMask, bool bUseFileDirectories)
+void CUtil::GetRecursiveListing(const CStdString& strPath, CFileItemList& items, const CStdString& strMask, unsigned int flags /* = DIR_FLAG_DEFAULTS */)
 {
   CFileItemList myItems;
-  int flags = DIR_FLAG_DEFAULTS;
-  if (!bUseFileDirectories)
-    flags |= DIR_FLAG_NO_FILE_DIRS;
   CDirectory::GetDirectory(strPath,myItems,strMask,flags);
   for (int i=0;i<myItems.Size();++i)
   {
     if (myItems[i]->m_bIsFolder)
-      CUtil::GetRecursiveListing(myItems[i]->GetPath(),items,strMask,bUseFileDirectories);
+      CUtil::GetRecursiveListing(myItems[i]->GetPath(),items,strMask,flags);
     else
       items.Add(myItems[i]);
   }
 }
 
-void CUtil::GetRecursiveDirsListing(const CStdString& strPath, CFileItemList& item)
+void CUtil::GetRecursiveDirsListing(const CStdString& strPath, CFileItemList& item, unsigned int flags /* = DIR_FLAG_DEFAULTS */)
 {
   CFileItemList myItems;
-  CDirectory::GetDirectory(strPath,myItems,"",DIR_FLAG_NO_FILE_DIRS);
+  CDirectory::GetDirectory(strPath,myItems,"",flags);
   for (int i=0;i<myItems.Size();++i)
   {
     if (myItems[i]->m_bIsFolder && !myItems[i]->GetPath().Equals(".."))
     {
       item.Add(myItems[i]);
-      CUtil::GetRecursiveDirsListing(myItems[i]->GetPath(),item);
+      CUtil::GetRecursiveDirsListing(myItems[i]->GetPath(),item,flags);
     }
   }
 }
@@ -1564,15 +1571,13 @@ void CUtil::InitRandomSeed()
 #ifdef TARGET_POSIX
 bool CUtil::RunCommandLine(const CStdString& cmdLine, bool waitExit)
 {
-  CStdStringArray args;
-
-  StringUtils::SplitString(cmdLine, ",", args);
+  vector<string> args = StringUtils::Split(cmdLine, ",");
 
   // Strip quotes and whitespace around the arguments, or exec will fail.
   // This allows the python invocation to be written more naturally with any amount of whitespace around the args.
   // But it's still limited, for example quotes inside the strings are not expanded, etc.
   // TODO: Maybe some python library routine can parse this more properly ?
-  for (CStdStringArray::iterator it = args.begin(); it != args.end(); ++it)
+  for (vector<string>::iterator it = args.begin(); it != args.end(); ++it)
   {
     size_t pos;
     pos = it->find_first_not_of(" \t\n\"'");
@@ -1593,7 +1598,7 @@ bool CUtil::RunCommandLine(const CStdString& cmdLine, bool waitExit)
 //
 // FIXME, this should be merged with the function below.
 //
-bool CUtil::Command(const CStdStringArray& arrArgs, bool waitExit)
+bool CUtil::Command(const std::vector<std::string>& arrArgs, bool waitExit)
 {
 #ifdef _DEBUG
   printf("Executing: ");
@@ -1645,8 +1650,7 @@ bool CUtil::SudoCommand(const CStdString &strCommand)
     close(0); // close stdin to avoid sudo request password
     close(1);
     close(2);
-    CStdStringArray arrArgs;
-    StringUtils::SplitString(strCommand, " ", arrArgs);
+    vector<string> arrArgs = StringUtils::Split(strCommand, " ");
     if (arrArgs.size() > 0)
     {
       char **args = (char **)alloca(sizeof(char *) * (arrArgs.size() + 3));
@@ -1910,10 +1914,9 @@ void CUtil::ScanForExternalSubtitles(const CStdString& strMovie, std::vector<CSt
   int iSize = strLookInPaths.size();
   for (int i=0; i<iSize; ++i)
   {
-    CStdStringArray directories;
-    int nTokens = StringUtils::SplitString( strLookInPaths[i], "/", directories );
-    if (nTokens == 1)
-      StringUtils::SplitString( strLookInPaths[i], "\\", directories );
+    vector<string> directories = StringUtils::Split( strLookInPaths[i], "/" );
+    if (directories.size() == 1)
+      directories = StringUtils::Split( strLookInPaths[i], "\\" );
 
     // if it's inside a cdX dir, add parent path
     if (directories.size() >= 2 && directories[directories.size()-2].size() == 3 && StringUtils::StartsWithNoCase(directories[directories.size()-2], "cd")) // SplitString returns empty token as last item, hence size-2
@@ -2036,7 +2039,7 @@ void CUtil::ScanForExternalSubtitles(const CStdString& strMovie, std::vector<CSt
           for (unsigned int k = 0; k < TagConv.m_Langclass.size(); k++)
           {
             strDest = StringUtils::Format("special://temp/subtitle.%s.%d.smi", TagConv.m_Langclass[k].Name.c_str(), i);
-            if (CFile::Cache(vecSubtitles[i], strDest))
+            if (CFile::Copy(vecSubtitles[i], strDest))
             {
               CLog::Log(LOGINFO, " cached subtitle %s->%s\n", vecSubtitles[i].c_str(), strDest.c_str());
               vecSubtitles.push_back(strDest);

@@ -1450,9 +1450,7 @@
 		DFF0F15617528350002DA3A4 /* LibraryLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E14ED0D25F9F900618676 /* LibraryLoader.cpp */; };
 		DFF0F15717528350002DA3A4 /* SoLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E14F40D25F9F900618676 /* SoLoader.cpp */; };
 		DFF0F15817528350002DA3A4 /* DVDAudioCodecFFmpeg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15070D25F9F900618676 /* DVDAudioCodecFFmpeg.cpp */; };
-		DFF0F15A17528350002DA3A4 /* DVDAudioCodecLPcm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15110D25F9F900618676 /* DVDAudioCodecLPcm.cpp */; };
 		DFF0F15B17528350002DA3A4 /* DVDAudioCodecPassthrough.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFB6610615374E80006B8FF1 /* DVDAudioCodecPassthrough.cpp */; };
-		DFF0F15D17528350002DA3A4 /* DVDAudioCodecPcm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15150D25F9F900618676 /* DVDAudioCodecPcm.cpp */; };
 		DFF0F15E17528350002DA3A4 /* DVDOverlayCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFDA3152160E34230047A626 /* DVDOverlayCodec.cpp */; };
 		DFF0F15F17528350002DA3A4 /* DVDOverlayCodecCC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E152B0D25F9F900618676 /* DVDOverlayCodecCC.cpp */; };
 		DFF0F16017528350002DA3A4 /* DVDOverlayCodecFFmpeg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E152D0D25F9F900618676 /* DVDOverlayCodecFFmpeg.cpp */; };
@@ -1611,7 +1609,6 @@
 		DFF0F1FE17528350002DA3A4 /* FileReaderFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF93D6731444A8B0007C6459 /* FileReaderFile.cpp */; };
 		DFF0F1FF17528350002DA3A4 /* FTPDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E16E40D25F9FA00618676 /* FTPDirectory.cpp */; };
 		DFF0F20017528350002DA3A4 /* FTPParse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E16E60D25F9FA00618676 /* FTPParse.cpp */; };
-		DFF0F20117528350002DA3A4 /* HDDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E16E80D25F9FA00618676 /* HDDirectory.cpp */; };
 		DFF0F20217528350002DA3A4 /* HDFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF93D6751444A8B0007C6459 /* HDFile.cpp */; };
 		DFF0F20317528350002DA3A4 /* HDHomeRunDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF93D7F51444B568007C6459 /* HDHomeRunDirectory.cpp */; };
 		DFF0F20417528350002DA3A4 /* HDHomeRunFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF93D7F01444B54A007C6459 /* HDHomeRunFile.cpp */; };
@@ -2297,8 +2294,6 @@
 		E38E1F790D25F9FD00618676 /* DVDAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E14FC0D25F9F900618676 /* DVDAudio.cpp */; };
 		E38E1F7A0D25F9FD00618676 /* DVDClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E14FE0D25F9F900618676 /* DVDClock.cpp */; };
 		E38E1F7B0D25F9FD00618676 /* DVDAudioCodecFFmpeg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15070D25F9F900618676 /* DVDAudioCodecFFmpeg.cpp */; };
-		E38E1F800D25F9FD00618676 /* DVDAudioCodecLPcm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15110D25F9F900618676 /* DVDAudioCodecLPcm.cpp */; };
-		E38E1F820D25F9FD00618676 /* DVDAudioCodecPcm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15150D25F9F900618676 /* DVDAudioCodecPcm.cpp */; };
 		E38E1F840D25F9FD00618676 /* DVDCodecUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15220D25F9F900618676 /* DVDCodecUtils.cpp */; };
 		E38E1F850D25F9FD00618676 /* DVDFactoryCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15240D25F9F900618676 /* DVDFactoryCodec.cpp */; };
 		E38E1F870D25F9FD00618676 /* DVDOverlayCodecCC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E152B0D25F9F900618676 /* DVDOverlayCodecCC.cpp */; };
@@ -2365,7 +2360,6 @@
 		E38E20130D25F9FD00618676 /* FileFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E16C40D25F9FA00618676 /* FileFactory.cpp */; };
 		E38E20230D25F9FD00618676 /* FTPDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E16E40D25F9FA00618676 /* FTPDirectory.cpp */; };
 		E38E20240D25F9FD00618676 /* FTPParse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E16E60D25F9FA00618676 /* FTPParse.cpp */; };
-		E38E20250D25F9FD00618676 /* HDDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E16E80D25F9FA00618676 /* HDDirectory.cpp */; };
 		E38E20270D25F9FD00618676 /* IDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E16EC0D25F9FA00618676 /* IDirectory.cpp */; };
 		E38E20280D25F9FD00618676 /* IFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E16EE0D25F9FA00618676 /* IFile.cpp */; };
 		E38E20290D25F9FD00618676 /* iso9660.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E16F10D25F9FA00618676 /* iso9660.cpp */; };
@@ -2731,9 +2725,7 @@
 		E49911BE174E5D0A00741B6D /* LibraryLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E14ED0D25F9F900618676 /* LibraryLoader.cpp */; };
 		E49911BF174E5D0A00741B6D /* SoLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E14F40D25F9F900618676 /* SoLoader.cpp */; };
 		E49911C0174E5D2500741B6D /* DVDAudioCodecFFmpeg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15070D25F9F900618676 /* DVDAudioCodecFFmpeg.cpp */; };
-		E49911C2174E5D2500741B6D /* DVDAudioCodecLPcm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15110D25F9F900618676 /* DVDAudioCodecLPcm.cpp */; };
 		E49911C3174E5D2500741B6D /* DVDAudioCodecPassthrough.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFB6610615374E80006B8FF1 /* DVDAudioCodecPassthrough.cpp */; };
-		E49911C5174E5D2500741B6D /* DVDAudioCodecPcm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15150D25F9F900618676 /* DVDAudioCodecPcm.cpp */; };
 		E49911C6174E5D2500741B6D /* DVDOverlayCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFDA3152160E34230047A626 /* DVDOverlayCodec.cpp */; };
 		E49911C7174E5D2500741B6D /* DVDOverlayCodecCC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E152B0D25F9F900618676 /* DVDOverlayCodecCC.cpp */; };
 		E49911C8174E5D2500741B6D /* DVDOverlayCodecFFmpeg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E152D0D25F9F900618676 /* DVDOverlayCodecFFmpeg.cpp */; };
@@ -2892,7 +2884,6 @@
 		E4991267174E5D8F00741B6D /* FileReaderFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF93D6731444A8B0007C6459 /* FileReaderFile.cpp */; };
 		E4991268174E5D8F00741B6D /* FTPDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E16E40D25F9FA00618676 /* FTPDirectory.cpp */; };
 		E4991269174E5D8F00741B6D /* FTPParse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E16E60D25F9FA00618676 /* FTPParse.cpp */; };
-		E499126A174E5D8F00741B6D /* HDDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E16E80D25F9FA00618676 /* HDDirectory.cpp */; };
 		E499126B174E5D8F00741B6D /* HDFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF93D6751444A8B0007C6459 /* HDFile.cpp */; };
 		E499126C174E5D8F00741B6D /* HDHomeRunDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF93D7F51444B568007C6459 /* HDHomeRunDirectory.cpp */; };
 		E499126D174E5D8F00741B6D /* HDHomeRunFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF93D7F01444B54A007C6459 /* HDHomeRunFile.cpp */; };
@@ -5224,10 +5215,6 @@
 		E38E15060D25F9F900618676 /* DVDAudioCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDAudioCodec.h; sourceTree = "<group>"; };
 		E38E15070D25F9F900618676 /* DVDAudioCodecFFmpeg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDAudioCodecFFmpeg.cpp; sourceTree = "<group>"; };
 		E38E15080D25F9F900618676 /* DVDAudioCodecFFmpeg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDAudioCodecFFmpeg.h; sourceTree = "<group>"; };
-		E38E15110D25F9F900618676 /* DVDAudioCodecLPcm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDAudioCodecLPcm.cpp; sourceTree = "<group>"; };
-		E38E15120D25F9F900618676 /* DVDAudioCodecLPcm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDAudioCodecLPcm.h; sourceTree = "<group>"; };
-		E38E15150D25F9F900618676 /* DVDAudioCodecPcm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDAudioCodecPcm.cpp; sourceTree = "<group>"; };
-		E38E15160D25F9F900618676 /* DVDAudioCodecPcm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDAudioCodecPcm.h; sourceTree = "<group>"; };
 		E38E15210D25F9F900618676 /* DVDCodecs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDCodecs.h; sourceTree = "<group>"; };
 		E38E15220D25F9F900618676 /* DVDCodecUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDCodecUtils.cpp; sourceTree = "<group>"; };
 		E38E15230D25F9F900618676 /* DVDCodecUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDCodecUtils.h; sourceTree = "<group>"; };
@@ -5397,8 +5384,6 @@
 		E38E16E50D25F9FA00618676 /* FTPDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FTPDirectory.h; sourceTree = "<group>"; };
 		E38E16E60D25F9FA00618676 /* FTPParse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FTPParse.cpp; sourceTree = "<group>"; };
 		E38E16E70D25F9FA00618676 /* FTPParse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FTPParse.h; sourceTree = "<group>"; };
-		E38E16E80D25F9FA00618676 /* HDDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HDDirectory.cpp; sourceTree = "<group>"; };
-		E38E16E90D25F9FA00618676 /* HDDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HDDirectory.h; sourceTree = "<group>"; };
 		E38E16EC0D25F9FA00618676 /* IDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IDirectory.cpp; sourceTree = "<group>"; };
 		E38E16ED0D25F9FA00618676 /* IDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDirectory.h; sourceTree = "<group>"; };
 		E38E16EE0D25F9FA00618676 /* IFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFile.cpp; sourceTree = "<group>"; };
@@ -8849,12 +8834,8 @@
 				E38E15060D25F9F900618676 /* DVDAudioCodec.h */,
 				E38E15070D25F9F900618676 /* DVDAudioCodecFFmpeg.cpp */,
 				E38E15080D25F9F900618676 /* DVDAudioCodecFFmpeg.h */,
-				E38E15110D25F9F900618676 /* DVDAudioCodecLPcm.cpp */,
-				E38E15120D25F9F900618676 /* DVDAudioCodecLPcm.h */,
 				DFB6610615374E80006B8FF1 /* DVDAudioCodecPassthrough.cpp */,
 				DFB6610715374E80006B8FF1 /* DVDAudioCodecPassthrough.h */,
-				E38E15150D25F9F900618676 /* DVDAudioCodecPcm.cpp */,
-				E38E15160D25F9F900618676 /* DVDAudioCodecPcm.h */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
@@ -9182,8 +9163,6 @@
 				E38E16E50D25F9FA00618676 /* FTPDirectory.h */,
 				E38E16E60D25F9FA00618676 /* FTPParse.cpp */,
 				E38E16E70D25F9FA00618676 /* FTPParse.h */,
-				E38E16E80D25F9FA00618676 /* HDDirectory.cpp */,
-				E38E16E90D25F9FA00618676 /* HDDirectory.h */,
 				DF93D6751444A8B0007C6459 /* HDFile.cpp */,
 				DF93D6761444A8B0007C6459 /* HDFile.h */,
 				DF93D7F51444B568007C6459 /* HDHomeRunDirectory.cpp */,
@@ -10703,8 +10682,6 @@
 				E38E1F790D25F9FD00618676 /* DVDAudio.cpp in Sources */,
 				E38E1F7A0D25F9FD00618676 /* DVDClock.cpp in Sources */,
 				E38E1F7B0D25F9FD00618676 /* DVDAudioCodecFFmpeg.cpp in Sources */,
-				E38E1F800D25F9FD00618676 /* DVDAudioCodecLPcm.cpp in Sources */,
-				E38E1F820D25F9FD00618676 /* DVDAudioCodecPcm.cpp in Sources */,
 				E38E1F840D25F9FD00618676 /* DVDCodecUtils.cpp in Sources */,
 				E38E1F850D25F9FD00618676 /* DVDFactoryCodec.cpp in Sources */,
 				E38E1F870D25F9FD00618676 /* DVDOverlayCodecCC.cpp in Sources */,
@@ -10771,7 +10748,6 @@
 				E38E20130D25F9FD00618676 /* FileFactory.cpp in Sources */,
 				E38E20230D25F9FD00618676 /* FTPDirectory.cpp in Sources */,
 				E38E20240D25F9FD00618676 /* FTPParse.cpp in Sources */,
-				E38E20250D25F9FD00618676 /* HDDirectory.cpp in Sources */,
 				E38E20270D25F9FD00618676 /* IDirectory.cpp in Sources */,
 				E38E20280D25F9FD00618676 /* IFile.cpp in Sources */,
 				E38E20290D25F9FD00618676 /* iso9660.cpp in Sources */,
@@ -11975,9 +11951,7 @@
 				DFF0F15617528350002DA3A4 /* LibraryLoader.cpp in Sources */,
 				DFF0F15717528350002DA3A4 /* SoLoader.cpp in Sources */,
 				DFF0F15817528350002DA3A4 /* DVDAudioCodecFFmpeg.cpp in Sources */,
-				DFF0F15A17528350002DA3A4 /* DVDAudioCodecLPcm.cpp in Sources */,
 				DFF0F15B17528350002DA3A4 /* DVDAudioCodecPassthrough.cpp in Sources */,
-				DFF0F15D17528350002DA3A4 /* DVDAudioCodecPcm.cpp in Sources */,
 				DFF0F15E17528350002DA3A4 /* DVDOverlayCodec.cpp in Sources */,
 				DFF0F15F17528350002DA3A4 /* DVDOverlayCodecCC.cpp in Sources */,
 				DFF0F16017528350002DA3A4 /* DVDOverlayCodecFFmpeg.cpp in Sources */,
@@ -12136,7 +12110,6 @@
 				DFF0F1FE17528350002DA3A4 /* FileReaderFile.cpp in Sources */,
 				DFF0F1FF17528350002DA3A4 /* FTPDirectory.cpp in Sources */,
 				DFF0F20017528350002DA3A4 /* FTPParse.cpp in Sources */,
-				DFF0F20117528350002DA3A4 /* HDDirectory.cpp in Sources */,
 				DFF0F20217528350002DA3A4 /* HDFile.cpp in Sources */,
 				DFF0F20317528350002DA3A4 /* HDHomeRunDirectory.cpp in Sources */,
 				DFF0F20417528350002DA3A4 /* HDHomeRunFile.cpp in Sources */,
@@ -13178,9 +13151,7 @@
 				E49911BE174E5D0A00741B6D /* LibraryLoader.cpp in Sources */,
 				E49911BF174E5D0A00741B6D /* SoLoader.cpp in Sources */,
 				E49911C0174E5D2500741B6D /* DVDAudioCodecFFmpeg.cpp in Sources */,
-				E49911C2174E5D2500741B6D /* DVDAudioCodecLPcm.cpp in Sources */,
 				E49911C3174E5D2500741B6D /* DVDAudioCodecPassthrough.cpp in Sources */,
-				E49911C5174E5D2500741B6D /* DVDAudioCodecPcm.cpp in Sources */,
 				E49911C6174E5D2500741B6D /* DVDOverlayCodec.cpp in Sources */,
 				E49911C7174E5D2500741B6D /* DVDOverlayCodecCC.cpp in Sources */,
 				E49911C8174E5D2500741B6D /* DVDOverlayCodecFFmpeg.cpp in Sources */,
@@ -13340,7 +13311,6 @@
 				E4991267174E5D8F00741B6D /* FileReaderFile.cpp in Sources */,
 				E4991268174E5D8F00741B6D /* FTPDirectory.cpp in Sources */,
 				E4991269174E5D8F00741B6D /* FTPParse.cpp in Sources */,
-				E499126A174E5D8F00741B6D /* HDDirectory.cpp in Sources */,
 				E499126B174E5D8F00741B6D /* HDFile.cpp in Sources */,
 				E499126C174E5D8F00741B6D /* HDHomeRunDirectory.cpp in Sources */,
 				E499126D174E5D8F00741B6D /* HDHomeRunFile.cpp in Sources */,

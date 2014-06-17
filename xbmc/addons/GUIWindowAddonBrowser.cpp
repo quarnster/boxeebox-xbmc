@@ -89,7 +89,12 @@ bool CGUIWindowAddonBrowser::OnMessage(CGUIMessage& message)
       int iControl = message.GetSenderId();
       if (iControl == CONTROL_AUTOUPDATE)
       {
-        CSettings::Get().ToggleBool("general.addonautoupdate");
+        const CGUIControl *control = GetControl(CONTROL_AUTOUPDATE);
+        if (control && control->GetControlType() == CGUIControl::GUICONTROL_BUTTON)
+          CSettings::Get().SetInt("general.addonupdates", (CSettings::Get().GetInt("general.addonupdates")+1) % AUTO_UPDATES_MAX);
+        else
+          CSettings::Get().SetInt("general.addonupdates", (CSettings::Get().GetInt("general.addonupdates") == 0) ? 1 : 0);
+        UpdateButtons();
         return true;
       }
       else if (iControl == CONTROL_SHUTUP)
@@ -271,7 +276,27 @@ bool CGUIWindowAddonBrowser::OnClick(int iItem)
 
 void CGUIWindowAddonBrowser::UpdateButtons()
 {
-  SET_CONTROL_SELECTED(GetID(),CONTROL_AUTOUPDATE, CSettings::Get().GetBool("general.addonautoupdate"));
+  const CGUIControl *control = GetControl(CONTROL_AUTOUPDATE);
+  if (control && control->GetControlType() == CGUIControl::GUICONTROL_BUTTON)
+  { // set label
+    CSettingInt *setting = (CSettingInt *)CSettings::Get().GetSetting("general.addonupdates");
+    if (setting)
+    {
+      const StaticIntegerSettingOptions& options = setting->GetOptions();
+      for (StaticIntegerSettingOptions::const_iterator it = options.begin(); it != options.end(); ++it)
+      {
+        if (it->second == setting->GetValue())
+        {
+          SET_CONTROL_LABEL(CONTROL_AUTOUPDATE, it->first);
+          break;
+        }
+      }
+    }
+  }
+  else
+  { // old skin with toggle button - set on if auto updates are on
+    SET_CONTROL_SELECTED(GetID(),CONTROL_AUTOUPDATE, CSettings::Get().GetInt("general.addonupdates") == AUTO_UPDATES_ON);
+  }
   SET_CONTROL_SELECTED(GetID(),CONTROL_SHUTUP, CSettings::Get().GetBool("general.addonnotifications"));
   SET_CONTROL_SELECTED(GetID(),CONTROL_FOREIGNFILTER, CSettings::Get().GetBool("general.addonforeignfilter"));
   CGUIMediaWindow::UpdateButtons();
@@ -391,7 +416,7 @@ int CGUIWindowAddonBrowser::SelectAddonID(TYPE type, CStdString &addonID, bool s
   return SelectAddonID(types, addonID, showNone);
 }
 
-int CGUIWindowAddonBrowser::SelectAddonID(ADDON::TYPE type, CStdStringArray &addonIDs, bool showNone /*= false*/, bool multipleSelection /*= true*/)
+int CGUIWindowAddonBrowser::SelectAddonID(ADDON::TYPE type, vector<string> &addonIDs, bool showNone /*= false*/, bool multipleSelection /*= true*/)
 {
   vector<ADDON::TYPE> types;
   types.push_back(type);
@@ -400,7 +425,7 @@ int CGUIWindowAddonBrowser::SelectAddonID(ADDON::TYPE type, CStdStringArray &add
 
 int CGUIWindowAddonBrowser::SelectAddonID(const vector<ADDON::TYPE> &types, CStdString &addonID, bool showNone /*= false*/)
 {
-  CStdStringArray addonIDs;
+  vector<string> addonIDs;
   if (!addonID.empty())
     addonIDs.push_back(addonID);
   int retval = SelectAddonID(types, addonIDs, showNone, false);
@@ -411,7 +436,7 @@ int CGUIWindowAddonBrowser::SelectAddonID(const vector<ADDON::TYPE> &types, CStd
   return retval;
 }
 
-int CGUIWindowAddonBrowser::SelectAddonID(const vector<ADDON::TYPE> &types, CStdStringArray &addonIDs, bool showNone /*= false*/, bool multipleSelection /*= true*/)
+int CGUIWindowAddonBrowser::SelectAddonID(const vector<ADDON::TYPE> &types, vector<string> &addonIDs, bool showNone /*= false*/, bool multipleSelection /*= true*/)
 {
   CGUIDialogSelect *dialog = (CGUIDialogSelect*)g_windowManager.GetWindow(WINDOW_DIALOG_SELECT);
   if (!dialog)
@@ -473,7 +498,7 @@ int CGUIWindowAddonBrowser::SelectAddonID(const vector<ADDON::TYPE> &types, CStd
 
   if (addonIDs.size() > 0)
   {
-    for (CStdStringArray::const_iterator it = addonIDs.begin(); it != addonIDs.end() ; it++)
+    for (vector<string>::const_iterator it = addonIDs.begin(); it != addonIDs.end() ; it++)
     {
       CFileItemPtr item = items.Get(*it);
       if (item)
@@ -485,7 +510,7 @@ int CGUIWindowAddonBrowser::SelectAddonID(const vector<ADDON::TYPE> &types, CStd
   dialog->DoModal();
   if (!multipleSelection && iTypes == 1 && dialog->IsButtonPressed())
   { // switch to the addons browser.
-    vector<CStdString> params;
+    vector<string> params;
     params.push_back("addons://all/"+TranslateType(types[0],false)+"/");
     params.push_back("return");
     g_windowManager.ActivateWindow(WINDOW_ADDON_BROWSER, params);

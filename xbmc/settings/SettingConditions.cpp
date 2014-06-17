@@ -43,6 +43,9 @@
 #endif // defined(HAS_LIBAMCODEC)
 #include "utils/SystemInfo.h"
 #include "windowing/WindowingFactory.h"
+#if defined(TARGET_DARWIN_OSX)
+#include "osx/DarwinUtils.h"
+#endif// defined(TARGET_DARWIN_OSX)
 
 bool AddonHasSettings(const std::string &condition, const std::string &value, const CSetting *setting)
 {
@@ -250,6 +253,9 @@ void CSettingConditions::Initialize()
   if (g_sysinfo.HasVideoToolBoxDecoder())
     m_simpleConditions.insert("hasvideotoolboxdecoder");
 #endif
+#ifdef TARGET_DARWIN_OSX
+  m_simpleConditions.insert("HasVDA");
+#endif
 #ifdef HAS_LIBAMCODEC
   if (aml_present())
     m_simpleConditions.insert("have_amcodec");
@@ -257,6 +263,10 @@ void CSettingConditions::Initialize()
 #ifdef TARGET_DARWIN_IOS_ATV2
   if (g_sysinfo.IsAppleTV2())
     m_simpleConditions.insert("isappletv2");
+#endif
+#ifdef TARGET_DARWIN_OSX
+  if (DarwinIsSnowLeopard())
+    m_simpleConditions.insert("osxissnowleopard");
 #endif
 #if defined(TARGET_WINDOWS) && defined(HAS_DX)
   m_simpleConditions.insert("has_dx");

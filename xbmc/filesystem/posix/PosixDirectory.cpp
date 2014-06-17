@@ -21,9 +21,12 @@
 #if defined(TARGET_POSIX)
 
 #include "PosixDirectory.h"
+#include "utils/AliasShortcutUtils.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "FileItem.h"
+#include "linux/XTimeUtils.h"
+#include "URL.h"
 
 #include <dirent.h>
 #include <sys/stat.h>
@@ -37,15 +40,18 @@ CPosixDirectory::CPosixDirectory(void)
 CPosixDirectory::~CPosixDirectory(void)
 {}
 
-bool CPosixDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items)
+bool CPosixDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 {
-  const char* root = strPath;
-  struct dirent* entry;
-  DIR *dir = opendir(root);
+  std::string root = url.Get();
 
+  if (IsAliasShortcut(root))
+    TranslateAliasShortcut(root);
+
+  DIR *dir = opendir(root.c_str());
   if (!dir)
     return false;
 
+  struct dirent* entry;
   while ((entry = readdir(dir)) != NULL)
   {
     if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
@@ -101,29 +107,30 @@ bool CPosixDirectory::GetDirectory(const CStdString& strPath, CFileItemList &ite
   return true;
 }
 
-bool CPosixDirectory::Create(const char* strPath)
+bool CPosixDirectory::Create(const CURL& url)
 {
-  if (!strPath || !*strPath)
-    return false;
-
-  return (mkdir(strPath, 0755) == 0 || errno == EEXIST);
+  if (mkdir(url.Get().c_str(), 0755) != 0)
+  {
+    if (errno == EEXIST)
+      return Exists(url);
+    else
+      return false;
+  }
+  return true;
 }
 
-bool CPosixDirectory::Remove(const char* strPath)
+bool CPosixDirectory::Remove(const CURL& url)
 {
-  if (!strPath || !*strPath)
-    return false;
+  if (rmdir(url.Get().c_str()) == 0);
+    return true;
 
-  return (rmdir(strPath) == 0);
+  return !Exists(url);
 }
 
-bool CPosixDirectory::Exists(const char* strPath)
+bool CPosixDirectory::Exists(const CURL& url)
 {
-  if (!strPath || !*strPath)
-    return false;
-
   struct stat buffer;
-  if (stat(strPath, &buffer) != 0)
+  if (stat(url.Get().c_str(), &buffer) != 0)
     return false;
   return S_ISDIR(buffer.st_mode) ? true : false;
 }

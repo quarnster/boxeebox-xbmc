@@ -30,6 +30,7 @@
 #include "utils/StringUtils.h"
 #include "threads/Condition.h"
 #include "threads/CriticalSection.h"
+#include "utils/TimeUtils.h"
 
 #include <sstream>
 
@@ -567,7 +568,9 @@ CAESinkDARWINOSX::CAESinkDARWINOSX()
   m_frameSizePerPlane(0),
   m_framesPerSecond(0),
   m_buffer(NULL),
-  m_started(false)
+  m_started(false),
+  m_render_tick(0),
+  m_render_delay(0.0)
 {
   // By default, kAudioHardwarePropertyRunLoop points at the process's main thread on SnowLeopard,
   // If your process lacks such a run loop, you can set kAudioHardwarePropertyRunLoop to NULL which
@@ -636,7 +639,10 @@ float ScoreStream(const AudioStreamBasicDescription &desc, const AEAudioFormat &
         score += 5;
       else if (desc.mChannelsPerFrame > format.m_channelLayout.Count())
         score += 1;
-      if (format.m_dataFormat == AE_FMT_FLOAT)
+
+      //if we get float, regardless of planar or not, prefer the highest bitdepth.
+      //For streams that are non-planar we let AE know in Initialize()
+      if (format.m_dataFormat == AE_FMT_FLOAT || format.m_dataFormat == AE_FMT_FLOATP)
       { // for float, prefer the highest bitdepth we have
         if (desc.mBitsPerChannel >= 16)
           score += (desc.mBitsPerChannel / 8);
@@ -691,6 +697,7 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
 
   bool                        passthrough  = false;
   UInt32                      outputIndex  = 0;
+  UInt32                      numOutputChannels = 0;
   float                       outputScore  = 0;
   AudioStreamBasicDescription outputFormat = {0};
   AudioStreamID               outputStream = 0;
@@ -736,11 +743,12 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
   }
 
   m_planes = 1;
+  numOutputChannels = outputFormat.mChannelsPerFrame;
   if (streams.size() > 1 && outputFormat.mChannelsPerFrame == 1)
   {
-    CLog::Log(LOGDEBUG, "%s Found planar audio with %u channels?", __FUNCTION__, (unsigned int)streams.size());
-    outputFormat.mChannelsPerFrame = std::min((size_t)format.m_channelLayout.Count(), streams.size());
-    m_planes = outputFormat.mChannelsPerFrame;
+    numOutputChannels = std::min((size_t)format.m_channelLayout.Count(), streams.size());
+    m_planes = numOutputChannels;
+    CLog::Log(LOGDEBUG, "%s Found planar audio with %u channels using %u of them.", __FUNCTION__, (unsigned int)streams.size(), (unsigned int)numOutputChannels);
   }
 
   if (!outputFormat.mFormatID)
@@ -774,7 +782,7 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
   CLog::Log(LOGDEBUG, "%s: New Physical Format: %s", __FUNCTION__, StreamDescriptionToString(outputFormat, formatString));
 
   // update the channel map based on the new stream format
-  GetAEChannelMap(m_device, format.m_channelLayout, outputFormat.mChannelsPerFrame);
+  GetAEChannelMap(m_device, format.m_channelLayout, numOutputChannels);
 
 
   m_latentFrames = m_device.GetNumLatencyFrames();
@@ -851,17 +859,27 @@ void CAESinkDARWINOSX::Deinitialize()
   m_started = false;
 }
 
-double CAESinkDARWINOSX::GetDelay()
+void CAESinkDARWINOSX::GetDelay(AEDelayStatus& status)
 {
-  if (m_buffer)
+  /* lockless way of guaranteeing consistency of tick/delay/buffer,
+   * this work since render callback is short and quick and higher
+   * priority compared to this thread, unsigned int are assumed
+   * aligned and having atomic read/write */
+  unsigned int size;
+  CAESpinLock lock(m_render_locker);
+  do
   {
-    // Calculate the duration of the data in the cache
-    double delay = (double)m_buffer->GetReadSize() / (double)m_frameSizePerPlane;
-    delay += (double)m_latentFrames;
-    delay /= (double)m_framesPerSecond;
-    return delay;
-  }
-  return 0.0;
+    status.tick  = m_render_tick;
+    status.delay = m_render_delay;
+    if(m_buffer)
+      size = m_buffer->GetReadSize();
+    else
+      size = 0;
+
+  } while(lock.retry());
+
+  status.delay += (double)size / (double)m_frameSizePerPlane / (double)m_framesPerSecond;
+  status.delay += (double)m_latentFrames / (double)m_framesPerSecond;
 }
 
 double CAESinkDARWINOSX::GetCacheTotal()
@@ -949,6 +967,7 @@ OSStatus CAESinkDARWINOSX::renderCallback(AudioDeviceID inDevice, const AudioTim
 {
   CAESinkDARWINOSX *sink = (CAESinkDARWINOSX*)inClientData;
 
+  sink->m_render_locker.enter(); /* grab lock */
   sink->m_started = true;
   if (outOutputData->mNumberBuffers)
   {
@@ -994,5 +1013,9 @@ OSStatus CAESinkDARWINOSX::renderCallback(AudioDeviceID inDevice, const AudioTim
     // tell the sink we're good for more data
     condVar.notifyAll();
   }
+
+  sink->m_render_delay = (double)(inOutputTime->mHostTime - inNow->mHostTime) / CurrentHostFrequency();
+  sink->m_render_tick  = inNow->mHostTime;
+  sink->m_render_locker.leave();
   return noErr;
 }

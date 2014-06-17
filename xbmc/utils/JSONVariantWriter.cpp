@@ -39,8 +39,12 @@ string CJSONVariantWriter::Write(const CVariant &value, bool compact)
 
   // Set locale to classic ("C") to ensure valid JSON numbers
   const char *currentLocale = setlocale(LC_NUMERIC, NULL);
+  std::string backupLocale;
   if (currentLocale != NULL)
+  {
+    backupLocale = currentLocale;
     setlocale(LC_NUMERIC, "C");
+  }
 
   if (InternalWrite(g, value))
   {
@@ -57,8 +61,8 @@ string CJSONVariantWriter::Write(const CVariant &value, bool compact)
   }
 
   // Re-set locale to what it was before using yajl
-  if (currentLocale != NULL)
-    setlocale(LC_NUMERIC, currentLocale);
+  if (!backupLocale.empty())
+    setlocale(LC_NUMERIC, backupLocale.c_str());
 
   yajl_gen_clear(g);
   yajl_gen_free(g);
@@ -102,7 +106,7 @@ bool CJSONVariantWriter::InternalWrite(yajl_gen g, const CVariant &value)
   case CVariant::VariantTypeArray:
     success = yajl_gen_status_ok == yajl_gen_array_open(g);
 
-    for (CVariant::const_iterator_array itr = value.begin_array(); itr != value.end_array() && success; itr++)
+    for (CVariant::const_iterator_array itr = value.begin_array(); itr != value.end_array() && success; ++itr)
       success &= InternalWrite(g, *itr);
 
     if (success)
@@ -112,7 +116,7 @@ bool CJSONVariantWriter::InternalWrite(yajl_gen g, const CVariant &value)
   case CVariant::VariantTypeObject:
     success = yajl_gen_status_ok == yajl_gen_map_open(g);
 
-    for (CVariant::const_iterator_map itr = value.begin_map(); itr != value.end_map() && success; itr++)
+    for (CVariant::const_iterator_map itr = value.begin_map(); itr != value.end_map() && success; ++itr)
     {
 #if YAJL_MAJOR == 2
       success &= yajl_gen_status_ok == yajl_gen_string(g, (const unsigned char*)itr->first.c_str(), (size_t)itr->first.length());

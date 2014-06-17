@@ -2667,7 +2667,8 @@ void CVideoDatabase::GetBookMarksForFile(const CStdString& strFilenameAndPath, V
     {
       CStackDirectory dir;
       CFileItemList fileList;
-      dir.GetDirectory(strFilenameAndPath, fileList);
+      const CURL pathToUrl(strFilenameAndPath);
+      dir.GetDirectory(pathToUrl, fileList);
       if (!bAppend)
         bookmarks.clear();
       for (int i = fileList.Size() - 1; i >= 0; i--) // put the bookmarks of the highest part first in the list
@@ -3498,7 +3499,8 @@ bool CVideoDatabase::GetResumePoint(CVideoInfoTag& tag)
     {
       CStackDirectory dir;
       CFileItemList fileList;
-      dir.GetDirectory(tag.m_strFileNameAndPath, fileList);
+      const CURL pathToUrl(tag.m_strFileNameAndPath);
+      dir.GetDirectory(pathToUrl, fileList);
       tag.m_resumePoint.Reset();
       for (int i = fileList.Size() - 1; i >= 0; i--)
       {
@@ -4106,14 +4108,13 @@ bool CVideoDatabase::GetStackTimes(const CStdString &filePath, vector<int> &time
     m_pDS->query( strSQL.c_str() );
     if (m_pDS->num_rows() > 0)
     { // get the video settings info
-      CStdStringArray timeString;
       int timeTotal = 0;
-      StringUtils::SplitString(m_pDS->fv("times").get_asString(), ",", timeString);
+      vector<string> timeString = StringUtils::Split(m_pDS->fv("times").get_asString(), ",");
       times.clear();
-      for (unsigned int i = 0; i < timeString.size(); i++)
+      for (vector<string>::const_iterator i = timeString.begin(); i != timeString.end(); ++i)
       {
-        times.push_back(atoi(timeString[i].c_str()));
-        timeTotal += atoi(timeString[i].c_str());
+        times.push_back(atoi(i->c_str()));
+        timeTotal += atoi(i->c_str());
       }
       m_pDS->close();
       return (timeTotal > 0);

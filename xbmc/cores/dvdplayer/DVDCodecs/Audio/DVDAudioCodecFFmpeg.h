@@ -44,24 +44,17 @@ public:
   virtual int GetSampleRate();
   virtual enum AEDataFormat GetDataFormat();
   virtual const char* GetName() { return "FFmpeg"; }
-  virtual int GetBufferSize() { return m_iBuffered; }
   virtual int GetBitRate();
 
 protected:
   AVCodecContext*     m_pCodecContext;
-  SwrContext*         m_pConvert;
   enum AVSampleFormat m_iSampleFormat;  
   CAEChannelInfo      m_channelLayout;
 
   AVFrame* m_pFrame1;
-  int      m_iBufferSize1;
-  uint8_t*    m_pBuffer2;
-  int      m_iBufferSize2;
-  int      m_iBufferTotalSize2;
+  int m_gotFrame;
 
   bool m_bOpenedCodec;
-  int m_iBuffered;
-
   int      m_channels;
   uint64_t m_layout;
 

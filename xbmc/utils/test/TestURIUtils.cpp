@@ -120,7 +120,7 @@ TEST_F(TestURIUtils, Split)
 
 TEST_F(TestURIUtils, SplitPath)
 {
-  CStdStringArray strarray;
+  std::vector<std::string> strarray;
 
   strarray = URIUtils::SplitPath("http://www.test.com/path/to/movie.avi");
 
@@ -137,7 +137,7 @@ TEST_F(TestURIUtils, SplitPathLocal)
 #else
   const char *path = "/path/to/movie.avi";
 #endif
-  CStdStringArray strarray;
+  std::vector<std::string> strarray;
 
   strarray = URIUtils::SplitPath(path);
 
@@ -493,8 +493,8 @@ TEST_F(TestURIUtils, CreateArchivePath)
 {
   CStdString ref, var;
 
-  ref = "file://%2fpath%2fto%2f/file";
-  URIUtils::CreateArchivePath(var, "file", "/path/to/", "file");
+  ref = "zip://%2fpath%2fto%2f/file";
+  URIUtils::CreateArchivePath(var, "zip", "/path/to/", "file");
   EXPECT_STREQ(ref.c_str(), var.c_str());
 }
 

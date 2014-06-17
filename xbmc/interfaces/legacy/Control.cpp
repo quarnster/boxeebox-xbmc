@@ -141,6 +141,14 @@ namespace XBMCAddon
       g_windowManager.SendThreadMessage(msg, iParentId);
     }
 
+    String ControlTextBox::getText() throw (UnimplementedException)
+    {
+      if (!pGUIControl) return NULL;
+
+      LOCKGUI;
+      return ((CGUITextBox*) pGUIControl)->GetDescription();
+    }
+
     void ControlTextBox::reset() throw(UnimplementedException)
     {
       // create message
@@ -799,12 +807,10 @@ namespace XBMCAddon
         const String& cAttr = pTuple.second();
 
         TiXmlElement pNode("animation");
-        CStdStringArray attrs;
-        StringUtils::SplitString(cAttr.c_str(), " ", attrs);
-        for (unsigned int i = 0; i < attrs.size(); i++)
+        std::vector<std::string> attrs = StringUtils::Split(cAttr, " ");
+        for (std::vector<std::string>::const_iterator i = attrs.begin(); i != attrs.end(); ++i)
         {
-          CStdStringArray attrs2;
-          StringUtils::SplitString(attrs[i], "=", attrs2);
+          std::vector<std::string> attrs2 = StringUtils::Split(*i, "=");
           if (attrs2.size() == 2)
             pNode.SetAttribute(attrs2[0], attrs2[1]);
         }

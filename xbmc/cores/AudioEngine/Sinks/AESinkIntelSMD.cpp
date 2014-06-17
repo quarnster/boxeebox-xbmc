@@ -211,10 +211,13 @@ static inline AEDataFormat getAEDataFormat(int deviceType, AEDataFormat inputMed
     case AE_FMT_S32BE:
     case AE_FMT_S32LE:
     case AE_FMT_S32NE:
+    case AE_FMT_S32NEP:
       outputAEDataFormat = AE_FMT_S32LE;
       break;
     case AE_FMT_FLOAT:
+    case AE_FMT_FLOATP:
     case AE_FMT_DOUBLE:
+    case AE_FMT_DOUBLEP:
       // if using SPDIF/HDMI then attempt to detect 24 bit audio
       // this uses the frame size to attempt to detect mono, stereo, 5.1, or 7.1 24 bit sources
       // Currently 24 bit is disabled until it is determined why audio crackling is heard on certain setups.
@@ -962,12 +965,15 @@ ismd_audio_format_t CAESinkIntelSMD::GetISMDFormat(AEDataFormat audioMediaFormat
   switch (audioMediaFormat)
     {
      case AE_FMT_U8:
+     case AE_FMT_U8P:
      case AE_FMT_S16BE:
      case AE_FMT_S16LE:
      case AE_FMT_S16NE:
+     case AE_FMT_S16NEP:
      case AE_FMT_S32BE:
      case AE_FMT_S32LE:
      case AE_FMT_S32NE:
+     case AE_FMT_S32NEP:
      case AE_FMT_S24BE4:
      case AE_FMT_S24LE4:
      case AE_FMT_S24NE4:
@@ -975,7 +981,9 @@ ismd_audio_format_t CAESinkIntelSMD::GetISMDFormat(AEDataFormat audioMediaFormat
      case AE_FMT_S24LE3:
      case AE_FMT_S24NE3:
      case AE_FMT_FLOAT:
+     case AE_FMT_FLOATP:
      case AE_FMT_DOUBLE:
+     case AE_FMT_DOUBLEP:
      case AE_FMT_LPCM:
        ismdAudioInputFormat = ISMD_AUDIO_MEDIA_FMT_PCM;
        break;

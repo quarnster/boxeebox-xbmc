@@ -30,6 +30,8 @@ using namespace ActiveAE;
 #include "settings/AdvancedSettings.h"
 #include "windowing/WindowingFactory.h"
 
+#include "utils/TimeUtils.h"
+
 #define MAX_CACHE_LEVEL 0.5   // total cache time of stream in seconds
 #define MAX_WATER_LEVEL 0.25  // buffered time after stream stages in seconds
 #define MAX_BUFFER_TIME 0.1   // max time of a buffer in seconds
@@ -37,18 +39,18 @@ using namespace ActiveAE;
 void CEngineStats::Reset(unsigned int sampleRate)
 {
   CSingleLock lock(m_lock);
-  m_sinkUpdate = XbmcThreads::SystemClockMillis();
-  m_sinkDelay = 0;
+  m_sinkDelay.SetDelay(0.0);
   m_sinkSampleRate = sampleRate;
   m_bufferedSamples = 0;
   m_suspended = false;
+  m_playingPTS = 0;
 }
 
-void CEngineStats::UpdateSinkDelay(double delay, int samples)
+void CEngineStats::UpdateSinkDelay(const AEDelayStatus& status, int samples, int64_t pts, int clockId)
 {
   CSingleLock lock(m_lock);
-  m_sinkUpdate = XbmcThreads::SystemClockMillis();
-  m_sinkDelay = delay;
+  m_sinkDelay = status;
+  m_playingPTS = (clockId == m_clockId) ? pts : 0;
   if (samples > m_bufferedSamples)
   {
     CLog::Log(LOGERROR, "CEngineStats::UpdateSinkDelay - inconsistency in buffer time");
@@ -77,33 +79,21 @@ void CEngineStats::AddSamples(int samples, std::list<CActiveAEStream*> &streams)
   }
 }
 
-float CEngineStats::GetDelay()
+void CEngineStats::GetDelay(AEDelayStatus& status)
 {
   CSingleLock lock(m_lock);
-  unsigned int now = XbmcThreads::SystemClockMillis();
-  float delay = m_sinkDelay - (double)(now-m_sinkUpdate) / 1000;
-  delay += (float)m_bufferedSamples / m_sinkSampleRate;
-
-  if (delay < 0)
-    delay = 0.0;
-
-  return delay;
+  status = m_sinkDelay;
+  status.delay += (double)m_bufferedSamples / m_sinkSampleRate;
 }
 
 // this is used to sync a/v so we need to add sink latency here
-float CEngineStats::GetDelay(CActiveAEStream *stream)
+void CEngineStats::GetDelay(AEDelayStatus& status, CActiveAEStream *stream)
 {
   CSingleLock lock(m_lock);
-  unsigned int now = XbmcThreads::SystemClockMillis();
-  float delay = m_sinkDelay - (double)(now-m_sinkUpdate) / 1000;
-  delay += m_sinkLatency;
-  delay += (float)m_bufferedSamples / m_sinkSampleRate;
+  GetDelay(status);
 
-  if (delay < 0)
-    delay = 0.0;
-
-  delay += stream->m_bufferedTime / stream->m_streamResampleRatio;
-  return delay;
+  status.delay += m_sinkLatency;
+  status.delay += stream->m_bufferedTime / stream->m_streamResampleRatio;
 }
 
 float CEngineStats::GetCacheTime(CActiveAEStream *stream)
@@ -118,6 +108,31 @@ float CEngineStats::GetCacheTime(CActiveAEStream *stream)
 float CEngineStats::GetCacheTotal(CActiveAEStream *stream)
 {
   return MAX_CACHE_LEVEL + m_sinkCacheTotal;
+}
+
+int64_t CEngineStats::GetPlayingPTS()
+{
+  CSingleLock lock(m_lock);
+  if (m_playingPTS == 0)
+    return 0;
+
+  int64_t pts = m_playingPTS + m_sinkDelay.GetDelay()*1000;
+
+  if (pts < 0)
+    return 0;
+
+  return pts;
+}
+
+int CEngineStats::Discontinuity(bool reset)
+{
+  CSingleLock lock(m_lock);
+  m_playingPTS = 0;
+  if (reset)
+    m_clockId = 0;
+  else
+    m_clockId++;
+  return m_clockId;
 }
 
 float CEngineStats::GetWaterLevel()
@@ -587,7 +602,11 @@ void CActiveAE::StateMachine(int signal, Protocol *port, Message *msg)
             if (m_extKeepConfig)
               m_extDrainTimer.Set(m_extKeepConfig);
             else
-              m_extDrainTimer.Set(m_stats.GetDelay() * 1000);
+            {
+              AEDelayStatus status;
+              m_stats.GetDelay(status);
+              m_extDrainTimer.Set(status.GetDelay() * 1000);
+            }
             m_extDrain = true;
           }
           m_extTimeout = 0;
@@ -1071,7 +1090,7 @@ void CActiveAE::Configure(AEAudioFormat *desiredFmt)
     else
     {
       outputFormat = m_sinkFormat;
-      outputFormat.m_dataFormat = AE_FMT_FLOAT;
+      outputFormat.m_dataFormat = AE_IS_PLANAR(outputFormat.m_dataFormat) ? AE_FMT_FLOATP : AE_FMT_FLOAT;
       outputFormat.m_frameSize = outputFormat.m_channelLayout.Count() *
                                  (CAEUtil::DataFormatToBits(outputFormat.m_dataFormat) >> 3);
 
@@ -1220,9 +1239,13 @@ CActiveAEStream* CActiveAE::CreateStream(MsgStreamNew *streamMsg)
   stream->m_statsLock = m_stats.GetLock();
   stream->m_fadingSamples = 0;
   stream->m_started = false;
+  stream->m_clockId = m_stats.Discontinuity(true);
 
   if (streamMsg->options & AESTREAM_PAUSED)
+  {
     stream->m_paused = true;
+    stream->m_streamIsBuffering = true;
+  }
 
   if (streamMsg->options & AESTREAM_FORCE_RESAMPLE)
     stream->m_forceResampler = true;
@@ -1349,6 +1372,7 @@ void CActiveAE::DiscardSound(CActiveAESound *sound)
     if ((*it) == sound)
     {
       m_sounds.erase(it);
+      delete sound;
       return;
     }
   }
@@ -1415,7 +1439,7 @@ void CActiveAE::ApplySettingsToFormat(AEAudioFormat &format, AudioSettings &sett
   }
   else
   {
-    format.m_dataFormat = AE_FMT_FLOAT;
+    format.m_dataFormat = AE_IS_PLANAR(format.m_dataFormat) ? AE_FMT_FLOATP : AE_FMT_FLOAT;
     // consider user channel layout for those cases
     // 1. input stream is multichannel
     // 2. stereo upmix is selected
@@ -1734,7 +1758,14 @@ bool CActiveAE::RunStages()
             if ((*it)->m_fadingSamples == -1)
             {
               (*it)->m_fadingSamples = m_internalFormat.m_sampleRate * (float)(*it)->m_fadingTime / 1000.0f;
-              (*it)->m_volume = (*it)->m_fadingBase;
+              if ((*it)->m_fadingSamples > 0)
+                (*it)->m_volume = (*it)->m_fadingBase;
+              else
+              {
+                (*it)->m_volume = (*it)->m_fadingTarget;
+                CSingleLock lock((*it)->m_streamLock);
+                (*it)->m_streamFading = false;
+              }
             }
             if ((*it)->m_fadingSamples > 0)
             {
@@ -1911,13 +1942,15 @@ bool CActiveAE::RunStages()
             }
             else
               CLog::Log(LOGWARNING,"ActiveAE::%s - viz ran out of free buffers", __FUNCTION__);
-            unsigned int now = XbmcThreads::SystemClockMillis();
-            unsigned int timestamp = now + m_stats.GetDelay() * 1000;
+            AEDelayStatus status;
+            m_stats.GetDelay(status);
+            int64_t now = XbmcThreads::SystemClockMillis();
+            int64_t timestamp = now + status.GetDelay() * 1000;
             busy |= m_vizBuffers->ResampleBuffers(timestamp);
             while(!m_vizBuffers->m_outputSamples.empty())
             {
               CSampleBuffer *buf = m_vizBuffers->m_outputSamples.front();
-              if ((now - buf->timestamp) & 0x80000000)
+              if ((now - buf->timestamp) < 0)
                 break;
               else
               {
@@ -1944,6 +1977,12 @@ bool CActiveAE::RunStages()
           m_encoder->Encode(out->pkt->data[0], out->pkt->planes*out->pkt->linesize,
                             buf->pkt->data[0], buf->pkt->planes*buf->pkt->linesize);
           buf->pkt->nb_samples = buf->pkt->max_nb_samples;
+
+          // set pts of last sample
+          buf->pkt_start_offset = buf->pkt->nb_samples;
+          buf->timestamp = out->timestamp;
+          buf->clockId = out->clockId;
+
           out->Return();
           out = buf;
         }

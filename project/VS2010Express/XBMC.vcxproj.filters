@@ -316,6 +316,9 @@
     <Filter Include="media">
       <UniqueIdentifier>{fe89da97-8cd1-4ba3-8ef2-ae4ae5498d59}</UniqueIdentifier>
     </Filter>
+    <Filter Include="filesystem\win32">
+      <UniqueIdentifier>{901e970d-b3b4-463a-93ab-9af30c6a1139}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\xbmc\win32\pch.cpp">
@@ -400,12 +403,6 @@
       <Filter>cores\dvdplayer\DVDCodecs</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecFFmpeg.cpp">
-      <Filter>cores\dvdplayer\DVDCodecs\Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecLPcm.cpp">
-      <Filter>cores\dvdplayer\DVDCodecs\Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecPcm.cpp">
       <Filter>cores\dvdplayer\DVDCodecs\Audio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Video\DVDVideoCodecCrystalHD.cpp">
@@ -2050,9 +2047,6 @@
     <ClCompile Include="..\..\xbmc\filesystem\FTPParse.cpp">
       <Filter>filesystem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\filesystem\HDDirectory.cpp">
-      <Filter>filesystem</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\filesystem\HDFile.cpp">
       <Filter>filesystem</Filter>
     </ClCompile>
@@ -3074,6 +3068,9 @@
     <ClCompile Include="..\..\xbmc\settings\SettingUtils.cpp">
       <Filter>settings</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\xbmc\filesystem\win32\Win32Directory.cpp">
+      <Filter>filesystem\win32</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\xbmc\win32\pch.h">
@@ -3170,12 +3167,6 @@
       <Filter>cores\dvdplayer\DVDCodecs\Audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecFFmpeg.h">
-      <Filter>cores\dvdplayer\DVDCodecs\Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecLPcm.h">
-      <Filter>cores\dvdplayer\DVDCodecs\Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecPcm.h">
       <Filter>cores\dvdplayer\DVDCodecs\Audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Video\DllLibMpeg2.h">
@@ -5032,9 +5023,6 @@
     <ClInclude Include="..\..\xbmc\filesystem\FTPParse.h">
       <Filter>filesystem</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\filesystem\HDDirectory.h">
-      <Filter>filesystem</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\filesystem\HDFile.h">
       <Filter>filesystem</Filter>
     </ClInclude>
@@ -6029,6 +6017,9 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\settings\SettingUtils.h">
       <Filter>settings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\filesystem\win32\Win32Directory.h">
+      <Filter>filesystem\win32</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

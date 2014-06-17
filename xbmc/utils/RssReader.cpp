@@ -147,7 +147,10 @@ void CRssReader::Process()
     // we wait for the network to come up
     if ((url.GetProtocol() == "http" || url.GetProtocol() == "https") &&
         !g_application.getNetwork().IsAvailable(true))
+    {
+      CLog::Log(LOGWARNING, "RSS: No network connection");
       strXML = "<rss><item><title>"+g_localizeStrings.Get(15301)+"</title></item></rss>";
+    }
     else
     {
       XbmcThreads::EndTime timeout(15000);
@@ -269,7 +272,7 @@ void CRssReader::GetNewsItems(TiXmlElement* channelXmlNode, int iFeed)
     {
       CStdString strName = childNode->Value();
 
-      for (i = m_tagSet.begin(); i != m_tagSet.end(); i++)
+      for (i = m_tagSet.begin(); i != m_tagSet.end(); ++i)
       {
         if (!childNode->NoChildren() && i->Equals(strName))
         {
@@ -295,7 +298,7 @@ void CRssReader::GetNewsItems(TiXmlElement* channelXmlNode, int iFeed)
     }
 
     int rsscolour = RSS_COLOR_HEADLINE;
-    for (i = m_tagSet.begin(); i != m_tagSet.end(); i++)
+    for (i = m_tagSet.begin(); i != m_tagSet.end(); ++i)
     {
       map <CStdString, CStdStringW>::iterator j = mTagElements.find(*i);
 

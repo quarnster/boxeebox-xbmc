@@ -71,28 +71,22 @@ using namespace EPG;
 
 CFileItem::CFileItem(const CSong& song)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-  Reset();
-
+  Initialize();
   SetFromSong(song);
+}
+
+CFileItem::CFileItem(const CURL &url, const CAlbum& album)
+{
+  Initialize();
+
+  m_strPath = url.Get();
+  URIUtils::AddSlashAtEnd(m_strPath);
+  SetFromAlbum(album);
 }
 
 CFileItem::CFileItem(const CStdString &path, const CAlbum& album)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-  Reset();
+  Initialize();
 
   m_strPath = path;
   URIUtils::AddSlashAtEnd(m_strPath);
@@ -101,14 +95,7 @@ CFileItem::CFileItem(const CStdString &path, const CAlbum& album)
 
 CFileItem::CFileItem(const CMusicInfoTag& music)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-  Reset();
+  Initialize();
   SetLabel(music.GetTitle());
   m_strPath = music.GetURL();
   m_bIsFolder = URIUtils::HasSlashAtEnd(m_strPath);
@@ -119,29 +106,13 @@ CFileItem::CFileItem(const CMusicInfoTag& music)
 
 CFileItem::CFileItem(const CVideoInfoTag& movie)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-  Reset();
-
+  Initialize();
   SetFromVideoInfoTag(movie);
 }
 
 CFileItem::CFileItem(const CEpgInfoTag& tag)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-
-  Reset();
+  Initialize();
 
   m_strPath = tag.Path();
   m_bIsFolder = false;
@@ -160,15 +131,8 @@ CFileItem::CFileItem(const CEpgInfoTag& tag)
 
 CFileItem::CFileItem(const CPVRChannel& channel)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
+  Initialize();
 
-  Reset();
   CEpgInfoTag epgNow;
   bool bHasEpgNow = channel.GetEPGNow(epgNow);
 
@@ -211,15 +175,7 @@ CFileItem::CFileItem(const CPVRChannel& channel)
 
 CFileItem::CFileItem(const CPVRRecording& record)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag   = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-
-  Reset();
+  Initialize();
 
   m_strPath = record.m_strFileNameAndPath;
   m_bIsFolder = false;
@@ -232,15 +188,7 @@ CFileItem::CFileItem(const CPVRRecording& record)
 
 CFileItem::CFileItem(const CPVRTimerInfoTag& timer)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-
-  Reset();
+  Initialize();
 
   m_strPath = timer.Path();
   m_bIsFolder = false;
@@ -257,14 +205,7 @@ CFileItem::CFileItem(const CPVRTimerInfoTag& timer)
 
 CFileItem::CFileItem(const CArtist& artist)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-  Reset();
+  Initialize();
   SetLabel(artist.strArtist);
   m_strPath = artist.strArtist;
   m_bIsFolder = true;
@@ -275,14 +216,7 @@ CFileItem::CFileItem(const CArtist& artist)
 
 CFileItem::CFileItem(const CGenre& genre)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-  Reset();
+  Initialize();
   SetLabel(genre.strGenre);
   m_strPath = genre.strGenre;
   m_bIsFolder = true;
@@ -305,15 +239,8 @@ CFileItem::CFileItem(const CFileItem& item): CGUIListItem()
 
 CFileItem::CFileItem(const CGUIListItem& item)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-  Reset();
-  // not particularly pretty, but it gets around the issue of Reset() defaulting
+  Initialize();
+  // not particularly pretty, but it gets around the issue of Initialize() defaulting
   // parameters in the CGUIListItem base class.
   *((CGUIListItem *)this) = item;
 
@@ -322,40 +249,30 @@ CFileItem::CFileItem(const CGUIListItem& item)
 
 CFileItem::CFileItem(void)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-  Reset();
+  Initialize();
 }
 
 CFileItem::CFileItem(const CStdString& strLabel)
     : CGUIListItem()
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-  Reset();
+  Initialize();
   SetLabel(strLabel);
+}
+
+CFileItem::CFileItem(const CURL& path, bool bIsFolder)
+{
+  Initialize();
+  m_strPath = path.Get();
+  m_bIsFolder = bIsFolder;
+  // tuxbox urls cannot have a / at end
+  if (m_bIsFolder && !m_strPath.empty() && !IsFileFolder() && !URIUtils::IsTuxBox(m_strPath))
+    URIUtils::AddSlashAtEnd(m_strPath);
+  FillInMimeType(false);
 }
 
 CFileItem::CFileItem(const CStdString& strPath, bool bIsFolder)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-  Reset();
+  Initialize();
   m_strPath = strPath;
   m_bIsFolder = bIsFolder;
   // tuxbox urls cannot have a / at end
@@ -366,14 +283,7 @@ CFileItem::CFileItem(const CStdString& strPath, bool bIsFolder)
 
 CFileItem::CFileItem(const CMediaSource& share)
 {
-  m_musicInfoTag = NULL;
-  m_videoInfoTag = NULL;
-  m_epgInfoTag = NULL;
-  m_pvrChannelInfoTag = NULL;
-  m_pvrRecordingInfoTag = NULL;
-  m_pvrTimerInfoTag = NULL;
-  m_pictureInfoTag = NULL;
-  Reset();
+  Initialize();
   m_bIsFolder = true;
   m_bIsShareOrDrive = true;
   m_strPath = share.strPath;
@@ -537,23 +447,20 @@ const CFileItem& CFileItem::operator=(const CFileItem& item)
   return *this;
 }
 
-void CFileItem::Reset()
+void CFileItem::Initialize()
 {
-  m_strLabel2.clear();
-  SetLabel("");
+  m_musicInfoTag = NULL;
+  m_videoInfoTag = NULL;
+  m_epgInfoTag = NULL;
+  m_pvrChannelInfoTag = NULL;
+  m_pvrRecordingInfoTag = NULL;
+  m_pvrTimerInfoTag = NULL;
+  m_pictureInfoTag = NULL;
   m_bLabelPreformated=false;
-  FreeIcons();
-  m_overlayIcon = ICON_OVERLAY_NONE;
-  m_bSelected = false;
   m_bIsAlbum = false;
-  m_strDVDLabel.clear();
-  m_strTitle.clear();
-  m_strPath.clear();
   m_dwSize = 0;
-  m_bIsFolder = false;
   m_bIsParentFolder=false;
   m_bIsShareOrDrive = false;
-  m_dateTime.Reset();
   m_iDriveType = CMediaSource::SOURCE_TYPE_UNKNOWN;
   m_lStartOffset = 0;
   m_lStartPartNumber = 1;
@@ -561,11 +468,28 @@ void CFileItem::Reset()
   m_iprogramCount = 0;
   m_idepth = 1;
   m_iLockMode = LOCK_MODE_EVERYONE;
-  m_strLockCode = "";
   m_iBadPwdCount = 0;
   m_iHasLock = 0;
   m_bCanQueue=true;
-  m_mimetype = "";
+  m_specialSort = SortSpecialNone;
+}
+
+void CFileItem::Reset()
+{
+  // CGUIListItem members...
+  m_strLabel2.clear();
+  SetLabel("");
+  FreeIcons();
+  m_overlayIcon = ICON_OVERLAY_NONE;
+  m_bSelected = false;
+  m_bIsFolder = false;
+
+  m_strDVDLabel.clear();
+  m_strTitle.clear();
+  m_strPath.clear();
+  m_dateTime.Reset();
+  m_strLockCode.clear();
+  m_mimetype.clear();
   delete m_musicInfoTag;
   m_musicInfoTag=NULL;
   delete m_videoInfoTag;
@@ -581,8 +505,9 @@ void CFileItem::Reset()
   delete m_pictureInfoTag;
   m_pictureInfoTag=NULL;
   m_extrainfo.clear();
-  m_specialSort = SortSpecialNone;
   ClearProperties();
+
+  Initialize();
   SetInvalid();
 }
 
@@ -782,7 +707,7 @@ bool CFileItem::Exists(bool bUseCache /* = true */) const
     strPath = CStackDirectory::GetFirstStackedFile(strPath);
 
   if (m_bIsFolder)
-    return CDirectory::Exists(strPath);
+    return CDirectory::Exists(strPath, bUseCache);
   else
     return CFile::Exists(strPath, bUseCache);
 
@@ -1592,6 +1517,24 @@ std::string CFileItem::GetOpticalMediaPath() const
   return dvdPath;
 }
 
+/*
+ TODO: Ideally this (and SetPath) would not be available outside of construction
+ for CFileItem objects, or at least restricted to essentially be equivalent
+ to construction. This would require re-formulating a bunch of CFileItem
+ construction, and also allowing CFileItemList to have it's own (public)
+ SetURL() function, so for now we give direct access.
+ */
+void CFileItem::SetURL(const CURL& url)
+{
+  m_strPath = url.Get();
+}
+
+const CURL CFileItem::GetURL() const
+{
+  CURL url(m_strPath);
+  return url;
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 /////
 ///// CFileItemList
@@ -2169,7 +2112,7 @@ void CFileItemList::FilterCueItems()
   CSingleLock lock(m_lock);
   // Handle .CUE sheet files...
   VECSONGS itemstoadd;
-  CStdStringArray itemstodelete;
+  vector<string> itemstodelete;
   for (int i = 0; i < (int)m_items.size(); i++)
   {
     CFileItemPtr pItem = m_items[i];
@@ -2213,11 +2156,10 @@ void CFileItemList::FilterCueItems()
                 }
                 else
                 { // try replacing the extension with one of our allowed ones.
-                  CStdStringArray extensions;
-                  StringUtils::SplitString(g_advancedSettings.m_musicExtensions, "|", extensions);
-                  for (unsigned int i = 0; i < extensions.size(); i++)
+                  vector<string> extensions = StringUtils::Split(g_advancedSettings.m_musicExtensions, "|");
+                  for (vector<string>::const_iterator i = extensions.begin(); i != extensions.end(); ++i)
                   {
-                    strMediaFile = URIUtils::ReplaceExtension(pItem->GetPath(), extensions[i]);
+                    strMediaFile = URIUtils::ReplaceExtension(pItem->GetPath(), *i);
                     CFileItem item(strMediaFile, false);
                     if (!item.IsCUESheet() && !item.IsPlayList() && Contains(strMediaFile))
                     {
@@ -2338,9 +2280,9 @@ void CFileItemList::StackFolders()
   // Precompile our REs
   VECCREGEXP folderRegExps;
   CRegExp folderRegExp(true, CRegExp::autoUtf8);
-  const CStdStringArray& strFolderRegExps = g_advancedSettings.m_folderStackRegExps;
+  const vector<string>& strFolderRegExps = g_advancedSettings.m_folderStackRegExps;
 
-  CStdStringArray::const_iterator strExpression = strFolderRegExps.begin();
+  vector<string>::const_iterator strExpression = strFolderRegExps.begin();
   while (strExpression != strFolderRegExps.end())
   {
     if (!folderRegExp.RegComp(*strExpression))
@@ -2430,8 +2372,8 @@ void CFileItemList::StackFiles()
   // Precompile our REs
   VECCREGEXP stackRegExps;
   CRegExp tmpRegExp(true, CRegExp::autoUtf8);
-  const CStdStringArray& strStackRegExps = g_advancedSettings.m_videoStackRegExps;
-  CStdStringArray::const_iterator strRegExp = strStackRegExps.begin();
+  const vector<string>& strStackRegExps = g_advancedSettings.m_videoStackRegExps;
+  vector<string>::const_iterator strRegExp = strStackRegExps.begin();
   while (strRegExp != strStackRegExps.end())
   {
     if (tmpRegExp.RegComp(*strRegExp))
@@ -2718,11 +2660,10 @@ CStdString CFileItem::GetUserMusicThumb(bool alwaysCheckRemote /* = false */, bo
   // if a folder, check for folder.jpg
   if (m_bIsFolder && !IsFileFolder() && (!IsRemote() || alwaysCheckRemote || CSettings::Get().GetBool("musicfiles.findremotethumbs")))
   {
-    CStdStringArray thumbs;
-    StringUtils::SplitString(g_advancedSettings.m_musicThumbs, "|", thumbs);
-    for (unsigned int i = 0; i < thumbs.size(); ++i)
+    vector<string> thumbs = StringUtils::Split(g_advancedSettings.m_musicThumbs, "|");
+    for (vector<string>::const_iterator i = thumbs.begin(); i != thumbs.end(); ++i)
     {
-      CStdString folderThumb(GetFolderThumb(thumbs[i]));
+      CStdString folderThumb(GetFolderThumb(*i));
       if (CFile::Exists(folderThumb))
       {
         return folderThumb;
@@ -2996,8 +2937,7 @@ CStdString CFileItem::GetLocalFanart() const
     items.Append(moreItems);
   }
 
-  CStdStringArray fanarts;
-  StringUtils::SplitString(g_advancedSettings.m_fanartImages, "|", fanarts);
+  vector<string> fanarts = StringUtils::Split(g_advancedSettings.m_fanartImages, "|");
 
   strFile = URIUtils::ReplaceExtension(strFile, "-fanart");
   fanarts.insert(m_bIsFolder ? fanarts.end() : fanarts.begin(), URIUtils::GetFileName(strFile));
@@ -3005,13 +2945,13 @@ CStdString CFileItem::GetLocalFanart() const
   if (!strFile2.empty())
     fanarts.insert(m_bIsFolder ? fanarts.end() : fanarts.begin(), URIUtils::GetFileName(strFile2));
 
-  for (unsigned int i = 0; i < fanarts.size(); ++i)
+  for (vector<string>::const_iterator i = fanarts.begin(); i != fanarts.end(); ++i)
   {
     for (int j = 0; j < items.Size(); j++)
     {
       CStdString strCandidate = URIUtils::GetFileName(items[j]->m_strPath);
       URIUtils::RemoveExtension(strCandidate);
-      CStdString strFanart = fanarts[i];
+      CStdString strFanart = *i;
       URIUtils::RemoveExtension(strFanart);
       if (StringUtils::EqualsNoCase(strCandidate, strFanart))
         return items[j]->m_strPath;
@@ -3258,9 +3198,9 @@ CStdString CFileItem::FindTrailer() const
   // Precompile our REs
   VECCREGEXP matchRegExps;
   CRegExp tmpRegExp(true, CRegExp::autoUtf8);
-  const CStdStringArray& strMatchRegExps = g_advancedSettings.m_trailerMatchRegExps;
+  const vector<string>& strMatchRegExps = g_advancedSettings.m_trailerMatchRegExps;
 
-  CStdStringArray::const_iterator strRegExp = strMatchRegExps.begin();
+  vector<string>::const_iterator strRegExp = strMatchRegExps.begin();
   while (strRegExp != strMatchRegExps.end())
   {
     if (tmpRegExp.RegComp(*strRegExp))

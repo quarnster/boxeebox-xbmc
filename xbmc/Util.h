@@ -68,6 +68,7 @@ public:
   CUtil(void);
   virtual ~CUtil(void);
   static void CleanString(const CStdString& strFileName, CStdString& strTitle, CStdString& strTitleAndYear, CStdString& strYear, bool bRemoveExtension = false, bool bCleanChars = true);
+  static CStdString GetTitleFromPath(const CURL& url, bool bIsFolder = false);
   static CStdString GetTitleFromPath(const CStdString& strFileNameAndPath, bool bIsFolder = false);
   static void GetQualifiedFilename(const CStdString &strBasePath, CStdString &strFilename);
   static void RunShortcut(const char* szPath);
@@ -76,7 +77,7 @@ public:
   static bool IsHTSP(const CStdString& strFile);
   static bool IsLiveTV(const CStdString& strFile);
   static bool IsTVRecording(const CStdString& strFile);
-  static bool ExcludeFileOrFolder(const CStdString& strFileOrFolder, const CStdStringArray& regexps);
+  static bool ExcludeFileOrFolder(const CStdString& strFileOrFolder, const std::vector<std::string>& regexps);
   static void GetFileAndProtocol(const CStdString& strURL, CStdString& strDir);
   static int GetDVDIfoTitle(const CStdString& strPathFile);
 
@@ -136,8 +137,8 @@ public:
    \param paramString the string to break up
    \param parameters the returned parameters
    */
-  static void SplitParams(const CStdString &paramString, std::vector<CStdString> &parameters);
-  static void SplitExecFunction(const CStdString &execString, CStdString &function, std::vector<CStdString> &parameters);
+  static void SplitParams(const CStdString &paramString, std::vector<std::string> &parameters);
+  static void SplitExecFunction(const CStdString &execString, CStdString &function, std::vector<std::string> &parameters);
   static int GetMatchingSource(const CStdString& strPath, VECSOURCES& VECSOURCES, bool& bIsSourceName);
   static CStdString TranslateSpecialSource(const CStdString &strSpecial);
   static void DeleteDirectoryCache(const CStdString &prefix = "");
@@ -147,8 +148,8 @@ public:
   static CStdString VideoPlaylistsLocation();
 
   static void GetSkinThemes(std::vector<CStdString>& vecTheme);
-  static void GetRecursiveListing(const CStdString& strPath, CFileItemList& items, const CStdString& strMask, bool bUseFileDirectories=false);
-  static void GetRecursiveDirsListing(const CStdString& strPath, CFileItemList& items);
+  static void GetRecursiveListing(const CStdString& strPath, CFileItemList& items, const CStdString& strMask, unsigned int flags = 0 /* DIR_FLAG_DEFAULTS */);
+  static void GetRecursiveDirsListing(const CStdString& strPath, CFileItemList& items, unsigned int flags = 0 /* DIR_FLAG_DEFAULTS */);
   static void ForceForwardSlashes(CStdString& strPath);
 
   static double AlbumRelevance(const CStdString& strAlbumTemp1, const CStdString& strAlbum1, const CStdString& strArtistTemp1, const CStdString& strArtist1);
@@ -195,7 +196,7 @@ public:
   //
   // Forks to execute a shell command.
   //
-  static bool Command(const CStdStringArray& arrArgs, bool waitExit = false);
+  static bool Command(const std::vector<std::string>& arrArgs, bool waitExit = false);
 
   //
   // Forks to execute an unparsed shell command line.

@@ -47,12 +47,12 @@ CMultiPathDirectory::CMultiPathDirectory()
 CMultiPathDirectory::~CMultiPathDirectory()
 {}
 
-bool CMultiPathDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items)
+bool CMultiPathDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 {
-  CLog::Log(LOGDEBUG,"CMultiPathDirectory::GetDirectory(%s)", strPath.c_str());
+  CLog::Log(LOGDEBUG,"CMultiPathDirectory::GetDirectory(%s)", url.GetRedacted().c_str());
 
   vector<CStdString> vecPaths;
-  if (!GetPaths(strPath, vecPaths))
+  if (!GetPaths(url, vecPaths))
     return false;
 
   XbmcThreads::EndTime progressTime(3000); // 3 seconds before showing progress bar
@@ -114,12 +114,12 @@ bool CMultiPathDirectory::GetDirectory(const CStdString& strPath, CFileItemList 
   return true;
 }
 
-bool CMultiPathDirectory::Exists(const char* strPath)
+bool CMultiPathDirectory::Exists(const CURL& url)
 {
-  CLog::Log(LOGDEBUG,"Testing Existence (%s)", strPath);
+  CLog::Log(LOGDEBUG,"Testing Existence (%s)", url.GetRedacted().c_str());
 
   vector<CStdString> vecPaths;
-  if (!GetPaths(strPath, vecPaths))
+  if (!GetPaths(url, vecPaths))
     return false;
 
   for (unsigned int i = 0; i < vecPaths.size(); ++i)
@@ -131,10 +131,10 @@ bool CMultiPathDirectory::Exists(const char* strPath)
   return false;
 }
 
-bool CMultiPathDirectory::Remove(const char* strPath)
+bool CMultiPathDirectory::Remove(const CURL& url)
 {
   vector<CStdString> vecPaths;
-  if (!GetPaths(strPath, vecPaths))
+  if (!GetPaths(url, vecPaths))
     return false;
 
   bool success = false;
@@ -154,6 +154,12 @@ CStdString CMultiPathDirectory::GetFirstPath(const CStdString &strPath)
   return "";
 }
 
+bool CMultiPathDirectory::GetPaths(const CURL& url, vector<CStdString>& vecPaths)
+{
+  const CStdString pathToUrl(url.Get());
+  return GetPaths(pathToUrl, vecPaths);
+}
+
 bool CMultiPathDirectory::GetPaths(const CStdString& strPath, vector<CStdString>& vecPaths)
 {
   vecPaths.clear();
@@ -164,9 +170,8 @@ bool CMultiPathDirectory::GetPaths(const CStdString& strPath, vector<CStdString>
   URIUtils::RemoveSlashAtEnd(strPath1);
 
   // split on "/"
-  vector<CStdString> vecTemp;
-  StringUtils::SplitString(strPath1, "/", vecTemp);
-  if (vecTemp.size() == 0)
+  vector<string> vecTemp = StringUtils::Split(strPath1, "/");
+  if (vecTemp.empty())
     return false;
 
   // check each item
@@ -184,9 +189,8 @@ bool CMultiPathDirectory::HasPath(const CStdString& strPath, const CStdString& s
   URIUtils::RemoveSlashAtEnd(strPath1);
 
   // split on "/"
-  vector<CStdString> vecTemp;
-  StringUtils::SplitString(strPath1, "/", vecTemp);
-  if (vecTemp.size() == 0)
+  vector<string> vecTemp = StringUtils::Split(strPath1, "/");
+  if (vecTemp.empty())
     return false;
 
   // check each item
@@ -220,23 +224,23 @@ void CMultiPathDirectory::AddToMultiPath(CStdString& strMultiPath, const CStdStr
   strMultiPath += "/";
 }
 
-CStdString CMultiPathDirectory::ConstructMultiPath(const vector<CStdString> &vecPaths)
+CStdString CMultiPathDirectory::ConstructMultiPath(const vector<string> &vecPaths)
 {
   // we replace all instances of comma's with double comma's, then separate
   // the paths using " , "
   //CLog::Log(LOGDEBUG, "Building multipath");
   CStdString newPath = "multipath://";
   //CLog::Log(LOGDEBUG, "-- adding path: %s", strPath.c_str());
-  for (unsigned int i = 0; i < vecPaths.size(); ++i)
-    AddToMultiPath(newPath, vecPaths[i]);
+  for (vector<string>::const_iterator path = vecPaths.begin(); path != vecPaths.end(); ++path)
+    AddToMultiPath(newPath, *path);
   //CLog::Log(LOGDEBUG, "Final path: %s", newPath.c_str());
   return newPath;
 }
 
-CStdString CMultiPathDirectory::ConstructMultiPath(const std::set<CStdString> &setPaths)
+CStdString CMultiPathDirectory::ConstructMultiPath(const set<string> &setPaths)
 {
   CStdString newPath = "multipath://";
-  for (std::set<CStdString>::const_iterator path = setPaths.begin(); path != setPaths.end(); ++path)
+  for (set<string>::const_iterator path = setPaths.begin(); path != setPaths.end(); ++path)
     AddToMultiPath(newPath, *path);
 
   return newPath;

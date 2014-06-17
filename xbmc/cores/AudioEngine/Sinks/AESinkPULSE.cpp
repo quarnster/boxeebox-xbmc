@@ -484,6 +484,14 @@ bool CAESinkPULSE::Initialize(AEAudioFormat &format, std::string &device)
   struct pa_channel_map map;
   pa_channel_map_init(&map);
 
+   // PULSE cannot cope with e.g. planar formats so we fallback to FLOAT
+   // when we receive an invalid pulse format
+   if (AEFormatToPulseFormat(format.m_dataFormat) == PA_SAMPLE_INVALID)
+   {
+     CLog::Log(LOGDEBUG, "PULSE does not support format: %s - will fallback to AE_FMT_FLOAT", CAEUtil::DataFormatToStr(format.m_dataFormat));
+     format.m_dataFormat = AE_FMT_FLOAT;
+   }
+
   m_passthrough = AE_IS_RAW(format.m_dataFormat);
 
   if(m_passthrough)
@@ -720,11 +728,13 @@ void CAESinkPULSE::Deinitialize()
   }
 }
 
-double CAESinkPULSE::GetDelay()
+void CAESinkPULSE::GetDelay(AEDelayStatus& status)
 {
   if (!m_IsAllocated)
-    return 0;
-
+  {
+    status.SetDelay(0);
+    return;
+  }
   int error = 0;
   pa_usec_t latency = (pa_usec_t) -1;
   pa_threaded_mainloop_lock(m_MainLoop);
@@ -743,7 +753,7 @@ double CAESinkPULSE::GetDelay()
     latency = (pa_usec_t) 0;
 
   pa_threaded_mainloop_unlock(m_MainLoop);
-  return latency / 1000000.0;
+  status.SetDelay(latency / 1000000.0);
 }
 
 double CAESinkPULSE::GetCacheTotal()
@@ -754,7 +764,7 @@ double CAESinkPULSE::GetCacheTotal()
 unsigned int CAESinkPULSE::AddPackets(uint8_t **data, unsigned int frames, unsigned int offset)
 {
   if (!m_IsAllocated)
-    return frames;
+    return 0;
 
   if (m_IsStreamPaused)
   {

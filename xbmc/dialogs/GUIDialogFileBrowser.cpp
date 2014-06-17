@@ -339,6 +339,8 @@ void CGUIDialogFileBrowser::OnSort()
 
 void CGUIDialogFileBrowser::Update(const CStdString &strDirectory)
 {
+  const CURL pathToUrl(strDirectory);
+
   if (m_browsingForImages && m_thumbLoader.IsLoading())
     m_thumbLoader.StopThread();
   // get selected item
@@ -360,9 +362,9 @@ void CGUIDialogFileBrowser::Update(const CStdString &strDirectory)
     CFileItemList items;
     CStdString strParentPath;
 
-    if (!m_rootDir.GetDirectory(strDirectory, items,m_useFileDirectories))
+    if (!m_rootDir.GetDirectory(pathToUrl, items, m_useFileDirectories))
     {
-      CLog::Log(LOGERROR,"CGUIDialogFileBrowser::GetDirectory(%s) failed", CURL::GetRedacted(strDirectory).c_str());
+      CLog::Log(LOGERROR,"CGUIDialogFileBrowser::GetDirectory(%s) failed", pathToUrl.GetRedacted().c_str());
 
       // We assume, we can get the parent
       // directory again
@@ -655,7 +657,7 @@ bool CGUIDialogFileBrowser::ShowAndGetImage(const VECSOURCES &shares, const CStd
   return ShowAndGetFile(shares, ".png|.jpg|.bmp|.gif|.tbn|.dds", heading, path, true); // true for use thumbs
 }
 
-bool CGUIDialogFileBrowser::ShowAndGetImageList(const VECSOURCES &shares, const CStdString &heading, CStdStringArray &path)
+bool CGUIDialogFileBrowser::ShowAndGetImageList(const VECSOURCES &shares, const CStdString &heading, std::vector<std::string> &path)
 {
   return ShowAndGetFileList(shares, ".png|.jpg|.bmp|.gif|.tbn|.dds", heading, path, true); // true for use thumbs
 }
@@ -779,7 +781,7 @@ bool CGUIDialogFileBrowser::ShowAndGetFile(const CStdString &directory, const CS
   return confirmed;
 }
 
-bool CGUIDialogFileBrowser::ShowAndGetFileList(const VECSOURCES &shares, const CStdString &mask, const CStdString &heading, CStdStringArray &path, bool useThumbs /* = false */, bool useFileDirectories /* = false */)
+bool CGUIDialogFileBrowser::ShowAndGetFileList(const VECSOURCES &shares, const CStdString &mask, const CStdString &heading, std::vector<std::string> &path, bool useThumbs /* = false */, bool useFileDirectories /* = false */)
 {
   CGUIDialogFileBrowser *browser = new CGUIDialogFileBrowser();
   if (!browser)

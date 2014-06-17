@@ -2245,9 +2245,6 @@ void COMXPlayer::OnExit()
   {
     CLog::Log(LOGNOTICE, "COMXPlayer::OnExit()");
 
-    m_av_clock.OMXStop();
-    m_av_clock.OMXStateIdle();
-
     // set event to inform openfile something went wrong in case openfile is still waiting for this event
     SetCaching(CACHESTATE_DONE);
 
@@ -2300,6 +2297,9 @@ void COMXPlayer::OnExit()
     m_SelectionStreams.Clear(STREAM_NONE, STREAM_SOURCE_NONE);
 
     m_messenger.End();
+
+    m_av_clock.OMXStop();
+    m_av_clock.OMXStateIdle();
 
     m_av_clock.OMXDeinitialize();
 
@@ -3998,7 +3998,15 @@ bool COMXPlayer::OnAction(const CAction &action)
           pt.y *= rs.Height() / rd.Height();
           pt += CPoint(rs.x1, rs.y1);
           if (action.GetID() == ACTION_MOUSE_LEFT_CLICK)
-            return pMenus->OnMouseClick(pt);
+          {
+            if (pMenus->OnMouseClick(pt))
+              return true;
+            else
+            {
+              CApplicationMessenger::Get().SendAction(CAction(ACTION_TRIGGER_OSD), WINDOW_INVALID, false); // Trigger the osd
+              return false;
+            }
+          }
           return pMenus->OnMouseMove(pt);
         }
         break;
