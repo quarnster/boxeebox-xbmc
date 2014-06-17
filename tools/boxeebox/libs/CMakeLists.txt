@@ -262,110 +262,110 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	taglib
-	URL 				http://taglib.github.io/releases/taglib-1.8.tar.gz
-	URL_MD5 			dcb8bd1b756f2843e18b1fdf3aaeee15
+	URL 			http://taglib.github.io/releases/taglib-1.8.tar.gz
+	URL_MD5 		dcb8bd1b756f2843e18b1fdf3aaeee15
 	PATCH_COMMAND 		sed -e "54,61d" -i taglib/toolkit/taglib.h
 	CONFIGURE_COMMAND	${BASIC_CMAKE}
 )
 
 ExternalProject_Add(
 	libpng
-	URL 				http://sourceforge.net/projects/libpng/files/libpng15/older-releases/1.5.13/libpng-1.5.13.tar.gz/download
-	URL_MD5 			9c5a584d4eb5fe40d0f1bc2090112c65
+	URL 			http://sourceforge.net/projects/libpng/files/libpng15/older-releases/1.5.13/libpng-1.5.13.tar.gz/download
+	URL_MD5 		9c5a584d4eb5fe40d0f1bc2090112c65
 	CONFIGURE_COMMAND 	CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib ${BASIC_CONF}
 	BUILD_COMMAND		CFLAGS=-I${TARGET_DIR}/include make ${PARALLEL}
-	DEPENDS				zlib
+	DEPENDS			zlib
 )
 
 ExternalProject_Add(
 	pcre
-	URL 				http://sourceforge.net/projects/pcre/files/pcre/8.35/pcre-8.35.tar.bz2/download
-	URL_MD5 			6aacb23986adccd9b3bc626c00979958
+	URL 			http://sourceforge.net/projects/pcre/files/pcre/8.35/pcre-8.35.tar.bz2/download
+	URL_MD5 		6aacb23986adccd9b3bc626c00979958
 	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-stack-for-recursion --enable-pcre8 --disable-pcre16 --disable-pcre32 --enable-jit --enable-utf --enable-unicode-properties --enable-newline-is-anycrlf
 )
 
 ExternalProject_Add(
 	jasper
-	URL 				http://www.ece.uvic.ca/~frodo/jasper/software/jasper-1.900.1.zip
-	URL_MD5 			a342b2b4495b3e1394e161eb5d85d754
+	URL 			http://www.ece.uvic.ca/~frodo/jasper/software/jasper-1.900.1.zip
+	URL_MD5 		a342b2b4495b3e1394e161eb5d85d754
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
 ExternalProject_Add(
 	libmicrohttpd
-	URL 				ftp://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.28.tar.gz
-	URL_MD5 			16c3cb66c839c6f929677471401a5b53
+	URL 			ftp://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.34.tar.gz
+	URL_MD5 		2947eee13c2c8affb95023a0cb6fda0c
 	PATCH_COMMAND 		sed -e "s,#ifdef LINUX,#ifdef LINUX\\n#define SOCK_NONBLOCK	O_NONBLOCK\\n#define EPOLL_CLOEXEC O_CLOEXEC," -e "s,epoll_create1,epoll_create,g" -i src/microhttpd/daemon.c
 	CONFIGURE_COMMAND 	CFLAGS=-I{TARGET_DIR}/include LDFLAGS=-lc ac_cv_path_LIBGCRYPT_CONFIG=${SYSROOT}/usr/local/bin/ <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-curl --disable-https
-	DEPENDS 			libgcrypt
+	DEPENDS 		libgcrypt
 )
 
 ExternalProject_Add(
 	freetype2
-	URL 				http://sourceforge.net/projects/freetype/files/freetype2/2.5.3/freetype-2.5.3.tar.gz/download
-	URL_MD5 			cafe9f210e45360279c730d27bf071e9
+	URL 			http://sourceforge.net/projects/freetype/files/freetype2/2.5.3/freetype-2.5.3.tar.gz/download
+	URL_MD5 		cafe9f210e45360279c730d27bf071e9
 	CONFIGURE_COMMAND 	LIBPNG_CFLAGS=-I${SYSROOT}/usr/local/include LIBPNG_LDFLAGS=-L${SYSROOT}/usr/local/lib ${BASIC_CONF}
 	BUILD_COMMAND		make ${PARALLEL}
-	DEPENDS             libpng
+	DEPENDS                 libpng
 )
 
 ExternalProject_Add(
 	gdbm
-	URL 				ftp://ftp.gnu.org/gnu/gdbm/gdbm-1.11.tar.gz
-	URL_MD5 			72c832680cf0999caedbe5b265c8c1bd
+	URL 			ftp://ftp.gnu.org/gnu/gdbm/gdbm-1.11.tar.gz
+	URL_MD5 		72c832680cf0999caedbe5b265c8c1bd
 	PATCH_COMMAND		sed -e "s,finish_cmds=.*,,g" -i configure
-		COMMAND 		sed -e "s,-o .(BINOWN) -g .(BINGRP),,g" -i Makefile.in
+	   COMMAND 	        sed -e "s,-o .(BINOWN) -g .(BINGRP),,g" -i Makefile.in
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 )
 
 ExternalProject_Add(
 	fribidi
-	URL 				http://fribidi.org/download/fribidi-0.19.6.tar.bz2
-	URL_MD5 			ce93d862344991173dabb609bf93ca1d
+	URL 			http://fribidi.org/download/fribidi-0.19.6.tar.bz2
+	URL_MD5 		ce93d862344991173dabb609bf93ca1d
 	CONFIGURE_COMMAND 	${BASIC_CONF} --without-glib --disable-debug --disable-deprecated --disable-silent-rules --enable-malloc --enable-charsets --with-gnu-ld
-	DEPENDS				freetype2
+	DEPENDS			freetype2
 )
 
 ExternalProject_Add(
 	fontconfig
-	URL 				http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.11.1.tar.gz
-	URL_MD5 			e75e303b4f7756c2b16203a57ac87eba
+	URL 			http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.11.1.tar.gz
+	URL_MD5 		e75e303b4f7756c2b16203a57ac87eba
 	CONFIGURE_COMMAND 	${BASIC_CONF} --with-default-fonts=/usr/share/fonts/liberation --disable-docs --without-add-fonts --disable-dependency-tracking ac_cv_path_FREETYPE_CONFIG=${SYSROOT}/usr/local/bin/freetype-config
 	DEPENDS fribidi freetype2 zlib expat libxml2 
 )
 
 ExternalProject_Add(
 	libjpeg-turbo
-	URL 				http://sourceforge.net/projects/libjpeg-turbo/files/1.3.1/libjpeg-turbo-1.3.1.tar.gz/download
-	URL_MD5 			2c3a68129dac443a72815ff5bb374b05
-    CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-nls --with-jpeg8 --without-simd
-    BUILD_COMMAND       make
-    INSTALL_COMMAND     make install
+	URL 			http://sourceforge.net/projects/libjpeg-turbo/files/1.3.1/libjpeg-turbo-1.3.1.tar.gz/download
+	URL_MD5 		2c3a68129dac443a72815ff5bb374b05
+    CONFIGURE_COMMAND           <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-nls --with-jpeg8 --without-simd
+    BUILD_COMMAND               make
+    INSTALL_COMMAND             make install
     BUILD_IN_SOURCE     1
-	DEPENDS             yasm
+	DEPENDS                 yasm
 )
 
 ExternalProject_Add(
 	fftw3
-	URL 				http://www.fftw.org/fftw-3.3.4.tar.gz
-	URL_MD5 			2edab8c06b24feeb3b82bbb3ebf3e7b3
+	URL 			http://www.fftw.org/fftw-3.3.4.tar.gz
+	URL_MD5 		2edab8c06b24feeb3b82bbb3ebf3e7b3
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
 ExternalProject_Add(
 	libogg
-	URL 				http://downloads.xiph.org/releases/ogg/libogg-1.3.1.tar.gz
-	URL_MD5 			ba526cd8f4403a5d351a9efaa8608fbc
+	URL 			http://downloads.xiph.org/releases/ogg/libogg-1.3.1.tar.gz
+	URL_MD5 		ba526cd8f4403a5d351a9efaa8608fbc
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
 ExternalProject_Add(
 	libvorbis
-	URL 				http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.3.tar.gz
-	URL_MD5 			6b1a36f0d72332fae5130688e65efe1f
+	URL 			http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.3.tar.gz
+	URL_MD5 		6b1a36f0d72332fae5130688e65efe1f
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 	DEPENDS libogg
@@ -373,27 +373,27 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	flac
-	URL 				http://downloads.xiph.org/releases/flac/flac-1.2.1.tar.gz
-	URL_MD5 			153c8b15a54da428d1f0fadc756c22c7
+	URL 			http://downloads.xiph.org/releases/flac/flac-1.2.1.tar.gz
+	URL_MD5 		153c8b15a54da428d1f0fadc756c22c7
 	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-oggtest --disable-xmms-plugin
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND		make -C src ${PARALLEL} install
-		COMMAND 		make -C include ${PARALLEL} install
+		COMMAND 	make -C include ${PARALLEL} install
 	DEPENDS libvorbis
 )
 
 ExternalProject_Add(
 	libao
-	URL 				http://downloads.xiph.org/releases/ao/libao-1.2.0.tar.gz
-	URL_MD5 			9f5dd20d7e95fd0dd72df5353829f097
+	URL 			http://downloads.xiph.org/releases/ao/libao-1.2.0.tar.gz
+	URL_MD5 		9f5dd20d7e95fd0dd72df5353829f097
 	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-pulse
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
 ExternalProject_Add(
 	vorbis-tools
-	URL 				http://downloads.xiph.org/releases/vorbis/vorbis-tools-1.4.0.tar.gz
-	URL_MD5 			567e0fb8d321b2cd7124f8208b8b90e6
+	URL 			http://downloads.xiph.org/releases/vorbis/vorbis-tools-1.4.0.tar.gz
+	URL_MD5 		567e0fb8d321b2cd7124f8208b8b90e6
 	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF}
 	DEPENDS flac
 )
@@ -401,28 +401,28 @@ ExternalProject_Add(
 ExternalProject_Add(
 	libass
 	GIT_REPOSITORY   	https://github.com/libass/libass.git
-	GIT_TAG 		    0.11.2
-	PATCH_COMMAND       ./autogen.sh
+	GIT_TAG 		0.11.2
+	PATCH_COMMAND           ./autogen.sh
 	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules --enable-asm --disable-test
 	DEPENDS libpng libenca fribidi freetype2 fontconfig yasm
 )
 # TODO:Fails due to libSDL
 ExternalProject_Add(
 	libmpeg2
-	URL 				http://libmpeg2.sourceforge.net/files/libmpeg2-0.5.1.tar.gz
-	URL_MD5 			0f92c7454e58379b4a5a378485bbd8ef
+	URL 			http://libmpeg2.sourceforge.net/files/libmpeg2-0.5.1.tar.gz
+	URL_MD5 		0f92c7454e58379b4a5a378485bbd8ef
     PATCH_COMMAND
-	    COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/01-libmpeg2-add-asm-leading-underscores.patch
-		COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/02-neon.patch
-		COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/03-config-fix.patch
-		COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/04-clang-fix.patch
+	COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/01-libmpeg2-add-asm-leading-underscores.patch
+	COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/02-neon.patch
+	COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/03-config-fix.patch
+	COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/04-clang-fix.patch
 	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-sdl
 )
 
 ExternalProject_Add(
 	libmodplug
-	URL 				http://sourceforge.net/projects/modplug-xmms/files/libmodplug/0.8.8.5/libmodplug-0.8.8.5.tar.gz/download
-	URL_MD5 			5f30241db109d647781b784e62ddfaa1
+	URL 			http://sourceforge.net/projects/modplug-xmms/files/libmodplug/0.8.8.5/libmodplug-0.8.8.5.tar.gz/download
+	URL_MD5 		5f30241db109d647781b784e62ddfaa1
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 )
 
@@ -438,8 +438,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libssh
-	URL 				http://www.libssh.org/files/0.5/libssh-0.5.3.tar.gz
-	URL_MD5 			9ad01838d3b89d98e900e0f6260a88cc
+	URL 			http://www.libssh.org/files/0.5/libssh-0.5.3.tar.gz
+	URL_MD5 		9ad01838d3b89d98e900e0f6260a88cc
 	PATCH_COMMAND 		sed -e "s,add_subdirectory\(examples\),,g" -i CMakeLists.txt
 	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DWITH_STATIC_LIB=ON -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
 	BUILD_COMMAND 		""
@@ -449,8 +449,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	util-linux
-	URL					https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.1.tar.gz
-	URL_MD5				ec45435f9d3d4a2590f4837e6acc9e73
+	URL			https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.1.tar.gz
+	URL_MD5			ec45435f9d3d4a2590f4837e6acc9e73
 	CONFIGURE_COMMAND	${BASIC_CONF} --without-ncurses
 	BUILD_COMMAND		""
 	INSTALL_COMMAND		make install-uuidincHEADERS
