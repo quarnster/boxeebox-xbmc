@@ -88,6 +88,49 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
+    ncurses
+    URL                   http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.7.tar.gz
+	URL_MD5               cce05daf61a64501ef6cd8da1f727ec6
+    CONFIGURE_COMMAND     ${BASIC_CONF} 
+    BUILD_COMMAND         make
+    INSTALL_COMMAND       make install
+)
+
+ExternalProject_Add(
+    readline
+    URL                   ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
+	URL_MD5               67948acb2ca081f23359d0256e9a271c
+    CONFIGURE_COMMAND     ${BASIC_CONF} CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib --with-curses --without-purify
+    BUILD_COMMAND         make
+    INSTALL_COMMAND       make install
+	DEPENDS               ncurses
+)
+
+ExternalProject_Add(
+    afpfs-ng
+    URL                   http://mirrors.xbmc.org/build-deps/darwin-libs/afpfs-ng-0.8.1.tar.bz2
+	URL_MD5               1bdd9f8a06e6085ea4cc38ce010ef60b 
+	PATCH_COMMAND         
+	    COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/fix_afpfs-ng_includes.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/01-gcrypt.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/02-pointer.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/04-boxee1.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/05-boxee2.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/06-boxee3.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/07-boxee4.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/08-boxee5.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/10-fix-errno.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/11-fix-stat.patch
+        COMMAND           patch -p0 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/android.patch
+		COMMAND           autoreconf -vif
+    CONFIGURE_COMMAND     ${BASIC_CONF} CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib ac_cv_func_malloc_0_nonnull=yes --disable-fuse --enable-gcrypt
+    BUILD_COMMAND         make
+	INSTALL_COMMAND       make install 
+	BUILD_IN_SOURCE 	  1
+	DEPENDS               readline ncurses
+)
+
+ExternalProject_Add(
 	mysql
 	URL 				http://mysql.mirrors.pair.com/Downloads/MySQL-5.1/mysql-5.1.72.tar.gz
 	URL_MD5 			ed79cd48e3e7402143548917813cdb80
@@ -109,6 +152,7 @@ ExternalProject_Add(
 	    COMMAND   make -C scripts/ install-binSCRIPTS
 	    COMMAND   make -C include/ install
 	    COMMAND   sudo ln -sf ${SYSROOT}/usr/local/bin/mysql_config /usr/bin/mysql_config
+		DEPENDS               readline ncurses
 )
 
 ExternalProject_Add(
@@ -529,6 +573,14 @@ ExternalProject_Add(
         DEPENDS           dbus_expat
 )
 
+ExternalProject_Add(
+    libffi
+    URL                   ftp://sourceware.org/pub/libffi/libffi-3.1.tar.gz
+    URL_MD5               f5898b29bbfd70502831a212d9249d10
+    CONFIGURE_COMMAND     ${BASIC_CONF} --disable-debug --enable-structs --enable-raw-api --disable-purify-safety --with-gnu-ld
+    BUILD_COMMAND         make
+)
+
 file(WRITE ${CMAKE_BINARY_DIR}/python_configure_helper.sh
 "
 export CC=${TARGET}-gcc
@@ -542,7 +594,7 @@ export ac_cv_prog_AR=${TARGET}-ar
 export ac_cv_file__dev_ptmx=no
 export ac_cv_file__dev_ptc=no
 export enable_toolbox_glue=no
-./configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-ipv6  --build=${HOSTMACHINE} --target=${TARGET} --with-system-expat
+./configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-ipv6  --build=${HOSTMACHINE} --target=${TARGET} --with-system-expat --with-system-ffi
 ")
 
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/python_configure_helper.sh)
@@ -569,7 +621,7 @@ ExternalProject_Add(
 	BUILD_COMMAND 		HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make ${PARALLEL}
 	INSTALL_COMMAND 	HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make install
 	BUILD_IN_SOURCE 	1
-	DEPENDS zlib expat bzip2 gdbm openssl sqlite
+	DEPENDS zlib expat bzip2 gdbm openssl sqlite libffi
 )
 
 ExternalProject_Add(
@@ -580,13 +632,7 @@ ExternalProject_Add(
     BUILD_COMMAND         make
 )
 
-ExternalProject_Add(
-    libffi
-    URL                   ftp://sourceware.org/pub/libffi/libffi-3.1.tar.gz
-    URL_MD5               f5898b29bbfd70502831a212d9249d10
-    CONFIGURE_COMMAND     ${BASIC_CONF} --disable-debug --enable-structs --enable-raw-api --disable-purify-safety --with-gnu-ld
-    BUILD_COMMAND         make
-)
+
 
 file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
 "
@@ -594,7 +640,6 @@ export CFLAGS=-I${TARGET_DIR}/include
 export LDFLAGS=-L${TARGET_DIR}/lib
 export CFLAGS="-march=i686"
 export LIBS=\"-lpthread -lrt -lffi -lz\"
-export CFLAGS=\"-I${TARGET_DIR}/include\"
 export ac_cv_func_mmap_fixed_mapped=yes
 export ac_cv_func_posix_getpwuid_r=yes
 export ac_cv_func_posix_getgrgid_r=yes
@@ -626,7 +671,6 @@ export CXX=${TARGET}-g++
 export CFLAGS=-I${TARGET_DIR}/include
 export LDFLAGS=-L${TARGET_DIR}/lib
 export LIBS=\"-lpthread -lrt -lgdbm\"
-export CFLAGS=\"-I${TARGET_DIR}/include\"
 ${CMAKE_BINARY_DIR}/avahi-prefix/src/avahi/configure --prefix=${TARGET_DIR} --host=${TARGET}--build=${HOSTMACHINE} --prefix=${TARGET_DIR} --host=${TARGET} py_cv_mod_gtk_=yes py_cv_mod_dbus_=yes ac_cv_func_chroot=no --with-distro=none --disable-glib --disable-qt3 --disable-qt4 --disable-gtk --disable-gtk3 --enable-dbus --disable-dbm --disable-gdbm --enable-libdaemon --disable-python --disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd --disable-doxygen-doc --disable-doxygen-dot --disable-doxygen-man --disable-doxygen-rtf --disable-doxygen-xml --disable-doxygen-chm --disable-doxygen-chi --disable-doxygen-html --disable-doxygen-ps --disable-doxygen-pdf --disable-core-docs --disable-manpages --disable-xmltoman --disable-tests --disable-compat-libdns_sd --disable-compat-howl --with-xml=expat --with-avahi-user=avahi --with-avahi-group=avahi --disable-gobject --disable-nls
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh)
