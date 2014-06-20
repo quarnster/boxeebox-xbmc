@@ -137,6 +137,8 @@ set(libs
 	libgif.so.6
 	libssl.so.1.0.0
 	libcrypto.so.1.0.0
+	libreadline.so.6
+	libafpclient.so.0
 )
 
 foreach(lib ${libs})
@@ -248,7 +250,6 @@ add_custom_target(refresh
 
 add_custom_target(
 egl
-COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/egl/lib ${SYSROOT}/usr/local/lib
 COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/egl/EGL ${SYSROOT}/usr/local/include/EGL
 COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/egl/GLES2 ${SYSROOT}/usr/local/include/GLES2
 COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libs/egl/KHR ${SYSROOT}/usr/local/include/KHR

@@ -88,6 +88,49 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
+    ncurses
+    URL                   http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.7.tar.gz
+	URL_MD5               cce05daf61a64501ef6cd8da1f727ec6
+    CONFIGURE_COMMAND     ${BASIC_CONF} 
+    BUILD_COMMAND         make
+    INSTALL_COMMAND       make install
+)
+
+ExternalProject_Add(
+    readline
+    URL                   ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
+	URL_MD5               67948acb2ca081f23359d0256e9a271c
+    CONFIGURE_COMMAND     ${BASIC_CONF} CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib --with-curses --without-purify
+    BUILD_COMMAND         make
+    INSTALL_COMMAND       make install
+	DEPENDS               ncurses
+)
+
+ExternalProject_Add(
+    afpfs-ng
+    URL                   http://mirrors.xbmc.org/build-deps/darwin-libs/afpfs-ng-0.8.1.tar.bz2
+	URL_MD5               1bdd9f8a06e6085ea4cc38ce010ef60b 
+	PATCH_COMMAND         
+	    COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/fix_afpfs-ng_includes.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/01-gcrypt.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/02-pointer.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/04-boxee1.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/05-boxee2.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/06-boxee3.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/07-boxee4.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/08-boxee5.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/10-fix-errno.patch
+		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/11-fix-stat.patch
+        COMMAND           patch -p0 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/android.patch
+		COMMAND           autoreconf -vif
+    CONFIGURE_COMMAND     ${BASIC_CONF} CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib ac_cv_func_malloc_0_nonnull=yes --disable-fuse --enable-gcrypt
+    BUILD_COMMAND         make
+	INSTALL_COMMAND       make install 
+	BUILD_IN_SOURCE 	  1
+	DEPENDS               readline ncurses
+)
+
+ExternalProject_Add(
 	mysql
 	URL 				http://mysql.mirrors.pair.com/Downloads/MySQL-5.1/mysql-5.1.72.tar.gz
 	URL_MD5 			ed79cd48e3e7402143548917813cdb80
@@ -109,6 +152,7 @@ ExternalProject_Add(
 	    COMMAND   make -C scripts/ install-binSCRIPTS
 	    COMMAND   make -C include/ install
 	    COMMAND   sudo ln -sf ${SYSROOT}/usr/local/bin/mysql_config /usr/bin/mysql_config
+		DEPENDS               readline ncurses
 )
 
 ExternalProject_Add(
@@ -262,110 +306,110 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	taglib
-	URL 				http://taglib.github.io/releases/taglib-1.8.tar.gz
-	URL_MD5 			dcb8bd1b756f2843e18b1fdf3aaeee15
+	URL 			http://taglib.github.io/releases/taglib-1.8.tar.gz
+	URL_MD5 		dcb8bd1b756f2843e18b1fdf3aaeee15
 	PATCH_COMMAND 		sed -e "54,61d" -i taglib/toolkit/taglib.h
 	CONFIGURE_COMMAND	${BASIC_CMAKE}
 )
 
 ExternalProject_Add(
 	libpng
-	URL 				http://sourceforge.net/projects/libpng/files/libpng15/older-releases/1.5.13/libpng-1.5.13.tar.gz/download
-	URL_MD5 			9c5a584d4eb5fe40d0f1bc2090112c65
+	URL 			http://sourceforge.net/projects/libpng/files/libpng15/older-releases/1.5.13/libpng-1.5.13.tar.gz/download
+	URL_MD5 		9c5a584d4eb5fe40d0f1bc2090112c65
 	CONFIGURE_COMMAND 	CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib ${BASIC_CONF}
 	BUILD_COMMAND		CFLAGS=-I${TARGET_DIR}/include make ${PARALLEL}
-	DEPENDS				zlib
+	DEPENDS			zlib
 )
 
 ExternalProject_Add(
 	pcre
-	URL 				http://sourceforge.net/projects/pcre/files/pcre/8.35/pcre-8.35.tar.bz2/download
-	URL_MD5 			6aacb23986adccd9b3bc626c00979958
+	URL 			http://sourceforge.net/projects/pcre/files/pcre/8.35/pcre-8.35.tar.bz2/download
+	URL_MD5 		6aacb23986adccd9b3bc626c00979958
 	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-stack-for-recursion --enable-pcre8 --disable-pcre16 --disable-pcre32 --enable-jit --enable-utf --enable-unicode-properties --enable-newline-is-anycrlf
 )
 
 ExternalProject_Add(
 	jasper
-	URL 				http://www.ece.uvic.ca/~frodo/jasper/software/jasper-1.900.1.zip
-	URL_MD5 			a342b2b4495b3e1394e161eb5d85d754
+	URL 			http://www.ece.uvic.ca/~frodo/jasper/software/jasper-1.900.1.zip
+	URL_MD5 		a342b2b4495b3e1394e161eb5d85d754
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
 ExternalProject_Add(
 	libmicrohttpd
-	URL 				ftp://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.28.tar.gz
-	URL_MD5 			16c3cb66c839c6f929677471401a5b53
+	URL 			ftp://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.34.tar.gz
+	URL_MD5 		2947eee13c2c8affb95023a0cb6fda0c
 	PATCH_COMMAND 		sed -e "s,#ifdef LINUX,#ifdef LINUX\\n#define SOCK_NONBLOCK	O_NONBLOCK\\n#define EPOLL_CLOEXEC O_CLOEXEC," -e "s,epoll_create1,epoll_create,g" -i src/microhttpd/daemon.c
 	CONFIGURE_COMMAND 	CFLAGS=-I{TARGET_DIR}/include LDFLAGS=-lc ac_cv_path_LIBGCRYPT_CONFIG=${SYSROOT}/usr/local/bin/ <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-curl --disable-https
-	DEPENDS 			libgcrypt
+	DEPENDS 		libgcrypt
 )
 
 ExternalProject_Add(
 	freetype2
-	URL 				http://sourceforge.net/projects/freetype/files/freetype2/2.5.3/freetype-2.5.3.tar.gz/download
-	URL_MD5 			cafe9f210e45360279c730d27bf071e9
+	URL 			http://sourceforge.net/projects/freetype/files/freetype2/2.5.3/freetype-2.5.3.tar.gz/download
+	URL_MD5 		cafe9f210e45360279c730d27bf071e9
 	CONFIGURE_COMMAND 	LIBPNG_CFLAGS=-I${SYSROOT}/usr/local/include LIBPNG_LDFLAGS=-L${SYSROOT}/usr/local/lib ${BASIC_CONF}
 	BUILD_COMMAND		make ${PARALLEL}
-	DEPENDS             libpng
+	DEPENDS                 libpng
 )
 
 ExternalProject_Add(
 	gdbm
-	URL 				ftp://ftp.gnu.org/gnu/gdbm/gdbm-1.11.tar.gz
-	URL_MD5 			72c832680cf0999caedbe5b265c8c1bd
+	URL 			ftp://ftp.gnu.org/gnu/gdbm/gdbm-1.11.tar.gz
+	URL_MD5 		72c832680cf0999caedbe5b265c8c1bd
 	PATCH_COMMAND		sed -e "s,finish_cmds=.*,,g" -i configure
-		COMMAND 		sed -e "s,-o .(BINOWN) -g .(BINGRP),,g" -i Makefile.in
+	   COMMAND 	        sed -e "s,-o .(BINOWN) -g .(BINGRP),,g" -i Makefile.in
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 )
 
 ExternalProject_Add(
 	fribidi
-	URL 				http://fribidi.org/download/fribidi-0.19.6.tar.bz2
-	URL_MD5 			ce93d862344991173dabb609bf93ca1d
+	URL 			http://fribidi.org/download/fribidi-0.19.6.tar.bz2
+	URL_MD5 		ce93d862344991173dabb609bf93ca1d
 	CONFIGURE_COMMAND 	${BASIC_CONF} --without-glib --disable-debug --disable-deprecated --disable-silent-rules --enable-malloc --enable-charsets --with-gnu-ld
-	DEPENDS				freetype2
+	DEPENDS			freetype2
 )
 
 ExternalProject_Add(
 	fontconfig
-	URL 				http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.11.1.tar.gz
-	URL_MD5 			e75e303b4f7756c2b16203a57ac87eba
+	URL 			http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.11.1.tar.gz
+	URL_MD5 		e75e303b4f7756c2b16203a57ac87eba
 	CONFIGURE_COMMAND 	${BASIC_CONF} --with-default-fonts=/usr/share/fonts/liberation --disable-docs --without-add-fonts --disable-dependency-tracking ac_cv_path_FREETYPE_CONFIG=${SYSROOT}/usr/local/bin/freetype-config
 	DEPENDS fribidi freetype2 zlib expat libxml2 
 )
 
 ExternalProject_Add(
 	libjpeg-turbo
-	URL 				http://sourceforge.net/projects/libjpeg-turbo/files/1.3.1/libjpeg-turbo-1.3.1.tar.gz/download
-	URL_MD5 			2c3a68129dac443a72815ff5bb374b05
-    CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-nls --with-jpeg8 --without-simd
-    BUILD_COMMAND       make
-    INSTALL_COMMAND     make install
+	URL 			http://sourceforge.net/projects/libjpeg-turbo/files/1.3.1/libjpeg-turbo-1.3.1.tar.gz/download
+	URL_MD5 		2c3a68129dac443a72815ff5bb374b05
+    CONFIGURE_COMMAND           <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-nls --with-jpeg8 --without-simd
+    BUILD_COMMAND               make
+    INSTALL_COMMAND             make install
     BUILD_IN_SOURCE     1
-	DEPENDS             yasm
+	DEPENDS                 yasm
 )
 
 ExternalProject_Add(
 	fftw3
-	URL 				http://www.fftw.org/fftw-3.3.4.tar.gz
-	URL_MD5 			2edab8c06b24feeb3b82bbb3ebf3e7b3
+	URL 			http://www.fftw.org/fftw-3.3.4.tar.gz
+	URL_MD5 		2edab8c06b24feeb3b82bbb3ebf3e7b3
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
 ExternalProject_Add(
 	libogg
-	URL 				http://downloads.xiph.org/releases/ogg/libogg-1.3.1.tar.gz
-	URL_MD5 			ba526cd8f4403a5d351a9efaa8608fbc
+	URL 			http://downloads.xiph.org/releases/ogg/libogg-1.3.1.tar.gz
+	URL_MD5 		ba526cd8f4403a5d351a9efaa8608fbc
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
 ExternalProject_Add(
 	libvorbis
-	URL 				http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.3.tar.gz
-	URL_MD5 			6b1a36f0d72332fae5130688e65efe1f
+	URL 			http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.3.tar.gz
+	URL_MD5 		6b1a36f0d72332fae5130688e65efe1f
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 	DEPENDS libogg
@@ -373,27 +417,27 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	flac
-	URL 				http://downloads.xiph.org/releases/flac/flac-1.2.1.tar.gz
-	URL_MD5 			153c8b15a54da428d1f0fadc756c22c7
+	URL 			http://downloads.xiph.org/releases/flac/flac-1.2.1.tar.gz
+	URL_MD5 		153c8b15a54da428d1f0fadc756c22c7
 	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-oggtest --disable-xmms-plugin
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND		make -C src ${PARALLEL} install
-		COMMAND 		make -C include ${PARALLEL} install
+		COMMAND 	make -C include ${PARALLEL} install
 	DEPENDS libvorbis
 )
 
 ExternalProject_Add(
 	libao
-	URL 				http://downloads.xiph.org/releases/ao/libao-1.2.0.tar.gz
-	URL_MD5 			9f5dd20d7e95fd0dd72df5353829f097
+	URL 			http://downloads.xiph.org/releases/ao/libao-1.2.0.tar.gz
+	URL_MD5 		9f5dd20d7e95fd0dd72df5353829f097
 	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-pulse
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
 ExternalProject_Add(
 	vorbis-tools
-	URL 				http://downloads.xiph.org/releases/vorbis/vorbis-tools-1.4.0.tar.gz
-	URL_MD5 			567e0fb8d321b2cd7124f8208b8b90e6
+	URL 			http://downloads.xiph.org/releases/vorbis/vorbis-tools-1.4.0.tar.gz
+	URL_MD5 		567e0fb8d321b2cd7124f8208b8b90e6
 	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF}
 	DEPENDS flac
 )
@@ -401,28 +445,28 @@ ExternalProject_Add(
 ExternalProject_Add(
 	libass
 	GIT_REPOSITORY   	https://github.com/libass/libass.git
-	GIT_TAG 		    0.11.2
-	PATCH_COMMAND       ./autogen.sh
+	GIT_TAG 		0.11.2
+	PATCH_COMMAND           ./autogen.sh
 	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules --enable-asm --disable-test
 	DEPENDS libpng libenca fribidi freetype2 fontconfig yasm
 )
 # TODO:Fails due to libSDL
 ExternalProject_Add(
 	libmpeg2
-	URL 				http://libmpeg2.sourceforge.net/files/libmpeg2-0.5.1.tar.gz
-	URL_MD5 			0f92c7454e58379b4a5a378485bbd8ef
+	URL 			http://libmpeg2.sourceforge.net/files/libmpeg2-0.5.1.tar.gz
+	URL_MD5 		0f92c7454e58379b4a5a378485bbd8ef
     PATCH_COMMAND
-	    COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/01-libmpeg2-add-asm-leading-underscores.patch
-		COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/02-neon.patch
-		COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/03-config-fix.patch
-		COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/04-clang-fix.patch
+	COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/01-libmpeg2-add-asm-leading-underscores.patch
+	COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/02-neon.patch
+	COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/03-config-fix.patch
+	COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/libmpeg2-patches/04-clang-fix.patch
 	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-sdl
 )
 
 ExternalProject_Add(
 	libmodplug
-	URL 				http://sourceforge.net/projects/modplug-xmms/files/libmodplug/0.8.8.5/libmodplug-0.8.8.5.tar.gz/download
-	URL_MD5 			5f30241db109d647781b784e62ddfaa1
+	URL 			http://sourceforge.net/projects/modplug-xmms/files/libmodplug/0.8.8.5/libmodplug-0.8.8.5.tar.gz/download
+	URL_MD5 		5f30241db109d647781b784e62ddfaa1
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 )
 
@@ -438,8 +482,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libssh
-	URL 				http://www.libssh.org/files/0.5/libssh-0.5.3.tar.gz
-	URL_MD5 			9ad01838d3b89d98e900e0f6260a88cc
+	URL 			http://www.libssh.org/files/0.5/libssh-0.5.3.tar.gz
+	URL_MD5 		9ad01838d3b89d98e900e0f6260a88cc
 	PATCH_COMMAND 		sed -e "s,add_subdirectory\(examples\),,g" -i CMakeLists.txt
 	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DWITH_STATIC_LIB=ON -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
 	BUILD_COMMAND 		""
@@ -449,8 +493,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	util-linux
-	URL					https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.1.tar.gz
-	URL_MD5				ec45435f9d3d4a2590f4837e6acc9e73
+	URL			https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.1.tar.gz
+	URL_MD5			ec45435f9d3d4a2590f4837e6acc9e73
 	CONFIGURE_COMMAND	${BASIC_CONF} --without-ncurses
 	BUILD_COMMAND		""
 	INSTALL_COMMAND		make install-uuidincHEADERS
@@ -529,6 +573,14 @@ ExternalProject_Add(
         DEPENDS           dbus_expat
 )
 
+ExternalProject_Add(
+    libffi
+    URL                   ftp://sourceware.org/pub/libffi/libffi-3.1.tar.gz
+    URL_MD5               f5898b29bbfd70502831a212d9249d10
+    CONFIGURE_COMMAND     ${BASIC_CONF} --disable-debug --enable-structs --enable-raw-api --disable-purify-safety --with-gnu-ld
+    BUILD_COMMAND         make
+)
+
 file(WRITE ${CMAKE_BINARY_DIR}/python_configure_helper.sh
 "
 export CC=${TARGET}-gcc
@@ -542,7 +594,7 @@ export ac_cv_prog_AR=${TARGET}-ar
 export ac_cv_file__dev_ptmx=no
 export ac_cv_file__dev_ptc=no
 export enable_toolbox_glue=no
-./configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-ipv6  --build=${HOSTMACHINE} --target=${TARGET} --with-system-expat
+./configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-ipv6  --build=${HOSTMACHINE} --target=${TARGET} --with-system-expat --with-system-ffi
 ")
 
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/python_configure_helper.sh)
@@ -569,7 +621,7 @@ ExternalProject_Add(
 	BUILD_COMMAND 		HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make ${PARALLEL}
 	INSTALL_COMMAND 	HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make install
 	BUILD_IN_SOURCE 	1
-	DEPENDS zlib expat bzip2 gdbm openssl sqlite
+	DEPENDS zlib expat bzip2 gdbm openssl sqlite libffi
 )
 
 ExternalProject_Add(
@@ -580,13 +632,7 @@ ExternalProject_Add(
     BUILD_COMMAND         make
 )
 
-ExternalProject_Add(
-    libffi
-    URL                   ftp://sourceware.org/pub/libffi/libffi-3.1.tar.gz
-    URL_MD5               f5898b29bbfd70502831a212d9249d10
-    CONFIGURE_COMMAND     ${BASIC_CONF} --disable-debug --enable-structs --enable-raw-api --disable-purify-safety --with-gnu-ld
-    BUILD_COMMAND         make
-)
+
 
 file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
 "
@@ -594,7 +640,6 @@ export CFLAGS=-I${TARGET_DIR}/include
 export LDFLAGS=-L${TARGET_DIR}/lib
 export CFLAGS="-march=i686"
 export LIBS=\"-lpthread -lrt -lffi -lz\"
-export CFLAGS=\"-I${TARGET_DIR}/include\"
 export ac_cv_func_mmap_fixed_mapped=yes
 export ac_cv_func_posix_getpwuid_r=yes
 export ac_cv_func_posix_getgrgid_r=yes
@@ -626,7 +671,6 @@ export CXX=${TARGET}-g++
 export CFLAGS=-I${TARGET_DIR}/include
 export LDFLAGS=-L${TARGET_DIR}/lib
 export LIBS=\"-lpthread -lrt -lgdbm\"
-export CFLAGS=\"-I${TARGET_DIR}/include\"
 ${CMAKE_BINARY_DIR}/avahi-prefix/src/avahi/configure --prefix=${TARGET_DIR} --host=${TARGET}--build=${HOSTMACHINE} --prefix=${TARGET_DIR} --host=${TARGET} py_cv_mod_gtk_=yes py_cv_mod_dbus_=yes ac_cv_func_chroot=no --with-distro=none --disable-glib --disable-qt3 --disable-qt4 --disable-gtk --disable-gtk3 --enable-dbus --disable-dbm --disable-gdbm --enable-libdaemon --disable-python --disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd --disable-doxygen-doc --disable-doxygen-dot --disable-doxygen-man --disable-doxygen-rtf --disable-doxygen-xml --disable-doxygen-chm --disable-doxygen-chi --disable-doxygen-html --disable-doxygen-ps --disable-doxygen-pdf --disable-core-docs --disable-manpages --disable-xmltoman --disable-tests --disable-compat-libdns_sd --disable-compat-howl --with-xml=expat --with-avahi-user=avahi --with-avahi-group=avahi --disable-gobject --disable-nls
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh)

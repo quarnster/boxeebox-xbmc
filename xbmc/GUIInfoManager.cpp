@@ -1033,7 +1033,8 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition, bool 
       }
       if (prop.name == "property")
       {
-        if (prop.param() == "fanart_image")
+        // properties are stored case sensitive in m_listItemProperties, but lookup is insensitive in CGUIListItem::GetProperty
+        if (StringUtils::EqualsNoCase(prop.param(), "fanart_image"))
           return AddMultiInfo(GUIInfo(PLAYER_ITEM_ART, ConditionalStringParameter("fanart")));
         return AddListItemProp(prop.param(), MUSICPLAYER_PROPERTY_OFFSET);
       }
@@ -1316,7 +1317,8 @@ int CGUIInfoManager::TranslateListItem(const Property &info)
   }
   if (info.name == "property" && info.num_params() == 1)
   {
-    if (info.param() == "fanart_image")
+    // properties are stored case sensitive in m_listItemProperties, but lookup is insensitive in CGUIListItem::GetProperty
+    if (StringUtils::EqualsNoCase(info.param(), "fanart_image"))
       return AddListItemProp("fanart", LISTITEM_ART_OFFSET);
     return AddListItemProp(info.param());
   }
@@ -1651,7 +1653,7 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
     if(g_application.m_pPlayer->IsPlaying())
     {
       SPlayerAudioStreamInfo info;
-      g_application.m_pPlayer->GetAudioStreamInfo(CMediaSettings::Get().GetCurrentVideoSettings().m_AudioStream, info);
+      g_application.m_pPlayer->GetAudioStreamInfo(g_application.m_pPlayer->GetAudioStream(), info);
       strLabel = info.language;
     }
     break;
@@ -1663,16 +1665,10 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
     }
     break;
   case VIDEOPLAYER_SUBTITLES_LANG:
-    // use g_settings.m_currentVideoSettings.m_SubtitleOn and g_settings.m_currentVideoSettings.m_SubtitleStream
-    // instead of g_application.m_pPlayer->GetSubtitleVisible and g_application.m_pPlayer->GetSubtitle()
-    // because when we switch subtitles there is few frames when weird things happen on subtitles switch with latter:
-    //  - when we switch from one sub to another, for few frames (time to handle message, close old and open new subs)
-    //    g_application.m_pPlayer->GetSubtitle() will return last of sub streams (that's how CSelectionStreams::IndexOf work for -1 index)
-    //  - when we toggle disable/enable subs there will be few frames before message will be handled
     if(g_application.m_pPlayer && g_application.m_pPlayer->IsPlaying() && CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn)
     {
       SPlayerSubtitleStreamInfo info;
-      g_application.m_pPlayer->GetSubtitleStreamInfo(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream, info);
+      g_application.m_pPlayer->GetSubtitleStreamInfo(g_application.m_pPlayer->GetSubtitle(), info);
       strLabel = info.language;
     }
     break;

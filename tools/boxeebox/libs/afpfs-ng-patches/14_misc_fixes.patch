@@ -1,0 +1,687 @@
+diff -Naur afpfs-ng-0.8.1/cmdline/cmdline_afp.c afpfs-ng-0.8.1-new/cmdline/cmdline_afp.c
+--- afpfs-ng-0.8.1/cmdline/cmdline_afp.c	2013-03-09 01:11:39.041703014 -0800
++++ afpfs-ng-0.8.1-new/cmdline/cmdline_afp.c	2013-03-09 01:34:32.640434161 -0800
+@@ -417,7 +417,7 @@
+ 	}
+ 
+ 	if (sscanf(modestring,"%o",&mode)!=1) {
+-		printf("Mode of %s isn't octal\n");
++		printf("Mode of %s isn't octal\n", modestring);
+ 		goto error;
+ 	}
+ 
+@@ -828,11 +828,11 @@
+ 	char text[40960];
+ 
+ 	afp_status_header(text,&len);
+-	printf(text);
++	printf("%s", text);
+ 
+ 	len=40960;
+ 	afp_status_server(server,text,&len);
+-	printf(text);
++	printf("%s", text);
+ 	return 0;
+ }
+ 
+@@ -1217,7 +1217,7 @@
+ {
+ 	struct passwd * passwd;
+ 
+-	snprintf(curdir,PATH_MAX,"%s",DEFAULT_DIRECTORY);
++	snprintf(curdir,sizeof(curdir), DEFAULT_DIRECTORY);
+ 	if (init_uams()<0) return -1;
+ 
+ 	afp_default_url(&url);
+diff -Naur afpfs-ng-0.8.1/cmdline/cmdline_testafp.c afpfs-ng-0.8.1-new/cmdline/cmdline_testafp.c
+--- afpfs-ng-0.8.1/cmdline/cmdline_testafp.c	2013-03-09 01:11:39.041703014 -0800
++++ afpfs-ng-0.8.1-new/cmdline/cmdline_testafp.c	2013-03-09 01:43:37.225588301 -0800
+@@ -14,7 +14,7 @@
+ extern struct afp_volume * vol;
+ 
+ static int test_one_url(char * url_string, 
+-	enum {TCPIP,AT} protocol, 
++	e_proto protocol, 
+ 	char * username, 
+ 	char * uamname,
+ 	char * password,
+@@ -26,12 +26,12 @@
+ 	struct afp_url valid_url;
+ 	afp_default_url(&valid_url);
+ 	valid_url.protocol=protocol;
+-	sprintf(valid_url.servername,servername);
+-	sprintf(valid_url.volumename,volumename);
+-	sprintf(valid_url.path,path);
+-	sprintf(valid_url.username,username);
+-	sprintf(valid_url.password,password);
+-	sprintf(valid_url.uamname,uamname);
++	sprintf(valid_url.servername, "%s", servername);
++	sprintf(valid_url.volumename, "%s", volumename);
++	sprintf(valid_url.path, "%s", path);
++	sprintf(valid_url.username, "%s", username);
++	sprintf(valid_url.password, "%s", password);
++	sprintf(valid_url.uamname,"%s", uamname);
+ 	valid_url.port=port;
+ 
+ 	if (afp_url_validate(url_string,&valid_url)) 
+@@ -42,7 +42,7 @@
+ 	return 0;
+ }
+ 
+-int test_urls(void)
++int test_urls(char *arg)
+ {
+ 
+ 	printf("Testing URL parsing\n");
+diff -Naur afpfs-ng-0.8.1/cmdline/cmdline_testafp.h afpfs-ng-0.8.1-new/cmdline/cmdline_testafp.h
+--- afpfs-ng-0.8.1/cmdline/cmdline_testafp.h	2008-01-04 21:00:57.000000000 -0800
++++ afpfs-ng-0.8.1-new/cmdline/cmdline_testafp.h	2013-03-09 01:37:52.117926800 -0800
+@@ -1,4 +1,4 @@
+ #ifndef __CMDLINE_TESTAFP_H_
+-int test_urls(void);
++int test_urls(char *);
+ #endif
+ 
+diff -Naur afpfs-ng-0.8.1/fuse/client.c afpfs-ng-0.8.1-new/fuse/client.c
+--- afpfs-ng-0.8.1/fuse/client.c	2013-03-09 01:11:49.593566133 -0800
++++ afpfs-ng-0.8.1-new/fuse/client.c	2013-03-09 02:40:19.474816137 -0800
+@@ -77,7 +77,7 @@
+ 				/* Try the path of afp_client */
+ 				char newpath[PATH_MAX];
+ 				snprintf(newpath,PATH_MAX,"%s/%s",
+-					basename(thisbin),AFPFSD_FILENAME);
++					(char *)basename(thisbin),AFPFSD_FILENAME);
+ 				if (execvp(newpath,argv)) {
+ 					perror("Starting up afpfsd\n");
+ 					return -1;
+@@ -548,7 +548,7 @@
+ done:
+ 	memset(toprint,0,MAX_CLIENT_RESPONSE+200);
+ 	snprintf(toprint,MAX_CLIENT_RESPONSE+200,"%s",incoming_buffer+sizeof(*answer));
+-	printf(toprint);
++	printf("%s", toprint);
+ 	return ((struct afp_server_response *) incoming_buffer)->result;
+ 
+ 	return 0;
+diff -Naur afpfs-ng-0.8.1/fuse/commands.c afpfs-ng-0.8.1-new/fuse/commands.c
+--- afpfs-ng-0.8.1/fuse/commands.c	2013-03-09 01:11:39.045703089 -0800
++++ afpfs-ng-0.8.1-new/fuse/commands.c	2013-03-09 02:24:01.643108793 -0800
+@@ -165,7 +165,7 @@
+ 		len = strlen(c->client_string);
+ 		snprintf(c->client_string+len,
+ 			MAX_CLIENT_RESPONSE-len,
+-			message);
++			"%s", message);
+ 	} else {
+ 
+ 		if (fuse_log_method & LOG_METHOD_SYSLOG)
+@@ -468,7 +468,7 @@
+ 	volume->mapping=req->map;
+ 	afp_detect_mapping(volume);
+ 
+-	snprintf(volume->mountpoint,255,req->mountpoint);
++	snprintf(volume->mountpoint,255, "%s", req->mountpoint);
+ 
+ 	/* Create the new thread and block until we get an answer back */
+ 	{
+diff -Naur afpfs-ng-0.8.1/include/afpfs-ng/afp.h afpfs-ng-0.8.1-new/include/afpfs-ng/afp.h
+--- afpfs-ng-0.8.1/include/afpfs-ng/afp.h	2013-03-09 01:12:52.600776096 -0800
++++ afpfs-ng-0.8.1-new/include/afpfs-ng/afp.h	2013-03-09 01:42:23.014521820 -0800
+@@ -20,9 +20,11 @@
+ /* This is the maximum AFP version this library supports */
+ #define AFP_MAX_SUPPORTED_VERSION 32
+ 
++typedef enum {TCPIP,AT} e_proto;
++
+ /* afp_url is used to pass locations around */
+ struct afp_url {
+-	enum {TCPIP,AT} protocol;
++	e_proto protocol;
+ 	char username[AFP_MAX_USERNAME_LEN];
+ 	char uamname[50];
+ 	char password[AFP_MAX_PASSWORD_LEN];
+@@ -60,7 +62,7 @@
+ 	unsigned int backup_date;
+ 	unsigned int fileid;
+ 	unsigned short offspring;
+-	char sync;
++	unsigned char sync;
+ 	char finderinfo[32];
+ 	char name[AFP_MAX_PATH];
+ 	char basename[AFP_MAX_PATH];
+@@ -327,6 +329,10 @@
+ int afp_dologin(struct afp_server *server,
+ 	unsigned int uam, char * username, char * passwd);
+ 
++int afp_dopasswd(struct afp_server *server, 
++		unsigned int uam, char * username, 
++		char * oldpasswd, char * newpasswd);
++
+ void afp_free_server(struct afp_server **server);
+ 
+ struct afp_server * afp_server_init(struct addrinfo * address);
+diff -Naur afpfs-ng-0.8.1/lib/afp.c afpfs-ng-0.8.1-new/lib/afp.c
+--- afpfs-ng-0.8.1/lib/afp.c	2013-03-09 01:12:52.600776096 -0800
++++ afpfs-ng-0.8.1-new/lib/afp.c	2013-03-08 22:51:51.175152459 -0800
+@@ -124,6 +124,17 @@
+ 
+ };
+ 
++void afp_server_identify(struct afp_server * s)
++{
++	if (strcmp(s->machine_type,"Netatalk")==0)
++		s->server_type=AFPFS_SERVER_TYPE_NETATALK;
++	else if (strcmp(s->machine_type,"AirPort")==0)
++		s->server_type=AFPFS_SERVER_TYPE_AIRPORT;
++	else if (strcmp(s->machine_type,"Macintosh")==0)
++		s->server_type=AFPFS_SERVER_TYPE_MACINTOSH;
++	else
++		s->server_type=AFPFS_SERVER_TYPE_UNKNOWN;
++}
+ 
+ /* This is the simplest afp reply */
+ static int afp_blank_reply(struct afp_server *server, char * buf, unsigned int size, void * ignored)
+@@ -246,7 +257,6 @@
+ {
+ 
+ 	struct afp_server * server;
+-	unsigned char emergency=0;
+ 
+ 	if (volume==NULL)
+ 		return -1;
+@@ -262,7 +272,6 @@
+ 
+ 	afp_flush(volume);
+ 
+-	if (afp_volclose(volume)!=kFPNoErr) emergency=1;
+ 	free_entire_did_cache(volume);
+ 	remove_fork_list(volume);
+ 	if (volume->dtrefnum) afp_closedt(server,volume->dtrefnum);
+@@ -657,10 +666,10 @@
+         		    inet_ntop(AF_INET, &(((struct sockaddr_in *)address->ai_addr)->sin_addr),
+         		            ip_addr, INET6_ADDRSTRLEN);
+         		break;
+-				default:
+-					snprintf(ip_addr, 22, "unknown address family");
+-				break;
++			default:
++				snprintf(ip_addr, 22, "unknown address family");
++			break;
+ 		}
+ 
+ 		snprintf(log_msg, sizeof(log_msg), "trying %s ...", ip_addr);
+ 
+diff -Naur afpfs-ng-0.8.1/lib/afp_url.c afpfs-ng-0.8.1-new/lib/afp_url.c
+--- afpfs-ng-0.8.1/lib/afp_url.c	2013-03-09 01:12:52.600776096 -0800
++++ afpfs-ng-0.8.1-new/lib/afp_url.c	2013-03-09 00:42:28.355711821 -0800
+@@ -245,7 +245,7 @@
+ 		}
+ 	}
+ 
+-	snprintf(url->servername,strlen(p)+1,p);
++	snprintf(url->servername,strlen(p)+1,"%s", p);
+ 	if (check_servername(url->servername)) {
+ 			if (verbose) printf("This isn't a valid servername\n");
+ 			return -1;
+@@ -275,7 +275,7 @@
+ 	if ((q=escape_strrchr(p,':',":"))) {
+ 		*q='\0';
+ 		q++;
+-		snprintf(url->password,strlen(q)+1,q);
++		snprintf(url->password,strlen(q)+1, "%s", q);
+ 		if (check_password(url->password)) {
+ 			if (verbose) printf("This isn't a valid passwd\n");
+ 			return -1;
+@@ -288,7 +288,7 @@
+ 	if ((q=strstr(p,";AUTH="))) {
+ 		*q='\0';
+ 		q+=6;
+-		snprintf(url->uamname,strlen(q)+1,q);
++		snprintf(url->uamname,strlen(q)+1,"%s", q);
+ 		if (check_uamname(url->uamname)) {
+ 			if (verbose) printf("This isn't a valid uamname\n");
+ 			return -1;
+@@ -296,7 +296,7 @@
+ 	}
+ 
+ 	if (strlen(p)>0) {
+-		snprintf(url->username,strlen(p)+1,p);
++		snprintf(url->username,strlen(p)+1,"%s", p);
+ 		if (check_username(url->username)) {
+ 			if (verbose) printf("This isn't a valid username\n");
+ 			return -1;;
+@@ -316,12 +316,12 @@
+ 		*q='\0';
+ 		q++;
+ 	}
+-	snprintf(url->volumename,strlen(p)+1,p);
++	snprintf(url->volumename,strlen(p)+1,"%s", p);
+ 
+ 
+ 	if (q) {
+ 		url->path[0]='/';
+-		snprintf(url->path+1,strlen(q)+1,q);
++		snprintf(url->path+1,strlen(q)+1, "%s", q);
+ 	}
+ 
+ done:
+diff -Naur afpfs-ng-0.8.1/lib/codepage.c afpfs-ng-0.8.1-new/lib/codepage.c
+--- afpfs-ng-0.8.1/lib/codepage.c	2013-03-09 01:11:39.057702742 -0800
++++ afpfs-ng-0.8.1-new/lib/codepage.c	2013-03-08 23:01:32.511843370 -0800
+@@ -60,14 +60,11 @@
+ int convert_path_to_afp(char encoding, char * dest, 
+ 	char * src, int dest_len)
+ {
+-	unsigned char namelen;
+-
+ 	memset(dest,0,dest_len);
+ 
+ 	switch (encoding) {
+ 	case kFPUTF8Name: 
+-		namelen=convert_utf8pre_to_utf8dec(src, strlen(src),
+-			dest,dest_len);
++		convert_utf8pre_to_utf8dec(src, strlen(src), dest,dest_len);
+ 		break;
+ 	case kFPLongName:
+ 		memcpy(dest,src,dest_len);
+@@ -158,7 +155,7 @@
+ 	char * dest, int dest_len)
+ {
+ 	int i, j=0;
+-	for (i=0;i<src_len; i++) {
++	for (i=0;i<src_len && j < dest_len; i++) {
+ 		if (((src[i] & 0xff)==0xc3) && ((src[i+1] & 0xff)==0xa4)) {
+ 			dest[j]=0x61;
+ 			j++;
+diff -Naur afpfs-ng-0.8.1/lib/dsi.c afpfs-ng-0.8.1-new/lib/dsi.c
+--- afpfs-ng-0.8.1/lib/dsi.c	2013-03-09 01:12:46.448848728 -0800
++++ afpfs-ng-0.8.1-new/lib/dsi.c	2013-03-08 23:14:30.390064472 -0800
+@@ -33,6 +33,10 @@
+ 
+ static int dsi_remove_from_request_queue(struct afp_server *server,
+ 	struct dsi_request *toremove);
++int convert_utf8dec_to_utf8pre(const char *src, int src_len,
++	char * dest, int dest_len);
++int convert_utf8pre_to_utf8dec(const char * src, int src_len, 
++	char * dest, int dest_len);
+ 
+ /* This sets up a DSI header. */
+ void dsi_setup_header(struct afp_server * server, struct dsi_header * header, char command) 
+@@ -100,6 +104,7 @@
+ 	return 0;
+ }
+ 
++/*
+ static int check_incoming_dsi_message(struct afp_server * server, void * data, int size)
+ {
+ 	struct dsi_header * header = (struct dsi_header *) data;
+@@ -129,6 +134,7 @@
+ 
+ 	return 0;
+ }
++*/
+ 
+ static int dsi_remove_from_request_queue(struct afp_server *server,
+ 	struct dsi_request *toremove)
+@@ -484,7 +490,7 @@
+ 	/* Now work our way through the variable bits */
+ 
+         /* First, make sure we're on an even boundary */
+-        if (((uint64_t) p) & 0x1) p++;
++        if (((uintptr_t) p) & 0x1) p++;
+ 
+ 	/* Get the signature */
+ 
+diff -Naur afpfs-ng-0.8.1/lib/loop.c afpfs-ng-0.8.1-new/lib/loop.c
+--- afpfs-ng-0.8.1/lib/loop.c	2013-03-09 01:12:46.448848728 -0800
++++ afpfs-ng-0.8.1-new/lib/loop.c	2013-03-09 00:24:44.357087573 -0800
+@@ -266,7 +266,6 @@
+ 		}
+ 	}
+ 
+-error:
+ 	return -1;
+ 
+ }
+diff -Naur afpfs-ng-0.8.1/lib/lowlevel.c afpfs-ng-0.8.1-new/lib/lowlevel.c
+--- afpfs-ng-0.8.1/lib/lowlevel.c	2013-03-09 01:12:46.448848728 -0800
++++ afpfs-ng-0.8.1-new/lib/lowlevel.c	2013-03-09 01:02:39.668485038 -0800
+@@ -23,6 +23,8 @@
+ #include "afpfs-ng/afp_protocol.h"
+ #include "afpfs-ng/codepage.h"
+ #include "afpfs-ng/utils.h"
++#include "afpfs-ng/midlevel.h"
++#include "lib/forklist.h"
+ #include "did.h"
+ #include "users.h"
+ 
+@@ -183,7 +185,7 @@
+ 
+ 	int ret, dsi_ret,rc;
+ 	int create_file=0;
+-	char converted_path[AFP_MAX_PATH];
++	//char converted_path[AFP_MAX_PATH];
+ 	unsigned char aflags = AFP_OPENFORK_ALLOWREAD;
+ 
+ 	if (flags & O_RDONLY) aflags|=AFP_OPENFORK_ALLOWREAD;
+@@ -211,7 +213,7 @@
+ 
+ 	/*this will be used later for caching*/
+ #ifdef __linux__
+-	fp->sync=(flags & (O_SYNC | O_DIRECT));  
++	fp->sync=((unsigned char)(flags & (O_SYNC | O_DIRECT)));  
+ #else
+ 	fp->sync=(flags & (O_SYNC));  
+ #endif
+@@ -321,8 +323,6 @@
+ 			goto error;
+ 	}
+ 
+-
+-out:
+ 	return 0;
+ 
+ error:
+@@ -340,7 +340,6 @@
+ 	int rc;
+ 	unsigned int bufsize=min(volume->server->rx_quantum,size);
+ 	struct afp_rx_buffer buffer;
+-	size_t amount_copied;
+ 
+ 	*eof=0;
+ 
+@@ -396,7 +395,7 @@
+ int ll_readdir(struct afp_volume * volume, const char *path, 
+ 	struct afp_file_info **fb, int resource)
+ {
+-	struct afp_file_info * p, * filebase=NULL, *base, *last;
++	struct afp_file_info * p, * filebase=NULL, *base, *last=NULL;
+ 	unsigned short reqcount=20;  /* Get them in batches of 20 */
+ 	unsigned long startindex=1;
+ 	int rc=0, ret=0, exit=0;
+@@ -633,7 +632,6 @@
+ 	int ret,err=0;
+ 	uint64_t sizetowrite, ignored;
+ 	uint32_t ignored32;
+-	unsigned char flags = 0;
+ 	unsigned int max_packet_size=volume->server->tx_quantum;
+ 	off_t o=0;
+ 	*totalwritten=0;
+diff -Naur afpfs-ng-0.8.1/lib/midlevel.c afpfs-ng-0.8.1-new/lib/midlevel.c
+--- afpfs-ng-0.8.1/lib/midlevel.c	2013-03-09 01:11:49.597566084 -0800
++++ afpfs-ng-0.8.1-new/lib/midlevel.c	2013-03-09 00:35:19.997100194 -0800
+@@ -78,7 +78,7 @@
+ 
+ 	fp->unixprivs.ua_permissions=0;
+ 
+-	if (!vol->extra_flags & VOLUME_EXTRA_FLAGS_VOL_SUPPORTS_UNIX)
++	if (!(vol->extra_flags & VOLUME_EXTRA_FLAGS_VOL_SUPPORTS_UNIX))
+ 		return 0;
+ 
+ 	if (fp->isdir) {
+@@ -215,12 +215,9 @@
+ /* FIXME:  doesn't handle create properly */
+ 
+ 	struct afp_file_info * fp ;
+-	int ret, dsi_ret,rc;
+-	int create_file=0;
+-	char resource=0;
++	int ret;
+ 	unsigned int dirid;
+ 	char converted_path[AFP_MAX_PATH];
+-	unsigned char aflags = AFP_OPENFORK_ALLOWREAD;
+ 
+ 	if (convert_path_to_afp(volume->server->path_encoding,
+ 		converted_path,(char *) path,AFP_MAX_PATH))
+@@ -268,7 +265,6 @@
+ int ml_creat(struct afp_volume * volume, const char *path, mode_t mode)
+ {
+ 	int ret=0;
+-	char resource;
+ 	char basename[AFP_MAX_PATH];
+ 	unsigned int dirid;
+ 	struct afp_file_info fp;
+@@ -393,13 +389,9 @@
+ 	char *buf, size_t size, off_t offset,
+ 	struct afp_file_info *fp, int * eof)
+ {
+-	int bytesleft=size;
+-	int totalsize=0;
+ 	int ret=0;
+-	int rc;
+-	unsigned int bufsize=min(volume->server->rx_quantum,size);
++	//unsigned int bufsize=min(volume->server->rx_quantum,size);
+ 	char converted_path[AFP_MAX_PATH];
+-	struct afp_rx_buffer buffer;
+ 	size_t amount_copied=0;
+ 
+ 	*eof=0;
+@@ -712,12 +704,11 @@
+ 		gid_t gid)
+ {
+ 
+-	int ret,err=0;
++	int ret;
+ 	size_t totalwritten = 0;
+-	uint64_t sizetowrite, ignored;
++	//uint64_t sizetowrite, ignored;
+ 	unsigned char flags = 0;
+-	unsigned int max_packet_size=volume->server->tx_quantum;
+-	off_t o=0;
++	//unsigned int max_packet_size=volume->server->tx_quantum;
+ 	char converted_path[AFP_MAX_PATH];
+ /* TODO:
+    - handle nonblocking IO correctly
+diff -Naur afpfs-ng-0.8.1/lib/proto_desktop.c afpfs-ng-0.8.1-new/lib/proto_desktop.c
+--- afpfs-ng-0.8.1/lib/proto_desktop.c	2013-03-09 01:11:49.601566376 -0800
++++ afpfs-ng-0.8.1-new/lib/proto_desktop.c	2013-03-09 00:36:44.448035469 -0800
+@@ -97,7 +97,7 @@
+ 
+ 	p=msg+sizeof(*request_packet) +sizeof_path_header(volume->server)+strlen(pathname);
+ 
+-        if (((uint64_t) p) & 0x1) {
++        if (((uintptr_t) p) & 0x1) {
+ 		/* Make sure we're on an even boundary */
+ 		p++;  
+ 		len++;
+diff -Naur afpfs-ng-0.8.1/lib/proto_directory.c afpfs-ng-0.8.1-new/lib/proto_directory.c
+--- afpfs-ng-0.8.1/lib/proto_directory.c	2013-03-09 01:12:46.452849000 -0800
++++ afpfs-ng-0.8.1-new/lib/proto_directory.c	2013-03-09 00:38:15.442892179 -0800
+@@ -266,7 +266,7 @@
+ 	} __attribute__((__packed__)) * entry;
+ 	char * p = buf + sizeof(*reply);
+ 	int i;
+-	char  *max=buf+size;
++	//char  *max=buf+size;
+ 	struct afp_file_info * filebase = NULL, *filecur = NULL, *new_file = NULL, **x = (struct afp_file_info **) other;
+ 
+ 	if (reply->dsi_header.return_code.error_code) {
+diff -Naur afpfs-ng-0.8.1/lib/proto_files.c afpfs-ng-0.8.1-new/lib/proto_files.c
+--- afpfs-ng-0.8.1/lib/proto_files.c	2013-03-09 01:11:39.061702637 -0800
++++ afpfs-ng-0.8.1-new/lib/proto_files.c	2013-03-09 00:39:33.009916105 -0800
+@@ -14,6 +14,7 @@
+ #include "dsi_protocol.h"
+ #include "afpfs-ng/afp_protocol.h"
+ #include "afp_internal.h"
++#include "afp_replies.h"
+ 
+ /* afp_setfileparms, afp_setdirparms and afpsetfiledirparms are all remarkably
+    similiar.  We abstract them to afp-setparms_lowlevel. */
+@@ -45,7 +46,7 @@
+ 	pathptr= msg+sizeof(*request_packet);
+ 	p = pathptr + sizeof_path_header(server)+strlen(pathname);
+ 
+-	if (((uint64_t) p) & 0x1) p++;	/* Make sure we're on an even boundary */
++	if (((uintptr_t) p) & 0x1) p++;	/* Make sure we're on an even boundary */
+ 	memset(msg,0,len);
+ 	request_packet = (void *) msg;
+ 	dsi_setup_header(server,&request_packet->dsi_header,DSI_DSICommand);
+diff -Naur afpfs-ng-0.8.1/lib/resource.c afpfs-ng-0.8.1-new/lib/resource.c
+--- afpfs-ng-0.8.1/lib/resource.c	2013-03-09 01:11:39.065702573 -0800
++++ afpfs-ng-0.8.1-new/lib/resource.c	2013-03-09 00:02:52.181586867 -0800
+@@ -8,6 +8,7 @@
+ #include "lowlevel.h"
+ #include "did.h"
+ #include "afpfs-ng/midlevel.h"
++#include "lib/forklist.h"
+ 
+ #define appledouble ".AppleDouble"
+ #define finderinfo_string ".finderinfo"
+@@ -211,7 +212,6 @@
+ {
+ 	int ret;
+ 	int towrite=size;
+-	unsigned int did;
+ 	struct afp_file_info fp2;
+ 
+ 	switch(fp->resource) {
+@@ -324,8 +324,10 @@
+ 					ret=1;
+ 					*eof=1;
+ 					fp->eof=1;
++					break;
+ 				default:
+-				break;
++					ret = -ENOENT;
++					break;
+ 			}
+ 			free(comment.data);
+ 			return ret;
+@@ -348,7 +350,7 @@
+ 	int resource = extra_translate(volume, path, &newpath);
+ 	struct afp_file_info fp;
+ 	int ret;
+-	int dirid;
++	unsigned int dirid;
+ 	char basename[AFP_MAX_PATH];
+ 
+ 	switch(resource) {
+@@ -362,12 +364,12 @@
+ 			ret=ll_zero_file(volume,fp.forkid,0);
+ 			if (ret<0) {
+ 				afp_closefork(volume,fp.forkid);
+-				remove_opened_fork(volume,fp);
++				remove_opened_fork(volume,&fp);
+ 				free(newpath);
+ 				return ret;
+ 			}
+ 			afp_closefork(volume,fp.forkid);
+-			remove_opened_fork(volume,fp);
++			remove_opened_fork(volume,&fp);
+ 
+ 			return 1;
+ 		case AFP_META_APPLEDOUBLE:
+@@ -518,12 +520,16 @@
+ {
+ 	struct afp_file_info * newfp;
+ 	newfp=malloc(sizeof(struct afp_file_info));
++	if(!newfp) {
++		return 1;
++	}
+ 	memcpy(newfp,fp,sizeof(struct afp_file_info));
+ 	strcat(newfp->name,suffix);
+ 	newfp->resourcesize=size;
+ 	newfp->unixprivs.permissions|=S_IFREG;
+ 	newfp->next=*newchain;
+ 	*newchain=newfp;
++	return 0;
+ }
+ 
+ int appledouble_readdir(struct afp_volume * volume, 
+@@ -537,9 +543,9 @@
+ 	switch(resource) {
+ 		case 0:
+ 			return 0;
++		break;
+ 		case AFP_META_APPLEDOUBLE: {
+-			struct afp_file_info *fp, *prev=NULL, 
+-				*newfp=NULL, *newchain=NULL, *last=NULL;
++			struct afp_file_info *fp, *newchain=NULL, *last=NULL;
+ 			ll_readdir(volume, newpath,base,1);
+ 
+ 			/* Add .finderinfo files */
+@@ -570,14 +576,15 @@
+ 
+ 			free(newpath);
+ 			return 1;
++		}
++		break;
+ 		case AFP_META_RESOURCE:
+ 		case AFP_META_SERVER_ICON:
+ 		case AFP_META_COMMENT:
+ 			free(newpath);
+ 			return -ENOTDIR;
+-		}
++		break;
+ 	}
+-
+ 	return 0;
+ }
+ 
+diff -Naur afpfs-ng-0.8.1/lib/resource.h afpfs-ng-0.8.1-new/lib/resource.h
+--- afpfs-ng-0.8.1/lib/resource.h	2008-02-17 19:46:56.000000000 -0800
++++ afpfs-ng-0.8.1-new/lib/resource.h	2013-03-09 00:33:33.574433152 -0800
+@@ -29,6 +29,9 @@
+ 	char * buf, size_t size, off_t offset, size_t * amount_read,
+ 	int * eof);
+ 
++int appledouble_write(struct afp_volume * volume, struct afp_file_info *fp,
++                const char *data, size_t size, off_t offset, size_t *totalwritten);
++
+ int appledouble_close(struct afp_volume * volume, struct afp_file_info * fp);
+ 
+ int appledouble_chmod(struct afp_volume * volume, const char * path, mode_t mode);
+diff -Naur afpfs-ng-0.8.1/lib/server.c afpfs-ng-0.8.1-new/lib/server.c
+--- afpfs-ng-0.8.1/lib/server.c	2013-03-09 01:12:52.604776151 -0800
++++ afpfs-ng-0.8.1-new/lib/server.c	2013-03-09 00:22:46.546571216 -0800
+@@ -6,7 +6,7 @@
+  */
+ 
+ #include <string.h>
+-#include <time.h>
++#include <sys/time.h>
+ 
+ #include "afpfs-ng/afp.h"
+ #include "afpfs-ng/dsi.h"
+@@ -70,7 +70,7 @@
+ 	}
+ 
+ 	/* If we haven't gotten a proper date back, so set it to the connect time. */
+-	if (server->connect_time==3094168448) {
++	if (server->connect_time == AD_DATE_TO_UNIX(0)) { 
+ 		struct timeval tv;
+ 		gettimeofday(&tv,NULL);
+ 		server->connect_time = tv.tv_sec;
+diff -Naur afpfs-ng-0.8.1/lib/uams.c afpfs-ng-0.8.1-new/lib/uams.c
+--- afpfs-ng-0.8.1/lib/uams.c	2013-03-09 01:11:49.601566376 -0800
++++ afpfs-ng-0.8.1-new/lib/uams.c	2013-03-08 23:46:33.389886904 -0800
+@@ -36,7 +36,7 @@
+ static int cleartxt_login(struct afp_server *server, char *username,
+ 				char *passwd);
+ static int cleartxt_passwd(struct afp_server *server, char *username,
+-				char *passwd);
++				char *passwd, char *newpasswd);
+ #ifdef HAVE_LIBGCRYPT
+ static int randnum_login(struct afp_server *server, char *username,
+ 		char *passwd);
+@@ -219,7 +219,7 @@
+  *      +------------------+
+  */
+ static int cleartxt_passwd(struct afp_server *server, 
+-	char *username, char *passwd) {
++	char *username, char *passwd, char *newpasswd) {
+ 
+ 	char *p, *ai = NULL;
+ 	int len, ret;
+diff -Naur afpfs-ng-0.8.1/lib/utils.c afpfs-ng-0.8.1-new/lib/utils.c
+--- afpfs-ng-0.8.1/lib/utils.c	2013-03-09 01:11:49.601566376 -0800
++++ afpfs-ng-0.8.1-new/lib/utils.c	2013-03-08 23:42:51.788675431 -0800
+@@ -41,7 +41,7 @@
+ {
+ 	unsigned char encoding = server->path_encoding;
+ 	char *p =NULL, *end;
+-	unsigned short len;
++	unsigned short len=0;
+ 
+ 	switch (encoding) {
+ 	case kFPUTF8Name: {
