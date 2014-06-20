@@ -1,0 +1,398 @@
+diff -Naur afpfs-ng-0.8.1/cmdline/getstatus.c afpfs-ng-0.8.1-v6/cmdline/getstatus.c
+--- afpfs-ng-0.8.1/cmdline/getstatus.c	2013-03-08 17:35:33.000000000 -0800
++++ afpfs-ng-0.8.1-v6/cmdline/getstatus.c	2013-03-08 18:09:05.000000000 -0800
+@@ -8,25 +8,26 @@
+ static int getstatus(char * address_string, unsigned int port)
+ {
+ 
+-        struct afp_server *server;
+-        struct hostent *h;
+-        int ret;
+-        struct sockaddr_in address;
++    struct afp_server *server;
++    struct hostent *h;
++    int ret;
++	struct addrinfo * address;
+ 	int j, firsttime=0;
+ 	char signature_string[AFP_SIGNATURE_LEN*2+1];
+ 	struct afp_versions * tmpversion;
+ 
+-        if (afp_get_address(NULL,address_string, port, &address)>0) return -1;
++    if ((address = afp_get_address(NULL,address_string, port)) == NULL) return -1;
+ 
+-        server=afp_server_init(&address);
++    server=afp_server_init(address);
+ 
+-        ret=afp_server_connect(server,1);
+-        if (ret<0) {
++    ret=afp_server_connect(server,1);
++
++    if (ret<0) {
+ 		perror("Connecting to server");
+ 		return -1;
+ 	}
+ 
+-        printf("Server name: %s\n",server->server_name_printable);
++    printf("Server name: %s\n",server->server_name_printable);
+ 	printf("Machine type: %s\n",server->machine_type);
+ 	printf("AFP versions: \n");
+ 
+diff -Naur afpfs-ng-0.8.1/include/afpfs-ng/afp.h afpfs-ng-0.8.1-v6/include/afpfs-ng/afp.h
+--- afpfs-ng-0.8.1/include/afpfs-ng/afp.h	2013-03-08 17:35:56.000000000 -0800
++++ afpfs-ng-0.8.1-v6/include/afpfs-ng/afp.h	2013-03-08 18:06:10.000000000 -0800
+@@ -165,7 +165,10 @@
+ 	unsigned int tx_delay;
+ 
+ 	/* Connection information */
+-	struct sockaddr_in address;
++	//the linked list returned by getaddrinfo
++	struct addrinfo *address;
++	//the address we successfully connected to
++	struct addrinfo *used_address;
+ 	int fd;
+ 
+ 	/* Some stats, for information only */
+@@ -225,7 +228,6 @@
+ 
+ 
+ 	char loginmesg[200];
+-	char servermesg[200];
+ 	char path_encoding;
+ 
+ 	/* This is the data for the incoming buffer */
+@@ -327,9 +329,8 @@
+ 
+ void afp_free_server(struct afp_server **server);
+ 
+-struct afp_server * afp_server_init(struct sockaddr_in * address);
+-int afp_get_address(void * priv, const char * hostname, unsigned int port,
+-	struct sockaddr_in * address);
++struct afp_server * afp_server_init(struct addrinfo * address);
++struct addrinfo * afp_get_address(void * priv, const char * hostname, unsigned int port);
+ 
+ 
+ int afp_main_loop(int command_fd);
+@@ -343,7 +344,7 @@
+ struct afp_server * afp_server_complete_connection(
+ 	void * priv,
+ 	struct afp_server * server,
+-	struct sockaddr_in * address, unsigned char * versions,
++	struct addrinfo * address, unsigned char * versions,
+ 	unsigned int uams, char * username, char * password,
+ 	unsigned int requested_version, unsigned int uam_mask);
+ 
+@@ -353,7 +354,7 @@
+ 
+ int add_cache_entry(struct afp_file_info * file) ;
+ struct afp_file_info * get_cache_by_name(char * name);
+-struct afp_server * find_server_by_address(struct sockaddr_in * address);
++struct afp_server * find_server_by_address(struct addrinfo * address);
+ struct afp_server * find_server_by_signature(char * signature);
+ struct afp_server * find_server_by_name(char * name);
+ int server_still_valid(struct afp_server * server);
+diff -Naur afpfs-ng-0.8.1/lib/afp.c afpfs-ng-0.8.1-v6/lib/afp.c
+--- afpfs-ng-0.8.1/lib/afp.c	2013-03-08 17:35:51.000000000 -0800
++++ afpfs-ng-0.8.1-v6/lib/afp.c	2013-03-09 15:47:36.000000000 -0800
+@@ -201,14 +201,19 @@
+ 	return NULL;
+ }
+ 
+-struct afp_server * find_server_by_address(struct sockaddr_in * address)
++struct afp_server * find_server_by_address(struct addrinfo *address)
+ {
+-        struct afp_server *s;
++    struct afp_server *s;
++
+ 	for (s=server_base;s;s=s->next) {
+-                if (bcmp(&s->address,address,sizeof(struct sockaddr_in))==0)
+-                        return s;
++        if (s->used_address != NULL && s->used_address->ai_addr != NULL &&
++			address != NULL && address->ai_addr != NULL &&
++			bcmp(&s->used_address->ai_addr, &address->ai_addr, 
++				sizeof(struct sockaddr))==0) {
++			return s;
++		}
+ 	}
+-        return NULL;
++    return NULL;
+ }
+ 
+ int something_is_mounted(struct afp_server * server)
+@@ -350,7 +355,7 @@
+ 
+ }
+ 
+-struct afp_server * afp_server_init(struct sockaddr_in * address)
++struct afp_server * afp_server_init(struct addrinfo * address)
+ {
+ 	struct afp_server * s;
+ 	struct passwd *pw;
+@@ -369,7 +374,7 @@
+ 	s->attention_len=0;
+ 
+ 	s->connect_state=SERVER_STATE_DISCONNECTED;
+-	memcpy(&s->address,address,sizeof(*address));
++	s->address = address;
+ 
+ 	/* FIXME this shouldn't be set here */
+ 	pw=getpwuid(geteuid());
+@@ -633,22 +638,57 @@
+ 
+ int afp_server_connect(struct afp_server *server, int full)
+ {
+-	int error = 0;
+-	struct timeval t1, t2;
++	int 	error = 0;
++	struct 	timeval t1, t2;
++	struct 	addrinfo *address;
++	char	log_msg[64];
++	char	ip_addr[INET6_ADDRSTRLEN];
++
++	address = server->address;
++   	while (address) 
++	{
++		switch(address->ai_family) 
++		{
++        		case AF_INET6:
++        		    inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)address->ai_addr)->sin6_addr),
++        		            ip_addr, INET6_ADDRSTRLEN);
++        		break;
++        		case AF_INET:
++        		    inet_ntop(AF_INET, &(((struct sockaddr_in *)address->ai_addr)->sin_addr),
++        		            ip_addr, INET6_ADDRSTRLEN);
++        		break;
++				default:
++					snprintf(ip_addr, 22, "unknown address family");
++				break;
++		}
+ 
+-	if ((server->fd= socket(PF_INET,SOCK_STREAM,IPPROTO_TCP)) < 0 ) {
+-		error = errno;
+-		goto error;
+-	}
++		snprintf(log_msg, sizeof(log_msg), "trying %s ...", ip_addr);
++
++		log_for_client(NULL, AFPFSD, LOG_NOTICE, log_msg);
++
++       	server->fd = socket(address->ai_family,
++                        address->ai_socktype, address->ai_protocol);
++
++        if (server->fd >= 0) 
++		{
++        	    if (connect(server->fd, address->ai_addr, address->ai_addrlen) == 0)
++        	        break;
++        	    close(server->fd);
++        	    server->fd	= -1;
++       	}
++        address	= address->ai_next;
++   	}
+ 
+-	if (connect(server->fd,(struct sockaddr *) &server->address,sizeof(server->address)) < 0) {
++	if(server->fd < 0)
++	{
+ 		error = errno;
+ 		goto error;
+ 	}
+ 
+-	server->exit_flag=0;
+-	server->lastrequestid=0;
+-	server->connect_state=SERVER_STATE_CONNECTED;
++	server->exit_flag		= 0;
++	server->lastrequestid	= 0;
++	server->connect_state	= SERVER_STATE_CONNECTED;
++	server->used_address	= address;
+ 
+ 	add_server(server);
+ 
+diff -Naur afpfs-ng-0.8.1/lib/afp_url.c afpfs-ng-0.8.1-v6/lib/afp_url.c
+--- afpfs-ng-0.8.1/lib/afp_url.c	2013-03-08 17:35:51.000000000 -0800
++++ afpfs-ng-0.8.1-v6/lib/afp_url.c	2013-03-08 17:14:12.000000000 -0800
+@@ -14,7 +14,6 @@
+ 
+ static int check_servername (char * servername) 
+ {
+-	if (strchr(servername,':')) return -1;
+ 	if (strchr(servername,'/')) return -1;
+ 	return 0;
+ }
+@@ -150,6 +149,7 @@
+ 	int skip_earliestpart=0;
+ 	int skip_secondpart=0;
+ 	char * lastchar;
++	int foundv6literal=0;
+ 
+ 	if (verbose) printf("Parsing %s\n",toparse);
+ 
+@@ -223,9 +223,19 @@
+ 	}
+ 	/* p now points to the start of the server name*/
+ 
++	/* square brackets denote a literal ipv6 address */
++	if (*p == '[' && 
++		(q=strchr(p,']'))) {
++		foundv6literal = 1;
++		p++;
++		*q = '\0';
++		q++;
++	}
++
+ 	/* see if we have a port number */
+ 
+-	if ((q=strchr(p,':'))) {
++	if ((foundv6literal && (q=strchr(q,':'))) ||
++			(!foundv6literal && (q=strchr(p,':'))) ) {
+ 		*q='\0';
+ 		q++;
+ 		if (check_port(q)) return -1;
+diff -Naur afpfs-ng-0.8.1/lib/connect.c afpfs-ng-0.8.1-v6/lib/connect.c
+--- afpfs-ng-0.8.1/lib/connect.c	2013-03-08 17:35:12.000000000 -0800
++++ afpfs-ng-0.8.1-v6/lib/connect.c	2013-03-08 19:32:23.000000000 -0800
+@@ -21,24 +21,25 @@
+ 
+ 
+ 
+-int afp_get_address(void * priv, const char * hostname, unsigned int port,
+-                struct sockaddr_in * address)
++struct addrinfo * afp_get_address(void * priv, const char * hostname, unsigned int port)
+ {
+-	struct hostent *h;
+-	h= gethostbyname(hostname);
+-	if (!h) {
++	char port_string[6];
++	struct addrinfo hints;
++	struct addrinfo * addresses;
++
++	memset(&hints, 0, sizeof(struct addrinfo));
++    	hints.ai_family = PF_UNSPEC;
++    	hints.ai_socktype = SOCK_STREAM;
++
++	snprintf(port_string, sizeof(port_string), "%u", port);
++	int res = getaddrinfo(hostname, port_string, &hints, &addresses);
++	if (res != 0 ) {
+ 		log_for_client(priv,AFPFSD,LOG_ERR,
+ 		"Could not resolve %s.\n",hostname);
+-		goto error;
++		return NULL;
+ 	}
+ 
+-	memset(address,0,sizeof(*address));
+-	address->sin_family = AF_INET;
+-	address->sin_port = htons(port);
+-	memcpy(&address->sin_addr,h->h_addr,h->h_length);
+-	return 0;
+-error:
+-	return -1;
++	return addresses;
+ }
+ 
+ 
+@@ -46,7 +47,7 @@
+ struct afp_server * afp_server_full_connect (void * priv, struct afp_connection_request *req)
+ {
+ 	int ret;
+-	struct sockaddr_in address;
++	struct addrinfo * address;
+ 	struct afp_server  * s=NULL;
+ 	struct afp_server  * tmpserver;
+ 	char signature[AFP_SIGNATURE_LEN];
+@@ -59,12 +60,12 @@
+ 	unsigned int rx_quantum;
+ 	char icon[AFP_SERVER_ICON_LEN];
+ 
+-	if (afp_get_address(priv,req->url.servername, req->url.port,&address)<0) 
++	if ((address = afp_get_address(priv,req->url.servername, req->url.port)) == NULL)
+ 		goto error;
+ 
+-	if ((s=find_server_by_address(&address))) goto have_server;
++	if ((s=find_server_by_address(address))) goto have_server;
+ 
+-	if ((tmpserver=afp_server_init(&address))==NULL) goto error;
++	if ((tmpserver=afp_server_init(address))==NULL) goto error;
+ 
+ 	if ((ret=afp_server_connect(tmpserver,1))<0) {
+ 		if (ret==-ETIMEDOUT) {
+@@ -75,7 +76,6 @@
+ 				"Could not connect, %s\n",strerror(-ret));
+ 		}
+ 		afp_server_remove(tmpserver);
+-		afp_server_remove(tmpserver);
+ 		goto error;
+ 	}
+ 	loop_disconnect(tmpserver);
+@@ -98,7 +98,7 @@
+ 	s=find_server_by_signature(signature);
+ 
+ 	if (!s) {
+-		s = afp_server_init(&address);
++		s = afp_server_init(address);
+ 
+ 		if (afp_server_connect(s,0) !=0) {
+ 			log_for_client(priv,AFPFSD,LOG_ERR,
+@@ -108,7 +108,7 @@
+ 		}
+ 
+ 		if ((afp_server_complete_connection(priv,
+-			s,&address,(unsigned char *) &versions,uams,
++			s,address,(unsigned char *) &versions,uams,
+ 			req->url.username, req->url.password, 
+ 			req->url.requested_version, req->uam_mask))==NULL) {
+ 			goto error;
+diff -Naur afpfs-ng-0.8.1/lib/server.c afpfs-ng-0.8.1-v6/lib/server.c
+--- afpfs-ng-0.8.1/lib/server.c	2013-03-08 17:35:12.000000000 -0800
++++ afpfs-ng-0.8.1-v6/lib/server.c	2013-03-08 17:14:12.000000000 -0800
+@@ -22,7 +22,7 @@
+ struct afp_server * afp_server_complete_connection(
+ 	void * priv,
+ 	struct afp_server * server,
+-	struct sockaddr_in * address, unsigned char * versions,
++	struct addrinfo * address, unsigned char * versions,
+ 		unsigned int uams, char * username, char * password, 
+ 		unsigned int requested_version, unsigned int uam_mask)
+ {
+diff -Naur afpfs-ng-0.8.1/lib/status.c afpfs-ng-0.8.1-v6/lib/status.c
+--- afpfs-ng-0.8.1/lib/status.c	2013-03-08 17:35:12.000000000 -0800
++++ afpfs-ng-0.8.1-v6/lib/status.c	2013-03-09 15:47:50.000000000 -0800
+@@ -73,6 +73,7 @@
+ 	int pos=0;
+ 	int firsttime=0;
+ 	struct dsi_request * request;
++	char ip_addr[64];
+ 
+ 	memset(text,0,*len);
+ 
+@@ -85,15 +86,32 @@
+ 	for (j=0;j<AFP_SIGNATURE_LEN;j++)
+ 		sprintf(signature_string+(j*2),"%02x",
+ 			(unsigned int) ((char) s->signature[j]));
++
++	switch(s->used_address->ai_family) 
++	{
++		case AF_INET6:
++       	    inet_ntop(AF_INET6, 
++						&(((struct sockaddr_in6 *)s->used_address->ai_addr)->sin6_addr),
++       		            ip_addr, INET6_ADDRSTRLEN);
++       		break;
++       		case AF_INET:
++       	    inet_ntop(AF_INET, 
++						&(((struct sockaddr_in *)s->used_address->ai_addr)->sin_addr),
++       		            ip_addr, INET6_ADDRSTRLEN);
++       		break;
++			default:
++			snprintf(ip_addr, 23, "unknown address family");
++			break;
++	}
+ 	
+ 	pos+=snprintf(text+pos,*len-pos,
+ 		"Server %s\n"
+ 		"    connection: %s:%d %s\n"
+ 		"    using AFP version: %s\n",
+ 		s->server_name_printable,
+-		inet_ntoa(s->address.sin_addr),ntohs(s->address.sin_port),
+-			(s->connect_state==SERVER_STATE_DISCONNECTED ? 
+-			"Disconnected" : "(active)"),
++		ip_addr, ntohs(s->used_address->ai_protocol),
++		(s->connect_state==SERVER_STATE_DISCONNECTED ? 
++		"(disconnected)" : "(active)"),
+ 		s->using_version->av_name
+ 	);
+ 

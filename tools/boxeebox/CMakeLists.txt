@@ -138,6 +138,8 @@ set(libs
 	libgif.so.6
 	libssl.so.1.0.0
 	libcrypto.so.1.0.0
+	libreadline.so.6
+	libafpclient.so.0
 )
 
 foreach(lib ${libs})
