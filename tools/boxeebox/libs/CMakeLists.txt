@@ -513,12 +513,15 @@ ExternalProject_Add(
 
 ExternalProject_Add(
         nfs
-        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.9.2.tar.gz
-        URL_MD5           c2697061fbccf2de610fd3b03f2d1a34
-        PATCH_COMMAND     patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
+        GIT_REPOSITORY    https://github.com/sahlberg/libnfs.git
+        URL_MD5           390ff38ad1689f0708cdb18811b3b7d5d616cba7
+		PATCH_COMMAND     ./bootstrap
         CONFIGURE_COMMAND ${BASIC_CONF} --disable-examples --disable-tirpc
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
+		COMMAND           rm -f ${SYSROOT}/usr/local/lib/libnfs.so ${SYSROOT}/usr/local/lib/libnfs.so.4
+		COMMAND           mv -f ${SYSROOT}/usr/local/lib/libnfs.so.4.0.0 ${SYSROOT}/usr/local/lib/libnfs.so.4
+		COMMAND           mv -f ${SYSROOT}/usr/local/lib/libnfs.so.4 ${SYSROOT}/usr/local/lib/libnfs.so.1
         BUILD_IN_SOURCE   1
 )
 
