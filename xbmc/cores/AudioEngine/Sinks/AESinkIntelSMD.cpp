@@ -701,9 +701,9 @@ double CAESinkIntelSMD::GetCacheTotal()
   return ((double) (maxDepth * m_dwBufferLen))/((double) (m_frameSize)*m_dSampleRate);
 }
 
-double CAESinkIntelSMD::GetDelay()
+void CAESinkIntelSMD::GetDelay(AEDelayStatus& status)
 {
-  return GetCacheTime();//+m_dwBufferLen/(2*2*m_dSampleRate);
+  status.SetDelay(GetCacheTime());
 }
 
 double CAESinkIntelSMD::GetCacheTime()

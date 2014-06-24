@@ -104,7 +104,7 @@ set(libs
 	libcdio.so.14
 	libtag.so.1
 	libsmbclient.so.0
-	libnfs.so.1
+	libnfs.so.4
 	librtmp.so.1
 	libdbus-1.so
 	libexpat.so

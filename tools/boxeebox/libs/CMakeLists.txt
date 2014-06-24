@@ -329,14 +329,6 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-	jasper
-	URL 			http://www.ece.uvic.ca/~frodo/jasper/software/jasper-1.900.1.zip
-	URL_MD5 		a342b2b4495b3e1394e161eb5d85d754
-	CONFIGURE_COMMAND 	${BASIC_CONF}
-	BUILD_COMMAND 		make ${PARALLEL}
-)
-
-ExternalProject_Add(
 	libmicrohttpd
 	URL 			ftp://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.34.tar.gz
 	URL_MD5 		2947eee13c2c8affb95023a0cb6fda0c
@@ -388,6 +380,15 @@ ExternalProject_Add(
     INSTALL_COMMAND             make install
     BUILD_IN_SOURCE     1
 	DEPENDS                 yasm
+)
+
+ExternalProject_Add(
+	jasper
+	URL 			http://www.ece.uvic.ca/~frodo/jasper/software/jasper-1.900.1.zip
+	URL_MD5 		a342b2b4495b3e1394e161eb5d85d754
+	CONFIGURE_COMMAND 	${BASIC_CONF}
+	BUILD_COMMAND 		make ${PARALLEL}
+	DEPENDS          libjpeg-turbo
 )
 
 ExternalProject_Add(
@@ -513,9 +514,9 @@ ExternalProject_Add(
 
 ExternalProject_Add(
         nfs
-        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.9.2.tar.gz
-        URL_MD5           c2697061fbccf2de610fd3b03f2d1a34
-        PATCH_COMMAND     patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
+        GIT_REPOSITORY    https://github.com/sahlberg/libnfs.git
+        GIT_TAG           390ff38ad1689f0708cdb18811b3b7d5d616cba7
+		PATCH_COMMAND     ./bootstrap
         CONFIGURE_COMMAND ${BASIC_CONF} --disable-examples --disable-tirpc
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
@@ -542,15 +543,6 @@ ExternalProject_Add(
 	DEPENDS openssl zlib bzip2 rtmpdump
 )
 
-ExternalProject_Add(
-        dbus_expat
-        URL http://downloads.sourceforge.net/expat/expat-2.1.0.tar.gz
-        URL_MD5 dd7dab7a5fea97d2a6a43f511449b7cd
-        CONFIGURE_COMMAND ${BASIC_CONF} CC=${TARGET}-gcc
-        BUILD_COMMAND make
-        INSTALL_COMMAND make install
-)
-
 file(WRITE ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh
 "
 export CC=${TARGET}-gcc
@@ -570,7 +562,7 @@ ExternalProject_Add(
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
         BUILD_IN_SOURCE   1
-        DEPENDS           dbus_expat
+        DEPENDS           expat
 )
 
 ExternalProject_Add(
@@ -681,7 +673,7 @@ ExternalProject_Add(
     URL_MD5               2f22745b8f7368ad5a0a3fddac343f2d
     CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh
 	BUILD_COMMAND 		  make
-	DEPENDS               libdaemon libffi glib dbus dbus_expat expat
+	DEPENDS               libdaemon libffi glib dbus expat
 	BUILD_IN_SOURCE 	  1
 )
 
@@ -740,8 +732,8 @@ add_custom_target(dummylibs ALL DEPENDS DEPENDS ${TARGET_DIR}/lib/libEGL.so ${TA
 ExternalProject_Add(
 	ffmpeg
 	GIT_REPOSITORY           https://github.com/xbmc/FFmpeg.git
-	GIT_TAG                  2.2-Helix-alpha1.1
-	CONFIGURE_COMMAND        <SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --disable-shared --enable-static --disable-programs --enable-gpl --disable-devices --disable-doc --disable-ffplay --disable-ffmpeg --disable-ffprobe --disable-ffserver --enable-runtime-cpudetect --enable-postproc --enable-pthreads --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=ipod --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2 --enable-protocol=http --enable-zlib --extra-version="xbmc-2.2-Helix-alpha1.1"
+	GIT_TAG                  2.2-Helix-alpha2
+	CONFIGURE_COMMAND        <SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --disable-shared --enable-static --disable-programs --enable-gpl --disable-devices --disable-doc --disable-ffplay --disable-ffmpeg --disable-ffprobe --disable-ffserver --enable-runtime-cpudetect --enable-postproc --enable-pthreads --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=ipod --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2 --enable-protocol=http --enable-zlib --extra-version="xbmc-2.2-Helix-alpha2"
 	BUILD_COMMAND            make ${PARALLEL}
 	DEPENDS                  yasm
 )
