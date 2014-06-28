@@ -628,32 +628,21 @@ ExternalProject_Add(
 
 file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
 "
-export CFLAGS=-I${TARGET_DIR}/include
-export LDFLAGS=-L${TARGET_DIR}/lib
-export CFLAGS="-march=i686"
-export LIBS=\"-lpthread -lrt -lffi -lz\"
-export ac_cv_func_mmap_fixed_mapped=yes
-export ac_cv_func_posix_getpwuid_r=yes
-export ac_cv_func_posix_getgrgid_r=yes
-export ac_cv_func_printf_unix98=yes
-export ac_cv_func_snprintf_c99
-export ac_cv_func_vsnprintf_c99=yes
-export glib_cv_stack_grows=no
-export glib_cv_uscore=no
-export glib_cv_va_val_copy=no
-${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --with-gnu-ld --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --disable-gtk-test
+export CFLAGS=-march=i686
+export LIBS=\"-lpthread -lz -lffi\"
+${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --build=${TARGET} CFLAGS=-march=i686 CROSS_COMPILE=${TARGET}- CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no 
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
 
 ExternalProject_Add(
     glib
-    URL                   https://github.com/GNOME/glib/archive/2.41.0.tar.gz
-    URL_MD5               4d8539503fcffe778b6c2b4da2ee3688
+    URL                   https://github.com/GNOME/glib/archive/2.40.0.tar.gz
+    URL_MD5               4e453a219faf86e51f47191a1f8cb910
     PATCH_COMMAND         ./autogen.sh
     CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
     BUILD_COMMAND         make
     BUILD_IN_SOURCE       1
-    DEPENDS               libffi python pcre zlib
+    DEPENDS               libffi python pcre zlib libxml2
 )
 
 file(WRITE ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh
