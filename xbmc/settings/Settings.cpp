@@ -92,6 +92,10 @@
 #include "utils/AMLUtils.h"
 #endif
 
+#if defined(TARGET_DARWIN_OSX)
+#include "osx/DarwinUtils.h"
+#endif// defined(TARGET_DARWIN_OSX)
+
 #define SETTINGS_XML_FOLDER "special://xbmc/system/settings/"
 #define SETTINGS_XML_ROOT   "settings"
 
@@ -931,6 +935,10 @@ void CSettings::InitializeConditions()
 #ifdef TARGET_DARWIN_IOS_ATV2
   if (g_sysinfo.IsAppleTV2())
     m_settingsManager->AddCondition("isappletv2");
+#endif
+#ifdef TARGET_DARWIN_OSX
+  if (DarwinIsSnowLeopard())
+    m_settingsManager->AddCondition("osxissnowleopard");
 #endif
 #if defined(TARGET_WINDOWS) && defined(HAS_DX)
   m_settingsManager->AddCondition("has_dx");

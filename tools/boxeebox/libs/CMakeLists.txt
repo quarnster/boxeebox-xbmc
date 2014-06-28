@@ -517,8 +517,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	samba
-	URL                     http://ftp.samba.org/pub/samba/stable/samba-3.6.22.tar.gz
-	URL_MD5                 59add4bb178ebc188d857bc13a508c0b
+	URL                     http://ftp.samba.org/pub/samba/stable/samba-3.6.24.tar.gz
+	URL_MD5                 d98425c0c2b73e08f048d31ffc727fb0
 	CONFIGURE_COMMAND	CC=${TARGET}-gcc CFLAGS=-I${SYSROOT}/usr/local/include LDFLAGS=-L${SYSROOT}/usr/local/lib ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 ./configure --prefix=${TARGET_DIR} --host=${TARGET} samba_cv_CC_NEGATIVE_ENUM_VALUES=yes libreplace_cv_HAVE_GETADDRINFO=no ac_cv_file__proc_sys_kernel_core_pattern=yes  samba_cv_HAVE_STAT_ST_FLAGS=no samba_cv_DARWIN_INITGROUPS=no --without-ldap --without-krb5 --without-ads --disable-cups --enable-swat=no --with-winbind=no --without-dnsupdate --without-libsmbsharemodes --without-pam --without-pam_smbpass --without-libaddns
  	BUILD_COMMAND 		${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} libsmbclient libtalloc libtevent libtdb
 	INSTALL_COMMAND 	${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} installlibsmbclient installlibtalloc installlibtevent installlibtdb
@@ -528,13 +528,13 @@ ExternalProject_Add(
 
 ExternalProject_Add(
         nfs
-        URL               https://sites.google.com/site/libnfstarballs/li/libnfs-1.9.2.tar.gz
-        URL_MD5           c2697061fbccf2de610fd3b03f2d1a34
-        PATCH_COMMAND     patch -p0 < ${CMAKE_SOURCE_DIR}/timeval.patch
-        CONFIGURE_COMMAND ${BASIC_CONF} --disable-examples --disable-tirpc
-        BUILD_COMMAND     make
-        INSTALL_COMMAND   make install
-        BUILD_IN_SOURCE   1
+        GIT_REPOSITORY          https://github.com/sahlberg/libnfs.git
+        GIT_TAG                 390ff38ad1689f0708cdb18811b3b7d5d616cba7
+        PATCH_COMMAND           ./bootstrap
+        CONFIGURE_COMMAND       ${BASIC_CONF} --disable-examples --disable-tirpc
+        BUILD_COMMAND           make
+        INSTALL_COMMAND         make install
+        BUILD_IN_SOURCE         1
 )
 
 ExternalProject_Add(
@@ -557,15 +557,6 @@ ExternalProject_Add(
 	DEPENDS openssl zlib bzip2 rtmpdump
 )
 
-ExternalProject_Add(
-        dbus_expat
-        URL http://downloads.sourceforge.net/expat/expat-2.1.0.tar.gz
-        URL_MD5 dd7dab7a5fea97d2a6a43f511449b7cd
-        CONFIGURE_COMMAND ${BASIC_CONF} CC=${TARGET}-gcc
-        BUILD_COMMAND make
-        INSTALL_COMMAND make install
-)
-
 file(WRITE ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh
 "
 export CC=${TARGET}-gcc
@@ -585,7 +576,7 @@ ExternalProject_Add(
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
         BUILD_IN_SOURCE   1
-        DEPENDS           dbus_expat
+        DEPENDS           expat
 )
 
 ExternalProject_Add(
@@ -649,32 +640,21 @@ ExternalProject_Add(
 
 file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
 "
-export CFLAGS=-I${TARGET_DIR}/include
-export LDFLAGS=-L${TARGET_DIR}/lib
-export CFLAGS="-march=i686"
-export LIBS=\"-lpthread -lrt -lffi -lz\"
-export ac_cv_func_mmap_fixed_mapped=yes
-export ac_cv_func_posix_getpwuid_r=yes
-export ac_cv_func_posix_getgrgid_r=yes
-export ac_cv_func_printf_unix98=yes
-export ac_cv_func_snprintf_c99
-export ac_cv_func_vsnprintf_c99=yes
-export glib_cv_stack_grows=no
-export glib_cv_uscore=no
-export glib_cv_va_val_copy=no
-${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET}--build=${HOSTMACHINE} --target=${TARGET} CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --with-gnu-ld --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --disable-gtk-test
+export CFLAGS=-march=i686
+export LIBS=\"-lpthread -lz -lffi\"
+${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --build=${TARGET} CFLAGS=-march=i686 CROSS_COMPILE=${TARGET}- CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no 
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
 
 ExternalProject_Add(
     glib
-    URL                   https://github.com/GNOME/glib/archive/2.41.0.tar.gz
-    URL_MD5               4d8539503fcffe778b6c2b4da2ee3688
-	PATCH_COMMAND         ./autogen.sh
+    URL                   https://github.com/GNOME/glib/archive/2.40.0.tar.gz
+    URL_MD5               4e453a219faf86e51f47191a1f8cb910
+    PATCH_COMMAND         ./autogen.sh
     CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
     BUILD_COMMAND         make
-	BUILD_IN_SOURCE 	  1
-	DEPENDS               libffi python pcre zlib
+    BUILD_IN_SOURCE       1
+    DEPENDS               libffi python pcre zlib libxml2
 )
 
 file(WRITE ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh
@@ -684,7 +664,7 @@ export CXX=${TARGET}-g++
 export CFLAGS=-I${TARGET_DIR}/include
 export LDFLAGS=-L${TARGET_DIR}/lib
 export LIBS=\"-lpthread -lrt -lgdbm\"
-${CMAKE_BINARY_DIR}/avahi-prefix/src/avahi/configure --prefix=${TARGET_DIR} --host=${TARGET}--build=${HOSTMACHINE} --prefix=${TARGET_DIR} --host=${TARGET} py_cv_mod_gtk_=yes py_cv_mod_dbus_=yes ac_cv_func_chroot=no --with-distro=none --disable-glib --disable-qt3 --disable-qt4 --disable-gtk --disable-gtk3 --enable-dbus --disable-dbm --disable-gdbm --enable-libdaemon --disable-python --disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd --disable-doxygen-doc --disable-doxygen-dot --disable-doxygen-man --disable-doxygen-rtf --disable-doxygen-xml --disable-doxygen-chm --disable-doxygen-chi --disable-doxygen-html --disable-doxygen-ps --disable-doxygen-pdf --disable-core-docs --disable-manpages --disable-xmltoman --disable-tests --disable-compat-libdns_sd --disable-compat-howl --with-xml=expat --with-avahi-user=avahi --with-avahi-group=avahi --disable-gobject --disable-nls
+${CMAKE_BINARY_DIR}/avahi-prefix/src/avahi/configure --prefix=${TARGET_DIR} --host=${TARGET} py_cv_mod_gtk_=yes py_cv_mod_dbus_=yes ac_cv_func_chroot=no --with-distro=none --disable-glib --disable-qt3 --disable-qt4 --disable-gtk --disable-gtk3 --enable-dbus --disable-dbm --disable-gdbm --enable-libdaemon --disable-python --disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd --disable-doxygen-doc --disable-doxygen-dot --disable-doxygen-man --disable-doxygen-rtf --disable-doxygen-xml --disable-doxygen-chm --disable-doxygen-chi --disable-doxygen-html --disable-doxygen-ps --disable-doxygen-pdf --disable-core-docs --disable-manpages --disable-xmltoman --disable-tests --disable-compat-libdns_sd --disable-compat-howl --with-xml=expat --with-avahi-user=avahi --with-avahi-group=avahi --disable-gobject --disable-nls
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh)
 
@@ -693,9 +673,9 @@ ExternalProject_Add(
     URL                   http://avahi.org/download/avahi-0.6.31.tar.gz
     URL_MD5               2f22745b8f7368ad5a0a3fddac343f2d
     CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh
-	BUILD_COMMAND 		  make
-	DEPENDS               libdaemon libffi glib dbus dbus_expat
-	BUILD_IN_SOURCE 	  1
+    BUILD_COMMAND         make
+    BUILD_IN_SOURCE       1
+    DEPENDS               libdaemon libffi glib dbus expat
 )
 
 ExternalProject_Add(
