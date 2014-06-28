@@ -557,15 +557,6 @@ ExternalProject_Add(
 	DEPENDS openssl zlib bzip2 rtmpdump
 )
 
-ExternalProject_Add(
-        dbus_expat
-        URL http://downloads.sourceforge.net/expat/expat-2.1.0.tar.gz
-        URL_MD5 dd7dab7a5fea97d2a6a43f511449b7cd
-        CONFIGURE_COMMAND ${BASIC_CONF} CC=${TARGET}-gcc
-        BUILD_COMMAND make
-        INSTALL_COMMAND make install
-)
-
 file(WRITE ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh
 "
 export CC=${TARGET}-gcc
@@ -585,7 +576,7 @@ ExternalProject_Add(
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
         BUILD_IN_SOURCE   1
-        DEPENDS           dbus_expat
+        DEPENDS           expat
 )
 
 ExternalProject_Add(
