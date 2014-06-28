@@ -517,8 +517,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	samba
-	URL                     http://ftp.samba.org/pub/samba/stable/samba-3.6.22.tar.gz
-	URL_MD5                 59add4bb178ebc188d857bc13a508c0b
+	URL                     http://ftp.samba.org/pub/samba/stable/samba-3.6.24.tar.gz
+	URL_MD5                 d98425c0c2b73e08f048d31ffc727fb0
 	CONFIGURE_COMMAND	CC=${TARGET}-gcc CFLAGS=-I${SYSROOT}/usr/local/include LDFLAGS=-L${SYSROOT}/usr/local/lib ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 ./configure --prefix=${TARGET_DIR} --host=${TARGET} samba_cv_CC_NEGATIVE_ENUM_VALUES=yes libreplace_cv_HAVE_GETADDRINFO=no ac_cv_file__proc_sys_kernel_core_pattern=yes  samba_cv_HAVE_STAT_ST_FLAGS=no samba_cv_DARWIN_INITGROUPS=no --without-ldap --without-krb5 --without-ads --disable-cups --enable-swat=no --with-winbind=no --without-dnsupdate --without-libsmbsharemodes --without-pam --without-pam_smbpass --without-libaddns
  	BUILD_COMMAND 		${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} libsmbclient libtalloc libtevent libtdb
 	INSTALL_COMMAND 	${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} installlibsmbclient installlibtalloc installlibtevent installlibtdb
