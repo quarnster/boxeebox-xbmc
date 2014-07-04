@@ -363,9 +363,6 @@
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDMessageQueue.cpp">
       <Filter>cores\dvdplayer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDMessageTracker.cpp">
-      <Filter>cores\dvdplayer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDOverlayContainer.cpp">
       <Filter>cores\dvdplayer</Filter>
     </ClCompile>
@@ -1490,6 +1487,9 @@
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\utils\RssReader.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\utils\SaveFileStateJob.cpp">
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\utils\ScraperParser.cpp">
@@ -2951,7 +2951,6 @@
     <ClCompile Include="..\..\xbmc\interfaces\json-rpc\ProfilesOperations.cpp">
       <Filter>interfaces\json-rpc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\GitRevision.cpp" />
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\Engines\ActiveAE\ActiveAE.cpp">
       <Filter>cores\AudioEngine\Engines\ActiveAE</Filter>
     </ClCompile>
@@ -3071,6 +3070,13 @@
     <ClCompile Include="..\..\xbmc\filesystem\win32\Win32Directory.cpp">
       <Filter>filesystem\win32</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\xbmc\CompileInfo.cpp" />
+    <ClCompile Include="..\..\xbmc\utils\auto_buffer.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\filesystem\win32\Win32SMBDirectory.cpp">
+      <Filter>filesystem\win32</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\xbmc\win32\pch.h">
@@ -3090,9 +3096,6 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\IPlayer.h">
       <Filter>cores</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\dvd_config.h">
-      <Filter>cores\dvdplayer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDAudio.h">
       <Filter>cores\dvdplayer</Filter>
@@ -3116,9 +3119,6 @@
       <Filter>cores\dvdplayer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDMessageQueue.h">
-      <Filter>cores\dvdplayer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDMessageTracker.h">
       <Filter>cores\dvdplayer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDOverlayContainer.h">
@@ -6021,6 +6021,13 @@
     <ClInclude Include="..\..\xbmc\filesystem\win32\Win32Directory.h">
       <Filter>filesystem\win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\xbmc\CompileInfo.h" />
+    <ClInclude Include="..\..\xbmc\utils\auto_buffer.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\filesystem\win32\Win32SMBDirectory.h">
+      <Filter>filesystem\win32</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\xbmc\win32\XBMC_PC.rc">
@@ -6059,6 +6066,7 @@
     <CustomBuild Include="..\..\xbmc\interfaces\json-rpc\schema\license.txt">
       <Filter>interfaces\json-rpc\schema</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\version.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\xbmc\interfaces\swig\ControlListAddItemMethods.i">

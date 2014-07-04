@@ -1,5 +1,7 @@
+#pragma once
+
 /*
- *      Copyright (C) 2011-2013 Team XBMC
+ *      Copyright (C) 2014 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -18,19 +20,11 @@
  *
  */
 
-#include "GitRevision.h"
-
-#include <cstddef>
-
-#if defined(TARGET_DARWIN) || (defined(TARGET_WINDOWS) && !defined(_DEBUG))
-#include "../git_revision.h" // generated file
-#endif
-
-const char *GetXbmcGitRevision()
+class CCompileInfo
 {
-#ifdef GIT_REV
-  return GIT_REV;
-#else
-  return NULL;
-#endif
-}
+public:
+  static int GetMajor();
+  static int GetMinor();
+  static const char *GetSuffix();  // Git "Tag", e.g. alpha1
+  static const char* GetSCMID();   // Git Revision
+};

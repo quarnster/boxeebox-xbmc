@@ -344,7 +344,7 @@ bool CPythonInvoker::execute(const std::string &script, const std::vector<std::s
     }
     if (old != s)
     {
-      CLog::Log(LOGINFO, "CPythonInvoker(%d, %s): waiting on thread %"PRIu64, GetId(), m_sourceFile.c_str(), (uint64_t)s->thread_id);
+      CLog::Log(LOGINFO, "CPythonInvoker(%d, %s): waiting on thread %" PRIu64, GetId(), m_sourceFile.c_str(), (uint64_t)s->thread_id);
       old = s;
     }
 
@@ -575,7 +575,7 @@ void CPythonInvoker::onError()
       }
     }
 
-    desc = StringUtils::Format(g_localizeStrings.Get(2100), script.c_str());
+    desc = StringUtils::Format(g_localizeStrings.Get(2100).c_str(), script.c_str());
     pDlgToast->QueueNotification(CGUIDialogKaiToast::Error, g_localizeStrings.Get(257), desc);
   }
 }

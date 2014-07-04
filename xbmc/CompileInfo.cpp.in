@@ -1,7 +1,5 @@
-#pragma once
-
 /*
- *      Copyright (C) 2005-2013 Team XBMC
+ *      Copyright (C) 2014 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,13 +18,37 @@
  *
  */
 
-// do not enable these options in cvs!!
-// xbmc will crash on a non debug xbox
+#include "CompileInfo.h"
+#include <cstddef>
+
+#if defined(TARGET_WINDOWS) && !defined(_DEBUG)
+#include "../git_revision.h" // generated file
+#endif
 
 
-// enable and use xbperfmon
-//#define DVDDEBUG_WITH_PERFORMANCE_COUNTER
+int CCompileInfo::GetMajor()
+{
+  return @APP_VERSION_MAJOR@;
+}
 
-// enable message tracking
-//#define DVDDEBUG_MESSAGE_TRACKER
+int CCompileInfo::GetMinor()
+{
+  return @APP_VERSION_MINOR@;
+}
 
+const char* CCompileInfo::GetSuffix()
+{
+  return "@APP_VERSION_TAG@";
+}
+
+const char* CCompileInfo::GetSCMID()
+{
+#if defined(TARGET_WINDOWS)
+#ifdef GIT_REV
+  return GIT_REV;
+#else
+  return "Unknown";
+#endif
+#endif
+  return "@APP_SCMID@";
+}

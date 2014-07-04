@@ -295,12 +295,14 @@ CHECK_DIRS = xbmc/addons/test \
              xbmc/utils/test \
              xbmc/threads/test \
              xbmc/interfaces/python/test \
+             xbmc/cores/AudioEngine/Sinks/test \
              xbmc/test
 CHECK_LIBS = xbmc/addons/test/addonsTest.a \
              xbmc/filesystem/test/filesystemTest.a \
              xbmc/utils/test/utilsTest.a \
              xbmc/threads/test/threadTest.a \
              xbmc/interfaces/python/test/pythonSwigTest.a \
+             xbmc/cores/AudioEngine/Sinks/test/AESinkTest.a \
              xbmc/test/xbmc-test.a
 
 ifeq (@USE_WAYLAND@,1)

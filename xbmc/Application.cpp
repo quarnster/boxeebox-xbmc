@@ -1793,6 +1793,21 @@ bool CApplication::OnSettingUpdate(CSetting* &setting, const char *oldSettingId,
     usestagefright->SetValue(false);
   }
 #endif
+#if defined(TARGET_DARWIN_OSX)
+  else if (settingId == "audiooutput.audiodevice")
+  {
+    CSettingString *audioDevice = (CSettingString*)setting;
+    // Gotham and older didn't enumerate audio devices per stream on osx
+    // add stream0 per default which should be ok for all old settings.
+    if (!StringUtils::EqualsNoCase(audioDevice->GetValue(), "DARWINOSX:default") && 
+        StringUtils::FindWords(audioDevice->GetValue().c_str(), ":stream") == std::string::npos)
+    {
+      std::string newSetting = audioDevice->GetValue();
+      newSetting += ":stream0";
+      return audioDevice->SetValue(newSetting);
+    }
+  }
+#endif
 
   return false;
 }
@@ -4979,8 +4994,7 @@ bool CApplication::ExecuteXBMCAction(std::string actionStr)
   //We don't know if there is unsecure information in this yet, so we
   //postpone any logging
   const std::string in_actionStr(actionStr);
-  CGUIInfoLabel info(actionStr, "");
-  actionStr = info.GetLabel(0);
+  actionStr = CGUIInfoLabel::GetLabel(actionStr);
 
   // user has asked for something to be executed
   if (CBuiltins::HasCommand(actionStr))
@@ -5257,7 +5271,7 @@ void CApplication::Restart(bool bSamePosition)
     m_pPlayer->SetPlayerState(state);
 }
 
-const CStdString& CApplication::CurrentFile()
+const std::string& CApplication::CurrentFile()
 {
   return m_itemCurrentFile->GetPath();
 }

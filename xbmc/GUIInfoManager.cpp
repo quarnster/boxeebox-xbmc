@@ -20,7 +20,7 @@
 
 #include "network/Network.h"
 #include "system.h"
-#include "GitRevision.h"
+#include "CompileInfo.h"
 #include "GUIInfoManager.h"
 #include "windows/GUIMediaWindow.h"
 #include "dialogs/GUIDialogProgress.h"
@@ -1354,7 +1354,7 @@ TIME_FORMAT CGUIInfoManager::TranslateTimeFormat(const CStdString &format)
   return TIME_FORMAT_GUESS;
 }
 
-CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fallback)
+CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, std::string *fallback)
 {
   if (info >= CONDITIONAL_LABEL_START && info <= CONDITIONAL_LABEL_END)
     return GetSkinVariableString(info, false);
@@ -1749,7 +1749,7 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
       if (window)
       {
         CURL url(((CGUIMediaWindow*)window)->CurrentDirectory().GetPath());
-        if (url.GetProtocol().Equals("plugin"))
+        if (url.IsProtocol("plugin"))
         {
           strLabel = url.GetFileName();
           URIUtils::RemoveSlashAtEnd(strLabel);
@@ -3119,7 +3119,7 @@ bool CGUIInfoManager::GetMultiInfoInt(int &value, const GUIInfo &info, int conte
 }
 
 /// \brief Examines the multi information sent and returns the string as appropriate
-CStdString CGUIInfoManager::GetMultiInfoLabel(const GUIInfo &info, int contextWindow, CStdString *fallback)
+CStdString CGUIInfoManager::GetMultiInfoLabel(const GUIInfo &info, int contextWindow, std::string *fallback)
 {
   if (info.m_info == SKIN_STRING)
   {
@@ -3333,7 +3333,7 @@ CStdString CGUIInfoManager::GetMultiInfoLabel(const GUIInfo &info, int contextWi
 }
 
 /// \brief Obtains the filename of the image to show from whichever subsystem is needed
-CStdString CGUIInfoManager::GetImage(int info, int contextWindow, CStdString *fallback)
+CStdString CGUIInfoManager::GetImage(int info, int contextWindow, std::string *fallback)
 {
   if (info >= CONDITIONAL_LABEL_START && info <= CONDITIONAL_LABEL_END)
     return GetSkinVariableString(info, true);
@@ -3772,7 +3772,7 @@ CStdString CGUIInfoManager::GetVideoLabel(int item)
               StringUtils::EmptyString :
               g_localizeStrings.Get(19055); // no information available
     case VIDEOPLAYER_GENRE:
-      return tag->GetEPGNow(epgTag) ? StringUtils::Join(epgTag.Genre(), g_advancedSettings.m_videoItemSeparator) : StringUtils::EmptyString;
+      return tag->GetEPGNow(epgTag) ? StringUtils::Join(epgTag.Genre(), g_advancedSettings.m_videoItemSeparator) : "";
     case VIDEOPLAYER_PLOT:
       return tag->GetEPGNow(epgTag) ? epgTag.Plot() : StringUtils::EmptyString;
     case VIDEOPLAYER_PLOT_OUTLINE:
@@ -3790,7 +3790,7 @@ CStdString CGUIInfoManager::GetVideoLabel(int item)
               StringUtils::EmptyString :
               g_localizeStrings.Get(19055); // no information available
     case VIDEOPLAYER_NEXT_GENRE:
-      return tag->GetEPGNext(epgTag) ? StringUtils::Join(epgTag.Genre(), g_advancedSettings.m_videoItemSeparator) : StringUtils::EmptyString;
+      return tag->GetEPGNext(epgTag) ? StringUtils::Join(epgTag.Genre(), g_advancedSettings.m_videoItemSeparator) : "";
     case VIDEOPLAYER_NEXT_PLOT:
       return tag->GetEPGNext(epgTag) ? epgTag.Plot() : StringUtils::EmptyString;
     case VIDEOPLAYER_NEXT_PLOT_OUTLINE:
@@ -4211,15 +4211,15 @@ CTemperature CGUIInfoManager::GetGPUTemperature()
 // in the HTTP request user agent.
 std::string CGUIInfoManager::GetVersionShort(void)
 {
-  return StringUtils::Format("%d.%d%s", VERSION_MAJOR, VERSION_MINOR, VERSION_TAG);
+  if (strlen(CCompileInfo::GetSuffix()) == 0)
+    return StringUtils::Format("%d.%d", CCompileInfo::GetMajor(), CCompileInfo::GetMinor());
+  else
+    return StringUtils::Format("%d.%d-%s", CCompileInfo::GetMajor(), CCompileInfo::GetMinor(), CCompileInfo::GetSuffix());
 }
 
 CStdString CGUIInfoManager::GetVersion()
 {
-  if (GetXbmcGitRevision())
-    return GetVersionShort() + " Git:" + GetXbmcGitRevision();
-
-  return GetVersionShort();
+  return GetVersionShort() + " Git:" + CCompileInfo::GetSCMID();
 }
 
 CStdString CGUIInfoManager::GetBuild()
@@ -4407,7 +4407,7 @@ bool CGUIInfoManager::GetItemInt(int &value, const CGUIListItem *item, int info)
   return false;
 }
 
-CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, CStdString *fallback)
+CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, std::string *fallback)
 {
   if (!item) return "";
 
@@ -4550,7 +4550,7 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, CStdSt
     if (item->HasPVRChannelInfoTag())
     {
       CEpgInfoTag epgTag;
-      return item->GetPVRChannelInfoTag()->GetEPGNow(epgTag) ? StringUtils::Join(epgTag.Genre(), g_advancedSettings.m_videoItemSeparator) : StringUtils::EmptyString;
+      return item->GetPVRChannelInfoTag()->GetEPGNow(epgTag) ? StringUtils::Join(epgTag.Genre(), g_advancedSettings.m_videoItemSeparator) : "";
     }
     if (item->HasPVRRecordingInfoTag())
       return StringUtils::Join(item->GetPVRRecordingInfoTag()->m_genre, g_advancedSettings.m_videoItemSeparator);
@@ -4602,7 +4602,7 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, CStdSt
         rating = StringUtils::Format("%.1f", item->GetVideoInfoTag()->m_fRating);
       else if (item->HasMusicInfoTag() && item->GetMusicInfoTag()->GetRating() > '0')
       { // song rating.  Images will probably be better than numbers for this in the long run
-        rating = item->GetMusicInfoTag()->GetRating();
+        rating.assign(1, item->GetMusicInfoTag()->GetRating());
       }
       return rating;
     }
@@ -5076,7 +5076,7 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, CStdSt
   return "";
 }
 
-CStdString CGUIInfoManager::GetItemImage(const CFileItem *item, int info, CStdString *fallback)
+CStdString CGUIInfoManager::GetItemImage(const CFileItem *item, int info, std::string *fallback)
 {
   if (info >= CONDITIONAL_LABEL_START && info <= CONDITIONAL_LABEL_END)
     return GetSkinVariableString(info, true, item);
@@ -5127,7 +5127,7 @@ bool CGUIInfoManager::GetItemBool(const CGUIListItem *item, int condition) const
       if (!g_application.m_strPlayListFile.empty())
       {
         //playlist file that is currently playing or the playlistitem that is currently playing.
-        return g_application.m_strPlayListFile.Equals(((const CFileItem *)item)->GetPath()) || m_currentFile->IsSamePath((const CFileItem *)item);
+        return ((const CFileItem *)item)->IsPath(g_application.m_strPlayListFile) || m_currentFile->IsSamePath((const CFileItem *)item);
       }
       return m_currentFile->IsSamePath((const CFileItem *)item);
     }

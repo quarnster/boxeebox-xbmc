@@ -566,19 +566,11 @@ COMXPlayer::COMXPlayer(IPlayerCallback &callback)
   m_stamp             = 0.0;
 
   memset(&m_SpeedState, 0, sizeof(m_SpeedState));
-
-#ifdef DVDDEBUG_MESSAGE_TRACKER
-  g_dvdMessageTracker.Init();
-#endif
 }
 
 COMXPlayer::~COMXPlayer()
 {
   CloseFile();
-
-#ifdef DVDDEBUG_MESSAGE_TRACKER
-  g_dvdMessageTracker.DeInit();
-#endif
 }
 
 bool COMXPlayer::OpenFile(const CFileItem &file, const CPlayerOptions &options)
@@ -726,7 +718,7 @@ bool COMXPlayer::OpenInputStream()
   &&  !m_pInputStream->IsStreamType(DVDSTREAM_TYPE_HTSP))
   {
     // find any available external subtitles
-    std::vector<CStdString> filenames;
+    std::vector<std::string> filenames;
     CUtil::ScanForExternalSubtitles( m_filename, filenames );
 
     // find any upnp subtitles
@@ -4269,8 +4261,12 @@ int COMXPlayer::AddSubtitleFile(const std::string& filename, const std::string& 
   std::string vobsubfile = subfilename;
   if(ext == ".idx")
   {
-    if (vobsubfile.empty())
-      vobsubfile = URIUtils::ReplaceExtension(filename, ".sub");
+    if (vobsubfile.empty()) {
+      // find corresponding .sub (e.g. in case of manually selected .idx sub)
+      vobsubfile = CUtil::GetVobSubSubFromIdx(filename);
+      if (vobsubfile.empty())
+        return -1;
+    }
 
     CDVDDemuxVobsub v;
     if(!v.Open(filename, vobsubfile))
@@ -4294,9 +4290,10 @@ int COMXPlayer::AddSubtitleFile(const std::string& filename, const std::string& 
   }
   if(ext == ".sub")
   {
-    CStdString strReplace(URIUtils::ReplaceExtension(filename,".idx"));
-    if (XFILE::CFile::Exists(strReplace))
-      return -1;
+    // if this looks like vobsub file (i.e. .idx found), add it as such
+    std::string vobsubidx = CUtil::GetVobSubIdxFromSub(filename);
+    if (!vobsubidx.empty())
+      return AddSubtitleFile(vobsubidx, filename, flags);
   }
   OMXSelectionStream s;
   s.source   = m_SelectionStreams.Source(STREAM_SOURCE_TEXT, filename);

@@ -208,14 +208,14 @@ public:
   virtual void SetHeight(float height);
   virtual void SetVisible(bool bVisible, bool setVisState = false);
   void SetVisibleCondition(const CStdString &expression, const CStdString &allowHiddenFocus = "");
-  bool HasVisibleCondition() const { return m_visibleCondition; };
+  bool HasVisibleCondition() const { return m_visibleCondition != NULL; };
   void SetEnableCondition(const CStdString &expression);
   virtual void UpdateVisibility(const CGUIListItem *item = NULL);
   virtual void SetInitialVisibility();
   virtual void SetEnabled(bool bEnable);
   virtual void SetInvalid() { m_bInvalidated = true; };
   virtual void SetPulseOnSelect(bool pulse) { m_pulseOnSelect = pulse; };
-  virtual CStdString GetDescription() const { return ""; };
+  virtual std::string GetDescription() const { return ""; };
 
   void SetAnimations(const std::vector<CAnimation> &animations);
   const std::vector<CAnimation> &GetAnimations() const { return m_animations; };

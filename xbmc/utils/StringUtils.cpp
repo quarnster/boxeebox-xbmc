@@ -645,11 +645,11 @@ bool StringUtils::EndsWithNoCase(const std::string &str1, const char *s2)
   return true;
 }
 
-CStdString StringUtils::Join(const vector<string> &strings, const CStdString& delimiter)
+std::string StringUtils::Join(const vector<string> &strings, const std::string& delimiter)
 {
-  CStdString result;
+  std::string result;
   for(vector<string>::const_iterator it = strings.begin(); it != strings.end(); it++ )
-    result += (*it) + delimiter.c_str();
+    result += (*it) + delimiter;
   
   if (!result.empty())
     result.erase(result.size() - delimiter.size());
@@ -906,7 +906,7 @@ int StringUtils::asciixdigitvalue(char chr)
 }
 
 
-void StringUtils::RemoveCRLF(CStdString& strLine)
+void StringUtils::RemoveCRLF(std::string& strLine)
 {
   StringUtils::TrimRight(strLine, "\n\r");
 }
@@ -1026,7 +1026,7 @@ int StringUtils::FindEndBracket(const CStdString &str, char opener, char closer,
   return (int)CStdString::npos;
 }
 
-void StringUtils::WordToDigits(CStdString &word)
+void StringUtils::WordToDigits(std::string &word)
 {
   static const char word_to_letter[] = "22233344455566677778889999";
   StringUtils::ToLower(word);
@@ -1164,19 +1164,16 @@ std::vector<std::string> StringUtils::Tokenize(const std::string &input, const s
 
 void StringUtils::Tokenize(const std::string& input, std::vector<std::string>& tokens, const std::string& delimiters)
 {
-  // Tokenize ripped from http://www.linuxselfhelp.com/HOWTO/C++Programming-HOWTO-7.html
+  tokens.clear();
   // Skip delimiters at beginning.
-  string::size_type lastPos = input.find_first_not_of(delimiters, 0);
-  // Find first "non-delimiter".
-  string::size_type pos = input.find_first_of(delimiters, lastPos);
-
-  while (string::npos != pos || string::npos != lastPos)
+  std::string::size_type dataPos = input.find_first_not_of(delimiters);
+  while (dataPos != std::string::npos)
   {
+    // Find next delimiter
+    const std::string::size_type nextDelimPos = input.find_first_of(delimiters, dataPos);
     // Found a token, add it to the vector.
-    tokens.push_back(input.substr(lastPos, pos - lastPos));
+    tokens.push_back(input.substr(dataPos, nextDelimPos - dataPos));
     // Skip delimiters.  Note the "not_of"
-    lastPos = input.find_first_not_of(delimiters, pos);
-    // Find next "non-delimiter"
-    pos = input.find_first_of(delimiters, lastPos);
+    dataPos = input.find_first_not_of(delimiters, nextDelimPos);
   }
 }

@@ -90,7 +90,7 @@ bool CPosixDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 
     if (!(m_flags & DIR_FLAG_NO_FILE_INFO))
     {
-      if (bStat || stat(pItem->GetPath(), &buffer) == 0)
+      if (bStat || stat(pItem->GetPath().c_str(), &buffer) == 0)
       {
         FILETIME fileTime, localTime;
         TimeTToFileTime(buffer.st_mtime, &fileTime);
@@ -129,8 +129,13 @@ bool CPosixDirectory::Remove(const CURL& url)
 
 bool CPosixDirectory::Exists(const CURL& url)
 {
+  std::string path = url.Get();
+
+  if (IsAliasShortcut(path))
+    TranslateAliasShortcut(path);
+
   struct stat buffer;
-  if (stat(url.Get().c_str(), &buffer) != 0)
+  if (stat(path.c_str(), &buffer) != 0)
     return false;
   return S_ISDIR(buffer.st_mode) ? true : false;
 }

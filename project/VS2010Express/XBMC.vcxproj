@@ -193,6 +193,7 @@
     <ClCompile Include="..\..\xbmc\Autorun.cpp" />
     <ClCompile Include="..\..\xbmc\AutoSwitch.cpp" />
     <ClCompile Include="..\..\xbmc\BackgroundInfoLoader.cpp" />
+    <ClCompile Include="..\..\xbmc\CompileInfo.cpp" />
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\AEFactory.cpp" />
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\AESinkFactory.cpp" />
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\Encoders\AEEncoderFFmpeg.cpp" />
@@ -387,6 +388,7 @@
     <ClCompile Include="..\..\xbmc\filesystem\VideoDatabaseDirectory.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\VideoDatabaseDirectory\DirectoryNodeGrouped.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\win32\Win32Directory.cpp" />
+    <ClCompile Include="..\..\xbmc\filesystem\win32\Win32SMBDirectory.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\windows\WINFileSMB.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\windows\WINSMBDirectory.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\VirtualDirectory.cpp" />
@@ -397,7 +399,6 @@
     <ClCompile Include="..\..\xbmc\filesystem\ZipDirectory.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\ZipFile.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\ZipManager.cpp" />
-    <ClCompile Include="..\..\xbmc\GitRevision.cpp" />
     <ClCompile Include="..\..\xbmc\GUIInfoManager.cpp" />
     <ClCompile Include="..\..\xbmc\GUILargeTextureManager.cpp" />
     <ClCompile Include="..\..\xbmc\guilib\AnimatedGif.cpp" />
@@ -803,6 +804,13 @@
     <ClInclude Include="..\..\xbmc\addons\AddonCallbacksCodec.h" />
     <ClInclude Include="..\..\xbmc\ApplicationPlayer.h" />
     <ClInclude Include="..\..\xbmc\AppParamParser.h" />
+    <ClInclude Include="..\..\xbmc\CompileInfo.h" />
+    <CustomBuild Include="..\..\xbmc\GitRevision.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CALL update_git_rev.bat</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\xbmc\win32\git_rev.h</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\.git\HEAD;..\..\xbmc\win32\git_rev.tmpl</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Retrieving the git revision</Message>
+    </CustomBuild>
     <ClInclude Include="..\..\xbmc\cores\AudioEngine\AEAudioFormat.h" />
     <ClInclude Include="..\..\xbmc\cores\AudioEngine\AEFactory.h" />
     <ClInclude Include="..\..\xbmc\cores\AudioEngine\AESinkFactory.h" />
@@ -848,14 +856,9 @@
     <ClInclude Include="..\..\xbmc\filesystem\MusicDatabaseDirectory\DirectoryNodeGrouped.h" />
     <ClInclude Include="..\..\xbmc\filesystem\VideoDatabaseDirectory\DirectoryNodeGrouped.h" />
     <ClInclude Include="..\..\xbmc\filesystem\win32\Win32Directory.h" />
+    <ClInclude Include="..\..\xbmc\filesystem\win32\Win32SMBDirectory.h" />
     <ClInclude Include="..\..\xbmc\filesystem\windows\WINFileSMB.h" />
     <ClInclude Include="..\..\xbmc\filesystem\windows\WINSMBDirectory.h" />
-    <CustomBuild Include="..\..\xbmc\GitRevision.h">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CALL update_git_rev.bat</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\xbmc\win32\git_rev.h</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\.git\HEAD;..\..\xbmc\win32\git_rev.tmpl</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Retrieving the git revision</Message>
-    </CustomBuild>
     <ClInclude Include="..\..\xbmc\guilib\cximage.h" />
     <ClInclude Include="..\..\xbmc\guilib\GUIKeyboard.h" />
     <ClInclude Include="..\..\xbmc\guilib\GUIKeyboardFactory.h" />
@@ -969,6 +972,7 @@
     <ClInclude Include="..\..\xbmc\settings\windows\GUIWindowSettingsScreenCalibration.h" />
     <ClInclude Include="..\..\xbmc\settings\windows\GUIWindowTestPattern.h" />
     <ClInclude Include="..\..\xbmc\utils\ActorProtocol.h" />
+    <ClInclude Include="..\..\xbmc\utils\auto_buffer.h" />
     <ClInclude Include="..\..\xbmc\utils\BooleanLogic.h" />
     <ClInclude Include="..\..\xbmc\utils\CharsetDetection.h" />
     <ClInclude Include="..\..\xbmc\utils\IRssObserver.h" />
@@ -1110,6 +1114,7 @@
     <ClInclude Include="..\..\xbmc\interfaces\json-rpc\AddonsOperations.h" />
     <ClCompile Include="..\..\xbmc\ThumbLoader.cpp" />
     <ClCompile Include="..\..\xbmc\utils\ActorProtocol.cpp" />
+    <ClCompile Include="..\..\xbmc\utils\auto_buffer.cpp" />
     <ClCompile Include="..\..\xbmc\utils\BooleanLogic.cpp" />
     <ClCompile Include="..\..\xbmc\utils\CharsetDetection.cpp" />
     <ClCompile Include="..\..\xbmc\utils\LegacyPathTranslation.cpp" />
@@ -1174,6 +1179,7 @@
     <ClCompile Include="..\..\xbmc\utils\RegExp.cpp" />
     <ClCompile Include="..\..\xbmc\utils\RingBuffer.cpp" />
     <ClCompile Include="..\..\xbmc\utils\RssReader.cpp" />
+    <ClCompile Include="..\..\xbmc\utils\SaveFileStateJob.cpp" />
     <ClCompile Include="..\..\xbmc\utils\ScraperParser.cpp" />
     <ClCompile Include="..\..\xbmc\utils\ScraperUrl.cpp" />
     <ClCompile Include="..\..\xbmc\utils\SeekHandler.cpp" />
@@ -1446,7 +1452,6 @@
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamTV.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDMessage.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDMessageQueue.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDMessageTracker.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDOverlayContainer.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDOverlayRenderer.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDPlayer.cpp" />
@@ -2133,7 +2138,6 @@
     <ClInclude Include="..\..\xbmc\win32\WindowHelper.h" />
     <ClInclude Include="..\..\xbmc\cores\DummyVideoPlayer.h" />
     <ClInclude Include="..\..\xbmc\cores\IPlayer.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\dvd_config.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDAudio.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDClock.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxSPU.h" />
@@ -2142,7 +2146,6 @@
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamTV.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDMessage.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDMessageQueue.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDMessageTracker.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDOverlayContainer.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDOverlayRenderer.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDPlayer.h" />
@@ -2526,6 +2529,19 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)..\ServiceDescription.h</Outputs>
     </CustomBuild>
     <None Include="..\..\xbmc\interfaces\swig\ControlListAddItemMethods.i" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\version.txt">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CALL ..\..\tools\windows\CompileInfo.bat</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating CompileInfo.cpp</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\xbmc\CompileInfo.cpp</Outputs>
+	  <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CALL ..\..\tools\windows\CompileInfo.bat</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating CompileInfo.cpp</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\xbmc\CompileInfo.cpp</Outputs>
+	  <Command Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">CALL ..\..\tools\windows\CompileInfo.bat</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">Generating CompileInfo.cpp</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">..\..\xbmc\CompileInfo.cpp</Outputs>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

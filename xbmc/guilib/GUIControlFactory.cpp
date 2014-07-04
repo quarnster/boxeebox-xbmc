@@ -358,8 +358,8 @@ bool CGUIControlFactory::GetTexture(const TiXmlNode* pRootNode, const char* strT
   if (flipX && strcmpi(flipX, "true") == 0) image.orientation = 1;
   const char *flipY = pNode->Attribute("flipy");
   if (flipY && strcmpi(flipY, "true") == 0) image.orientation = 3 - image.orientation;  // either 3 or 2
-  image.diffuse = pNode->Attribute("diffuse");
-  image.diffuseColor.Parse(pNode->Attribute("colordiffuse"), 0);
+  image.diffuse = XMLUtils::GetAttribute(pNode, "diffuse");
+  image.diffuseColor.Parse(XMLUtils::GetAttribute(pNode, "colordiffuse"), 0);
   const char *background = pNode->Attribute("background");
   if (background && strnicmp(background, "true", 4) == 0)
     image.useLarge = true;
@@ -419,11 +419,11 @@ bool CGUIControlFactory::GetAlignmentY(const TiXmlNode* pRootNode, const char* s
   return true;
 }
 
-bool CGUIControlFactory::GetConditionalVisibility(const TiXmlNode* control, CStdString &condition, CStdString &allowHiddenFocus)
+bool CGUIControlFactory::GetConditionalVisibility(const TiXmlNode* control, std::string &condition, std::string &allowHiddenFocus)
 {
   const TiXmlElement* node = control->FirstChildElement("visible");
   if (!node) return false;
-  vector<CStdString> conditions;
+  vector<std::string> conditions;
   while (node)
   {
     const char *hidden = node->Attribute("allowhiddenfocus");
@@ -448,7 +448,7 @@ bool CGUIControlFactory::GetConditionalVisibility(const TiXmlNode* control, CStd
   return true;
 }
 
-bool CGUIControlFactory::GetConditionalVisibility(const TiXmlNode *control, CStdString &condition)
+bool CGUIControlFactory::GetConditionalVisibility(const TiXmlNode *control, std::string &condition)
 {
   CStdString allowHiddenFocus;
   return GetConditionalVisibility(control, condition, allowHiddenFocus);
@@ -503,7 +503,7 @@ bool CGUIControlFactory::GetActions(const TiXmlNode* pRootNode, const char* strT
     if (pElement->FirstChild())
     {
       CGUIAction::cond_action_pair pair;
-      pair.condition = pElement->Attribute("condition");
+      pair.condition = XMLUtils::GetAttribute(pElement, "condition");
       pair.action = pElement->FirstChild()->Value();
       action.m_actions.push_back(pair);
     }
@@ -559,7 +559,7 @@ bool CGUIControlFactory::GetInfoColor(const TiXmlNode *control, const char *strT
   const TiXmlElement* node = control->FirstChildElement(strTag);
   if (node && node->FirstChild())
   {
-    value.Parse(node->FirstChild()->Value(), parentID);
+    value.Parse(node->FirstChild()->ValueStr(), parentID);
     return true;
   }
   return false;
@@ -582,7 +582,7 @@ bool CGUIControlFactory::GetInfoLabelFromElement(const TiXmlElement *element, CG
   if (label.empty() || label == "-")
     return false;
 
-  CStdString fallback = element->Attribute("fallback");
+  CStdString fallback = XMLUtils::GetAttribute(element, "fallback");
   if (StringUtils::IsNaturalNumber(label))
     label = g_localizeStrings.Get(atoi(label));
   if (StringUtils::IsNaturalNumber(fallback))
@@ -658,11 +658,8 @@ bool CGUIControlFactory::GetString(const TiXmlNode* pRootNode, const char *strTa
 
 CStdString CGUIControlFactory::GetType(const TiXmlElement *pControlNode)
 {
-  CStdString type;
-  const char *szType = pControlNode->Attribute("type");
-  if (szType)
-    type = szType;
-  else  // backward compatibility - not desired
+  CStdString type = XMLUtils::GetAttribute(pControlNode, "type");
+  if (type.empty())  // backward compatibility - not desired
     XMLUtils::GetString(pControlNode, "type", type);
   return type;
 }

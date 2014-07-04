@@ -60,6 +60,7 @@
       <display>FullScreen</display>
       <start>PreviousMenu</start>
       <record>Record</record>
+      <eject>XBMC.EjectTray()</eject>
       <volumeplus>VolumeUp</volumeplus>
       <volumeminus>VolumeDown</volumeminus>
       <mute>Mute</mute>
@@ -555,4 +556,12 @@
       <clear>Delete</clear>
     </remote>
   </AddonSettings>
+  <Addon>
+    <remote>
+      <red>Red</red>
+      <green>Green</green>
+      <yellow>Yellow</yellow>
+      <blue>Blue</blue>
+    </remote>
+  </Addon>
 </keymap>

@@ -1128,7 +1128,7 @@
         </setting>
         <setting id="pvrmenu.closechannelosdonswitch" type="boolean" label="19229" help="36214">
           <level>2</level>
-          <default>false</default>
+          <default>true</default>
           <control type="toggle" />
         </setting>
       </group>
@@ -2403,6 +2403,9 @@
             <options>audiodevices</options>
           </constraints>
           <control type="list" format="string" />
+          <updates>
+            <update type="change" />
+          </updates>
         </setting>
         <setting id="audiooutput.channels" type="integer" label="34100" help="36362">
           <level>0</level>

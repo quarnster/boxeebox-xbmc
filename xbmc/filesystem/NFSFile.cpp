@@ -171,7 +171,7 @@ struct nfs_context *CNfsConnection::getContextFromMap(const CStdString &exportna
       //refresh access time of that
       //context and return it
       if (!forceCacheHit) // only log it if this isn't the resetkeepalive on each read ;)
-        CLog::Log(LOGDEBUG, "NFS: Refreshing context for %s, old: %"PRId64", new: %"PRId64, exportname.c_str(), it->second.lastAccessedTime, now);
+        CLog::Log(LOGDEBUG, "NFS: Refreshing context for %s, old: %" PRId64", new: %" PRId64, exportname.c_str(), it->second.lastAccessedTime, now);
       it->second.lastAccessedTime = now;
       pRet = it->second.pContext;
     }
@@ -299,10 +299,10 @@ bool CNfsConnection::Connect(const CURL& url, CStdString &relativePath)
   ret = splitUrlIntoExportAndPath(url, exportPath, relativePath);
   
   if( (ret && (!exportPath.Equals(m_exportPath,true)  || 
-      !url.GetHostName().Equals(m_hostName,false)))    ||
+       url.GetHostName() != m_hostName))    ||
       (XbmcThreads::SystemClockMillis() - m_lastAccessedTime) > CONTEXT_TIMEOUT )
   {
-    int contextRet = getContextForExport(url.GetHostName() + exportPath);
+    int contextRet = getContextForExport((CStdString)url.GetHostName() + exportPath);
     
     if(contextRet == CONTEXT_INVALID)//we need a new context because sharename or hostname has changed
     {
@@ -318,7 +318,7 @@ bool CNfsConnection::Connect(const CURL& url, CStdString &relativePath)
       if(nfsRet != 0) 
       {
         CLog::Log(LOGERROR,"NFS: Failed to mount nfs share: %s (%s)\n", exportPath.c_str(), m_pLibNfs->nfs_get_error(m_pNfsContext));
-        destroyContext(url.GetHostName() + exportPath);
+        destroyContext((CStdString)url.GetHostName() + exportPath);
         return false;
       }
       CLog::Log(LOGDEBUG,"NFS: Connected to server %s and export %s\n", url.GetHostName().c_str(), exportPath.c_str());
@@ -668,7 +668,7 @@ int64_t CNFSFile::Seek(int64_t iFilePosition, int iWhence)
   ret = (int)gNfsConnection.GetImpl()->nfs_lseek(m_pNfsContext, m_pFileHandle, iFilePosition, iWhence, &offset);
   if (ret < 0) 
   {
-    CLog::Log(LOGERROR, "%s - Error( seekpos: %"PRId64", whence: %i, fsize: %"PRId64", %s)", __FUNCTION__, iFilePosition, iWhence, m_fileSize, gNfsConnection.GetImpl()->nfs_get_error(m_pNfsContext));
+    CLog::Log(LOGERROR, "%s - Error( seekpos: %" PRId64", whence: %i, fsize: %" PRId64", %s)", __FUNCTION__, iFilePosition, iWhence, m_fileSize, gNfsConnection.GetImpl()->nfs_get_error(m_pNfsContext));
     return -1;
   }
   return (int64_t)offset;
@@ -685,7 +685,7 @@ int CNFSFile::Truncate(int64_t iSize)
   ret = (int)gNfsConnection.GetImpl()->nfs_ftruncate(m_pNfsContext, m_pFileHandle, iSize);
   if (ret < 0) 
   {
-    CLog::Log(LOGERROR, "%s - Error( ftruncate: %"PRId64", fsize: %"PRId64", %s)", __FUNCTION__, iSize, m_fileSize, gNfsConnection.GetImpl()->nfs_get_error(m_pNfsContext));
+    CLog::Log(LOGERROR, "%s - Error( ftruncate: %" PRId64", fsize: %" PRId64", %s)", __FUNCTION__, iSize, m_fileSize, gNfsConnection.GetImpl()->nfs_get_error(m_pNfsContext));
     return -1;
   }
   return ret;

@@ -167,7 +167,7 @@ CBaseTexture *CTextureCacheJob::LoadImage(const CStdString &image, unsigned int 
   CFileItem file(image, false);
   file.FillInMimeType();
   if (!(file.IsPicture() && !(file.IsZIP() || file.IsRAR() || file.IsCBR() || file.IsCBZ() ))
-      && !StringUtils::StartsWithNoCase(file.GetMimeType(), "image/") && !file.GetMimeType().Equals("application/octet-stream")) // ignore non-pictures
+      && !StringUtils::StartsWithNoCase(file.GetMimeType(), "image/") && !StringUtils::EqualsNoCase(file.GetMimeType(), "application/octet-stream")) // ignore non-pictures
     return NULL;
 
   CBaseTexture *texture = CBaseTexture::LoadFromFile(image, width, height, CSettings::Get().GetBool("pictures.useexifrotation"), requirePixels, file.GetMimeType());
@@ -201,7 +201,7 @@ CStdString CTextureCacheJob::GetImageHash(const CStdString &url)
     if (!time)
       time = st.st_ctime;
     if (time || st.st_size)
-      return StringUtils::Format("d%"PRId64"s%"PRId64, time, st.st_size);;
+      return StringUtils::Format("d%" PRId64"s%" PRId64, time, st.st_size);;
 
   }
   CLog::Log(LOGDEBUG, "%s - unable to stat url %s", __FUNCTION__, url.c_str());
