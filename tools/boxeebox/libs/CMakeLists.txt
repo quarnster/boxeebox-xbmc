@@ -31,15 +31,15 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libgpg-error
-	URL 				ftp://ftp.gnupg.org/gcrypt/libgpg-error/libgpg-error-1.12.tar.bz2
-	URL_MD5 			8f0eb41a344d19ac2aa9bd101dfb9ce6
+	URL 			ftp://ftp.gnupg.org/gcrypt/libgpg-error/libgpg-error-1.12.tar.bz2
+	URL_MD5 		8f0eb41a344d19ac2aa9bd101dfb9ce6
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 )
 
 ExternalProject_Add(
 	libgcrypt
-	URL 				ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.6.1.tar.gz
-	URL_MD5 			d155aa1b06fa879175922ba28f6a6509
+	URL 			ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.6.1.tar.gz
+	URL_MD5 		d155aa1b06fa879175922ba28f6a6509
 	CONFIGURE_COMMAND 	GPG_ERROR_CONFIG=${TARGET_DIR}/bin/gpg-error-config ${BASIC_CONF} --disable-asm
 	DEPENDS libgpg-error
 )
@@ -90,7 +90,7 @@ ExternalProject_Add(
 ExternalProject_Add(
     ncurses
     URL                   http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.7.tar.gz
-	URL_MD5               cce05daf61a64501ef6cd8da1f727ec6
+    URL_MD5               cce05daf61a64501ef6cd8da1f727ec6
     CONFIGURE_COMMAND     ${BASIC_CONF} 
     BUILD_COMMAND         make
     INSTALL_COMMAND       make install
@@ -99,7 +99,7 @@ ExternalProject_Add(
 ExternalProject_Add(
     readline
     URL                   ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
-	URL_MD5               67948acb2ca081f23359d0256e9a271c
+    URL_MD5               67948acb2ca081f23359d0256e9a271c
     CONFIGURE_COMMAND     ${BASIC_CONF} CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib --with-curses --without-purify
     BUILD_COMMAND         make
     INSTALL_COMMAND       make install
@@ -109,50 +109,50 @@ ExternalProject_Add(
 ExternalProject_Add(
     afpfs-ng
     URL                   http://mirrors.xbmc.org/build-deps/darwin-libs/afpfs-ng-0.8.1.tar.bz2
-	URL_MD5               1bdd9f8a06e6085ea4cc38ce010ef60b 
-	PATCH_COMMAND         
-	    COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/fix_afpfs-ng_includes.patch
-		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/01-gcrypt.patch
-		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/02-pointer.patch
-		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/04-boxee1.patch
-		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/05-boxee2.patch
-		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/06-boxee3.patch
-		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/07-boxee4.patch
-		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/08-boxee5.patch
-		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/10-fix-errno.patch
-		COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/11-fix-stat.patch
+    URL_MD5               1bdd9f8a06e6085ea4cc38ce010ef60b
+    PATCH_COMMAND
+        COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/fix_afpfs-ng_includes.patch
+        COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/01-gcrypt.patch
+        COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/02-pointer.patch
+        COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/04-boxee1.patch
+        COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/05-boxee2.patch
+        COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/06-boxee3.patch
+        COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/07-boxee4.patch
+        COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/08-boxee5.patch
+        COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/10-fix-errno.patch
+        COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/11-fix-stat.patch
         COMMAND           patch -p0 < ${CMAKE_SOURCE_DIR}/afpfs-ng-patches/android.patch
-		COMMAND           autoreconf -vif
+        COMMAND           autoreconf -vif
     CONFIGURE_COMMAND     ${BASIC_CONF} CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib ac_cv_func_malloc_0_nonnull=yes --disable-fuse --enable-gcrypt
     BUILD_COMMAND         make
-	INSTALL_COMMAND       make install 
-	BUILD_IN_SOURCE 	  1
-	DEPENDS               readline ncurses
+    INSTALL_COMMAND       make install
+    BUILD_IN_SOURCE       1
+    DEPENDS               readline ncurses
 )
 
 ExternalProject_Add(
 	mysql
-	URL 				http://mysql.mirrors.pair.com/Downloads/MySQL-5.1/mysql-5.1.72.tar.gz
-	URL_MD5 			ed79cd48e3e7402143548917813cdb80
+	URL 		  http://mysql.mirrors.pair.com/Downloads/MySQL-5.1/mysql-5.1.72.tar.gz
+	URL_MD5 	  ed79cd48e3e7402143548917813cdb80
 	PATCH_COMMAND
-	    COMMAND patch -Np1  < ${CMAKE_SOURCE_DIR}/01-mysqlclient-cross-compile.patch
+	    COMMAND       patch -Np1  < ${CMAKE_SOURCE_DIR}/01-mysqlclient-cross-compile.patch
 	CONFIGURE_COMMAND <SOURCE_DIR>/configure CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib --prefix=${TARGET_DIR} --host=${TARGET} ac_cv_c_stack_direction=-1 ac_cv_sys_restartable_syscalls=yes --localstatedir=/storage/.mysql --with-unix-socket-path=/var/tmp/mysql.socket --with-tcp-port=3306 --enable-static --disable-shared --with-low-memory --enable-largefile --with-big-tables --with-mysqld-user=mysqld --with-extra-charsets=all --with-extra-charsets=complex --with-named-thread-libs=-lc --with-named-curses-libs=-lncurses --enable-thread-safe-client --enable-assembler --enable-local-infile --without-debug --without-docs --without-man --with-readline --without-libwrap --without-server --without-embedded-server --without-libedit --with-query-cache --with-pthread --with-named-thread-libs=-lpthread
-        BUILD_COMMAND make -C include my_config.h
-	    COMMAND   make -C mysys libmysys.a
-	    COMMAND   make -C strings libmystrings.a
-	    COMMAND   make -C vio libvio.a
-	    COMMAND   make -C dbug libdbug.a
-	    COMMAND   make -C regex libregex.a
-	    COMMAND   make -C sql gen_lex_hash
-	    COMMAND   make -C mysys libmysys.a
-	    COMMAND   make -C scripts comp_sql
-	    COMMAND   make -C extra comp_err
-	INSTALL_COMMAND make -C libmysql
-	    COMMAND   make -C libmysql/ install
-	    COMMAND   make -C scripts/ install-binSCRIPTS
-	    COMMAND   make -C include/ install
-	    COMMAND   sudo ln -sf ${SYSROOT}/usr/local/bin/mysql_config /usr/bin/mysql_config
-		DEPENDS               readline ncurses
+	BUILD_COMMAND     make -C include my_config.h
+	    COMMAND       make -C mysys libmysys.a
+	    COMMAND       make -C strings libmystrings.a
+	    COMMAND       make -C vio libvio.a
+	    COMMAND       make -C dbug libdbug.a
+	    COMMAND       make -C regex libregex.a
+	    COMMAND       make -C sql gen_lex_hash
+	    COMMAND       make -C mysys libmysys.a
+	    COMMAND       make -C scripts comp_sql
+	    COMMAND       make -C extra comp_err
+	INSTALL_COMMAND   make -C libmysql
+	    COMMAND       make -C libmysql/ install
+	    COMMAND       make -C scripts/ install-binSCRIPTS
+	    COMMAND       make -C include/ install
+	    COMMAND       sudo ln -sf ${SYSROOT}/usr/local/bin/mysql_config /usr/bin/mysql_config
+	    DEPENDS       readline ncurses
 )
 
 ExternalProject_Add(
@@ -179,46 +179,46 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libusb
-	URL					http://mirrors.xbmc.org/build-deps/darwin-libs/libusb-0.1.12.tar.gz
-	URL_MD5				caf182cbc7565dac0fd72155919672e6
+	URL                 http://mirrors.xbmc.org/build-deps/darwin-libs/libusb-0.1.12.tar.gz
+	URL_MD5             caf182cbc7565dac0fd72155919672e6
 	CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET}  --disable-shared --disable-build-docs
 	BUILD_COMMAND       make
-    INSTALL_COMMAND		make install
-    BUILD_IN_SOURCE     1
+    INSTALL_COMMAND         make install
+    BUILD_IN_SOURCE         1
 )
 
 ExternalProject_Add(
 	libcec
-	URL 				https://github.com/Pulse-Eight/libcec/archive/libcec-2.1.3.tar.gz
-	URL_MD5				ee2f2c71516cea30ac992ddbe8f7ed1c
+	URL                 https://github.com/Pulse-Eight/libcec/archive/libcec-2.1.3.tar.gz
+	URL_MD5             ee2f2c71516cea30ac992ddbe8f7ed1c
 	PATCH_COMMAND       ./bootstrap
-	CONFIGURE_COMMAND 	${BASIC_CONF} --sysconfdir=/etc
+	CONFIGURE_COMMAND   ${BASIC_CONF} --sysconfdir=/etc
 	BUILD_COMMAND       make
-    INSTALL_COMMAND     make install
+	INSTALL_COMMAND     make install
 )
 
 ExternalProject_Add(
 	bzip2
-	URL					http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
-	URL_MD5				00b516f4704d4a7cb50a1d97e6e8e15b
-	PATCH_COMMAND		sed -e "s,CC=gcc,CC=${TARGET}-gcc," -e "s,RANLIB=ranlib,RANLIB=${TARGET}-ranlib," -e "s,PREFIX=/usr/local,PREFIX=${TARGET_DIR},g" -i Makefile
-	CONFIGURE_COMMAND	""
-	BUILD_COMMAND		""
-	INSTALL_COMMAND		make install
-	BUILD_IN_SOURCE 	1
+	URL                 http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
+	URL_MD5             00b516f4704d4a7cb50a1d97e6e8e15b
+	PATCH_COMMAND       sed -e "s,CC=gcc,CC=${TARGET}-gcc," -e "s,RANLIB=ranlib,RANLIB=${TARGET}-ranlib," -e "s,PREFIX=/usr/local,PREFIX=${TARGET_DIR},g" -i Makefile
+	CONFIGURE_COMMAND   ""
+	BUILD_COMMAND       ""
+	INSTALL_COMMAND     make install
+	BUILD_IN_SOURCE     1
 )
 
 ExternalProject_Add(
 	lzo
-	URL					http://www.oberhumer.com/opensource/lzo/download/lzo-2.06.tar.gz
-	URL_MD5				95380bd4081f85ef08c5209f4107e9f8
-	CONFIGURE_COMMAND	${BASIC_CONF}
+	URL                 http://www.oberhumer.com/opensource/lzo/download/lzo-2.06.tar.gz
+	URL_MD5             95380bd4081f85ef08c5209f4107e9f8
+	CONFIGURE_COMMAND   ${BASIC_CONF}
 )
 
 ExternalProject_Add(
 	zlib
-	URL 				http://zlib.net/zlib-1.2.8.tar.gz
-	URL_MD5 			44d667c142d7cda120332623eab69f40
+	URL                     http://zlib.net/zlib-1.2.8.tar.gz
+	URL_MD5                 44d667c142d7cda120332623eab69f40
 	CONFIGURE_COMMAND	CROSS_PREFIX=${TARGET} AR=${TARGET}-ar CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib <SOURCE_DIR>/configure --uname=Linux --prefix=${SYSROOT}/usr
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND 	make ${PARALLEL} install
@@ -227,28 +227,28 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	openssl
-	URL 				ftp://ftp.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.0.1h.tar.gz
-	URL_MD5 			8d6d684a9430d5cc98a62a5d8fbda8cf
-	PATCH_COMMAND       patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-cflags.patch
-	  COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-nodocs.patch
+	URL                     ftp://ftp.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.0.1h.tar.gz
+	URL_MD5                 8d6d684a9430d5cc98a62a5d8fbda8cf
+	PATCH_COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-cflags.patch
+	  COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-nodocs.patch
 	CONFIGURE_COMMAND 	CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib AR=${TARGET}-ar <SOURCE_DIR>/Configure --prefix=${SYSROOT}/usr/local shared --openssldir=/ --libdir=lib linux-elf threads enable-camellia enable-seed enable-tlsext enable-rfc3779 enable-cms enable-md2 no-krb5 no-mdc2 no-rc5 no-ec no-ec2mno-ecdh no-ecdsa no-srp
-	BUILD_COMMAND       make 
+	BUILD_COMMAND           make 
 	INSTALL_COMMAND 	make install
 	BUILD_IN_SOURCE 	1
-	DEPENDS zlib
+	DEPENDS                 zlib
 )
 
 ExternalProject_Add(
 	libtiff
-	URL 				http://download.osgeo.org/libtiff/tiff-4.0.3.tar.gz
-	URL_MD5 			051c1068e6a0627f461948c365290410
+	URL			http://download.osgeo.org/libtiff/tiff-4.0.3.tar.gz
+	URL_MD5			051c1068e6a0627f461948c365290410
 	CONFIGURE_COMMAND	${BASIC_CONF}
 )
 
 ExternalProject_Add(
 	flex
-	URL 				http://sourceforge.net/projects/flex/files/flex-2.5.39.tar.bz2/download
-	URL_MD5 			77d44c6bb8c0705e0017ab9a84a1502b
+	URL			http://sourceforge.net/projects/flex/files/flex-2.5.39.tar.bz2/download
+	URL_MD5			77d44c6bb8c0705e0017ab9a84a1502b
 	PATCH_COMMAND 		sed -e "s/AR\ =\ ar/AR\ =\ ${TARGET}-ar/g" -i Makefile.in
 	CONFIGURE_COMMAND	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
@@ -256,22 +256,22 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	expat
-	URL 				http://sourceforge.net/projects/expat/files/expat/2.1.0/expat-2.1.0.tar.gz/download
-	URL_MD5 			dd7dab7a5fea97d2a6a43f511449b7cd
+	URL			http://sourceforge.net/projects/expat/files/expat/2.1.0/expat-2.1.0.tar.gz/download
+	URL_MD5			dd7dab7a5fea97d2a6a43f511449b7cd
 	CONFIGURE_COMMAND	${BASIC_CONF}
 )
 
 ExternalProject_Add(
 	yajl
 	GIT_REPOSITORY  	https://github.com/lloyd/yajl.git
-	GIT_TAG				2.1.0
+	GIT_TAG			2.1.0
 	CONFIGURE_COMMAND 	${BASIC_CMAKE}
 )
 
 ExternalProject_Add(
 	tinyxml
-	URL 				http://sourceforge.net/projects/tinyxml/files/tinyxml/2.6.2/tinyxml_2_6_2.tar.gz/download
-	URL_MD5 			c1b864c96804a10526540c664ade67f0
+	URL			http://sourceforge.net/projects/tinyxml/files/tinyxml/2.6.2/tinyxml_2_6_2.tar.gz/download
+	URL_MD5			c1b864c96804a10526540c664ade67f0
 	CONFIGURE_COMMAND 	""
 	BUILD_COMMAND 		make CXX=${TARGET}-g++ LD=${TARGET}-g++ CXXFLAGS=-DTIXML_USE_STL
 		COMMAND ${TARGET}-ar r libtinyxml.a tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o
@@ -291,16 +291,16 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libcdio
-	URL 				http://ftp.gnu.org/gnu/libcdio/libcdio-0.90.tar.gz
-	URL_MD5				1b245b023fb03a58d030fd2800db3247
+	URL			http://ftp.gnu.org/gnu/libcdio/libcdio-0.90.tar.gz
+	URL_MD5			1b245b023fb03a58d030fd2800db3247
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 )
 
 ExternalProject_Add(
-    libcddb
-    URL                   http://prdownloads.sourceforge.net/libcddb/libcddb-1.3.2.tar.bz2
+        libcddb
+        URL                   http://prdownloads.sourceforge.net/libcddb/libcddb-1.3.2.tar.bz2
 	URL_MD5               8bb4a6f542197e8e9648ae597cd6bc8a
-    CONFIGURE_COMMAND     ${BASIC_CONF}
+	CONFIGURE_COMMAND     ${BASIC_CONF}
 	DEPENDS               libcdio
 )
 
@@ -375,10 +375,10 @@ ExternalProject_Add(
 	libjpeg-turbo
 	URL 			http://sourceforge.net/projects/libjpeg-turbo/files/1.3.1/libjpeg-turbo-1.3.1.tar.gz/download
 	URL_MD5 		2c3a68129dac443a72815ff5bb374b05
-    CONFIGURE_COMMAND           <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-nls --with-jpeg8 --without-simd
-    BUILD_COMMAND               make
-    INSTALL_COMMAND             make install
-    BUILD_IN_SOURCE     1
+	CONFIGURE_COMMAND       <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-nls --with-jpeg8 --without-simd
+	BUILD_COMMAND           make
+	INSTALL_COMMAND         make install
+	BUILD_IN_SOURCE         1
 	DEPENDS                 yasm
 )
 
@@ -388,7 +388,7 @@ ExternalProject_Add(
 	URL_MD5 		a342b2b4495b3e1394e161eb5d85d754
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
-	DEPENDS          libjpeg-turbo
+	DEPENDS                 libjpeg-turbo
 )
 
 ExternalProject_Add(
@@ -473,12 +473,12 @@ ExternalProject_Add(
 
 ExternalProject_Add(
     libbluray
-    URL                   ftp://ftp.videolan.org/pub/videolan/libbluray/0.6.0/libbluray-0.6.0.tar.bz2
-    URL_MD5               697886c09ef058bb9a2954ee5ee4f140
-    CONFIGURE_COMMAND     ${BASIC_CONF} --disable-examples --disable-doxygen-doc
-    BUILD_COMMAND         make
-    INSTALL_COMMAND       make install
-    DEPENDS               libxml2  freetype2
+    URL                         ftp://ftp.videolan.org/pub/videolan/libbluray/0.6.0/libbluray-0.6.0.tar.bz2
+    URL_MD5                     697886c09ef058bb9a2954ee5ee4f140
+    CONFIGURE_COMMAND           ${BASIC_CONF} --disable-examples --disable-doxygen-doc
+    BUILD_COMMAND               make
+    INSTALL_COMMAND             make install
+    DEPENDS                     libxml2  freetype2
 )
 
 ExternalProject_Add(
@@ -489,7 +489,7 @@ ExternalProject_Add(
 	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DWITH_STATIC_LIB=ON -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND 	make install
-	DEPENDS libgcrypt openssl
+	DEPENDS                 libgcrypt openssl
 )
 
 ExternalProject_Add(
@@ -503,8 +503,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	samba
-	URL                     http://ftp.samba.org/pub/samba/stable/samba-3.6.22.tar.gz
-	URL_MD5                 59add4bb178ebc188d857bc13a508c0b
+	URL                     http://ftp.samba.org/pub/samba/stable/samba-3.6.24.tar.gz
+	URL_MD5                 d98425c0c2b73e08f048d31ffc727fb0
 	CONFIGURE_COMMAND	CC=${TARGET}-gcc CFLAGS=-I${SYSROOT}/usr/local/include LDFLAGS=-L${SYSROOT}/usr/local/lib ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 ./configure --prefix=${TARGET_DIR} --host=${TARGET} samba_cv_CC_NEGATIVE_ENUM_VALUES=yes libreplace_cv_HAVE_GETADDRINFO=no ac_cv_file__proc_sys_kernel_core_pattern=yes  samba_cv_HAVE_STAT_ST_FLAGS=no samba_cv_DARWIN_INITGROUPS=no --without-ldap --without-krb5 --without-ads --disable-cups --enable-swat=no --with-winbind=no --without-dnsupdate --without-libsmbsharemodes --without-pam --without-pam_smbpass --without-libaddns
  	BUILD_COMMAND 		${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} libsmbclient libtalloc libtevent libtdb
 	INSTALL_COMMAND 	${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} installlibsmbclient installlibtalloc installlibtevent installlibtdb
@@ -514,23 +514,23 @@ ExternalProject_Add(
 
 ExternalProject_Add(
         nfs
-        GIT_REPOSITORY    https://github.com/sahlberg/libnfs.git
-        GIT_TAG           390ff38ad1689f0708cdb18811b3b7d5d616cba7
-		PATCH_COMMAND     ./bootstrap
-        CONFIGURE_COMMAND ${BASIC_CONF} --disable-examples --disable-tirpc
-        BUILD_COMMAND     make
-        INSTALL_COMMAND   make install
-        BUILD_IN_SOURCE   1
+        GIT_REPOSITORY          https://github.com/sahlberg/libnfs.git
+        GIT_TAG                 390ff38ad1689f0708cdb18811b3b7d5d616cba7
+        PATCH_COMMAND           ./bootstrap
+        CONFIGURE_COMMAND       ${BASIC_CONF} --disable-examples --disable-tirpc
+        BUILD_COMMAND           make
+        INSTALL_COMMAND         make install
+        BUILD_IN_SOURCE         1
 )
 
 ExternalProject_Add(
         rtmpdump
-        GIT_REPOSITORY https://github.com/BurntSushi/rtmpdump-ksv.git
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND make DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
-        INSTALL_COMMAND make install DESTDIR=${SYSROOT}
-        BUILD_IN_SOURCE 1
-        DEPENDS zlib openssl
+        GIT_REPOSITORY          https://github.com/BurntSushi/rtmpdump-ksv.git
+        CONFIGURE_COMMAND       ""
+        BUILD_COMMAND           make DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
+        INSTALL_COMMAND         make install DESTDIR=${SYSROOT}
+        BUILD_IN_SOURCE         1
+        DEPENDS                 zlib openssl
 )
 
 ExternalProject_Add(
@@ -540,7 +540,7 @@ ExternalProject_Add(
 	PATCH_COMMAND           ./buildconf
 	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn --enable-threaded-resolver
 	BUILD_COMMAND 		make
-	DEPENDS openssl zlib bzip2 rtmpdump
+	DEPENDS                 openssl zlib bzip2 rtmpdump
 )
 
 file(WRITE ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh
@@ -628,32 +628,21 @@ ExternalProject_Add(
 
 file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
 "
-export CFLAGS=-I${TARGET_DIR}/include
-export LDFLAGS=-L${TARGET_DIR}/lib
-export CFLAGS="-march=i686"
-export LIBS=\"-lpthread -lrt -lffi -lz\"
-export ac_cv_func_mmap_fixed_mapped=yes
-export ac_cv_func_posix_getpwuid_r=yes
-export ac_cv_func_posix_getgrgid_r=yes
-export ac_cv_func_printf_unix98=yes
-export ac_cv_func_snprintf_c99
-export ac_cv_func_vsnprintf_c99=yes
-export glib_cv_stack_grows=no
-export glib_cv_uscore=no
-export glib_cv_va_val_copy=no
-${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET}--build=${HOSTMACHINE} --target=${TARGET} CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --with-gnu-ld --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --disable-gtk-test
+export CFLAGS=-march=i686
+export LIBS=\"-lpthread -lz -lffi\"
+${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --build=${TARGET} CFLAGS=-march=i686 CROSS_COMPILE=${TARGET}- CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no 
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
 
 ExternalProject_Add(
     glib
-    URL                   https://github.com/GNOME/glib/archive/2.41.0.tar.gz
-    URL_MD5               4d8539503fcffe778b6c2b4da2ee3688
-	PATCH_COMMAND         ./autogen.sh
+    URL                   https://github.com/GNOME/glib/archive/2.40.0.tar.gz
+    URL_MD5               4e453a219faf86e51f47191a1f8cb910
+    PATCH_COMMAND         ./autogen.sh
     CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
     BUILD_COMMAND         make
-	BUILD_IN_SOURCE 	  1
-	DEPENDS               libffi python pcre zlib
+    BUILD_IN_SOURCE       1
+    DEPENDS               libffi python pcre zlib libxml2
 )
 
 file(WRITE ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh
@@ -663,7 +652,7 @@ export CXX=${TARGET}-g++
 export CFLAGS=-I${TARGET_DIR}/include
 export LDFLAGS=-L${TARGET_DIR}/lib
 export LIBS=\"-lpthread -lrt -lgdbm\"
-${CMAKE_BINARY_DIR}/avahi-prefix/src/avahi/configure --prefix=${TARGET_DIR} --host=${TARGET}--build=${HOSTMACHINE} --prefix=${TARGET_DIR} --host=${TARGET} py_cv_mod_gtk_=yes py_cv_mod_dbus_=yes ac_cv_func_chroot=no --with-distro=none --disable-glib --disable-qt3 --disable-qt4 --disable-gtk --disable-gtk3 --enable-dbus --disable-dbm --disable-gdbm --enable-libdaemon --disable-python --disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd --disable-doxygen-doc --disable-doxygen-dot --disable-doxygen-man --disable-doxygen-rtf --disable-doxygen-xml --disable-doxygen-chm --disable-doxygen-chi --disable-doxygen-html --disable-doxygen-ps --disable-doxygen-pdf --disable-core-docs --disable-manpages --disable-xmltoman --disable-tests --disable-compat-libdns_sd --disable-compat-howl --with-xml=expat --with-avahi-user=avahi --with-avahi-group=avahi --disable-gobject --disable-nls
+${CMAKE_BINARY_DIR}/avahi-prefix/src/avahi/configure --prefix=${TARGET_DIR} --host=${TARGET} py_cv_mod_gtk_=yes py_cv_mod_dbus_=yes ac_cv_func_chroot=no --with-distro=none --disable-glib --disable-qt3 --disable-qt4 --disable-gtk --disable-gtk3 --enable-dbus --disable-dbm --disable-gdbm --enable-libdaemon --disable-python --disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd --disable-doxygen-doc --disable-doxygen-dot --disable-doxygen-man --disable-doxygen-rtf --disable-doxygen-xml --disable-doxygen-chm --disable-doxygen-chi --disable-doxygen-html --disable-doxygen-ps --disable-doxygen-pdf --disable-core-docs --disable-manpages --disable-xmltoman --disable-tests --disable-compat-libdns_sd --disable-compat-howl --with-xml=expat --with-avahi-user=avahi --with-avahi-group=avahi --disable-gobject --disable-nls
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh)
 
@@ -672,21 +661,21 @@ ExternalProject_Add(
     URL                   http://avahi.org/download/avahi-0.6.31.tar.gz
     URL_MD5               2f22745b8f7368ad5a0a3fddac343f2d
     CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh
-	BUILD_COMMAND 		  make
-	DEPENDS               libdaemon libffi glib dbus expat
-	BUILD_IN_SOURCE 	  1
+    BUILD_COMMAND         make
+    BUILD_IN_SOURCE       1
+    DEPENDS               libdaemon libffi glib dbus expat
 )
 
 ExternalProject_Add(
 	boost
-	URL 				http://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.gz/download
-	URL_MD5 			93780777cfbf999a600f62883bd54b17
+	URL			http://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.gz/download
+	URL_MD5			93780777cfbf999a600f62883bd54b17
 	PATCH_COMMAND 		${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/boost.user-config.jam ./tools/build/v2/user-config.jam
 	CONFIGURE_COMMAND 	./bootstrap.sh --prefix=${TARGET_DIR}
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND 	./b2 include=${TARGET_DIR}/include linkflags="-L${TARGET_DIR}/lib" toolset=gcc-i686 link=static target-os=linux --without-mpi --without-context --without-log --without-python --without-coroutine ${PARALLEL} install
 	BUILD_IN_SOURCE 	1
-	DEPENDS 			zlib bzip2
+	DEPENDS			zlib bzip2
 )
 
 if(NOT EXISTS "${TARGET_DIR}/include/EGL/egl.h")
