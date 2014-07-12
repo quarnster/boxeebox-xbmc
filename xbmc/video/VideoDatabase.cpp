@@ -387,6 +387,21 @@ void CVideoDatabase::CreateViews()
 
   /* NOTE: The tvshowview needs to have "GROUP BY tvshow.idShow" added to any usage if you wish to
            avoid duplicates due to multiple paths per tvshow (from the join on tvshowlinkpath) */
+  CLog::Log(LOGINFO, "create tvshowcounts");
+  CStdString tvshowcounts = PrepareSQL("CREATE VIEW tvshowcounts AS SELECT "
+                                       "      tvshow.idShow AS idShow,"
+                                       "      MAX(files.lastPlayed) AS lastPlayed,"
+                                       "      NULLIF(COUNT(episode.c12), 0) AS totalCount,"
+                                       "      COUNT(files.playCount) AS watchedcount,"
+                                       "      NULLIF(COUNT(DISTINCT(episode.c12)), 0) AS totalSeasons "
+                                       "    FROM tvshow"
+                                       "      LEFT JOIN episode ON"
+                                       "        episode.idShow=tvshow.idShow"
+                                       "      LEFT JOIN files ON"
+                                       "        files.idFile=episode.idFile "
+                                       "    GROUP BY tvshow.idShow");
+  m_pDS->exec(tvshowcounts.c_str());
+
   CLog::Log(LOGINFO, "create tvshowview");
   CStdString tvshowview = PrepareSQL("CREATE VIEW tvshowview AS SELECT "
                                      "  tvshow.*,"
@@ -399,19 +414,8 @@ void CVideoDatabase::CreateViews()
                                      "    tvshowlinkpath.idShow=tvshow.idShow"
                                      "  LEFT JOIN path ON"
                                      "    path.idPath=tvshowlinkpath.idPath"
-                                     "  INNER JOIN ("
-                                     "    SELECT tvshow.idShow AS idShow,"
-                                     "      MAX(files.lastPlayed) AS lastPlayed,"
-                                     "      NULLIF(COUNT(episode.c12), 0) AS totalCount,"
-                                     "      COUNT(files.playCount) AS watchedcount,"
-                                     "      NULLIF(COUNT(DISTINCT(episode.c12)), 0) AS totalSeasons "
-                                     "    FROM tvshow"
-                                     "      LEFT JOIN episode ON"
-                                     "        episode.idShow=tvshow.idShow"
-                                     "      LEFT JOIN files ON"
-                                     "        files.idFile=episode.idFile "
-                                     "    GROUP BY tvshow.idShow) AS counts ON"
-                                     "  tvshow.idShow = counts.idShow");
+                                     "  INNER JOIN tvshowcounts ON"
+                                     "  tvshow.idShow = tvshowcounts.idShow");
   m_pDS->exec(tvshowview.c_str());
 
   CLog::Log(LOGINFO, "create seasonview");
@@ -4598,7 +4602,7 @@ void CVideoDatabase::UpdateTables(int iVersion)
         }
       }
       // cleanup duplicate seasons
-      m_pDS->exec("DELETE FROM seasons WHERE idSeason NOT IN (SELECT min(idSeason) FROM seasons GROUP BY idShow,season)");
+      m_pDS->exec("DELETE FROM seasons WHERE idSeason NOT IN (SELECT idSeason FROM (SELECT min(idSeason) FROM seasons GROUP BY idShow,season) AS sub)");
     }
   }
   if (iVersion < 84)
@@ -4623,7 +4627,9 @@ void CVideoDatabase::UpdateTables(int iVersion)
       for (vector<string>::const_iterator j = paths.begin(); j != paths.end(); ++j)
       {
         int idPath = AddPath(*j, URIUtils::GetParentPath(*j));
-        m_pDS->exec(PrepareSQL("REPLACE INTO tvshowlinkpath(idShow, idPath) VALUES(%i,%i)", i->show, idPath));
+        /* we can't rely on REPLACE INTO here as analytics (indices) aren't online yet */
+        if (GetSingleValue(PrepareSQL("SELECT 1 FROM tvshowlinkpath WHERE idShow=%i AND idPath=%i", i->show, idPath)).empty())
+          m_pDS->exec(PrepareSQL("INSERT INTO tvshowlinkpath(idShow, idPath) VALUES(%i,%i)", i->show, idPath));
       }
       m_pDS->exec(PrepareSQL("DELETE FROM tvshowlinkpath WHERE idShow=%i AND idPath=%i", i->show, i->pathId));
     }
@@ -4633,11 +4639,16 @@ void CVideoDatabase::UpdateTables(int iVersion)
     // drop multipaths from the path table - they're not needed for anything at all
     m_pDS->exec("DELETE FROM path WHERE strPath LIKE 'multipath://%'");
   }
+  if (iVersion < 87)
+  { // due to the tvshow merging above, there could be orphaned season or show art
+    m_pDS->exec("DELETE from art WHERE media_type='tvshow' AND NOT EXISTS (SELECT 1 FROM tvshow WHERE tvshow.idShow = art.media_id)");
+    m_pDS->exec("DELETE from art WHERE media_type='season' AND NOT EXISTS (SELECT 1 FROM seasons WHERE seasons.idSeason = art.media_id)");
+  }
 }
 
 int CVideoDatabase::GetSchemaVersion() const
 {
-  return 85;
+  return 87;
 }
 
 bool CVideoDatabase::LookupByFolders(const CStdString &path, bool shows)
@@ -8225,7 +8236,7 @@ std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, co
             pDialog->SetChoice(1, 15014);
 
             //send message and wait for user input
-            ThreadMessage tMsg = { TMSG_DIALOG_DOMODAL, WINDOW_DIALOG_YES_NO, (unsigned int)g_windowManager.GetActiveWindow() };
+            ThreadMessage tMsg = { TMSG_DIALOG_DOMODAL, WINDOW_DIALOG_YES_NO, g_windowManager.GetActiveWindow() };
             CApplicationMessenger::Get().SendMessage(tMsg, true);
 
             del = !pDialog->IsConfirmed();

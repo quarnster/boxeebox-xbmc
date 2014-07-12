@@ -233,7 +233,6 @@ void CSettings::Uninitialize()
   m_settingsManager->UnregisterSettingOptionsFiller("fontheights");
   m_settingsManager->UnregisterSettingOptionsFiller("fonts");
   m_settingsManager->UnregisterSettingOptionsFiller("languages");
-  m_settingsManager->UnregisterSettingOptionsFiller("pvrstartlastchannel");
   m_settingsManager->UnregisterSettingOptionsFiller("refreshchangedelays");
   m_settingsManager->UnregisterSettingOptionsFiller("refreshrates");
   m_settingsManager->UnregisterSettingOptionsFiller("regions");
@@ -574,7 +573,6 @@ void CSettings::InitializeOptionFillers()
   // register setting option fillers
 #ifdef HAS_DVD_DRIVE
   m_settingsManager->RegisterSettingOptionsFiller("audiocdactions", MEDIA_DETECT::CAutorun::SettingOptionAudioCdActionsFiller);
-  m_settingsManager->RegisterSettingOptionsFiller("audiocdencoders", MEDIA_DETECT::CAutorun::SettingOptionAudioCdEncodersFiller);
 #endif
   m_settingsManager->RegisterSettingOptionsFiller("aequalitylevels", CAEFactory::SettingOptionsAudioQualityLevelsFiller);
   m_settingsManager->RegisterSettingOptionsFiller("audiodevices", CAEFactory::SettingOptionsAudioDevicesFiller);
@@ -584,7 +582,6 @@ void CSettings::InitializeOptionFillers()
   m_settingsManager->RegisterSettingOptionsFiller("epgguideviews", PVR::CGUIWindowPVRGuide::SettingOptionsEpgGuideViewFiller);
   m_settingsManager->RegisterSettingOptionsFiller("fonts", GUIFontManager::SettingOptionsFontsFiller);
   m_settingsManager->RegisterSettingOptionsFiller("languages", CLangInfo::SettingOptionsLanguagesFiller);
-  m_settingsManager->RegisterSettingOptionsFiller("pvrstartlastchannel", PVR::CPVRManager::SettingOptionsPvrStartLastChannelFiller);
   m_settingsManager->RegisterSettingOptionsFiller("refreshchangedelays", CDisplaySettings::SettingOptionsRefreshChangeDelaysFiller);
   m_settingsManager->RegisterSettingOptionsFiller("refreshrates", CDisplaySettings::SettingOptionsRefreshRatesFiller);
   m_settingsManager->RegisterSettingOptionsFiller("regions", CLangInfo::SettingOptionsRegionsFiller);
@@ -724,6 +721,7 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert("screensaver.mode");
   settingSet.insert("screensaver.preview");
   settingSet.insert("screensaver.settings");
+  settingSet.insert("audiocds.settings");
   settingSet.insert("videoscreen.guicalibration");
   settingSet.insert("videoscreen.testpattern");
   settingSet.insert("videoplayer.useamcodec");

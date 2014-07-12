@@ -460,7 +460,7 @@ msgstr ""
 
 #: xbmc/windows/GUIWindowFileManager.cpp
 msgctxt "#122"
-msgid "Confirm file delete?"
+msgid "Confirm delete"
 msgstr ""
 
 #: xbmc/windows/GUIWindowFileManager.cpp
@@ -823,7 +823,11 @@ msgctxt "#199"
 msgid "Web interface"
 msgstr ""
 
-#empty strings from id 200 to 201
+msgctxt "#200"
+msgid "Audio encoders"
+msgstr ""
+
+#empty string with id 201
 
 #: xbmc/playlists/SmartPlaylist.cpp
 msgctxt "#202"
@@ -7843,7 +7847,13 @@ msgctxt "#19111"
 msgid "PVR backend error. Check the log for details."
 msgstr ""
 
-#empty strings from id 19112 to 19113
+msgctxt "#19112"
+msgid "Delete this recording?"
+msgstr ""
+
+msgctxt "#19113"
+msgid "Delete all recordings in this folder?"
+msgstr ""
 
 #: xbmc/windows/GUIWindowSystemInfo.cpp
 msgctxt "#19114"
@@ -8166,8 +8176,9 @@ msgctxt "#19189"
 msgid "Continue last channel on startup"
 msgstr ""
 
+#: system/settings/settings.xml
 msgctxt "#19190"
-msgid "Minimised"
+msgid "Background"
 msgstr ""
 
 msgctxt "#19191"
@@ -8595,7 +8606,12 @@ msgctxt "#19286"
 msgid "Searching for channel icons"
 msgstr ""
 
-#empty strings from id 19287 to 19498
+#: system/settings/settings.xml
+msgctxt "#19288"
+msgid "Foreground"
+msgstr ""
+
+#empty strings from id 19289 to 19498
 
 #: xbmc/epg/Epg.cpp
 msgctxt "#19499"
@@ -15771,4 +15787,9 @@ msgstr ""
 #: system/settings/rbp.xml
 msgctxt "#37024"
 msgid "Select this if the audio out connection only supports multichannel audio as Dolby Digital 5.1, this allows multichannel audio such as AAC5.1 or FLAC5.1 to be listened to in 5.1 surround sound. Note - Not recommended on Pi as this requires a lot of CPU."
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#37025"
+msgid "Configure audio encoder settings such as quality and compression level"
 msgstr ""

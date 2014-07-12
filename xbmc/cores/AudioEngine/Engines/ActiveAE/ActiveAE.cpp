@@ -1470,7 +1470,19 @@ void CActiveAE::ApplySettingsToFormat(AEAudioFormat &format, AudioSettings &sett
       else if (m_extKeepConfig && (settings.config == AE_CONFIG_AUTO) && (oldMode != MODE_RAW))
         format.m_channelLayout = m_internalFormat.m_channelLayout;
       else
+      {
+        if (stdLayout == AE_CH_LAYOUT_5_0 || stdLayout == AE_CH_LAYOUT_5_1)
+        {
+          std::vector<CAEChannelInfo> alts;
+          alts.push_back(stdLayout);
+          stdLayout.ReplaceChannel(AE_CH_BL, AE_CH_SL);
+          stdLayout.ReplaceChannel(AE_CH_BR, AE_CH_SR);
+          alts.push_back(stdLayout);
+          int bestMatch = format.m_channelLayout.BestMatch(alts);
+          stdLayout = alts[bestMatch];
+        }
         format.m_channelLayout.ResolveChannels(stdLayout);
+      }
     }
     // don't change from multi to stereo in AUTO mode
     else if ((settings.config == AE_CONFIG_AUTO) &&
@@ -2231,6 +2243,23 @@ bool CActiveAE::SupportsRaw(AEDataFormat format, int samplerate)
 bool CActiveAE::SupportsSilenceTimeout()
 {
   return true;
+}
+
+bool CActiveAE::HasStereoAudioChannelCount()
+{
+  std::string device = CSettings::Get().GetString("audiooutput.audiodevice");
+  int numChannels = (m_sink.GetDeviceType(device) == AE_DEVTYPE_IEC958) ? AE_CH_LAYOUT_2_0 : CSettings::Get().GetInt("audiooutput.channels");
+  bool passthrough = CSettings::Get().GetInt("audiooutput.config") == AE_CONFIG_FIXED ? false : CSettings::Get().GetBool("audiooutput.passthrough");
+  return numChannels == AE_CH_LAYOUT_2_0 && ! (passthrough &&
+    CSettings::Get().GetBool("audiooutput.ac3passthrough") &&
+    CSettings::Get().GetBool("audiooutput.ac3transcode"));
+}
+
+bool CActiveAE::HasHDAudioChannelCount()
+{
+  std::string device = CSettings::Get().GetString("audiooutput.audiodevice");
+  int numChannels = (m_sink.GetDeviceType(device) == AE_DEVTYPE_IEC958) ? AE_CH_LAYOUT_2_0 : CSettings::Get().GetInt("audiooutput.channels");
+  return numChannels > AE_CH_LAYOUT_5_1;
 }
 
 bool CActiveAE::SupportsQualityLevel(enum AEQuality level)
