@@ -297,7 +297,7 @@ extern "C"
     void* pBlock = malloc(size);
     if (!pBlock)
     {
-      CLog::Log(LOGSEVERE, "malloc %"PRIdS" bytes failed, crash imminent", size);
+      CLog::Log(LOGSEVERE, "malloc %" PRIdS" bytes failed, crash imminent", size);
     }
     return pBlock;
   }
@@ -312,7 +312,7 @@ extern "C"
     void* pBlock = calloc(num, size);
     if (!pBlock)
     {
-      CLog::Log(LOGSEVERE, "calloc %"PRIdS" bytes failed, crash imminent", size);
+      CLog::Log(LOGSEVERE, "calloc %" PRIdS" bytes failed, crash imminent", size);
     }
     return pBlock;
   }
@@ -322,7 +322,7 @@ extern "C"
     void* pBlock =  realloc(memblock, size);
     if (!pBlock)
     {
-      CLog::Log(LOGSEVERE, "realloc %"PRIdS" bytes failed, crash imminent", size);
+      CLog::Log(LOGSEVERE, "realloc %" PRIdS" bytes failed, crash imminent", size);
     }
     return pBlock;
   }
@@ -839,7 +839,7 @@ extern "C"
     while ((vecDirsOpen[iDirSlot].curr_index != -1) && (iDirSlot<MAX_OPEN_DIRS)) iDirSlot++;
     if (iDirSlot >= MAX_OPEN_DIRS)
       return -1; // no free slots
-    if (url.GetProtocol().Equals("filereader"))
+    if (url.IsProtocol("filereader"))
     {
       CURL url2(url.GetFileName());
       url = url2;
@@ -964,7 +964,7 @@ extern "C"
       return NULL; // no free slots
     }
 
-    if (url.GetProtocol().Equals("filereader"))
+    if (url.IsProtocol("filereader"))
     {
       CURL url2(url.GetFileName());
       url = url2;

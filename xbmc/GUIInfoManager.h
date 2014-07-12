@@ -498,10 +498,6 @@ namespace INFO
 #define CONTROL_GROUP_HAS_FOCUS     29999
 #define CONTROL_HAS_FOCUS           30000
 
-#define VERSION_MAJOR               14
-#define VERSION_MINOR               0
-#define VERSION_TAG                 "-ALPHA1"
-
 #define LISTITEM_START              35000
 #define LISTITEM_THUMB              (LISTITEM_START)
 #define LISTITEM_LABEL              (LISTITEM_START + 1)
@@ -650,6 +646,7 @@ namespace INFO
 #define LISTITEM_STEREOSCOPIC_MODE  (LISTITEM_START + 140)
 #define LISTITEM_IS_STEREOSCOPIC    (LISTITEM_START + 141)
 #define LISTITEM_INPROGRESS         (LISTITEM_START + 142)
+#define LISTITEM_HASRECORDING       (LISTITEM_START + 143)
 
 #define LISTITEM_PROPERTY_START     (LISTITEM_START + 200)
 #define LISTITEM_PROPERTY_END       (LISTITEM_PROPERTY_START + 1000)
@@ -748,9 +745,9 @@ public:
    \sa GetItemInt, GetMultiInfoInt
    */
   bool GetInt(int &value, int info, int contextWindow = 0, const CGUIListItem *item = NULL) const;
-  CStdString GetLabel(int info, int contextWindow = 0, CStdString *fallback = NULL);
+  CStdString GetLabel(int info, int contextWindow = 0, std::string *fallback = NULL);
 
-  CStdString GetImage(int info, int contextWindow, CStdString *fallback = NULL);
+  CStdString GetImage(int info, int contextWindow, std::string *fallback = NULL);
 
   CStdString GetTime(TIME_FORMAT format = TIME_FORMAT_GUESS) const;
   CStdString GetDate(bool bNumbersOnly = false);
@@ -812,8 +809,8 @@ public:
 
   void ResetCache();
   bool GetItemInt(int &value, const CGUIListItem *item, int info) const;
-  CStdString GetItemLabel(const CFileItem *item, int info, CStdString *fallback = NULL);
-  CStdString GetItemImage(const CFileItem *item, int info, CStdString *fallback = NULL);
+  CStdString GetItemLabel(const CFileItem *item, int info, std::string *fallback = NULL);
+  CStdString GetItemImage(const CFileItem *item, int info, std::string *fallback = NULL);
 
   // Called from tuxbox service thread to update current status
   void UpdateFromTuxBox();
@@ -871,7 +868,7 @@ protected:
 
   bool GetMultiInfoBool(const GUIInfo &info, int contextWindow = 0, const CGUIListItem *item = NULL);
   bool GetMultiInfoInt(int &value, const GUIInfo &info, int contextWindow = 0) const;
-  CStdString GetMultiInfoLabel(const GUIInfo &info, int contextWindow = 0, CStdString *fallback = NULL);
+  CStdString GetMultiInfoLabel(const GUIInfo &info, int contextWindow = 0, std::string *fallback = NULL);
   int TranslateListItem(const Property &info);
   int TranslateMusicPlayerString(const CStdString &info) const;
   TIME_FORMAT TranslateTimeFormat(const CStdString &format);

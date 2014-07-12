@@ -126,6 +126,11 @@ bool CGUIProgressControl::CanFocus() const
 
 bool CGUIProgressControl::OnMessage(CGUIMessage& message)
 {
+  if (message.GetMessage() == GUI_MSG_ITEM_SELECT)
+  {
+    SetPercentage((float)message.GetParam1());
+    return true;
+  }
   return CGUIControl::OnMessage(message);
 }
 
@@ -204,7 +209,7 @@ bool CGUIProgressControl::UpdateColors()
   return changed;
 }
 
-CStdString CGUIProgressControl::GetDescription() const
+std::string CGUIProgressControl::GetDescription() const
 {
   return StringUtils::Format("%2.f", m_fPercent);
 }

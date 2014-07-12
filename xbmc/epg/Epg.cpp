@@ -329,6 +329,7 @@ void CEpg::AddEntry(const CEpgInfoTag &tag)
     newTag->Update(tag);
     newTag->SetPVRChannel(m_pvrChannel);
     newTag->m_epg          = this;
+    UpdateRecording(newTag);
     newTag->m_bChanged     = false;
   }
 }
@@ -355,11 +356,30 @@ bool CEpg::UpdateEntry(const CEpgInfoTag &tag, bool bUpdateDatabase /* = false *
   infoTag->Update(tag, bNewTag);
   infoTag->m_epg          = this;
   infoTag->m_pvrChannel   = m_pvrChannel;
+  UpdateRecording(infoTag);
 
   if (bUpdateDatabase)
     m_changedTags.insert(make_pair(infoTag->UniqueBroadcastID(), infoTag));
 
   return true;
+}
+
+void CEpg::UpdateRecording(CEpgInfoTagPtr tag)
+{
+  if (!tag)
+    return;
+
+  if (tag->HasPVRChannel() && tag->HasRecordingId())
+  {
+    CPVRRecordingPtr recording = g_PVRRecordings->GetById(tag->ChannelTag()->ClientID(), tag->RecordingId());
+    if (recording)
+    {
+      tag->SetRecording(recording);
+      return;
+    }
+  }
+
+  tag->ClearRecording();
 }
 
 bool CEpg::Load(void)
@@ -693,7 +713,7 @@ bool CEpg::UpdateFromScraper(time_t start, time_t end)
 
 //@}
 
-const CStdString &CEpg::ConvertGenreIdToString(int iID, int iSubID)
+const std::string &CEpg::ConvertGenreIdToString(int iID, int iSubID)
 {
   unsigned int iLabelId = 19499;
   switch (iID)
@@ -843,7 +863,7 @@ void CEpg::SetChannel(PVR::CPVRChannelPtr channel)
 bool CEpg::HasPVRChannel(void) const
 {
   CSingleLock lock(m_critSection);
-  return m_pvrChannel;
+  return m_pvrChannel != NULL;
 }
 
 bool CEpg::UpdatePending(void) const

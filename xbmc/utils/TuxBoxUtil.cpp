@@ -40,6 +40,7 @@
 #include "guilib/LocalizeStrings.h"
 #include "StringUtils.h"
 #include "utils/XBMCTinyXML.h"
+#include "utils/XMLUtils.h"
 #include "log.h"
 
 using namespace XFILE;
@@ -144,7 +145,7 @@ bool CTuxBoxUtil::CreateNewItem(const CFileItem& item, CFileItem& item_new)
   if(g_tuxbox.GetZapUrl(item.GetPath(), item_new))
   {
     if(vVideoSubChannel.mode)
-      vVideoSubChannel.current_name = item_new.GetLabel()+" ("+vVideoSubChannel.current_name+")";
+      vVideoSubChannel.current_name = (CStdString)item_new.GetLabel()+" ("+vVideoSubChannel.current_name+")";
     return true;
   }
   else
@@ -1516,7 +1517,6 @@ CStdString CTuxBoxUtil::GetPicon(CStdString strServiceName)
   else
   {
     CStdString piconXML, piconPath, defaultPng;
-    CStdString strName, strPng;
     piconPath = "special://xbmc/userdata/PictureIcon/Picon/";
     defaultPng = piconPath+"tuxbox.png";
     piconXML = "special://xbmc/userdata/PictureIcon/picon.xml";
@@ -1543,15 +1543,12 @@ CStdString CTuxBoxUtil::GetPicon(CStdString strServiceName)
     pService = pServices->FirstChildElement("service");
     while(pService)
     {
-      if(pService->Attribute("name"))
-        strName = StringUtils::Format("%s", pService->Attribute("name"));
-
-      if(pService->Attribute("png"))
-        strPng = StringUtils::Format("%s", pService->Attribute("png"));
+      CStdString strName = XMLUtils::GetAttribute(pService, "name");
+      CStdString  strPng = XMLUtils::GetAttribute(pService, "png");
 
       if(strName.Equals(strServiceName))
       {
-        strPng = StringUtils::Format("%s%s", piconPath.c_str(), strPng.c_str());
+        strPng = piconPath + strPng;
         StringUtils::ToLower(strPng);
         CLog::Log(LOGDEBUG, "%s %s: Path is: %s", __FUNCTION__,strServiceName.c_str(), strPng.c_str());
         return strPng;
@@ -1624,28 +1621,27 @@ CStdString CTuxBoxUtil::DetectSubMode(CStdString strSubMode, CStdString& strXMLR
   size_t ipointMode = strSubMode.find("?mode=");
   size_t ipointSubMode = strSubMode.find("&submode=");
   if (ipointMode != std::string::npos)
-    strFilter = strSubMode.at(ipointMode + 6);
+    strFilter.assign(1, strSubMode.at(ipointMode + 6));
 
   if (ipointSubMode != std::string::npos)
   {
-    CStdString strTemp;
-    strTemp = strSubMode.at(ipointSubMode + 9);
-    if(strTemp.Equals("1"))
+    char v = strSubMode.at(ipointSubMode + 9);
+    if(v == '1')
     {
       strXMLRootString = StringUtils::Format("unknowns");
       strXMLChildString = StringUtils::Format("unknown");
     }
-    else if(strTemp.Equals("2"))
+    else if(v == '2')
     {
       strXMLRootString = StringUtils::Format("satellites");
       strXMLChildString = StringUtils::Format("satellite");
     }
-    else if(strTemp.Equals("3"))
+    else if(v == '3')
     {
       strXMLRootString = StringUtils::Format("providers");
       strXMLChildString = StringUtils::Format("provider");
     }
-    else if(strTemp.Equals("4"))
+    else if(v == '4')
     {
       strXMLRootString = StringUtils::Format("bouquets");
       strXMLChildString = StringUtils::Format("bouquet");

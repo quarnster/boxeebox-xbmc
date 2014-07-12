@@ -27,7 +27,6 @@
 #include "filesystem/ZipManager.h"
 #include "filesystem/FileDirectoryFactory.h"
 #include "dialogs/GUIDialogContextMenu.h"
-#include "guilib/GUIListContainer.h"
 #include "dialogs/GUIDialogMediaSource.h"
 #include "GUIPassword.h"
 #include "GUIUserMessages.h"
@@ -322,7 +321,7 @@ void CGUIWindowFileManager::OnSort(int iList)
   for (int i = 0; i < m_vecItems[iList]->Size(); i++)
   {
     CFileItemPtr pItem = m_vecItems[iList]->Get(i);
-    if (pItem->m_bIsFolder && (!pItem->m_dwSize || pItem->GetPath().Equals("add")))
+    if (pItem->m_bIsFolder && (!pItem->m_dwSize || pItem->IsPath("add")))
       pItem->SetLabel2("");
     else
       pItem->SetFileSizeLabel();
@@ -571,15 +570,13 @@ void CGUIWindowFileManager::OnClick(int iList, int iItem)
   }
   else if (pItem->IsZIP() || pItem->IsCBZ()) // mount zip archive
   {
-    CStdString strArcivedPath;
-    URIUtils::CreateArchivePath(strArcivedPath, "zip", pItem->GetPath(), "");
-    Update(iList, strArcivedPath);
+    CURL pathToUrl = URIUtils::CreateArchivePath("zip", pItem->GetURL(), "");
+    Update(iList, pathToUrl.Get());
   }
   else if (pItem->IsRAR() || pItem->IsCBR())
   {
-    CStdString strArcivedPath;
-    URIUtils::CreateArchivePath(strArcivedPath, "rar", pItem->GetPath(), "");
-    Update(iList, strArcivedPath);
+    CURL pathToUrl = URIUtils::CreateArchivePath("rar", pItem->GetURL(), "");
+    Update(iList, pathToUrl.Get());
   }
   else
   {
@@ -806,10 +803,12 @@ void CGUIWindowFileManager::Refresh()
 
 int CGUIWindowFileManager::GetSelectedItem(int iControl)
 {
-  if (iControl < 0 || iControl > 1) return -1;
-  CGUIListContainer *pControl = (CGUIListContainer *)GetControl(iControl + CONTROL_LEFT_LIST);
-  if (!pControl || !m_vecItems[iControl]->Size()) return -1;
-  return pControl->GetSelectedItem();
+  if (iControl < 0 || iControl > 1 || m_vecItems[iControl]->IsEmpty())
+    return -1;
+  CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), iControl + CONTROL_LEFT_LIST);
+  if (OnMessage(msg))
+    return (int)msg.GetParam1();
+  return -1;
 }
 
 void CGUIWindowFileManager::GoParentFolder(int iList)

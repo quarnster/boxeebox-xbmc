@@ -215,7 +215,7 @@ bool CGUIDialogAddonInfo::PromptIfDependency(int heading, int line2)
 
   if (!deps.empty())
   {
-    string line0 = StringUtils::Format(g_localizeStrings.Get(24046), m_localAddon->Name().c_str());
+    string line0 = StringUtils::Format(g_localizeStrings.Get(24046).c_str(), m_localAddon->Name().c_str());
     string line1 = StringUtils::Join(deps, ", ");
     CGUIDialogOK::ShowAndGetInput(heading, line0, line1, line2);
     return true;
@@ -273,7 +273,7 @@ void CGUIDialogAddonInfo::OnSettings()
 void CGUIDialogAddonInfo::OnChangeLog()
 {
   CGUIDialogTextViewer* pDlgInfo = (CGUIDialogTextViewer*)g_windowManager.GetWindow(WINDOW_DIALOG_TEXT_VIEWER);
-  CStdString name;
+  std::string name;
   if (m_addon)
     name = m_addon->Name();
   else if (m_localAddon)
@@ -413,15 +413,13 @@ void CGUIDialogAddonInfo::OnJobComplete(unsigned int jobID, bool success,
   else
   {
     CFile file;
-    if (file.Open("special://temp/"+
-      URIUtils::GetFileName(((CFileOperationJob*)job)->GetItems()[0]->GetPath())))
+    XFILE::auto_buffer buf;
+    if (file.LoadFile("special://temp/" +
+      URIUtils::GetFileName(((CFileOperationJob*)job)->GetItems()[0]->GetPath()), buf) > 0)
     {
-      char* temp = new char[(size_t)file.GetLength()+1];
-      file.Read(temp,file.GetLength());
-      temp[file.GetLength()] = '\0';
-      m_item->SetProperty("Addon.Changelog",temp);
-      pDlgInfo->SetText(temp);
-      delete[] temp;
+      std::string str(buf.get(), buf.length());
+      m_item->SetProperty("Addon.Changelog", str);
+      pDlgInfo->SetText(str);
     }
   }
   CGUIMessage msg(GUI_MSG_NOTIFY_ALL, WINDOW_DIALOG_TEXT_VIEWER, 0, GUI_MSG_UPDATE);

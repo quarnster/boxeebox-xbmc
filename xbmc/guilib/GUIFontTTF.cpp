@@ -138,7 +138,6 @@ CGUIFontTTFBase::CGUIFontTTFBase(const CStdString& strFileName)
   m_maxChars = 0;
   m_nestedBeginCount = 0;
 
-  m_bTextureLoaded = false;
   m_vertex_size   = 4*1024;
   m_vertex        = (SVertex*)malloc(m_vertex_size * sizeof(SVertex));
 
@@ -734,7 +733,7 @@ void CGUIFontTTFBase::RenderCharacter(float posX, float posY, const Character *c
     if (!m_vertex)
     {
       free(old);
-      CLog::Log(LOGSEVERE, "%s: can't allocate %"PRIdS" bytes for texture", __FUNCTION__ , m_vertex_size * sizeof(SVertex));
+      CLog::Log(LOGSEVERE, "%s: can't allocate %" PRIdS" bytes for texture", __FUNCTION__ , m_vertex_size * sizeof(SVertex));
       return;
     }
   }

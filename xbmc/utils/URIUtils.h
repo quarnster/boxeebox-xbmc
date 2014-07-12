@@ -35,8 +35,8 @@ public:
   static const CStdString GetFileName(const CURL& url);
   static const CStdString GetFileName(const CStdString& strFileNameAndPath);
 
-  static CStdString GetExtension(const CURL& url);
-  static CStdString GetExtension(const CStdString& strFileName);
+  static std::string GetExtension(const CURL& url);
+  static std::string GetExtension(const std::string& strFileName);
 
   /*!
    \brief Check if there is a file extension
@@ -60,18 +60,16 @@ public:
   static bool HasExtension(const CStdString& strFileName, const CStdString& strExtensions);
   static bool HasExtension(const CURL& url, const CStdString& strExtensions);
 
-  static void RemoveExtension(CStdString& strFileName);
+  static void RemoveExtension(std::string& strFileName);
   static CStdString ReplaceExtension(const CStdString& strFile,
                                      const CStdString& strNewExtension);
-  static void Split(const CStdString& strFileNameAndPath, 
-                    CStdString& strPath, CStdString& strFileName);
   static void Split(const std::string& strFileNameAndPath, 
                     std::string& strPath, std::string& strFileName);
   static std::vector<std::string> SplitPath(const CStdString& strPath);
 
-  static void GetCommonPath(CStdString& strPath, const CStdString& strPath2);
-  static CStdString GetParentPath(const CStdString& strPath);
-  static bool GetParentPath(const CStdString& strPath, CStdString& strParent);
+  static void GetCommonPath(std::string& strPath, const std::string& strPath2);
+  static std::string GetParentPath(const std::string& strPath);
+  static bool GetParentPath(const std::string& strPath, std::string& strParent);
 
   /* \brief Change the base path of a URL: fromPath/fromFile -> toPath/toFile
     Handles changes in path separator and filename URL encoding if necessary to derive toFile.
@@ -84,6 +82,34 @@ public:
 
   static CURL SubstitutePath(const CURL& url, bool reverse = false);
   static CStdString SubstitutePath(const CStdString& strPath, bool reverse = false);
+
+  /*! \brief Check whether a URL is a given URL scheme.
+   Comparison is case-insensitve as per RFC1738
+   \param url a std::string path.
+   \param type a lower-case scheme name, e.g. "smb".
+   \return true if the url is of the given scheme, false otherwise.
+   \sa PathStarts, PathEquals
+   */
+  static bool IsProtocol(const std::string& url, const std::string& type);
+
+  /*! \brief Check whether a path starts with a given start.
+   Comparison is case-sensitive.
+   Use IsProtocol() to compare the protocol portion only.
+   \param path a std::string path.
+   \param start the string the start of the path should be compared against.
+   \return true if the path starts with the given string, false otherwise.
+   \sa IsProtocol, PathEquals
+   */
+  static bool PathStarts(const std::string& path, const char *start);
+
+  /*! \brief Check whether a path equals another path.
+   Comparison is case-sensitive.
+   \param path1 a std::string path.
+   \param path2 the second path the path should be compared against.
+   \return true if the paths are equal, false otherwise.
+   \sa IsProtocol, PathStarts
+   */
+  static bool PathEquals(const std::string& path1, const std::string &path2);
 
   static bool IsAddonsPath(const CStdString& strFile);
   static bool IsSourcesPath(const CStdString& strFile);
@@ -157,17 +183,11 @@ public:
                                 const std::string& pathInArchive = "",
                                 const std::string& password = "");
 
-  static void CreateArchivePath(CStdString& strUrlPath,
-                                const CStdString& strType,
-                                const CStdString& strArchivePath,
-                                const CStdString& strFilePathInArchive,
-                                const CStdString& strPwd="");
-
   static CStdString AddFileToFolder(const CStdString &strFolder, const CStdString &strFile);
 
-  static bool ProtocolHasParentInHostname(const CStdString& prot);
-  static bool ProtocolHasEncodedHostname(const CStdString& prot);
-  static bool ProtocolHasEncodedFilename(const CStdString& prot);
+  static bool HasParentInHostname(const CURL& url);
+  static bool HasEncodedHostname(const CURL& url);
+  static bool HasEncodedFilename(const CURL& url);
 
   /*!
    \brief Cleans up the given path by resolving "." and ".."

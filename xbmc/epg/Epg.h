@@ -270,7 +270,7 @@ namespace EPG
      * @param iSubID The genre sub ID.
      * @return A human readable name.
      */
-    static const CStdString &ConvertGenreIdToString(int iID, int iSubID);
+    static const std::string &ConvertGenreIdToString(int iID, int iSubID);
 
     /*!
      * @brief Update an entry in this EPG.
@@ -293,7 +293,7 @@ namespace EPG
     bool NeedsSave(void) const;
 
     /*!
-     * @return True when this EPG is valid and can be updated, false otherwise
+     * @return True when this EPG is valid and can be updated, false otherwise.
      */
     bool IsValid(void) const;
   protected:
@@ -338,6 +338,8 @@ namespace EPG
     bool UpdateEntries(const CEpg &epg, bool bStoreInDb = true);
 
     bool IsRemovableTag(const EPG::CEpgInfoTag &tag) const;
+
+    void UpdateRecording(CEpgInfoTagPtr tag);
 
     std::map<CDateTime, CEpgInfoTagPtr> m_tags;
     std::map<int, CEpgInfoTagPtr>       m_changedTags;

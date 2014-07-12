@@ -39,6 +39,7 @@
 #include "guilib/LocalizeStrings.h"
 #include "cores/AudioEngine/AEFactory.h"
 #include "utils/StringUtils.h"
+#include "utils/XMLUtils.h"
 
 #define PLAYERCOREFACTORY_XML "playercorefactory.xml"
 
@@ -170,13 +171,13 @@ void CPlayerCoreFactory::GetPlayers( const CFileItem& item, VECPLAYERCORES &vecC
   for(unsigned int i = 0; i < m_vecCoreSelectionRules.size(); i++)
     m_vecCoreSelectionRules[i]->GetPlayers(item, vecCores);
 
-  CLog::Log(LOGDEBUG, "CPlayerCoreFactory::GetPlayers: matched %"PRIuS" rules with players", vecCores.size());
+  CLog::Log(LOGDEBUG, "CPlayerCoreFactory::GetPlayers: matched %" PRIuS" rules with players", vecCores.size());
 
   if( PAPlayer::HandlesType(url.GetFileType()) )
   {
     // We no longer force PAPlayer as our default audio player (used to be true):
     bool bAdd = false;
-    if (url.GetProtocol().Equals("mms"))
+    if (url.IsProtocol("mms"))
     {
        bAdd = false;
     }
@@ -191,8 +192,7 @@ void CPlayerCoreFactory::GetPlayers( const CFileItem& item, VECPLAYERCORES &vecC
 
     if (bAdd)
     {
-      if ((url.GetFileType().Equals("ac3"))
-            || (url.GetFileType().Equals("dts")))
+      if (url.IsFileType("ac3") || url.IsFileType("dts"))
       {
         CLog::Log(LOGDEBUG, "CPlayerCoreFactory::GetPlayers: adding DVDPlayer (%d)", EPC_DVDPLAYER);
         vecCores.push_back(EPC_DVDPLAYER);
@@ -238,7 +238,7 @@ void CPlayerCoreFactory::GetPlayers( const CFileItem& item, VECPLAYERCORES &vecC
   /* make our list unique, preserving first added players */
   unique(vecCores);
 
-  CLog::Log(LOGDEBUG, "CPlayerCoreFactory::GetPlayers: added %"PRIuS" players", vecCores.size());
+  CLog::Log(LOGDEBUG, "CPlayerCoreFactory::GetPlayers: added %" PRIuS" players", vecCores.size());
 }
 
 void CPlayerCoreFactory::GetRemotePlayers( VECPLAYERCORES &vecCores ) const
@@ -360,9 +360,9 @@ bool CPlayerCoreFactory::LoadConfiguration(const std::string &file, bool clear)
     TiXmlElement* pPlayer = pPlayers->FirstChildElement("player");
     while (pPlayer)
     {
-      CStdString name = pPlayer->Attribute("name");
-      CStdString type = pPlayer->Attribute("type");
-      if (type.length() == 0) type = name;
+      CStdString name = XMLUtils::GetAttribute(pPlayer, "name");
+      CStdString type = XMLUtils::GetAttribute(pPlayer, "type");
+      if (type.empty()) type = name;
       StringUtils::ToLower(type);
 
       EPLAYERCORES eCore = EPC_NONE;

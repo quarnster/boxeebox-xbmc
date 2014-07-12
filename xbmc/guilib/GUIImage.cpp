@@ -100,9 +100,9 @@ void CGUIImage::AllocateOnDemand()
 void CGUIImage::Process(unsigned int currentTime, CDirtyRegionList &dirtyregions)
 {
   // check whether our image failed to allocate, and if so drop back to the fallback image
-  if (m_texture.FailedToAlloc() && !m_texture.GetFileName().Equals(m_info.GetFallback()))
+  if (m_texture.FailedToAlloc() && m_texture.GetFileName() != m_info.GetFallback())
   {
-    if (!m_currentFallback.empty() && !m_texture.GetFileName().Equals(m_currentFallback))
+    if (!m_currentFallback.empty() && m_texture.GetFileName() != m_currentFallback)
       m_texture.SetFileName(m_currentFallback);
     else
       m_texture.SetFileName(m_info.GetFallback());
@@ -215,6 +215,16 @@ bool CGUIImage::OnMessage(CGUIMessage& message)
   {
     if (!m_info.IsConstant())
       FreeTextures(true); // true as we want to free the texture immediately
+    return true;
+  }
+  else if (message.GetMessage() == GUI_MSG_SET_FILENAME)
+  {
+    SetFileName(message.GetLabel());
+    return true;
+  }
+  else if (message.GetMessage() == GUI_MSG_GET_FILENAME)
+  {
+    message.SetLabel(GetFileName());
     return true;
   }
   return CGUIControl::OnMessage(message);
@@ -394,7 +404,7 @@ unsigned char CGUIImage::GetFadeLevel(unsigned int time) const
   return (unsigned char)(255.0f * (1 - pow(1-alpha, amount))/alpha);
 }
 
-CStdString CGUIImage::GetDescription(void) const
+std::string CGUIImage::GetDescription(void) const
 {
   return GetFileName();
 }

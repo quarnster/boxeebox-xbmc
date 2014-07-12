@@ -59,7 +59,7 @@ extern "C" void tracker_library_free_all(DllTrackInfo* pInfo)
   if (!pInfo->dllList.empty())
   {
     CSingleLock lock(g_trackerLock);
-    CLog::Log(LOGDEBUG,"%s: Detected %"PRIdS" unloaded dll's", pInfo->pDll->GetFileName(), pInfo->dllList.size());
+    CLog::Log(LOGDEBUG,"%s: Detected %" PRIdS" unloaded dll's", pInfo->pDll->GetFileName(), pInfo->dllList.size());
     for (DllListIter it = pInfo->dllList.begin(); it != pInfo->dllList.end(); ++it)
     {
       LibraryLoader* pDll = DllLoaderContainer::GetModule((HMODULE)*it);
@@ -98,7 +98,7 @@ extern "C" HMODULE __stdcall track_LoadLibraryA(LPCSTR file)
   uintptr_t loc = (uintptr_t)_ReturnAddress();
 
   DllTrackInfo* pInfo = tracker_get_dlltrackinfo(loc);
-  char* path = NULL;
+  const char* path = NULL;
   if (pInfo) path = pInfo->pDll->GetFileName();
 
   HMODULE hHandle = dllLoadLibraryExtended(file, path);
@@ -112,7 +112,7 @@ extern "C" HMODULE __stdcall track_LoadLibraryExA(LPCSTR lpLibFileName, HANDLE h
   uintptr_t loc = (uintptr_t)_ReturnAddress();
 
   DllTrackInfo* pInfo = tracker_get_dlltrackinfo(loc);
-  char* path = NULL;
+  const char* path = NULL;
   if (pInfo) path = pInfo->pDll->GetFileName();
 
   HMODULE hHandle = dllLoadLibraryExExtended(lpLibFileName, hFile, dwFlags, path);

@@ -193,14 +193,14 @@ CAfpConnection::afpConnnectError CAfpConnection::Connect(const CURL& url)
   m_pLibAfp->afp_default_url(&tmpurl);
 
   // if hostname has changed - assume server changed
-  if (!nonConstUrl.GetHostName().Equals(m_pAfpUrl->servername, false)|| (m_pAfpServer && m_pAfpServer->connect_state == 0))
+  if (nonConstUrl.GetHostName() != m_pAfpUrl->servername || (m_pAfpServer && m_pAfpServer->connect_state == 0))
   {
     serverChanged = true;
     Disconnect();
   }
 
   // if volume changed - also assume server changed (afpclient can't reuse old servobject it seems)
-  if (!nonConstUrl.GetShareName().Equals(m_pAfpUrl->volumename, false))
+  if (nonConstUrl.GetShareName() != m_pAfpUrl->volumename)
   {
    // no reusing of old server object possible with libafpclient it seems...
     serverChanged = true;
@@ -584,7 +584,7 @@ int64_t CAFPFile::Seek(int64_t iFilePosition, int iWhence)
 
   if ( newOffset < 0 || newOffset > m_fileSize)
   {
-    CLog::Log(LOGERROR, "%s - Error( %"PRId64")", __FUNCTION__, newOffset);
+    CLog::Log(LOGERROR, "%s - Error( %" PRId64")", __FUNCTION__, newOffset);
     return -1;
   }
 

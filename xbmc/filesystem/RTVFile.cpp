@@ -30,6 +30,7 @@
 #ifdef TARGET_WINDOWS
 #include "PlatformDefs.h" //for PRIdS
 #endif
+#include "utils/StdString.h"
 extern "C"
 {
 #include "lib/libRTV/interface.h"
@@ -101,13 +102,13 @@ bool CRTVFile::Open(const char* strHostName, const char* strFileName, int iport)
   }
   m_bOpened = true;
 
-  CLog::Log(LOGDEBUG, "%s - Opened %s on %s, Size %"PRIu64", Position %"PRIu64"", __FUNCTION__, strHostName, strFileName, m_fileSize, m_filePos);
+  CLog::Log(LOGDEBUG, "%s - Opened %s on %s, Size %" PRIu64", Position %" PRIu64"", __FUNCTION__, strHostName, strFileName, m_fileSize, m_filePos);
   return true;
 }
 
 bool CRTVFile::Open(const CURL& url)
 {
-  return Open(url.GetHostName(), url.GetFileName(), url.GetPort());
+  return Open((CStdString)url.GetHostName(), (CStdString)url.GetFileName(), url.GetPort());
 }
 
 bool CRTVFile::Exists(const CURL& url)
@@ -132,7 +133,7 @@ unsigned int CRTVFile::Read(void *lpBuf, int64_t uiBufSize)
   // Read uiBufSize bytes from the m_rtvd connection
   lenread = rtv_read_file(m_rtvd, (char *) lpBuf, (size_t) uiBufSize);
 
-  CLog::Log(LOGDEBUG, "%s - Requested %"PRIdS", Received %"PRIdS"", __FUNCTION__, (size_t)uiBufSize, lenread);
+  CLog::Log(LOGDEBUG, "%s - Requested %" PRIdS", Received %" PRIdS"", __FUNCTION__, (size_t)uiBufSize, lenread);
 
   // Some extra checking so library behaves
   if(m_filePos + lenread > m_fileSize)
