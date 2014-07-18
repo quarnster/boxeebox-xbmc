@@ -24,8 +24,6 @@
 #include <deque>
 #include <sys/types.h>
 
-#include "utils/StdString.h"
-
 #include "OMXClock.h"
 #include "DVDStreamInfo.h"
 #include "OMXVideo.h"
@@ -38,8 +36,6 @@
 #include "utils/BitstreamStats.h"
 #include "linux/DllBCM.h"
 #include "cores/VideoRenderers/RenderManager.h"
-
-using namespace std;
 
 class OMXPlayerVideo : public CThread
 {

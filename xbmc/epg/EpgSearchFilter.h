@@ -56,10 +56,11 @@ namespace EPG
     virtual bool MatchChannelNumber(const CEpgInfoTag &tag) const;
     virtual bool MatchChannelGroup(const CEpgInfoTag &tag) const;
     virtual bool MatchBroadcastId(const CEpgInfoTag &tag) const;
+    virtual bool MatchChannelType(const CEpgInfoTag &tag) const;
 
     static int RemoveDuplicates(CFileItemList &results);
 
-    CStdString    m_strSearchTerm;            /*!< The term to search for */
+    std::string   m_strSearchTerm;            /*!< The term to search for */
     bool          m_bIsCaseSensitive;         /*!< Do a case sensitive search */
     bool          m_bSearchInDescription;     /*!< Search for strSearchTerm in the description too */
     int           m_iGenreType;               /*!< The genre type for an entry */
@@ -70,6 +71,7 @@ namespace EPG
     CDateTime     m_endDateTime;              /*!< The maximum end time for an entry */
     bool          m_bIncludeUnknownGenres;    /*!< Include unknown genres or not */
     bool          m_bPreventRepeats;          /*!< True to remove repeating events, false if not */
+    bool          m_bIsRadio;                 /*!< True to filter radio channels only, false to tv only */
 
     /* PVR specific filters */
     int           m_iChannelNumber;           /*!< The channel number in the selected channel group */

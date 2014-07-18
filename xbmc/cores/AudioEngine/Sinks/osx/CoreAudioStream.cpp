@@ -19,10 +19,10 @@
  */
 
 #include "CoreAudioStream.h"
+#include "CoreAudioDevice.h"
 
 #include "CoreAudioHelpers.h"
 #include "utils/log.h"
-#include "utils/StdString.h"
 
 CCoreAudioStream::CCoreAudioStream() :
   m_StreamId  (0    )
@@ -212,6 +212,13 @@ bool CCoreAudioStream::SetVirtualFormat(AudioStreamBasicDescription* pDesc)
 
   std::string formatString;
 
+  // suppress callbacks for the default output device change
+  // for the next 2 seconds because setting format
+  // might trigger a change (when setting/unsetting an encoded
+  // passthrough format)
+  CCoreAudioDevice::SuppressDefaultOutputDeviceCB(2000);
+
+
   if (!m_OriginalVirtualFormat.mFormatID)
   {
     // Store the original format (as we found it) so that it can be restored later
@@ -291,6 +298,12 @@ bool CCoreAudioStream::SetPhysicalFormat(AudioStreamBasicDescription* pDesc)
     return false;
 
   std::string formatString;
+
+  // suppress callbacks for the default output device change
+  // for the next 2 seconds because setting format
+  // might trigger a change (when setting/unsetting an encoded
+  // passthrough format)
+  CCoreAudioDevice::SuppressDefaultOutputDeviceCB(2000);
 
   if (!m_OriginalPhysicalFormat.mFormatID)
   {
@@ -427,7 +440,7 @@ OSStatus CCoreAudioStream::HardwareStreamListener(AudioObjectID inObjectID,
       // hardware physical format has changed.
       if (AudioObjectGetPropertyData(ca_stream->m_StreamId, &inAddresses[i], 0, NULL, &propertySize, &actualFormat) == noErr)
       {
-        CStdString formatString;
+        std::string formatString;
         CLog::Log(LOGINFO, "CCoreAudioStream::HardwareStreamListener: "
           "Hardware physical format changed to %s", StreamDescriptionToString(actualFormat, formatString));
         ca_stream->m_physical_format_event.Set();
@@ -440,7 +453,7 @@ OSStatus CCoreAudioStream::HardwareStreamListener(AudioObjectID inObjectID,
       UInt32 propertySize = sizeof(AudioStreamBasicDescription);
       if (AudioObjectGetPropertyData(ca_stream->m_StreamId, &inAddresses[i], 0, NULL, &propertySize, &actualFormat) == noErr)
       {
-        CStdString formatString;
+        std::string formatString;
         CLog::Log(LOGINFO, "CCoreAudioStream::HardwareStreamListener: "
           "Hardware virtual format changed to %s", StreamDescriptionToString(actualFormat, formatString));
         ca_stream->m_virtual_format_event.Set();

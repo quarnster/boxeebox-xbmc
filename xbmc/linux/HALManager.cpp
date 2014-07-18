@@ -427,8 +427,8 @@ void CHALManager::HandleNewVolume(CStorageDevice *dev)
       if (Mountable)
       {
         CLog::Log(LOGNOTICE, "HAL: Trying to mount %s", dev->FriendlyName.c_str());
-        CStdString MountPoint;
-        CStdString TestPath;
+        std::string MountPoint;
+        std::string TestPath;
         if (dev->Label.size() > 0)
         {
           MountPoint = dev->Label.c_str();
@@ -598,7 +598,7 @@ bool CHALManager::ApproveDevice(CStorageDevice *device)
     approve = false;
 
   // Ignore some mountpoints, unless a weird setup these should never contain anything usefull for an enduser.
-  if (strcmp(device->MountPoint, "/") == 0 || strcmp(device->MountPoint, "/boot/") == 0 || strcmp(device->MountPoint, "/mnt/") == 0 || strcmp(device->MountPoint, "/home/") == 0)
+  if (strcmp(device->MountPoint.c_str(), "/") == 0 || strcmp(device->MountPoint.c_str(), "/boot/") == 0 || strcmp(device->MountPoint.c_str(), "/mnt/") == 0 || strcmp(device->MountPoint.c_str(), "/home/") == 0)
     approve = false;
 
   if (device->HalIgnore)
@@ -608,11 +608,11 @@ bool CHALManager::ApproveDevice(CStorageDevice *device)
   return approve;
 }
 
-bool CHALManager::Eject(CStdString path)
+bool CHALManager::Eject(const std::string& path)
 {
   for (unsigned int i = 0; i < m_Volumes.size(); i++)
   {
-    if (m_Volumes[i].MountPoint.Equals(path))
+    if (m_Volumes[i].MountPoint == path)
       return m_Volumes[i].HotPlugged ? UnMount(m_Volumes[i]) : false;
   }
 
@@ -669,7 +669,7 @@ bool CHALManager::UnMount(CStorageDevice volume)
   }
 }
 
-bool CHALManager::Mount(CStorageDevice *volume, CStdString mountpath)
+bool CHALManager::Mount(CStorageDevice *volume, const std::string &mountpath)
 {
   CLog::Log(LOGNOTICE, "HAL: Mounting %s (%s) at %s with umask=%u", volume->UDI.c_str(), volume->toString().c_str(), mountpath.c_str(), umask (0));
   DBusMessage* msg;
@@ -691,9 +691,9 @@ bool CHALManager::Mount(CStorageDevice *volume, CStdString mountpath)
     DBusMessageIter sub;
     dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, DBUS_TYPE_STRING_AS_STRING, &sub);
 
-    CStdString temporaryString;
+    std::string temporaryString;
 
-    if (volume->FileSystem.Equals("vfat"))
+    if (volume->FileSystem == "vfat")
     {
       int mask = umask (0);
       temporaryString = StringUtils::Format("umask=%#o", mask);

@@ -252,7 +252,11 @@
 /* PVR related include Files */
 #include "pvr/PVRManager.h"
 #include "pvr/timers/PVRTimers.h"
-#include "pvr/windows/GUIWindowPVR.h"
+#include "pvr/windows/GUIWindowPVRChannels.h"
+#include "pvr/windows/GUIWindowPVRRecordings.h"
+#include "pvr/windows/GUIWindowPVRGuide.h"
+#include "pvr/windows/GUIWindowPVRTimers.h"
+#include "pvr/windows/GUIWindowPVRSearch.h"
 #include "pvr/dialogs/GUIDialogPVRChannelManager.h"
 #include "pvr/dialogs/GUIDialogPVRChannelsOSD.h"
 #include "pvr/dialogs/GUIDialogPVRCutterOSD.h"
@@ -596,6 +600,7 @@ bool CApplication::OnEvent(XBMC_Event& newEvent)
 
 extern "C" void __stdcall init_emu_environ();
 extern "C" void __stdcall update_emu_environ();
+extern "C" void __stdcall cleanup_emu_environ();
 
 //
 // Utility function used to copy files from the application bundle
@@ -1422,7 +1427,16 @@ bool CApplication::Initialize()
 
     /* Load PVR related Windows and Dialogs */
     g_windowManager.Add(new CGUIDialogTeletext);
-    g_windowManager.Add(new CGUIWindowPVR);
+    g_windowManager.Add(new CGUIWindowPVRChannels(false));
+    g_windowManager.Add(new CGUIWindowPVRRecordings(false));
+    g_windowManager.Add(new CGUIWindowPVRGuide(false));
+    g_windowManager.Add(new CGUIWindowPVRTimers(false));
+    g_windowManager.Add(new CGUIWindowPVRSearch(false));
+    g_windowManager.Add(new CGUIWindowPVRChannels(true));
+    g_windowManager.Add(new CGUIWindowPVRRecordings(true));
+    g_windowManager.Add(new CGUIWindowPVRGuide(true));
+    g_windowManager.Add(new CGUIWindowPVRTimers(true));
+    g_windowManager.Add(new CGUIWindowPVRSearch(true));
     g_windowManager.Add(new CGUIDialogPVRGuideInfo);
     g_windowManager.Add(new CGUIDialogPVRRecordingInfo);
     g_windowManager.Add(new CGUIDialogPVRTimerSettings);
@@ -1483,16 +1497,10 @@ bool CApplication::Initialize()
       CJSONRPC::Initialize();
 #endif
       ADDON::CAddonMgr::Get().StartServices(false);
-      if (g_SkinInfo->GetFirstWindow() == WINDOW_PVR)
-      {
-        g_windowManager.ActivateWindow(WINDOW_HOME);
-        StartPVRManager(true);
-      }
-      else
-      {
-        StartPVRManager(false);
+
+      // let's start the PVR manager and decide if the PVR manager handle the startup window activation
+      if (!StartPVRManager())
         g_windowManager.ActivateWindow(g_SkinInfo->GetFirstWindow());
-      }
 
       CStereoscopicsManager::Get().Initialize();
     }
@@ -1589,10 +1597,18 @@ bool CApplication::StartServer(enum ESERVERS eServer, bool bStart, bool bWait/* 
   return ret;
 }
 
-void CApplication::StartPVRManager(bool bOpenPVRWindow /* = false */)
+bool CApplication::StartPVRManager()
 {
-  if (CSettings::Get().GetBool("pvrmanager.enabled"))
-    g_PVRManager.Start(true, bOpenPVRWindow);
+  if (!CSettings::Get().GetBool("pvrmanager.enabled"))
+    return false;
+
+  int firstWindowId = 0;
+  if (g_PVRManager.IsPVRWindow(g_SkinInfo->GetStartWindow()))
+    firstWindowId = g_SkinInfo->GetFirstWindow();
+
+  g_PVRManager.Start(true, firstWindowId);
+
+  return (firstWindowId > 0);
 }
 
 void CApplication::StopPVRManager()
@@ -2069,7 +2085,7 @@ void CApplication::UnloadSkin(bool forReload /* = false */)
 bool CApplication::LoadUserWindows()
 {
   // Start from wherever home.xml is
-  std::vector<CStdString> vecSkinPath;
+  std::vector<std::string> vecSkinPath;
   g_SkinInfo->GetSkinPaths(vecSkinPath);
   for (unsigned int i = 0;i < vecSkinPath.size();++i)
   {
@@ -2191,7 +2207,7 @@ float CApplication::GetDimScreenSaverLevel() const
     return 0;
 
   if (!m_screenSaver->GetSetting("level").empty())
-    return 100.0f - (float)atof(m_screenSaver->GetSetting("level"));
+    return 100.0f - (float)atof(m_screenSaver->GetSetting("level").c_str());
   return 100.0f;
 }
 
@@ -3397,7 +3413,16 @@ bool CApplication::Cleanup()
     g_windowManager.Delete(WINDOW_DIALOG_SUBTITLES);
 
     /* Delete PVR related windows and dialogs */
-    g_windowManager.Delete(WINDOW_PVR);
+    g_windowManager.Delete(WINDOW_TV_CHANNELS);
+    g_windowManager.Delete(WINDOW_TV_RECORDINGS);
+    g_windowManager.Delete(WINDOW_TV_GUIDE);
+    g_windowManager.Delete(WINDOW_TV_TIMERS);
+    g_windowManager.Delete(WINDOW_TV_SEARCH);
+    g_windowManager.Delete(WINDOW_RADIO_CHANNELS);
+    g_windowManager.Delete(WINDOW_RADIO_RECORDINGS);
+    g_windowManager.Delete(WINDOW_RADIO_GUIDE);
+    g_windowManager.Delete(WINDOW_RADIO_TIMERS);
+    g_windowManager.Delete(WINDOW_RADIO_SEARCH);
     g_windowManager.Delete(WINDOW_DIALOG_PVR_GUIDE_INFO);
     g_windowManager.Delete(WINDOW_DIALOG_PVR_RECORDING_INFO);
     g_windowManager.Delete(WINDOW_DIALOG_PVR_TIMER_SETTING);
@@ -3634,6 +3659,8 @@ void CApplication::Stop(int exitCode)
   // we may not get to finish the run cycle but exit immediately after a call to g_application.Stop()
   // so we may never get to Destroy() in CXBApplicationEx::Run(), we call it here.
   Destroy();
+  cleanup_emu_environ();
+  CTimeUtils::Close();
 
   //
   Sleep(200);
@@ -3767,6 +3794,8 @@ PlayBackRet CApplication::PlayStack(const CFileItem& item, bool bRestart)
   // case 2: all other stacks
   else
   {
+    LoadVideoSettings(item.GetPath());
+    
     // see if we have the info in the database
     // TODO: If user changes the time speed (FPS via framerate conversion stuff)
     //       then these times will be wrong.
@@ -3778,7 +3807,6 @@ PlayBackRet CApplication::PlayStack(const CFileItem& item, bool bRestart)
     CVideoDatabase dbs;
     if (dbs.Open())
     {
-      dbs.GetVideoSettings(item.GetPath(), CMediaSettings::Get().GetCurrentVideoSettings());
       haveTimes = dbs.GetStackTimes(item.GetPath(), times);
       dbs.Close();
     }
@@ -3864,7 +3892,7 @@ PlayBackRet CApplication::PlayFile(const CFileItem& item, bool bRestart)
 
   if (!bRestart)
   {
-    SaveCurrentFileSettings();
+    SaveFileState(true);
 
     OutputDebugString("new file set audiostream:0\n");
     // Switch to default options
@@ -3985,13 +4013,13 @@ PlayBackRet CApplication::PlayFile(const CFileItem& item, bool bRestart)
   else
   {
     options.starttime = item.m_lStartOffset / 75.0;
+    LoadVideoSettings(item.GetPath());
 
     if (item.IsVideo())
     {
       // open the d/b and retrieve the bookmarks for the current movie
       CVideoDatabase dbs;
       dbs.Open();
-      dbs.GetVideoSettings(item.GetPath(), CMediaSettings::Get().GetCurrentVideoSettings());
 
       if( item.m_lStartOffset == STARTOFFSET_RESUME )
       {
@@ -4375,27 +4403,23 @@ bool CApplication::IsFullScreen()
 
 void CApplication::SaveFileState(bool bForeground /* = false */)
 {
-  if (m_progressTrackingItem->IsPVRChannel() || !CProfilesManager::Get().GetCurrentProfile().canWriteDatabases())
+  if (!CProfilesManager::Get().GetCurrentProfile().canWriteDatabases())
     return;
 
+  CJob* job = new CSaveFileStateJob(*m_progressTrackingItem,
+      *m_stackFileItemToUpdate,
+      m_progressTrackingVideoResumeBookmark,
+      m_progressTrackingPlayCountUpdate,
+      CMediaSettings::Get().GetCurrentVideoSettings());
+  
   if (bForeground)
   {
-    CSaveFileStateJob job(*m_progressTrackingItem,
-    *m_stackFileItemToUpdate,
-    m_progressTrackingVideoResumeBookmark,
-    m_progressTrackingPlayCountUpdate);
-
     // Run job in the foreground to make sure it finishes
-    job.DoWork();
+    job->DoWork();
+    delete job;
   }
   else
-  {
-    CJob* job = new CSaveFileStateJob(*m_progressTrackingItem,
-        *m_stackFileItemToUpdate,
-        m_progressTrackingVideoResumeBookmark,
-        m_progressTrackingPlayCountUpdate);
     CJobManager::GetInstance().AddJob(job, NULL, CJob::PRIORITY_NORMAL);
-  }
 }
 
 void CApplication::UpdateFileState()
@@ -4403,7 +4427,9 @@ void CApplication::UpdateFileState()
   // Did the file change?
   if (m_progressTrackingItem->GetPath() != "" && m_progressTrackingItem->GetPath() != CurrentFile())
   {
-    SaveFileState();
+    // Ignore for PVR channels, PerformChannelSwitch takes care of this
+    if (!m_progressTrackingItem->IsPVRChannel())
+      SaveFileState();
 
     // Reset tracking item
     m_progressTrackingItem->Reset();
@@ -4471,6 +4497,21 @@ void CApplication::UpdateFileState()
   }
 }
 
+void CApplication::LoadVideoSettings(const std::string &path)
+{
+  CVideoDatabase dbs;
+  if (dbs.Open())
+  {
+    CLog::Log(LOGDEBUG, "Loading settings for %s", path.c_str());
+    
+    // Load stored settings if they exist, otherwise use default
+    if (!dbs.GetVideoSettings(path, CMediaSettings::Get().GetCurrentVideoSettings()))
+      CMediaSettings::Get().GetCurrentVideoSettings() = CMediaSettings::Get().GetDefaultVideoSettings();
+    
+    dbs.Close();
+  }
+}
+
 void CApplication::StopPlaying()
 {
   int iWin = g_windowManager.GetActiveWindow();
@@ -4480,9 +4521,6 @@ void CApplication::StopPlaying()
     if( m_pKaraokeMgr )
       m_pKaraokeMgr->Stop();
 #endif
-
-    if (g_PVRManager.IsPlayingTV() || g_PVRManager.IsPlayingRadio())
-      g_PVRManager.SaveCurrentChannelSettings();
 
     m_pPlayer->CloseFile();
 
@@ -5750,26 +5788,6 @@ bool CApplication::ProcessAndStartPlaylist(const CStdString& strPlayList, CPlayL
     return true;
   }
   return false;
-}
-
-void CApplication::SaveCurrentFileSettings()
-{
-  // don't store settings for PVR in video database
-  if (m_itemCurrentFile->IsVideo() && !m_itemCurrentFile->IsPVRChannel())
-  {
-    // save video settings
-    if (CMediaSettings::Get().GetCurrentVideoSettings() != CMediaSettings::Get().GetDefaultVideoSettings())
-    {
-      CVideoDatabase dbs;
-      dbs.Open();
-      dbs.SetVideoSettings(m_itemCurrentFile->GetPath(), CMediaSettings::Get().GetCurrentVideoSettings());
-      dbs.Close();
-    }
-  }
-  else if (m_itemCurrentFile->IsPVRChannel())
-  {
-    g_PVRManager.SaveCurrentChannelSettings();
-  }
 }
 
 bool CApplication::AlwaysProcess(const CAction& action)

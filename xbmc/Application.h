@@ -26,6 +26,7 @@
 #include "guilib/IMsgTargetCallback.h"
 #include "threads/Condition.h"
 #include "utils/GlobalsHandling.h"
+#include "utils/StdString.h"
 
 #include <map>
 
@@ -146,7 +147,11 @@ public:
 
   bool StartServer(enum ESERVERS eServer, bool bStart, bool bWait = false);
 
-  void StartPVRManager(bool bOpenPVRWindow = false);
+  /*!
+   * @brief Starts the PVR manager and decide if the manager should handle the startup window activation.
+   * @return true, if the startup window activation is handled by the pvr manager, otherwise false
+   */
+  bool StartPVRManager();
   void StopPVRManager();
   bool IsCurrentThread() const;
   void Stop(int exitCode);
@@ -174,6 +179,7 @@ public:
   PlayBackRet PlayFile(const CFileItem& item, bool bRestart = false);
   void SaveFileState(bool bForeground = false);
   void UpdateFileState();
+  void LoadVideoSettings(const std::string &path);
   void StopPlaying();
   void Restart(bool bSamePosition = true);
   void DelayedPlayerRestart();
@@ -449,8 +455,6 @@ protected:
 
   float NavigationIdleTime();
   static bool AlwaysProcess(const CAction& action);
-
-  void SaveCurrentFileSettings();
 
   bool InitDirectoriesLinux();
   bool InitDirectoriesOSX();

@@ -66,6 +66,9 @@
 #include "XHandle.h"
 #endif
 
+#ifdef HAS_DVD_DRIVE
+using namespace MEDIA_DETECT;
+#endif
 
 PVOID CIoSupport::m_rawXferBuffer;
 
@@ -80,7 +83,7 @@ HANDLE CIoSupport::OpenCDROM()
   hDevice->fd = fd;
   hDevice->m_bCDROM = true;
 #elif defined(TARGET_WINDOWS)
-  hDevice = CreateFile(g_mediaManager.TranslateDevicePath("",true), GENERIC_READ, FILE_SHARE_READ,
+  hDevice = CreateFile(g_mediaManager.TranslateDevicePath("",true).c_str(), GENERIC_READ, FILE_SHARE_READ,
                        NULL, OPEN_EXISTING,
                        FILE_FLAG_RANDOM_ACCESS, NULL );
 #else

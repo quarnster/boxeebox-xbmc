@@ -139,9 +139,9 @@ namespace PVR
     /*!
      * @brief Start the PVRManager, which loads all PVR data and starts some threads to update the PVR data.
      * @param bAsync True to (re)start the manager from another thread
-     * @param bOpenPVRWindow True to open the PVR window after starting, false otherwise
+     * @param openWindowId Window id to open after starting
      */
-    void Start(bool bAsync = false, bool bOpenPVRWindow = false);
+    void Start(bool bAsync = false, int openWindowId = 0);
 
     /*!
      * @brief Stop the PVRManager and destroy all objects it created.
@@ -157,6 +157,11 @@ namespace PVR
      * @return True when a PVR window is active, false otherwise.
      */
     bool IsPVRWindowActive(void) const;
+
+    /*!
+     * @return True when the given window id is an PVR window, false otherwise.
+     */
+    static bool IsPVRWindow(int windowId);
 
     /*!
      * @brief Check whether an add-on can be upgraded or installed without restarting the pvr manager, when the add-on is in use or the pvr window is active
@@ -392,11 +397,6 @@ namespace PVR
     void TriggerChannelGroupsUpdate(void);
 
     /*!
-     * @brief Let the background thread save the current video settings.
-     */
-    void TriggerSaveChannelSettings(void);
-
-    /*!
      * @brief Let the background thread search for missing channel icons.
      */
     void TriggerSearchMissingChannelIcons(void);
@@ -504,16 +504,6 @@ namespace PVR
     void SearchMissingChannelIcons(void);
 
     /*!
-     * @brief Persist the current channel settings in the database.
-     */
-    void SaveCurrentChannelSettings(void);
-
-    /*!
-     * @brief Load the settings for the current channel from the database.
-     */
-    void LoadCurrentChannelSettings(void);
-
-    /*!
      * @brief Check if channel is parental locked. Ask for PIN if neccessary.
      * @param channel The channel to open.
      * @return True if channel is unlocked (by default or PIN unlocked), false otherwise.
@@ -571,7 +561,7 @@ namespace PVR
      * @return If at least one client and all pvr data was loaded, false otherwise.
      */
     bool Load(void);
-
+    
     /*!
      * @brief Update all recordings.
      */
@@ -672,8 +662,9 @@ namespace PVR
     CCriticalSection                m_managerStateMutex;
     ManagerState                    m_managerState;
     CStopWatch                     *m_parentalTimer;
-    bool                            m_bOpenPVRWindow;
+    int                             m_openWindowId;
     std::map<std::string, std::string> m_outdatedAddons;
+    static int                      m_pvrWindowIds[10];
   };
 
   class CPVREpgsCreateJob : public CJob
@@ -724,16 +715,6 @@ namespace PVR
     virtual const char *GetType() const { return "pvr-update-channelgroups"; }
 
     virtual bool DoWork();
-  };
-
-  class CPVRChannelSettingsSaveJob : public CJob
-  {
-  public:
-    CPVRChannelSettingsSaveJob(void) {}
-    virtual ~CPVRChannelSettingsSaveJob() {}
-    virtual const char *GetType() const { return "pvr-save-channelsettings"; }
-
-    bool DoWork();
   };
 
   class CPVRChannelSwitchJob : public CJob

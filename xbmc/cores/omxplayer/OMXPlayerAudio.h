@@ -24,8 +24,6 @@
 #include <deque>
 #include <sys/types.h>
 
-#include "utils/StdString.h"
-
 #include "OMXClock.h"
 #include "DVDStreamInfo.h"
 #include "OMXAudio.h"
@@ -36,8 +34,6 @@
 #include "DVDMessageQueue.h"
 #include "utils/BitstreamStats.h"
 #include "xbmc/linux/DllBCM.h"
-
-using namespace std;
 
 class OMXPlayerAudio : public CThread
 {

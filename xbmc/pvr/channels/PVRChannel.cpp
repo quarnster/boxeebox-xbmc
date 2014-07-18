@@ -720,11 +720,11 @@ void CPVRChannel::SetCachedChannelNumber(unsigned int iChannelNumber)
 
 void CPVRChannel::ToSortable(SortItem& sortable, Field field) const
 {
+  CSingleLock lock(m_critSection);
   if (field == FieldChannelName)
-  {
-    CSingleLock lock(m_critSection);
     sortable[FieldChannelName] = m_strChannelName;
-  }
+  else if (field == FieldChannelNumber)
+    sortable[FieldChannelNumber] = m_iCachedChannelNumber;
 }
 
 int CPVRChannel::ChannelID(void) const
@@ -766,7 +766,7 @@ bool CPVRChannel::IsUserSetIcon(void) const
 
 bool CPVRChannel::IsIconExists() const
 {
-  return  CFile::Exists(IconPath());
+  return XFILE::CFile::Exists(IconPath());
 }
 
 bool CPVRChannel::IsUserSetName() const

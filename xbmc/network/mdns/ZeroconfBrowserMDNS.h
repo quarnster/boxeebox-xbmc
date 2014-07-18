@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2013 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,59 +20,81 @@
 #pragma once
 
 #include <memory>
+#include <map>
 
-#include "network/Zeroconf.h"
+#include "network/ZeroconfBrowser.h"
+#include "threads/Thread.h"
 #include "threads/CriticalSection.h"
 #include <dns_sd.h>
-#include "threads/Thread.h"
 
-class CZeroconfMDNS : public CZeroconf,public CThread
+//platform specific implementation of  zeroconfbrowser interface using native os x APIs
+class CZeroconfBrowserMDNS : public CZeroconfBrowser
 {
 public:
-  CZeroconfMDNS();
-  ~CZeroconfMDNS();
-
-protected:
-
-  //CThread interface
-  void Process();
-
-  //implement base CZeroConf interface
-  bool doPublishService(const std::string& fcr_identifier,
-                        const std::string& fcr_type,
-                        const std::string& fcr_name,
-                        unsigned int f_port,
-                        const std::vector<std::pair<std::string, std::string> >& txt);
-
-  bool doForceReAnnounceService(const std::string& fcr_identifier);
-  bool doRemoveService(const std::string& fcr_ident);
-
-  virtual void doStop();
-
-  bool IsZCdaemonRunning();
-
-  void ProcessResults();
+  CZeroconfBrowserMDNS();
+  ~CZeroconfBrowserMDNS();
 
 private:
+  ///implementation if CZeroconfBrowser interface
+  ///@{
+  virtual bool doAddServiceType(const std::string& fcr_service_type);
+  virtual bool doRemoveServiceType(const std::string& fcr_service_type);
 
-  static void DNSSD_API registerCallback(DNSServiceRef sdref,
-                                         const DNSServiceFlags flags,
-                                         DNSServiceErrorType errorCode,
-                                         const char *name,
-                                         const char *regtype,
-                                         const char *domain,
-                                         void *context);
+  virtual std::vector<CZeroconfBrowser::ZeroconfService> doGetFoundServices();
+  virtual bool doResolveService(CZeroconfBrowser::ZeroconfService& fr_service, double f_timeout);
+  ///@}
 
+  /// browser callback
+  static void DNSSD_API BrowserCallback(DNSServiceRef browser,
+                                        DNSServiceFlags flags,
+                                        uint32_t interfaceIndex,
+                                        DNSServiceErrorType errorCode,
+                                        const char *serviceName,
+                                        const char *regtype,
+                                        const char *replyDomain,
+                                        void *context);
+  /// GetAddrInfo callback
+  static void DNSSD_API GetAddrInfoCallback(DNSServiceRef                    sdRef,
+                                            DNSServiceFlags                  flags,
+                                            uint32_t                         interfaceIndex,
+                                            DNSServiceErrorType              errorCode,
+                                            const char                       *hostname,
+                                            const struct sockaddr            *address,
+                                            uint32_t                         ttl,
+                                            void                             *context
+                                            );
 
-  //lock + data (accessed from runloop(main thread) + the rest)
+  /// resolve callback
+  static void DNSSD_API ResolveCallback(DNSServiceRef                       sdRef,
+                                        DNSServiceFlags                     flags,
+                                        uint32_t                            interfaceIndex,
+                                        DNSServiceErrorType                 errorCode,
+                                        const char                          *fullname,
+                                        const char                          *hosttarget,
+                                        uint16_t                            port,        /* In network byte order */
+                                        uint16_t                            txtLen,
+                                        const unsigned char                 *txtRecord,
+                                        void                                *context
+                                        );
+
+  /// adds the service to list of found services
+  void addDiscoveredService(DNSServiceRef browser, CZeroconfBrowser::ZeroconfService const& fcr_service);
+  /// removes the service from list of found services
+  void removeDiscoveredService(DNSServiceRef browser, CZeroconfBrowser::ZeroconfService const& fcr_service);
+  // win32: process replies from the bonjour daemon
+  void ProcessResults();
+
+  //shared variables (with guard)
   CCriticalSection m_data_guard;
-  struct tServiceRef
-  {
-    DNSServiceRef serviceRef;
-    TXTRecordRef txtRecordRef;
-    int updateNumber;
-  };
-  typedef std::map<std::string, struct tServiceRef> tServiceMap;
-  tServiceMap m_services;
-  DNSServiceRef m_service;
+  // tBrowserMap maps service types the corresponding browser
+  typedef std::map<std::string, DNSServiceRef> tBrowserMap;
+  tBrowserMap m_service_browsers;
+  //tDiscoveredServicesMap maps browsers to their discovered services + a ref-count for each service
+  //ref-count is needed, because a service might pop up more than once, if there's more than one network-iface
+  typedef std::map<DNSServiceRef, std::vector<std::pair<ZeroconfService, unsigned int> > > tDiscoveredServicesMap;
+  tDiscoveredServicesMap m_discovered_services;
+  DNSServiceRef m_browser;
+  CZeroconfBrowser::ZeroconfService m_resolving_service;
+  CEvent m_resolved_event;
+  CEvent m_addrinfo_event;
 };

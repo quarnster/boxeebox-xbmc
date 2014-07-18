@@ -247,13 +247,13 @@ void CPVRChannelGroup::SearchAndSetChannelIcons(bool bUpdateDb /* = false */)
 
   /* fetch files in icon path for fast lookup */
   CFileItemList fileItemList;
-  CDirectory::GetDirectory(iconPath, fileItemList, ".jpg|.png|.tbn");
+  XFILE::CDirectory::GetDirectory(iconPath, fileItemList, ".jpg|.png|.tbn");
 
   if (fileItemList.IsEmpty())
     return;
 
   CGUIDialogExtendedProgressBar* dlgProgress = (CGUIDialogExtendedProgressBar*)g_windowManager.GetWindow(WINDOW_DIALOG_EXT_PROGRESS);
-  CGUIDialogProgressBarHandle* dlgProgressHandle = dlgProgress ? dlgProgress->GetHandle(g_localizeStrings.Get(19286)) : NULL;
+  CGUIDialogProgressBarHandle* dlgProgressHandle = dlgProgress ? dlgProgress->GetHandle(g_localizeStrings.Get(19287)) : NULL;
 
   CSingleLock lock(m_critSection);
 
@@ -1290,6 +1290,16 @@ bool CPVRChannelGroup::UpdateChannel(const CFileItem &item, bool bHidden, bool b
   }
 
   return true;
+}
+
+int CPVRChannelGroup::GetNumChannels() const
+{
+  return m_members.size();
+}
+
+bool CPVRChannelGroup::HasChannels() const
+{
+  return !m_members.empty();
 }
 
 bool CPVRChannelGroup::ToggleChannelLocked(const CFileItem &item)
