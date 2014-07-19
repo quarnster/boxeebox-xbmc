@@ -1108,7 +1108,7 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
         st->iBitsPerPixel = pStream->codec->bits_per_coded_sample;
 
         AVDictionaryEntry *rtag = av_dict_get(pStream->metadata, "rotate", NULL, 0);
-        if (rtag)
+        if (rtag) 
           st->iOrientation = atoi(rtag->value);
 
         // detect stereoscopic mode
@@ -1119,7 +1119,7 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
         if (!stereoMode.empty())
           st->stereo_mode = stereoMode;
 
-
+        
         if ( m_pInput->IsStreamType(DVDSTREAM_TYPE_DVD) )
         {
           if (pStream->codec->codec_id == AV_CODEC_ID_PROBE)
@@ -1337,7 +1337,7 @@ int CDVDDemuxFFmpeg::GetChapter()
 void CDVDDemuxFFmpeg::GetChapterName(std::string& strChapterName)
 {
   CDVDInputStream::IChapter* ich = dynamic_cast<CDVDInputStream::IChapter*>(m_pInput);
-  if(ich)
+  if(ich)  
     ich->GetChapterName(strChapterName);
   else
   {
