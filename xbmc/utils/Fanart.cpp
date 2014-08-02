@@ -63,25 +63,28 @@ bool CFanart::Unpack()
   TiXmlElement *fanart = doc.FirstChildElement("fanart");
   while (fanart)
   {
-    CStdString url = XMLUtils::GetAttribute(fanart, "url");
+    std::string url = XMLUtils::GetAttribute(fanart, "url");
     TiXmlElement *fanartThumb = fanart->FirstChildElement("thumb");
     while (fanartThumb)
     {
-      SFanartData data;
-      if (url.empty())
+      if (!fanartThumb->NoChildren())
       {
-        data.strImage = fanartThumb->GetText();
-        data.strPreview = XMLUtils::GetAttribute(fanartThumb, "preview");
+        SFanartData data;
+        if (url.empty())
+        {
+          data.strImage = fanartThumb->FirstChild()->ValueStr();
+          data.strPreview = XMLUtils::GetAttribute(fanartThumb, "preview");
+        }
+        else
+        {
+          data.strImage = URIUtils::AddFileToFolder(url, fanartThumb->FirstChild()->ValueStr());
+          if (fanartThumb->Attribute("preview"))
+            data.strPreview = URIUtils::AddFileToFolder(url, fanartThumb->Attribute("preview"));
+        }
+        data.strResolution = XMLUtils::GetAttribute(fanartThumb, "dim");
+        ParseColors(XMLUtils::GetAttribute(fanartThumb, "colors"), data.strColors);
+        m_fanart.push_back(data);
       }
-      else
-      {
-        data.strImage = URIUtils::AddFileToFolder(url, fanartThumb->GetText());
-        if (fanartThumb->Attribute("preview"))
-          data.strPreview = URIUtils::AddFileToFolder(url, fanartThumb->Attribute("preview"));
-      }
-      data.strResolution = XMLUtils::GetAttribute(fanartThumb, "dim");
-      ParseColors(XMLUtils::GetAttribute(fanartThumb, "colors"), data.strColors);
-      m_fanart.push_back(data);
       fanartThumb = fanartThumb->NextSiblingElement("thumb");
     }
     fanart = fanart->NextSiblingElement("fanart");
@@ -89,7 +92,7 @@ bool CFanart::Unpack()
   return true;
 }
 
-CStdString CFanart::GetImageURL(unsigned int index) const
+std::string CFanart::GetImageURL(unsigned int index) const
 {
   if (index >= m_fanart.size())
     return "";
@@ -97,7 +100,7 @@ CStdString CFanart::GetImageURL(unsigned int index) const
   return m_fanart[index].strImage;
 }
 
-CStdString CFanart::GetPreviewURL(unsigned int index) const
+std::string CFanart::GetPreviewURL(unsigned int index) const
 {
   if (index >= m_fanart.size())
     return "";
@@ -105,7 +108,7 @@ CStdString CFanart::GetPreviewURL(unsigned int index) const
   return m_fanart[index].strPreview.empty() ? m_fanart[index].strImage : m_fanart[index].strPreview;
 }
 
-const CStdString CFanart::GetColor(unsigned int index) const
+const std::string CFanart::GetColor(unsigned int index) const
 {
   if (index >= max_fanart_colors || m_fanart.size() == 0 ||
       m_fanart[0].strColors.size() < index*9+8)
@@ -133,7 +136,7 @@ unsigned int CFanart::GetNumFanarts() const
   return m_fanart.size();
 }
 
-bool CFanart::ParseColors(const CStdString &colorsIn, CStdString &colorsOut)
+bool CFanart::ParseColors(const std::string &colorsIn, std::string &colorsOut)
 {
   // Formats:
   // 0: XBMC ARGB Hexadecimal string comma seperated "FFFFFFFF,DDDDDDDD,AAAAAAAA"

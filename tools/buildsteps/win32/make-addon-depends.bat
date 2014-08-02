@@ -4,12 +4,24 @@ SETLOCAL
 
 SET EXITCODE=0
 
+SET noclean=false
+SET dependency=
+FOR %%b in (%1, %2) DO (
+  IF %%b == noclean (
+    SET noclean=true
+  ) ELSE ( IF %%b == clean (
+    SET noclean=false
+  ) ELSE (
+    SET dependency=%%b
+  ))
+)
+
 rem set Visual C++ build environment
 call "%VS120COMNTOOLS%..\..\VC\bin\vcvars32.bat"
 
 SET WORKDIR=%WORKSPACE%
 
-IF "%WORKDIR%"=="" (
+IF "%WORKDIR%" == "" (
   SET WORKDIR=%CD%\..\..\..
 )
 
@@ -17,47 +29,52 @@ rem setup some paths that we need later
 SET CUR_PATH=%CD%
 
 SET BASE_PATH=%WORKDIR%\project\cmake\
+SET SCRIPTS_PATH=%BASE_PATH%\scripts\windows
 SET ADDONS_PATH=%BASE_PATH%\addons
 SET ADDONS_OUTPUT_PATH=%ADDONS_PATH%\output
-SET ADDON_DEPENDS_PATH=%ADDONS_PATH%\depends\win32
+SET ADDON_DEPENDS_PATH=%ADDONS_PATH%\depends
 SET ADDON_DEPENDS_BUILD_PATH=%ADDON_DEPENDS_PATH%\build
 
 SET ERRORFILE=%BASE_PATH%\make-addon-depends.error
 
-rem remove the output directory if it exists
-IF EXIST "%ADDONS_OUTPUT_PATH%" (
-	RMDIR "%ADDONS_OUTPUT_PATH%" /S /Q > NUL
+IF %noclean% == false (
+  rem remove the output directory if it exists
+  IF EXIST "%ADDONS_OUTPUT_PATH%" (
+    RMDIR "%ADDONS_OUTPUT_PATH%" /S /Q > NUL
+  )
+
+  rem remove the build directory if it exists
+  IF EXIST "%ADDON_DEPENDS_BUILD_PATH%" (
+    RMDIR "%ADDON_DEPENDS_BUILD_PATH%" /S /Q > NUL
+  )
 )
 
 rem create the output directory
-MKDIR "%ADDONS_OUTPUT_PATH%"
-
-rem go into the addon depends directory
-CD %ADDON_DEPENDS_PATH%
-
-rem remove the build directory if it exists
-IF EXIST "%ADDON_DEPENDS_BUILD_PATH%" (
-	RMDIR "%ADDON_DEPENDS_BUILD_PATH%" /S /Q > NUL
-)
+IF NOT EXIST "%ADDONS_OUTPUT_PATH%" MKDIR "%ADDONS_OUTPUT_PATH%"
 
 rem create the build directory
-MKDIR "%ADDON_DEPENDS_BUILD_PATH%"
+IF NOT EXIST "%ADDON_DEPENDS_BUILD_PATH%" MKDIR "%ADDON_DEPENDS_BUILD_PATH%"
 
 rem go into the build directory
 CD "%ADDON_DEPENDS_BUILD_PATH%"
 
 rem execute cmake to generate makefiles processable by nmake
-cmake "%ADDON_DEPENDS_PATH%" -G "NMake Makefiles" -DCMAKE_INSTALL_PREFIX=%ADDONS_OUTPUT_PATH%
+cmake "%ADDON_DEPENDS_PATH%" -G "NMake Makefiles" ^
+      -DCMAKE_BUILD_TYPE=Release ^
+      -DCMAKE_USER_MAKE_RULES_OVERRIDE="%SCRIPTS_PATH%/xbmc-c-flag-overrides.cmake" ^
+      -DCMAKE_USER_MAKE_RULES_OVERRIDE_CXX="%SCRIPTS_PATH%/xbmc-cxx-flag-overrides.cmake" ^ ^
+      -DCMAKE_INSTALL_PREFIX=%ADDONS_OUTPUT_PATH% ^
+      -DARCH_DEFINES="-DTARGET_WINDOWS -DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -D_USE_32BIT_TIME_T -D_WINSOCKAPI_"
 IF ERRORLEVEL 1 (
-	ECHO cmake error level: %ERRORLEVEL% > %ERRORFILE%
-	GOTO ERROR
+  ECHO cmake error level: %ERRORLEVEL% > %ERRORFILE%
+  GOTO ERROR
 )
 
 rem execute nmake to build the addon depends
-nmake
+nmake %dependency%
 IF ERRORLEVEL 1 (
-	ECHO nmake error level: %ERRORLEVEL% > %ERRORFILE%
-	GOTO ERROR
+  ECHO nmake error level: %ERRORLEVEL% > %ERRORFILE%
+  GOTO ERROR
 )
 
 rem everything was fine

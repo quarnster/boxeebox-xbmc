@@ -38,7 +38,7 @@ using namespace PVR;
 using namespace EPG;
 using namespace std;
 
-CEpg::CEpg(int iEpgID, const CStdString &strName /* = "" */, const CStdString &strScraperName /* = "" */, bool bLoadedFromDb /* = false */) :
+CEpg::CEpg(int iEpgID, const std::string &strName /* = "" */, const std::string &strScraperName /* = "" */, bool bLoadedFromDb /* = false */) :
     m_bChanged(!bLoadedFromDb),
     m_bTagsChanged(false),
     m_bLoaded(false),
@@ -107,22 +107,22 @@ CEpg &CEpg::operator =(const CEpg &right)
 /** @name Public methods */
 //@{
 
-void CEpg::SetName(const CStdString &strName)
+void CEpg::SetName(const std::string &strName)
 {
   CSingleLock lock(m_critSection);
 
-  if (!m_strName.Equals(strName))
+  if (m_strName != strName)
   {
     m_bChanged = true;
     m_strName = strName;
   }
 }
 
-void CEpg::SetScraperName(const CStdString &strScraperName)
+void CEpg::SetScraperName(const std::string &strScraperName)
 {
   CSingleLock lock(m_critSection);
 
-  if (!m_strScraperName.Equals(strScraperName))
+  if (m_strScraperName != strScraperName)
   {
     m_bChanged = true;
     m_strScraperName = strScraperName;
@@ -320,7 +320,7 @@ void CEpg::AddEntry(const CEpgInfoTag &tag)
     newTag = itr->second;
   else
   {
-    newTag = CEpgInfoTagPtr(new CEpgInfoTag(this, m_pvrChannel, m_strName, m_pvrChannel ? m_pvrChannel->IconPath() : StringUtils::EmptyString));
+    newTag = CEpgInfoTagPtr(new CEpgInfoTag(this, m_pvrChannel, m_strName, m_pvrChannel ? m_pvrChannel->IconPath() : ""));
     m_tags.insert(make_pair(tag.StartAsUTC(), newTag));
   }
 
@@ -347,7 +347,7 @@ bool CEpg::UpdateEntry(const CEpgInfoTag &tag, bool bUpdateDatabase /* = false *
   else
   {
     /* create a new tag if no tag with this ID exists */
-    infoTag = CEpgInfoTagPtr(new CEpgInfoTag(this, m_pvrChannel, m_strName, m_pvrChannel ? m_pvrChannel->IconPath() : StringUtils::EmptyString));
+    infoTag = CEpgInfoTagPtr(new CEpgInfoTag(this, m_pvrChannel, m_strName, m_pvrChannel ? m_pvrChannel->IconPath() : ""));
     infoTag->SetUniqueBroadcastID(tag.UniqueBroadcastID());
     m_tags.insert(make_pair(tag.StartAsUTC(), infoTag));
     bNewTag = true;

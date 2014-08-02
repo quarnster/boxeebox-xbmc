@@ -30,7 +30,6 @@
 #include "epg/EpgSearchFilter.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 
-using namespace std;
 using namespace PVR;
 
 #define CONTROL_EDIT_SEARCH       9
@@ -66,15 +65,17 @@ void CGUIDialogPVRGuideSearch::UpdateChannelSpin(void)
 {
   int iChannelGroup = GetSpinValue(CONTROL_SPIN_GROUPS);
 
-  vector< pair<string, int> > labels;
-  labels.push_back(make_pair(g_localizeStrings.Get(19217), EPG_SEARCH_UNSET));
+  std::vector< std::pair<std::string, int> > labels;
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19217), EPG_SEARCH_UNSET));
 
-  int iGroupId = (iChannelGroup == EPG_SEARCH_UNSET) ?
-      XBMC_INTERNAL_GROUP_TV :
-      iChannelGroup;
-  CPVRChannelGroupPtr group = g_PVRChannelGroups->GetByIdFromAll(iGroupId);
+  CPVRChannelGroupPtr group;
+  if (iChannelGroup == EPG_SEARCH_UNSET)
+    group = g_PVRChannelGroups->GetGroupAll(m_searchFilter->m_bIsRadio);
+  else
+    group = g_PVRChannelGroups->GetByIdFromAll(iChannelGroup);
+
   if (!group)
-    group = g_PVRChannelGroups->GetGroupAllTV();
+    group = g_PVRChannelGroups->GetGroupAll(m_searchFilter->m_bIsRadio);
 
   for (int iChannelPtr = 0; iChannelPtr < group->Size(); iChannelPtr++)
   {
@@ -83,7 +84,7 @@ void CGUIDialogPVRGuideSearch::UpdateChannelSpin(void)
       continue;
 
     int iChannelNumber = group->GetChannelNumber(*channel->GetPVRChannelInfoTag());
-    labels.push_back(make_pair(channel->GetPVRChannelInfoTag()->ChannelName(), iChannelNumber));
+    labels.push_back(std::make_pair(channel->GetPVRChannelInfoTag()->ChannelName(), iChannelNumber));
   }
 
   SET_CONTROL_LABELS(CONTROL_SPIN_CHANNELS, m_searchFilter->m_iChannelNumber, &labels);
@@ -91,40 +92,32 @@ void CGUIDialogPVRGuideSearch::UpdateChannelSpin(void)
 
 void CGUIDialogPVRGuideSearch::UpdateGroupsSpin(void)
 {
-  std::vector<CPVRChannelGroupPtr> group;
-  std::vector<CPVRChannelGroupPtr>::const_iterator it;
+  std::vector< std::pair<std::string, int> > labels;
 
-  vector< pair<string, int> > labels;
-
-  /* tv groups */
-  group = g_PVRChannelGroups->GetTV()->GetMembers();
-  for (it = group.begin(); it != group.end(); ++it)
-    labels.push_back(make_pair((*it)->GroupName(), (*it)->GroupID()));
-
-  /* radio groups */
-  group = g_PVRChannelGroups->GetRadio()->GetMembers();
-  for (it = group.begin(); it != group.end(); ++it)
-    labels.push_back(make_pair((*it)->GroupName(), (*it)->GroupID()));
+  /* groups */
+  std::vector<CPVRChannelGroupPtr> groups = g_PVRChannelGroups->Get(m_searchFilter->m_bIsRadio)->GetMembers();
+  for (std::vector<CPVRChannelGroupPtr>::const_iterator it = groups.begin(); it != groups.end(); ++it)
+    labels.push_back(std::make_pair((*it)->GroupName(), (*it)->GroupID()));
 
   SET_CONTROL_LABELS(CONTROL_SPIN_GROUPS, m_searchFilter->m_iChannelGroup, &labels);
 }
 
 void CGUIDialogPVRGuideSearch::UpdateGenreSpin(void)
 {
-  vector< pair<string, int> > labels;
-  labels.push_back(make_pair(g_localizeStrings.Get(593),   EPG_SEARCH_UNSET));
-  labels.push_back(make_pair(g_localizeStrings.Get(19500), EPG_EVENT_CONTENTMASK_MOVIEDRAMA));
-  labels.push_back(make_pair(g_localizeStrings.Get(19516), EPG_EVENT_CONTENTMASK_NEWSCURRENTAFFAIRS));
-  labels.push_back(make_pair(g_localizeStrings.Get(19532), EPG_EVENT_CONTENTMASK_SHOW));
-  labels.push_back(make_pair(g_localizeStrings.Get(19548), EPG_EVENT_CONTENTMASK_SPORTS));
-  labels.push_back(make_pair(g_localizeStrings.Get(19564), EPG_EVENT_CONTENTMASK_CHILDRENYOUTH));
-  labels.push_back(make_pair(g_localizeStrings.Get(19580), EPG_EVENT_CONTENTMASK_MUSICBALLETDANCE));
-  labels.push_back(make_pair(g_localizeStrings.Get(19596), EPG_EVENT_CONTENTMASK_ARTSCULTURE));
-  labels.push_back(make_pair(g_localizeStrings.Get(19612), EPG_EVENT_CONTENTMASK_SOCIALPOLITICALECONOMICS));
-  labels.push_back(make_pair(g_localizeStrings.Get(19628), EPG_EVENT_CONTENTMASK_EDUCATIONALSCIENCE));
-  labels.push_back(make_pair(g_localizeStrings.Get(19644), EPG_EVENT_CONTENTMASK_LEISUREHOBBIES));
-  labels.push_back(make_pair(g_localizeStrings.Get(19660), EPG_EVENT_CONTENTMASK_SPECIAL));
-  labels.push_back(make_pair(g_localizeStrings.Get(19499), EPG_EVENT_CONTENTMASK_USERDEFINED));
+  std::vector< std::pair<std::string, int> > labels;
+  labels.push_back(std::make_pair(g_localizeStrings.Get(593),   EPG_SEARCH_UNSET));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19500), EPG_EVENT_CONTENTMASK_MOVIEDRAMA));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19516), EPG_EVENT_CONTENTMASK_NEWSCURRENTAFFAIRS));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19532), EPG_EVENT_CONTENTMASK_SHOW));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19548), EPG_EVENT_CONTENTMASK_SPORTS));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19564), EPG_EVENT_CONTENTMASK_CHILDRENYOUTH));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19580), EPG_EVENT_CONTENTMASK_MUSICBALLETDANCE));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19596), EPG_EVENT_CONTENTMASK_ARTSCULTURE));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19612), EPG_EVENT_CONTENTMASK_SOCIALPOLITICALECONOMICS));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19628), EPG_EVENT_CONTENTMASK_EDUCATIONALSCIENCE));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19644), EPG_EVENT_CONTENTMASK_LEISUREHOBBIES));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19660), EPG_EVENT_CONTENTMASK_SPECIAL));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19499), EPG_EVENT_CONTENTMASK_USERDEFINED));
 
   SET_CONTROL_LABELS(CONTROL_SPIN_GENRE, m_searchFilter->m_iGenreType, &labels);
 }
@@ -132,20 +125,20 @@ void CGUIDialogPVRGuideSearch::UpdateGenreSpin(void)
 void CGUIDialogPVRGuideSearch::UpdateDurationSpin(void)
 {
   /* minimum duration */
-  vector< pair<string, int> > labels;
+  std::vector< std::pair<std::string, int> > labels;
 
-  labels.push_back(make_pair("-", EPG_SEARCH_UNSET));
+  labels.push_back(std::make_pair("-", EPG_SEARCH_UNSET));
   for (int i = 1; i < 12*60/5; i++)
-    labels.push_back(make_pair(StringUtils::Format(g_localizeStrings.Get(14044).c_str(), i*5), i*5));
+    labels.push_back(std::make_pair(StringUtils::Format(g_localizeStrings.Get(14044).c_str(), i*5), i*5));
 
   SET_CONTROL_LABELS(CONTROL_SPIN_MIN_DURATION, m_searchFilter->m_iMinimumDuration, &labels);
 
   /* maximum duration */
   labels.clear();
 
-  labels.push_back(make_pair("-", EPG_SEARCH_UNSET));
+  labels.push_back(std::make_pair("-", EPG_SEARCH_UNSET));
   for (int i = 1; i < 12*60/5; i++)
-    labels.push_back(make_pair(StringUtils::Format(g_localizeStrings.Get(14044).c_str(), i*5), i*5));
+    labels.push_back(std::make_pair(StringUtils::Format(g_localizeStrings.Get(14044).c_str(), i*5), i*5));
 
   SET_CONTROL_LABELS(CONTROL_SPIN_MAX_DURATION, m_searchFilter->m_iMaximumDuration, &labels);
 }
@@ -209,10 +202,10 @@ void CGUIDialogPVRGuideSearch::OnWindowLoaded()
   return CGUIDialog::OnWindowLoaded();
 }
 
-void CGUIDialogPVRGuideSearch::ReadDateTime(const CStdString &strDate, const CStdString &strTime, CDateTime &dateTime) const
+void CGUIDialogPVRGuideSearch::ReadDateTime(const std::string &strDate, const std::string &strTime, CDateTime &dateTime) const
 {
   int iHours, iMinutes;
-  sscanf(strTime, "%d:%d", &iHours, &iMinutes);
+  sscanf(strTime.c_str(), "%d:%d", &iHours, &iMinutes);
   dateTime.SetFromDBDate(strDate);
   dateTime.SetDateTime(dateTime.GetYear(), dateTime.GetMonth(), dateTime.GetDay(), iHours, iMinutes, 0);
 }
@@ -231,7 +224,7 @@ int CGUIDialogPVRGuideSearch::GetSpinValue(int controlID)
   return (int)msg.GetParam1();
 }
 
-string CGUIDialogPVRGuideSearch::GetEditValue(int controlID)
+std::string CGUIDialogPVRGuideSearch::GetEditValue(int controlID)
 {
   CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), controlID);
   OnMessage(msg);
@@ -259,7 +252,7 @@ void CGUIDialogPVRGuideSearch::OnSearch()
   m_searchFilter->m_iChannelNumber = GetSpinValue(CONTROL_SPIN_CHANNELS);
   m_searchFilter->m_iChannelGroup = GetSpinValue(CONTROL_SPIN_GROUPS);
 
-  CStdString strTmp = GetEditValue(CONTROL_EDIT_START_TIME);
+  std::string strTmp = GetEditValue(CONTROL_EDIT_START_TIME);
   ReadDateTime(GetEditValue(CONTROL_EDIT_START_DATE), strTmp, m_searchFilter->m_startDateTime);
   strTmp = GetEditValue(CONTROL_EDIT_STOP_TIME);
   ReadDateTime(GetEditValue(CONTROL_EDIT_STOP_DATE), strTmp, m_searchFilter->m_endDateTime);

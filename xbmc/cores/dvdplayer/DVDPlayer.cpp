@@ -70,7 +70,6 @@
 #include "utils/StreamDetails.h"
 #include "pvr/PVRManager.h"
 #include "pvr/channels/PVRChannel.h"
-#include "pvr/windows/GUIWindowPVR.h"
 #include "filesystem/PVRFile.h"
 #include "video/dialogs/GUIDialogFullScreenInfo.h"
 #include "utils/StreamUtils.h"
@@ -191,7 +190,7 @@ static bool PredicateAudioPriority(const SelectionStream& lh, const SelectionStr
 
   if(!StringUtils::EqualsNoCase(CSettings::Get().GetString("locale.audiolanguage"), "original"))
   {
-    CStdString audio_language = g_langInfo.GetAudioLanguage();
+    std::string audio_language = g_langInfo.GetAudioLanguage();
     PREDICATE_RETURN(g_LangCodeExpander.CompareLangCodes(audio_language, lh.language)
                    , g_LangCodeExpander.CompareLangCodes(audio_language, rh.language));
   }
@@ -263,7 +262,7 @@ public:
                      , rh.flags & CDemuxStream::FLAG_FORCED);
     }
 
-    CStdString subtitle_language = g_langInfo.GetSubtitleLanguage();
+    std::string subtitle_language = g_langInfo.GetSubtitleLanguage();
     if(!original)
     {
       PREDICATE_RETURN((STREAM_SOURCE_MASK(lh.source) == STREAM_SOURCE_DEMUX_SUB || STREAM_SOURCE_MASK(lh.source) == STREAM_SOURCE_TEXT) && g_LangCodeExpander.CompareLangCodes(subtitle_language, lh.language)
@@ -463,7 +462,7 @@ void CSelectionStreams::Update(CDVDInputStream* input, CDVDDemux* demuxer)
       s.flags    = stream->flags;
       s.filename = demuxer->GetFileName();
       stream->GetStreamName(s.name);
-      CStdString codec;
+      std::string codec;
       demuxer->GetStreamCodecName(stream->iId, codec);
       s.codec    = codec;
       s.channels = 0; // Default to 0. Overwrite if STREAM_AUDIO below.
@@ -625,8 +624,8 @@ bool CDVDPlayer::OpenInputStream()
   CLog::Log(LOGNOTICE, "Creating InputStream");
 
   // correct the filename if needed
-  CStdString filename(m_filename);
-  if (StringUtils::StartsWith(filename, "dvd://")
+  std::string filename(m_filename);
+  if (URIUtils::IsProtocol(filename, "dvd")
   ||  StringUtils::EqualsNoCase(filename, "iso9660://video_ts/video_ts.ifo"))
   {
     m_filename = g_mediaManager.TranslateDevicePath("");
@@ -658,7 +657,7 @@ bool CDVDPlayer::OpenInputStream()
     CUtil::ScanForExternalSubtitles( m_filename, filenames );
 
     // find any upnp subtitles
-    CStdString key("upnp:subtitle:1");
+    std::string key("upnp:subtitle:1");
     for(unsigned s = 1; m_item.HasProperty(key); key = StringUtils::Format("upnp:subtitle:%u", ++s))
       filenames.push_back(m_item.GetProperty(key).asString());
 
@@ -667,7 +666,7 @@ bool CDVDPlayer::OpenInputStream()
       // if vobsub subtitle:
       if (URIUtils::HasExtension(filenames[i], ".idx"))
       {
-        CStdString strSubFile;
+        std::string strSubFile;
         if ( CUtil::FindVobSubPair( filenames, filenames[i], strSubFile ) )
           AddSubtitleFile(filenames[i], strSubFile);
       }
@@ -1550,10 +1549,6 @@ void CDVDPlayer::HandlePlaySpeed()
           bGotAudio, m_dvdPlayerAudio.GetLevel(),
           bGotVideo, m_dvdPlayerVideo.GetLevel());
 
-      CFileItem currentItem(g_application.CurrentFileItem());
-      if (currentItem.HasPVRChannelInfoTag())
-        g_PVRManager.LoadCurrentChannelSettings();
-
       caching = CACHESTATE_DONE;
     }
     else
@@ -2397,7 +2392,7 @@ void CDVDPlayer::Pause()
     return;
   lock.Leave();
 
-  if(m_playSpeed != DVD_PLAYSPEED_PAUSE && (m_caching == CACHESTATE_FULL || m_caching == CACHESTATE_PVR))
+  if(m_playSpeed != DVD_PLAYSPEED_PAUSE && IsCaching())
   {
     SetCaching(CACHESTATE_DONE);
     return;
@@ -2418,7 +2413,7 @@ void CDVDPlayer::Pause()
 
 bool CDVDPlayer::IsPaused() const
 {
-  return m_playSpeed == DVD_PLAYSPEED_PAUSE || m_caching == CACHESTATE_FULL || m_caching == CACHESTATE_PVR;
+  return m_playSpeed == DVD_PLAYSPEED_PAUSE || IsCaching();
 }
 
 bool CDVDPlayer::HasVideo() const
@@ -2580,7 +2575,7 @@ bool CDVDPlayer::SeekScene(bool bPlus)
   return false;
 }
 
-void CDVDPlayer::GetAudioInfo(CStdString& strAudioInfo)
+void CDVDPlayer::GetAudioInfo(std::string& strAudioInfo)
 {
   { CSingleLock lock(m_StateSection);
     strAudioInfo = StringUtils::Format("D(%s)", m_StateInput.demux_audio.c_str());
@@ -2588,7 +2583,7 @@ void CDVDPlayer::GetAudioInfo(CStdString& strAudioInfo)
   strAudioInfo += StringUtils::Format("\nP(%s)", m_dvdPlayerAudio.GetPlayerInfo().c_str());
 }
 
-void CDVDPlayer::GetVideoInfo(CStdString& strVideoInfo)
+void CDVDPlayer::GetVideoInfo(std::string& strVideoInfo)
 {
   { CSingleLock lock(m_StateSection);
     strVideoInfo = StringUtils::Format("D(%s)", m_StateInput.demux_video.c_str());
@@ -2596,7 +2591,7 @@ void CDVDPlayer::GetVideoInfo(CStdString& strVideoInfo)
   strVideoInfo += StringUtils::Format("\nP(%s)", m_dvdPlayerVideo.GetPlayerInfo().c_str());
 }
 
-void CDVDPlayer::GetGeneralInfo(CStdString& strGeneralInfo)
+void CDVDPlayer::GetGeneralInfo(std::string& strGeneralInfo)
 {
   if (!m_bStop)
   {
@@ -2609,10 +2604,9 @@ void CDVDPlayer::GetGeneralInfo(CStdString& strGeneralInfo)
     if( apts != DVD_NOPTS_VALUE && vpts != DVD_NOPTS_VALUE )
       dDiff = (apts - vpts) / DVD_TIME_BASE;
 
-    CStdString strEDL;
-    strEDL += StringUtils::Format(", edl:%s", m_Edl.GetInfo().c_str());
+    std::string strEDL = StringUtils::Format(", edl:%s", m_Edl.GetInfo().c_str());
 
-    CStdString strBuf;
+    std::string strBuf;
     CSingleLock lock(m_StateSection);
     if(m_StateInput.cache_bytes >= 0)
     {
@@ -3394,10 +3388,9 @@ bool CDVDPlayer::ShowPVRChannelInfo(void)
 {
   bool bReturn(false);
 
-  if (CSettings::Get().GetBool("pvrmenu.infoswitch"))
+  if (CSettings::Get().GetInt("pvrmenu.displaychannelinfo") > 0)
   {
-    int iTimeout = CSettings::Get().GetBool("pvrmenu.infotimeout") ? CSettings::Get().GetInt("pvrmenu.infotime") : 0;
-    g_PVRManager.ShowPlayerInfo(iTimeout);
+    g_PVRManager.ShowPlayerInfo(CSettings::Get().GetInt("pvrmenu.displaychannelinfo"));
 
     bReturn = true;
   }
@@ -3679,13 +3672,13 @@ bool CDVDPlayer::HasMenu()
     return false;
 }
 
-CStdString CDVDPlayer::GetPlayerState()
+std::string CDVDPlayer::GetPlayerState()
 {
   CSingleLock lock(m_StateSection);
   return m_State.player_state;
 }
 
-bool CDVDPlayer::SetPlayerState(CStdString state)
+bool CDVDPlayer::SetPlayerState(const std::string& state)
 {
   m_messenger.Put(new CDVDMsgPlayerSetState(state));
   return true;
@@ -3703,7 +3696,7 @@ int CDVDPlayer::GetChapter()
   return m_State.chapter;
 }
 
-void CDVDPlayer::GetChapterName(CStdString& strChapterName)
+void CDVDPlayer::GetChapterName(std::string& strChapterName)
 {
   CSingleLock lock(m_StateSection);
   strChapterName = m_State.chapter_name;
@@ -3726,7 +3719,7 @@ int CDVDPlayer::SeekChapter(int iChapter)
   return 0;
 }
 
-int CDVDPlayer::AddSubtitle(const CStdString& strSubPath)
+int CDVDPlayer::AddSubtitle(const std::string& strSubPath)
 {
   return AddSubtitleFile(strSubPath);
 }
@@ -3748,7 +3741,7 @@ void CDVDPlayer::GetVideoStreamInfo(SPlayerVideoStreamInfo &info)
 {
   info.bitrate = m_dvdPlayerVideo.GetVideoBitrate();
 
-  CStdString retVal;
+  std::string retVal;
   if (m_pDemuxer && (m_CurrentVideo.id != -1))
   {
     m_pDemuxer->GetStreamCodecName(m_CurrentVideo.id, retVal);
@@ -3805,7 +3798,7 @@ void CDVDPlayer::GetAudioStreamInfo(int index, SPlayerAudioStreamInfo &info)
     if (stream)
     {
       info.channels = stream->iChannels;
-      CStdString codecName;
+      std::string codecName;
       m_pDemuxer->GetStreamCodecName(stream->iId, codecName);
       info.audioCodecName = codecName;
     }
@@ -4085,7 +4078,7 @@ bool CDVDPlayer::GetStreamDetails(CStreamDetails &details)
     return false;
 }
 
-CStdString CDVDPlayer::GetPlayingTitle()
+std::string CDVDPlayer::GetPlayingTitle()
 {
   /* Currently we support only Title Name from Teletext line 30 */
   TextCacheStruct_t* ttcache = m_dvdPlayerTeletext.GetTeletextCache();
@@ -4106,11 +4099,6 @@ bool CDVDPlayer::SwitchChannel(const CPVRChannel &channel)
 
   UpdateApplication(0);
   UpdatePlayState(0);
-
-  /* make sure the pvr window is updated */
-  CGUIWindowPVR *pWindow = (CGUIWindowPVR *) g_windowManager.GetWindow(WINDOW_PVR);
-  if (pWindow)
-    pWindow->SetInvalid();
 
   /* select the new channel */
   m_messenger.Put(new CDVDMsgType<CPVRChannel>(CDVDMsg::PLAYER_CHANNEL_SELECT, channel));

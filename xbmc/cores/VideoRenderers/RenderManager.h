@@ -138,7 +138,7 @@ public:
   static double GetPresentTime();
   void  WaitPresentTime(double presenttime);
 
-  CStdString GetVSyncState();
+  std::string GetVSyncState();
 
   void UpdateResolution();
 

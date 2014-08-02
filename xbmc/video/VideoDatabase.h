@@ -504,7 +504,13 @@ public:
   // per-file video settings
   bool GetVideoSettings(const CStdString &strFilenameAndPath, CVideoSettings &settings);
   void SetVideoSettings(const CStdString &strFilenameAndPath, const CVideoSettings &settings);
-  void EraseVideoSettings();
+  
+  /**
+   * Erases settings for all files beginning with the specified path. Defaults 
+   * to an empty path, meaning all settings will be erased.
+   * @param path partial path, e.g. pvr://channels
+   */
+  void EraseVideoSettings(const std::string &path = "");
 
   bool GetStackTimes(const CStdString &filePath, std::vector<int> &times);
   void SetStackTimes(const CStdString &filePath, std::vector<int> &times);
@@ -711,7 +717,7 @@ public:
   unsigned int GetMusicVideoIDs(const CStdString& strWhere, std::vector<std::pair<int,int> > &songIDs);
   bool GetRandomMusicVideo(CFileItem* item, int& idSong, const CStdString& strWhere);
 
-  static void VideoContentTypeToString(VIDEODB_CONTENT_TYPE type, CStdString& out)
+  static void VideoContentTypeToString(VIDEODB_CONTENT_TYPE type, std::string& out)
   {
     switch (type)
     {

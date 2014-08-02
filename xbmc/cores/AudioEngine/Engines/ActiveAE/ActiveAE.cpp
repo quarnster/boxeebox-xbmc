@@ -44,6 +44,7 @@ void CEngineStats::Reset(unsigned int sampleRate)
   m_bufferedSamples = 0;
   m_suspended = false;
   m_playingPTS = 0;
+  m_clockId = 0;
 }
 
 void CEngineStats::UpdateSinkDelay(const AEDelayStatus& status, int samples, int64_t pts, int clockId)
@@ -2512,6 +2513,11 @@ IAESound *CActiveAE::MakeSound(const std::string& file)
   if (!io_fmt)
   {
     avformat_close_input(&fmt_ctx);
+    if (io_ctx)
+    {
+      av_freep(&io_ctx->buffer);
+      av_freep(&io_ctx);
+    }
     delete sound;
     return NULL;
   }
@@ -2532,6 +2538,11 @@ IAESound *CActiveAE::MakeSound(const std::string& file)
   if (dec == NULL)
   {
     avformat_close_input(&fmt_ctx);
+    if (io_ctx)
+    {
+      av_freep(&io_ctx->buffer);
+      av_freep(&io_ctx);
+    }
     delete sound;
     return NULL;
   }
@@ -2564,6 +2575,11 @@ IAESound *CActiveAE::MakeSound(const std::string& file)
         av_free(dec_ctx);
         av_free(&decoded_frame);
         avformat_close_input(&fmt_ctx);
+        if (io_ctx)
+        {
+          av_freep(&io_ctx->buffer);
+          av_freep(&io_ctx);
+        }
         delete sound;
         return NULL;
       }
@@ -2587,6 +2603,11 @@ IAESound *CActiveAE::MakeSound(const std::string& file)
   av_free(dec_ctx);
   av_free(decoded_frame);
   avformat_close_input(&fmt_ctx);
+  if (io_ctx)
+  {
+    av_freep(&io_ctx->buffer);
+    av_freep(&io_ctx);
+  }
 
   sound->Finish();
 

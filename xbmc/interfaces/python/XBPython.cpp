@@ -94,6 +94,10 @@ void XBPython::Announce(AnnouncementFlag flag, const char *sender, const char *m
      OnScanFinished("video");
    else if (strcmp(message, "OnScanStarted") == 0)
      OnScanStarted("video");
+   else if (strcmp(message, "OnCleanStarted") == 0)
+     OnCleanStarted("video");
+   else if (strcmp(message, "OnCleanFinished") == 0)
+     OnCleanFinished("video");
   }
   else if (flag & AudioLibrary)
   {
@@ -101,6 +105,10 @@ void XBPython::Announce(AnnouncementFlag flag, const char *sender, const char *m
      OnScanFinished("music");
    else if (strcmp(message, "OnScanStarted") == 0)
      OnScanStarted("music");
+   else if (strcmp(message, "OnCleanStarted") == 0)
+     OnCleanStarted("music");
+   else if (strcmp(message, "OnCleanFinished") == 0)
+     OnCleanFinished("music");
   }
   else if (flag & GUI)
   {
@@ -273,7 +281,7 @@ void XBPython::UnregisterPythonMonitorCallBack(XBMCAddon::xbmc::Monitor* pCallba
   }
 }
 
-void XBPython::OnSettingsChanged(const CStdString &ID)
+void XBPython::OnSettingsChanged(const std::string &ID)
 {
   XBMC_TRACE;
   LOCK_AND_COPY(std::vector<XBMCAddon::xbmc::Monitor*>,tmp,m_vecMonitorCallbackList);
@@ -350,7 +358,29 @@ void XBPython::OnScanFinished(const std::string &library)
   }
 }
 
-void XBPython::OnAbortRequested(const CStdString &ID)
+void XBPython::OnCleanStarted(const std::string &library)
+{
+  XBMC_TRACE;
+  LOCK_AND_COPY(std::vector<XBMCAddon::xbmc::Monitor*>,tmp,m_vecMonitorCallbackList);
+  for (MonitorCallbackList::iterator it = tmp.begin(); (it != tmp.end()); ++it)
+  {
+    if (CHECK_FOR_ENTRY(m_vecMonitorCallbackList,(*it)))
+      (*it)->OnCleanStarted(library);
+  }
+}
+
+void XBPython::OnCleanFinished(const std::string &library)
+{
+  XBMC_TRACE;
+  LOCK_AND_COPY(std::vector<XBMCAddon::xbmc::Monitor*>,tmp,m_vecMonitorCallbackList);
+  for (MonitorCallbackList::iterator it = tmp.begin(); (it != tmp.end()); ++it)
+  {
+    if (CHECK_FOR_ENTRY(m_vecMonitorCallbackList,(*it)))
+      (*it)->OnCleanFinished(library);
+  }
+}
+
+void XBPython::OnAbortRequested(const std::string &ID)
 {
   XBMC_TRACE;
   LOCK_AND_COPY(std::vector<XBMCAddon::xbmc::Monitor*>,tmp,m_vecMonitorCallbackList);
@@ -489,7 +519,7 @@ bool XBPython::InitializeEngine()
 #elif defined(TARGET_WINDOWS)
       // because the third party build of python is compiled with vs2008 we need
       // a hack to set the PYTHONPATH
-      CStdString buf;
+      std::string buf;
       buf = "PYTHONPATH=" + CSpecialProtocol::TranslatePath("special://xbmc/system/python/DLLs") + ";" + CSpecialProtocol::TranslatePath("special://xbmc/system/python/Lib");
       CEnvironment::putenv(buf);
       buf = "PYTHONOPTIMIZE=1";
@@ -500,7 +530,7 @@ bool XBPython::InitializeEngine()
       CEnvironment::putenv(buf);
 
 #elif defined(TARGET_ANDROID)
-      CStdString apkPath = getenv("XBMC_ANDROID_APK");
+      std::string apkPath = getenv("XBMC_ANDROID_APK");
       apkPath += "/assets/python2.6";
       setenv("PYTHONHOME",apkPath.c_str(), 1);
       setenv("PYTHONPATH", "", 1);

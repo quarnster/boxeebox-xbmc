@@ -32,6 +32,7 @@
 #include "settings/Settings.h"
 #include "GUIInfoManager.h"
 #include "cores/IPlayer.h"
+#include "utils/StringUtils.h"
 
 #include "pvr/PVRManager.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
@@ -39,7 +40,6 @@
 #include "pvr/timers/PVRTimerInfoTag.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 
-using namespace std;
 using namespace PVR;
 using namespace EPG;
 
@@ -216,7 +216,11 @@ void CGUIDialogPVRChannelsOSD::Clear()
 void CGUIDialogPVRChannelsOSD::CloseOrSelect(unsigned int iItem)
 {
   if (CSettings::Get().GetBool("pvrmenu.closechannelosdonswitch"))
+  {
+    if (CSettings::Get().GetInt("pvrmenu.displaychannelinfo") > 0)
+      g_PVRManager.ShowPlayerInfo(CSettings::Get().GetInt("pvrmenu.displaychannelinfo"));
     Close();
+  }
   else
     m_viewControl.SetSelectedItem(iItem);
 }
@@ -239,7 +243,7 @@ void CGUIDialogPVRChannelsOSD::GotoChannel(int item)
     if (!g_PVRManager.CheckParentalLock(*channel) ||
         !g_application.m_pPlayer->SwitchChannel(*channel))
     {
-      CStdString msg = StringUtils::Format(g_localizeStrings.Get(19035).c_str(), channel->ChannelName().c_str()); // CHANNELNAME could not be played. Check the log for details.
+      std::string msg = StringUtils::Format(g_localizeStrings.Get(19035).c_str(), channel->ChannelName().c_str()); // CHANNELNAME could not be played. Check the log for details.
       CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Error,
               g_localizeStrings.Get(19166), // PVR information
               msg);
@@ -325,7 +329,7 @@ void CGUIDialogPVRChannelsOSD::SaveSelectedItem(int iGroupID)
 
 int CGUIDialogPVRChannelsOSD::GetLastSelectedItem(int iGroupID) const
 {
-  map<int,int>::const_iterator it = m_groupSelectedItems.find(iGroupID);
+  std::map<int,int>::const_iterator it = m_groupSelectedItems.find(iGroupID);
   if(it != m_groupSelectedItems.end())
     return it->second;
   return 0;

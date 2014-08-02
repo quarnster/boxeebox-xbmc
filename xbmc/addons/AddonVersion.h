@@ -20,7 +20,6 @@
 
 #include <string>
 #include <boost/operators.hpp>
-#include "utils/StdString.h"
 
 namespace ADDON
 {
@@ -40,7 +39,7 @@ namespace ADDON
   public:
     AddonVersion(const AddonVersion& other) { *this = other; }
     explicit AddonVersion(const std::string& version);
-    ~AddonVersion() {};
+    virtual ~AddonVersion() {};
 
     int Epoch() const { return mEpoch; }
     const std::string &Upstream() const { return mUpstream; }
@@ -52,8 +51,8 @@ namespace ADDON
     std::string asString() const;
     bool empty() const;
 
-    static bool SplitFileName(CStdString& ID, CStdString& version,
-                              const CStdString& filename);
+    static bool SplitFileName(std::string& ID, std::string& version,
+                              const std::string& filename);
 
   protected:
     int mEpoch;

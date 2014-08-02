@@ -2302,7 +2302,11 @@ msgctxt "#548"
 msgid "Downmix multichannel audio to stereo"
 msgstr ""
 
-#empty string with id 549
+#: /xbmc/xbmc/pvr/windows/GUIViewStatePVR.cpp
+#: /xbmc/xbmc/utils/SortUtils.cpp
+msgctxt "#549"
+msgid "Number"
+msgstr ""
 
 #: xbmc/windows/GUIMediaWindow.cpp
 msgctxt "#550"
@@ -7452,7 +7456,7 @@ msgstr ""
 
 #: xbmc/dialogs/GUIDialogMediaSource.cpp
 msgctxt "#19017"
-msgid "TV recordings"
+msgid "Recordings"
 msgstr ""
 
 #. Name of a setting, asking to enter the path to a folder that contains icons for TV channels
@@ -7462,6 +7466,7 @@ msgid "Folder with channel icons"
 msgstr ""
 
 #: xbmc/windows/GUIWindowSystemInfo.cpp
+#: skin.confluence
 msgctxt "#19019"
 msgid "Channels"
 msgstr ""
@@ -7651,10 +7656,7 @@ msgctxt "#19064"
 msgid "Go to end"
 msgstr ""
 
-#: system/settings/settings.xml
-msgctxt "#19065"
-msgid "Default EPG window"
-msgstr ""
+#empty string with id 19065
 
 #. Name of a shortcut to a custom folder for channel icons
 #: xbmc/pvr/windows/GUIWindowPVRChannels.cpp
@@ -7823,7 +7825,8 @@ msgctxt "#19104"
 msgid "Enter the name of the folder for the recording"
 msgstr ""
 
-#empty string with id 19105
+msgctxt "#19105"
+msgid "Please select a channel"
 
 msgctxt "#19106"
 msgid "Next timer on"
@@ -8126,10 +8129,7 @@ msgctxt "#19178"
 msgid "Show channel information when switching channels"
 msgstr ""
 
-#: system/settings/settings.xml
-msgctxt "#19179"
-msgid "Automatically hide channel information"
-msgstr ""
+#empty string with id 19179
 
 #: system/settings/settings.xml
 msgctxt "#19180"
@@ -8146,12 +8146,12 @@ msgctxt "#19182"
 msgid "Days to display in the EPG"
 msgstr ""
 
-#empty string with id 19183
-
 #: system/settings/settings.xml
-msgctxt "#19184"
-msgid "Channel information duration"
+msgctxt "#19183"
+msgid "Radio"
 msgstr ""
+
+#empty string with id 19184
 
 #: system/settings/settings.xml
 msgctxt "#19185"
@@ -8604,6 +8604,11 @@ msgstr ""
 #: xbmc/pvr/PVRManager.cpp
 msgctxt "#19286"
 msgid "Searching for channel icons"
+
+#. Label for the default pvr channel group
+#: xbmc/pvr/windows/GUIWindowPVRCommon.cpp
+msgctxt "#19287"
+msgid "All channels"
 msgstr ""
 
 #: system/settings/settings.xml
@@ -11712,6 +11717,9 @@ msgctxt "#22019"
 msgid "Recordings by title"
 msgstr ""
 
+#. Electronic program guide, used as label in the menu of the PVR section and the MythDirectory
+#: addons/skin/confluence
+#: xbmc/filesystem/MythDirectory.cpp
 msgctxt "#22020"
 msgid "Guide"
 msgstr ""
@@ -12759,6 +12767,7 @@ msgid "Play the"
 msgstr ""
 
 #: addons/skin/touched/
+#: addons/skin/confluence
 msgctxt "#33063"
 msgid "Options"
 msgstr ""
@@ -14100,20 +14109,14 @@ msgctxt "#36212"
 msgid "Display programming information when changing channels, such as the current TV show."
 msgstr ""
 
-#: system/settings/settings.xml
-msgctxt "#36213"
-msgid "Hide the programming information automatically after a few seconds, defined below."
-msgstr ""
+#empty string with id 36213
 
 #: system/settings/settings.xml
 msgctxt "#36214"
 msgid "Close the on screen display controls after switching channels."
 msgstr ""
 
-#: system/settings/settings.xml
-msgctxt "#36215"
-msgid "How long the programming information is displayed when the 'automatically hide' setting is turned on."
-msgstr ""
+#empty string with id 36215
 
 #: system/settings/settings.xml
 msgctxt "#36216"
@@ -14130,10 +14133,7 @@ msgctxt "#36218"
 msgid "Category for electronic programming guide settings."
 msgstr ""
 
-#: system/settings/settings.xml
-msgctxt "#36219"
-msgid "Default electronic programming guide window to show."
-msgstr ""
+#empty string with id 36219
 
 #: system/settings/settings.xml
 msgctxt "#36220"
@@ -15404,13 +15404,6 @@ msgctxt "#36509"
 msgid "Monoscopic - 2D"
 msgstr ""
 
-#. Description of setting "System -> Debugging -> Component-specific logging..." with label #668
-#: system/settings/settings.xml
-msgctxt "#36510"
-msgid "Specify additional libraries whose log messages are to be included in the log."
-msgstr ""
-
-#empty strings from id 36511 to 36519
 #reserved strings for 3d modes 36509 - 36520
 
 #: system/settings/settings.xml
@@ -15485,7 +15478,11 @@ msgctxt "#36533"
 msgid "Select how audio is downmixed, for example from 5.1 to 2.0: [Enabled] maintains the dynamic range of the original audio source when downmixed however volume will be lower [Disabled] maintains volume level of the original audio source however the dynamic range is compressed. Note - Dynamic range is the difference between the quietest and loudest sounds in a audio source."
 msgstr ""
 
-#empty string with id 36534
+#. Description of setting "System -> Debugging -> Component-specific logging..." with label #668
+#: system/settings/settings.xml
+msgctxt "#36534"
+msgid "Specify additional libraries whose log messages are to be included in the log."
+msgstr ""
 
 #: guilib/StereoscopicsManager.cpp
 #: xbmc/video/dialogs/GUIDialogVideoSettings.cpp

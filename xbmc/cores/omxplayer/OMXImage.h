@@ -39,9 +39,6 @@
 #include <EGL/eglext.h>
 #include "threads/Thread.h"
 
-using namespace XFILE;
-using namespace std;
-
 class COMXImageFile;
 
 class COMXImage : public CThread
@@ -68,14 +65,14 @@ public:
   virtual ~COMXImage();
   void Initialize();
   void Deinitialize();
-  static COMXImageFile *LoadJpeg(const CStdString& texturePath);
+  static COMXImageFile *LoadJpeg(const std::string& texturePath);
   static void CloseJpeg(COMXImageFile *file);
 
   static bool DecodeJpeg(COMXImageFile *file, unsigned int maxWidth, unsigned int maxHeight, unsigned int stride, void *pixels);
   static bool CreateThumbnailFromSurface(unsigned char* buffer, unsigned int width, unsigned int height,
-      unsigned int format, unsigned int pitch, const CStdString& destFile);
+      unsigned int format, unsigned int pitch, const std::string& destFile);
   static bool ClampLimits(unsigned int &width, unsigned int &height, unsigned int m_width, unsigned int m_height, bool transposed = false);
-  static bool CreateThumb(const CStdString& srcFile, unsigned int width, unsigned int height, std::string &additional_info, const CStdString& destFile);
+  static bool CreateThumb(const std::string& srcFile, unsigned int width, unsigned int height, std::string &additional_info, const std::string& destFile);
   bool SendMessage(bool (*callback)(EGLDisplay egl_display, EGLContext egl_context, void *cookie), void *cookie);
   bool DecodeJpegToTexture(COMXImageFile *file, unsigned int width, unsigned int height, void **userdata);
   void DestroyTexture(void *userdata);
@@ -97,7 +94,7 @@ class COMXImageFile
 public:
   COMXImageFile();
   virtual ~COMXImageFile();
-  bool ReadFile(const CStdString& inputFile);
+  bool ReadFile(const std::string& inputFile);
   int  GetOrientation() { return m_orientation; };
   unsigned int GetWidth()  { return m_width; };
   unsigned int GetHeight() { return m_height; };
@@ -135,6 +132,7 @@ protected:
   OMX_BUFFERHEADERTYPE          *m_decoded_buffer;
   OMX_PARAM_PORTDEFINITIONTYPE  m_decoded_format;
   CCriticalSection              m_OMXSection;
+  bool                          m_success;
 };
 
 class COMXImageEnc
@@ -145,7 +143,7 @@ public:
 
   // Required overrides
   bool CreateThumbnailFromSurface(unsigned char* buffer, unsigned int width, unsigned int height,
-      unsigned int format, unsigned int pitch, const CStdString& destFile);
+      unsigned int format, unsigned int pitch, const std::string& destFile);
 protected:
   bool Encode(unsigned char *buffer, int size, unsigned int width, unsigned int height, unsigned int pitch);
   // Components
@@ -153,6 +151,7 @@ protected:
   OMX_BUFFERHEADERTYPE          *m_encoded_buffer;
   OMX_PARAM_PORTDEFINITIONTYPE  m_encoded_format;
   CCriticalSection              m_OMXSection;
+  bool                          m_success;
 };
 
 class COMXImageReEnc
@@ -176,6 +175,7 @@ protected:
   CCriticalSection              m_OMXSection;
   void                          *m_pDestBuffer;
   unsigned int                  m_nDestAllocSize;
+  bool                          m_success;
 };
 
 class COMXTexture
@@ -200,6 +200,7 @@ protected:
 
   OMX_BUFFERHEADERTYPE *m_egl_buffer;
   CCriticalSection              m_OMXSection;
+  bool              m_success;
 };
 
 extern COMXImage g_OMXImage;

@@ -29,7 +29,6 @@
 #include "pvr/PVRManager.h"
 #include "pvr/recordings/PVRRecordings.h"
 #include "pvr/timers/PVRTimers.h"
-#include "pvr/windows/GUIWindowPVR.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "threads/SingleLock.h"
@@ -38,18 +37,17 @@
 
 using namespace PVR;
 
-CGUIWindowPVRRecordings::CGUIWindowPVRRecordings(CGUIWindowPVR *parent) :
-  CGUIWindowPVRCommon(parent, PVR_WINDOW_RECORDINGS, CONTROL_BTNRECORDINGS, CONTROL_LIST_RECORDINGS)
+CGUIWindowPVRRecordings::CGUIWindowPVRRecordings(bool bRadio) :
+  CGUIWindowPVRBase(bRadio, bRadio ? WINDOW_RADIO_RECORDINGS : WINDOW_TV_RECORDINGS, "MyPVRRecordings.xml")
 {
-  m_strSelectedPath = "pvr://recordings/";
 }
 
 void CGUIWindowPVRRecordings::UnregisterObservers(void)
 {
   CSingleLock lock(m_critSection);
-  if(g_PVRRecordings)
+  if (g_PVRRecordings)
     g_PVRRecordings->UnregisterObserver(this);
-  if(g_PVRTimers)
+  if (g_PVRTimers)
     g_PVRTimers->UnregisterObserver(this);
   g_infoManager.UnregisterObserver(this);
 }
@@ -57,14 +55,22 @@ void CGUIWindowPVRRecordings::UnregisterObservers(void)
 void CGUIWindowPVRRecordings::ResetObservers(void)
 {
   CSingleLock lock(m_critSection);
+  UnregisterObservers();
   g_PVRRecordings->RegisterObserver(this);
   g_PVRTimers->RegisterObserver(this);
   g_infoManager.RegisterObserver(this);
 }
 
-CStdString CGUIWindowPVRRecordings::GetResumeString(const CFileItem& item)
+std::string CGUIWindowPVRRecordings::GetDirectoryPath(void)
 {
-  CStdString resumeString;
+  if (StringUtils::StartsWith(m_vecItems->GetPath(), "pvr://recordings/"))
+    return m_vecItems->GetPath();
+  return "pvr://recordings/";
+}
+
+std::string CGUIWindowPVRRecordings::GetResumeString(const CFileItem& item)
+{
+  std::string resumeString;
   if (item.IsPVRRecording())
   {
 
@@ -77,7 +83,7 @@ CStdString CGUIWindowPVRRecordings::GetResumeString(const CFileItem& item)
       if (db.Open())
       {
         CBookmark bookmark;
-        CStdString itemPath(item.GetPVRRecordingInfoTag()->m_strFileNameAndPath);
+        std::string itemPath(item.GetPVRRecordingInfoTag()->m_strFileNameAndPath);
         if (db.GetResumeBookMark(itemPath, bookmark) )
           positionInSeconds = lrint(bookmark.timeInSeconds);
         db.Close();
@@ -91,18 +97,18 @@ CStdString CGUIWindowPVRRecordings::GetResumeString(const CFileItem& item)
   return resumeString;
 }
 
-void CGUIWindowPVRRecordings::GetContextButtons(int itemNumber, CContextButtons &buttons) const
+void CGUIWindowPVRRecordings::GetContextButtons(int itemNumber, CContextButtons &buttons)
 {
-  if (itemNumber < 0 || itemNumber >= m_parent->m_vecItems->Size())
+  if (itemNumber < 0 || itemNumber >= m_vecItems->Size())
     return;
-  CFileItemPtr pItem = m_parent->m_vecItems->Get(itemNumber);
+  CFileItemPtr pItem = m_vecItems->Get(itemNumber);
 
   if (pItem->HasPVRRecordingInfoTag())
   {
     buttons.Add(CONTEXT_BUTTON_INFO, 19053);      /* Get Information of this recording */
     buttons.Add(CONTEXT_BUTTON_FIND, 19003);      /* Find similar program */
     buttons.Add(CONTEXT_BUTTON_PLAY_ITEM, 12021); /* Play this recording */
-    CStdString resumeString = GetResumeString(*pItem);
+    std::string resumeString = GetResumeString(*pItem);
     if (!resumeString.empty())
     {
       buttons.Add(CONTEXT_BUTTON_RESUME_ITEM, resumeString);
@@ -127,26 +133,10 @@ void CGUIWindowPVRRecordings::GetContextButtons(int itemNumber, CContextButtons 
   // Add delete button for all items except the All recordings directory
   if (!g_PVRRecordings->IsAllRecordingsDirectory(*pItem.get()))
     buttons.Add(CONTEXT_BUTTON_DELETE, 117);
-  
-  buttons.Add(CONTEXT_BUTTON_SORTBY_NAME, 103);       /* sort by name */
-  buttons.Add(CONTEXT_BUTTON_SORTBY_DATE, 104);       /* sort by date */
 
   if (pItem->HasPVRRecordingInfoTag() &&
       g_PVRClients->HasMenuHooks(pItem->GetPVRRecordingInfoTag()->m_iClientId, PVR_MENUHOOK_RECORDING))
     buttons.Add(CONTEXT_BUTTON_MENU_HOOKS, 19195);      /* PVR client specific action */
-
-  // Update sort by button
-//if (m_guiState->GetSortMethod()!=SortByNone)
-//{
-//  CStdString sortLabel;
-//  sortLabel.Format(g_localizeStrings.Get(550).c_str(), g_localizeStrings.Get(m_guiState->GetSortMethodLabel()).c_str());
-//  buttons.Add(CONTEXT_BUTTON_SORTBY, sortLabel);   /* Sort method */
-//
-//  if (m_guiState->GetDisplaySortOrder()==SortOrderAscending)
-//    buttons.Add(CONTEXT_BUTTON_SORTASC, 584);        /* Sort up or down */
-//  else
-//    buttons.Add(CONTEXT_BUTTON_SORTASC, 585);        /* Sort up or down */
-//}
 }
 
 bool CGUIWindowPVRRecordings::OnAction(const CAction &action)
@@ -154,141 +144,115 @@ bool CGUIWindowPVRRecordings::OnAction(const CAction &action)
   if (action.GetID() == ACTION_PARENT_DIR ||
       action.GetID() == ACTION_NAV_BACK)
   {
-    if (m_parent->m_vecItems->GetPath() != "pvr://recordings/")
+    if (m_vecItems->GetPath() != "pvr://recordings/")
     {
-      m_parent->GoParentFolder();
+      GoParentFolder();
       return true;
     }
   }
-  return CGUIWindowPVRCommon::OnAction(action);
+  return CGUIWindowPVRBase::OnAction(action);
 }
 
 bool CGUIWindowPVRRecordings::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
 {
-  if (itemNumber < 0 || itemNumber >= m_parent->m_vecItems->Size())
+  if (itemNumber < 0 || itemNumber >= m_vecItems->Size())
     return false;
-  CFileItemPtr pItem = m_parent->m_vecItems->Get(itemNumber);
+  CFileItemPtr pItem = m_vecItems->Get(itemNumber);
 
   return OnContextButtonPlay(pItem.get(), button) ||
       OnContextButtonRename(pItem.get(), button) ||
       OnContextButtonDelete(pItem.get(), button) ||
       OnContextButtonInfo(pItem.get(), button) ||
       OnContextButtonMarkWatched(pItem, button) ||
-      CGUIWindowPVRCommon::OnContextButton(itemNumber, button);
+      CGUIWindowPVRBase::OnContextButton(itemNumber, button);
 }
 
-void CGUIWindowPVRRecordings::OnWindowUnload(void)
+bool CGUIWindowPVRRecordings::Update(const std::string &strDirectory, bool updateFilterPath /* = true */)
 {
-  m_strSelectedPath = m_parent->m_vecItems->GetPath();
-  CGUIWindowPVRCommon::OnWindowUnload();
-}
+  m_thumbLoader.StopThread();
 
-void CGUIWindowPVRRecordings::UpdateData(bool bUpdateSelectedFile /* = true */)
-{
-  CSingleLock lock(m_critSection);
-  CLog::Log(LOGDEBUG, "CGUIWindowPVRRecordings - %s - update window '%s'. set view to %d", __FUNCTION__, GetName(), m_iControlList);
-  m_bUpdateRequired = false;
+  bool bReturn = CGUIWindowPVRBase::Update(strDirectory);
 
-  /* lock the graphics context while updating */
-  CSingleLock graphicsLock(g_graphicsContext);
-
-  m_iSelected = m_parent->m_viewControl.GetSelectedItem();
-  if (!StringUtils::StartsWith(m_parent->m_vecItems->GetPath(), "pvr://recordings/"))
-    m_strSelectedPath = "pvr://recordings/";
-  else
-    m_strSelectedPath = m_parent->m_vecItems->GetPath();
-
-  m_parent->m_viewControl.SetCurrentView(m_iControlList);
-  ShowBusyItem();
-  m_parent->m_vecItems->Clear();
-  m_parent->m_vecItems->SetPath(m_strSelectedPath);
-  m_parent->Update(m_strSelectedPath);
-  m_parent->m_viewControl.SetItems(*m_parent->m_vecItems);
-
-  if (bUpdateSelectedFile)
-  {
-    if (!SelectPlayingFile())
-      m_parent->m_viewControl.SetSelectedItem(m_iSelected);
-  }
-
-  m_parent->SetLabel(CONTROL_LABELHEADER, g_localizeStrings.Get(19017));
-  m_parent->SetLabel(CONTROL_LABELGROUP, "");
-}
-
-void CGUIWindowPVRRecordings::Notify(const Observable &obs, const ObservableMessage msg)
-{
-  if (msg == ObservableMessageTimers || msg == ObservableMessageCurrentItem)
-  {
-    if (IsVisible())
-      SetInvalid();
-    else
-      m_bUpdateRequired = true;
-  }
-  else if (msg == ObservableMessageRecordings || msg == ObservableMessageTimersReset)
-  {
-    if (IsVisible())
-      UpdateData();
-    else
-      m_bUpdateRequired = true;
-  }
-}
-
-bool CGUIWindowPVRRecordings::OnClickButton(CGUIMessage &message)
-{
-  bool bReturn = false;
-
-  if (IsSelectedButton(message))
-  {
-    bReturn = true;
-    g_PVRManager.TriggerRecordingsUpdate();
-  }
+  AfterUpdate(*m_unfilteredItems);
 
   return bReturn;
 }
 
-bool CGUIWindowPVRRecordings::OnClickList(CGUIMessage &message)
+bool CGUIWindowPVRRecordings::OnMessage(CGUIMessage &message)
 {
   bool bReturn = false;
-
-  if (IsSelectedList(message))
+  switch (message.GetMessage())
   {
-    bReturn = true;
-    int iAction = message.GetParam1();
-    int iItem = m_parent->m_viewControl.GetSelectedItem();
-
-    /* get the fileitem pointer */
-    if (iItem < 0 || iItem >= (int) m_parent->m_vecItems->Size())
-      return bReturn;
-    CFileItemPtr pItem = m_parent->m_vecItems->Get(iItem);
-
-    /* process actions */
-    if (iAction == ACTION_SELECT_ITEM || iAction == ACTION_MOUSE_LEFT_CLICK || iAction == ACTION_PLAY)
-    {
-      int choice = CONTEXT_BUTTON_PLAY_ITEM;
-      CStdString resumeString = GetResumeString(*pItem);
-      if (!resumeString.empty())
+    case GUI_MSG_CLICKED:
+      if (message.GetSenderId() == m_viewControl.GetCurrentControl())
       {
-        CContextButtons choices;
-        choices.Add(CONTEXT_BUTTON_RESUME_ITEM, resumeString);
-        choices.Add(CONTEXT_BUTTON_PLAY_ITEM, 12021);
-        choice = CGUIDialogContextMenu::ShowAndGetChoice(choices);
+        int iItem = m_viewControl.GetSelectedItem();
+        if (iItem >= 0 && iItem < m_vecItems->Size())
+        {
+          switch (message.GetParam1())
+          {
+            case ACTION_SELECT_ITEM:
+            case ACTION_MOUSE_LEFT_CLICK:
+            case ACTION_PLAY:
+            {
+              CFileItemPtr pItem = m_vecItems->Get(iItem);
+              std::string resumeString = GetResumeString(*pItem);
+              if (!resumeString.empty())
+              {
+                CContextButtons choices;
+                choices.Add(CONTEXT_BUTTON_RESUME_ITEM, resumeString);
+                choices.Add(CONTEXT_BUTTON_PLAY_ITEM, 12021);
+                int choice = CGUIDialogContextMenu::ShowAndGetChoice(choices);
+                if (choice > 0)
+                  OnContextButtonPlay(pItem.get(), (CONTEXT_BUTTON)choice);
+                bReturn = true;
+              }
+              break;
+            }
+            case ACTION_CONTEXT_MENU:
+            case ACTION_MOUSE_RIGHT_CLICK:
+              OnPopupMenu(iItem);
+              bReturn = true;
+              break;
+            case ACTION_SHOW_INFO:
+              ShowRecordingInfo(m_vecItems->Get(iItem).get());
+              bReturn = true;
+              break;
+            case ACTION_DELETE_ITEM:
+              ActionDeleteRecording(m_vecItems->Get(iItem).get());
+              bReturn = true;
+              break;
+            default:
+              bReturn = false;
+              break;
+          }
+        }
       }
-      if (choice < 0)
-        bReturn = true;
-      else
-        bReturn = OnContextButtonPlay(pItem.get(), (CONTEXT_BUTTON)choice);
-    }
-    else if (iAction == ACTION_CONTEXT_MENU || iAction == ACTION_MOUSE_RIGHT_CLICK)
-      m_parent->OnPopupMenu(iItem);
-    else if (iAction == ACTION_SHOW_INFO)
-      ShowRecordingInfo(pItem.get());
-    else if (iAction == ACTION_DELETE_ITEM)
-      bReturn = ActionDeleteRecording(pItem.get());
-    else
-      bReturn = false;
+      break;
+    case GUI_MSG_REFRESH_LIST:
+      switch(message.GetParam1())
+      {
+        case ObservableMessageTimers:
+        case ObservableMessageCurrentItem:
+        {
+          if (IsActive())
+            SetInvalid();
+          bReturn = true;
+          break;
+        }
+        case ObservableMessageRecordings:
+        case ObservableMessageTimersReset:
+        {
+          if (IsActive())
+            Refresh(true);
+          bReturn = true;
+          break;
+        }
+      }
+      break;
   }
 
-  return bReturn;
+  return bReturn || CGUIWindowPVRBase::OnMessage(message);
 }
 
 bool CGUIWindowPVRRecordings::OnContextButtonDelete(CFileItem *item, CONTEXT_BUTTON button)
@@ -332,11 +296,11 @@ bool CGUIWindowPVRRecordings::OnContextButtonRename(CFileItem *item, CONTEXT_BUT
     bReturn = true;
 
     CPVRRecording *recording = item->GetPVRRecordingInfoTag();
-    CStdString strNewName = recording->m_strTitle;
+    std::string strNewName = recording->m_strTitle;
     if (CGUIKeyboardFactory::ShowAndGetInput(strNewName, g_localizeStrings.Get(19041), false))
     {
       if (g_PVRRecordings->RenameRecording(*item, strNewName))
-        UpdateData();
+        Refresh(true);
     }
   }
 
@@ -351,11 +315,11 @@ bool CGUIWindowPVRRecordings::OnContextButtonMarkWatched(const CFileItemPtr &ite
   {
     bReturn = true;
 
-    int newSelection = m_parent->m_viewControl.GetSelectedItem();
+    int newSelection = m_viewControl.GetSelectedItem();
     g_PVRRecordings->SetRecordingsPlayCount(item, 1);
-    m_parent->m_viewControl.SetSelectedItem(newSelection);
+    m_viewControl.SetSelectedItem(newSelection);
 
-    UpdateData();
+    Refresh(true);
   }
 
   if (button == CONTEXT_BUTTON_MARK_UNWATCHED)
@@ -364,19 +328,10 @@ bool CGUIWindowPVRRecordings::OnContextButtonMarkWatched(const CFileItemPtr &ite
 
     g_PVRRecordings->SetRecordingsPlayCount(item, 0);
 
-    UpdateData();
+    Refresh(true);
   }
 
   return bReturn;
-}
-
-void CGUIWindowPVRRecordings::BeforeUpdate(const CStdString &strDirectory)
-{
-  // set items path to current directory
-  m_parent->m_vecItems->SetPath(strDirectory);
-
-  if (m_thumbLoader.IsLoading())
-    m_thumbLoader.StopThread();
 }
 
 void CGUIWindowPVRRecordings::AfterUpdate(CFileItemList& items)
@@ -394,19 +349,19 @@ void CGUIWindowPVRRecordings::AfterUpdate(CFileItemList& items)
     if (!files.IsEmpty())
     {
       files.SetPath(items.GetPath());
-      if(m_database.Open())
+      if (m_database.Open())
       {
         if (g_PVRRecordings->HasAllRecordingsPathExtension(files.GetPath()))
         {
           // Build a map of all files belonging to common subdirectories and call
           // LoadVideoInfo for each item list
           typedef boost::shared_ptr<CFileItemList> CFileItemListPtr;
-          typedef std::map<CStdString, CFileItemListPtr> DirectoryMap;
+          typedef std::map<std::string, CFileItemListPtr> DirectoryMap;
 
           DirectoryMap directory_map;
           for (int i = 0; i < files.Size(); i++)
           {
-            CStdString strDirectory = URIUtils::GetDirectory(files[i]->GetPath());
+            std::string strDirectory = URIUtils::GetDirectory(files[i]->GetPath());
             DirectoryMap::iterator it = directory_map.find(strDirectory);
             if (it == directory_map.end())
               it = directory_map.insert(std::make_pair(

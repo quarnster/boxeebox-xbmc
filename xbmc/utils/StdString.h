@@ -610,7 +610,7 @@ inline const Type& SSMAX(const Type& arg1, const Type& arg2)
       #ifdef UNICODE
         typedef wchar_t    TCHAR;
       #else
-        typedef char    TCHAR;
+//        typedef char    TCHAR; //commented out by quasar, re: https://github.com/quasar1/boxeebox-xbmc/commit/bcec38ee248eed3caec6a3834b68cd25a39fac15
       #endif
       typedef wchar_t      OLECHAR;
 
@@ -694,7 +694,7 @@ inline const Type& SSMAX(const Type& arg1, const Type& arg2)
 // as an LPCTSTR.
 
 #if !defined(PCTSTR) && !defined(PCTSTR_DEFINED)
-  typedef const TCHAR*      PCTSTR;
+//  typedef const TCHAR*      PCTSTR; //commented out by quasar, re: https://github.com/quasar1/boxeebox-xbmc/commit/bcec38ee248eed3caec6a3834b68cd25a39fac15
   #define PCTSTR_DEFINED
 #endif
 
@@ -1140,7 +1140,7 @@ inline PUSTR StdCodeCvt(PUSTR pDst, int nDst, PCSTR pSrc, int nSrc)
 // Define tstring -- generic name for std::basic_string<TCHAR>
 
 #if !defined(tstring) && !defined(TSTRING_DEFINED)
-  typedef std::basic_string<TCHAR> tstring;
+//  typedef std::basic_string<TCHAR> tstring;  //commented out by quasar, re: https://github.com/quasar1/boxeebox-xbmc/commit/bcec38ee248eed3caec6a3834b68cd25a39fac15
   #define TSTRING_DEFINED
 #endif
 
