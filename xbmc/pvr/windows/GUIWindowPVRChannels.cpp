@@ -41,7 +41,6 @@
 #include "utils/log.h"
 #include "threads/SingleLock.h"
 
-using namespace std;
 using namespace PVR;
 using namespace EPG;
 
@@ -117,7 +116,7 @@ std::string CGUIWindowPVRChannels::GetDirectoryPath(void)
 
 bool CGUIWindowPVRChannels::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
 {
-  if (itemNumber < 0 || itemNumber >= (int) m_vecItems->Size())
+  if (itemNumber < 0 || itemNumber >= m_vecItems->Size())
     return false;
   CFileItemPtr pItem = m_vecItems->Get(itemNumber);
 
@@ -188,7 +187,7 @@ bool CGUIWindowPVRChannels::OnMessage(CGUIMessage& message)
       if (message.GetSenderId() == m_viewControl.GetCurrentControl())
       {
         int iItem = m_viewControl.GetSelectedItem();
-        if (iItem > 0 || iItem < (int) m_vecItems->Size())
+        if (iItem >= 0 && iItem < m_vecItems->Size())
         {
           bReturn = true;
           switch (message.GetParam1())
@@ -346,7 +345,7 @@ bool CGUIWindowPVRChannels::OnContextButtonMove(CFileItem *item, CONTEXT_BUTTON 
     if (!channel || channel->IsRadio() != m_bRadio)
       return bReturn;
 
-    CStdString strIndex;
+    std::string strIndex;
     strIndex = StringUtils::Format("%i", channel->ChannelNumber());
     CGUIDialogNumeric::ShowAndGetNumber(strIndex, g_localizeStrings.Get(19052));
     int newIndex = atoi(strIndex.c_str());
@@ -414,7 +413,7 @@ bool CGUIWindowPVRChannels::OnContextButtonSetThumb(CFileItem *item, CONTEXT_BUT
     nothumb->SetLabel(g_localizeStrings.Get(19283));
     items.Add(nothumb);
 
-    CStdString strThumb;
+    std::string strThumb;
     VECSOURCES shares;
     if (CSettings::Get().GetString("pvrmenu.iconpath") != "")
     {
@@ -466,7 +465,7 @@ bool CGUIWindowPVRChannels::OnContextButtonFilter(CFileItem *item, CONTEXT_BUTTO
 
   if (button == CONTEXT_BUTTON_FILTER)
   {
-    CStdString filter = GetProperty("filter").asString();
+    std::string filter = GetProperty("filter").asString();
     CGUIKeyboardFactory::ShowAndGetFilter(filter, false);
     OnFilterItems(filter);
 
@@ -513,7 +512,7 @@ bool CGUIWindowPVRChannels::OnContextButtonUpdateEpg(CFileItem *item, CONTEXT_BU
 
     bReturn = UpdateEpgForChannel(item);
 
-    CStdString strMessage = StringUtils::Format("%s: '%s'", g_localizeStrings.Get(bReturn ? 19253 : 19254).c_str(), channel->ChannelName().c_str());
+    std::string strMessage = StringUtils::Format("%s: '%s'", g_localizeStrings.Get(bReturn ? 19253 : 19254).c_str(), channel->ChannelName().c_str());
     CGUIDialogKaiToast::QueueNotification(bReturn ? CGUIDialogKaiToast::Info : CGUIDialogKaiToast::Error,
         g_localizeStrings.Get(19166),
         strMessage);

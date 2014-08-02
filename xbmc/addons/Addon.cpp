@@ -174,6 +174,7 @@ AddonProps::AddonProps(const cp_extension_t *ext)
 
 AddonProps::AddonProps(const cp_plugin_info_t *plugin)
   : id(SS(plugin->identifier))
+  , type(ADDON_UNKNOWN)
   , version(SS(plugin->version))
   , minversion(SS(plugin->abi_bw_compatibility))
   , name(SS(plugin->name))

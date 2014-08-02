@@ -213,13 +213,11 @@ bool COMXImage::SendMessage(bool (*callback)(EGLDisplay egl_display, EGLContext 
   mess.sync.Reset();
   {
     CSingleLock lock(m_texqueue_lock);
-    CLog::Log(LOGDEBUG, "%s: texture job: %p:%p", __func__, &mess, mess.callback);
     m_texqueue.push(&mess);
     m_texqueue_cond.notifyAll();
   }
   // wait for function to have finished (in texture thread)
   mess.sync.Wait();
-  CLog::Log(LOGDEBUG, "%s: texture job done: %p:%p = %d", __func__, &mess, mess.callback, mess.result);
   // need to ensure texture thread has returned from mess.sync.Set() before we exit and free tex
   CSingleLock lock(m_texqueue_lock);
   return mess.result;
@@ -432,15 +430,12 @@ void COMXImage::Process()
       struct callbackinfo *mess = m_texqueue.front();
       m_texqueue.pop();
       lock.Leave();
-      CLog::Log(LOGDEBUG, "%s: texture job: %p:%p:%p", __func__, mess, mess->callback, mess->cookie);
 
       mess->result = mess->callback(g_Windowing.GetEGLDisplay(), GetEGLContext(), mess->cookie);
-      CLog::Log(LOGDEBUG, "%s: texture job about to Set: %p:%p:%p", __func__, mess, mess->callback, mess->cookie);
       {
         CSingleLock lock(m_texqueue_lock);
         mess->sync.Set();
       }
-      CLog::Log(LOGDEBUG, "%s: texture job: %p done", __func__, mess);
     }
   }
 }
@@ -910,6 +905,7 @@ COMXImageDec::COMXImageDec()
 {
   m_decoded_buffer = NULL;
   OMX_INIT_STRUCTURE(m_decoded_format);
+  m_success = false;
 }
 
 COMXImageDec::~COMXImageDec()
@@ -924,15 +920,20 @@ void COMXImageDec::Close()
 {
   CSingleLock lock(m_OMXSection);
 
-  if(m_omx_decoder.IsInitialized())
+  if (!m_success)
   {
-    m_omx_decoder.FlushInput();
-    m_omx_decoder.FreeInputBuffers();
-  }
-  if(m_omx_resize.IsInitialized())
-  {
-    m_omx_resize.FlushOutput();
-    m_omx_resize.FreeOutputBuffers();
+    if(m_omx_decoder.IsInitialized())
+    {
+      m_omx_decoder.SetStateForComponent(OMX_StateIdle);
+      m_omx_decoder.FlushInput();
+      m_omx_decoder.FreeInputBuffers();
+    }
+    if(m_omx_resize.IsInitialized())
+    {
+      m_omx_resize.SetStateForComponent(OMX_StateIdle);
+      m_omx_resize.FlushOutput();
+      m_omx_resize.FreeOutputBuffers();
+    }
   }
   if(m_omx_tunnel_decode.IsInitialized())
     m_omx_tunnel_decode.Deestablish();
@@ -1185,6 +1186,7 @@ bool COMXImageDec::Decode(const uint8_t *demuxer_content, unsigned demuxer_bytes
 
   memcpy( (char*)pixels, m_decoded_buffer->pBuffer, stride * height);
 
+  m_success = true;
   Close();
   return true;
 }
@@ -1199,6 +1201,7 @@ COMXImageEnc::COMXImageEnc()
   CSingleLock lock(m_OMXSection);
   OMX_INIT_STRUCTURE(m_encoded_format);
   m_encoded_buffer = NULL;
+  m_success = false;
 }
 
 COMXImageEnc::~COMXImageEnc()
@@ -1424,6 +1427,7 @@ COMXImageReEnc::COMXImageReEnc()
   m_encoded_buffer = NULL;
   m_pDestBuffer = NULL;
   m_nDestAllocSize = 0;
+  m_success = false;
 }
 
 COMXImageReEnc::~COMXImageReEnc()
@@ -1439,15 +1443,24 @@ void COMXImageReEnc::Close()
 {
   CSingleLock lock(m_OMXSection);
 
-  if(m_omx_decoder.IsInitialized())
+  if (!m_success)
   {
-    m_omx_decoder.FlushInput();
-    m_omx_decoder.FreeInputBuffers();
-  }
-  if(m_omx_encoder.IsInitialized())
-  {
-    m_omx_encoder.FlushOutput();
-    m_omx_encoder.FreeOutputBuffers();
+    if(m_omx_decoder.IsInitialized())
+    {
+      m_omx_decoder.SetStateForComponent(OMX_StateIdle);
+      m_omx_decoder.FlushInput();
+      m_omx_decoder.FreeInputBuffers();
+    }
+    if(m_omx_resize.IsInitialized())
+    {
+      m_omx_resize.SetStateForComponent(OMX_StateIdle);
+    }
+    if(m_omx_encoder.IsInitialized())
+    {
+      m_omx_encoder.SetStateForComponent(OMX_StateIdle);
+      m_omx_encoder.FlushOutput();
+      m_omx_encoder.FreeOutputBuffers();
+    }
   }
   if(m_omx_tunnel_decode.IsInitialized())
     m_omx_tunnel_decode.Deestablish();
@@ -1864,13 +1877,14 @@ bool COMXImageReEnc::ReEncode(COMXImageFile &srcFile, unsigned int maxWidth, uns
     }
   }
 
-  Close();
-
   if(m_omx_decoder.BadState())
     return false;
 
   pDestBuffer = m_pDestBuffer;
   CLog::Log(LOGDEBUG, "%s::%s : %s %dx%d -> %dx%d\n", CLASSNAME, __func__, srcFile.GetFilename(), srcFile.GetWidth(), srcFile.GetHeight(), maxWidth, maxHeight);
+
+  m_success = true;
+  Close();
 
   return true;
 }
@@ -1883,6 +1897,7 @@ bool COMXImageReEnc::ReEncode(COMXImageFile &srcFile, unsigned int maxWidth, uns
 
 COMXTexture::COMXTexture()
 {
+  m_success = false;
 }
 
 COMXTexture::~COMXTexture()
@@ -1894,15 +1909,20 @@ void COMXTexture::Close()
 {
   CSingleLock lock(m_OMXSection);
 
-  if(m_omx_decoder.IsInitialized())
+  if (!m_success)
   {
-    m_omx_decoder.FlushInput();
-    m_omx_decoder.FreeInputBuffers();
-  }
-  if(m_omx_egl_render.IsInitialized())
-  {
-    m_omx_egl_render.FlushOutput();
-    m_omx_egl_render.FreeOutputBuffers();
+    if(m_omx_decoder.IsInitialized())
+    {
+      m_omx_decoder.SetStateForComponent(OMX_StateIdle);
+      m_omx_decoder.FlushInput();
+      m_omx_decoder.FreeInputBuffers();
+    }
+    if(m_omx_egl_render.IsInitialized())
+    {
+      m_omx_egl_render.SetStateForComponent(OMX_StateIdle);
+      m_omx_egl_render.FlushOutput();
+      m_omx_egl_render.FreeOutputBuffers();
+    }
   }
   if (m_omx_tunnel_decode.IsInitialized())
     m_omx_tunnel_decode.Deestablish();
@@ -2204,6 +2224,7 @@ bool COMXTexture::Decode(const uint8_t *demuxer_content, unsigned demuxer_bytes,
       eos = true;
     }
   }
+  m_success = true;
   Close();
   return true;
 }

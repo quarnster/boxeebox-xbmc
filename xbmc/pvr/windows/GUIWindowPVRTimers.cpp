@@ -111,7 +111,7 @@ bool CGUIWindowPVRTimers::OnMessage(CGUIMessage &message)
       if (message.GetSenderId() == m_viewControl.GetCurrentControl())
       {
         int iItem = m_viewControl.GetSelectedItem();
-        if (iItem > 0 || iItem < m_vecItems->Size())
+        if (iItem >= 0 && iItem < m_vecItems->Size())
         {
           bReturn = true;
           switch (message.GetParam1())
@@ -254,7 +254,7 @@ bool CGUIWindowPVRTimers::OnContextButtonRename(CFileItem *item, CONTEXT_BUTTON 
       return bReturn;
     CPVRTimerInfoTag *timer = item->GetPVRTimerInfoTag();
 
-    CStdString strNewName(timer->m_strTitle);
+    std::string strNewName(timer->m_strTitle);
     if (CGUIKeyboardFactory::ShowAndGetInput(strNewName, g_localizeStrings.Get(19042), false))
       g_PVRTimers->RenameTimer(*item, strNewName);
   }

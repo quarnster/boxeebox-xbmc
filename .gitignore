@@ -125,6 +125,7 @@ config.log
 /addons/visualization.itunes/iTunes.mvis
 /addons/visualization.fishbmc/fishbmc.vis
 /addons/script.module.pil/
+/addons/audioencoder.*
 /addons/pvr.*
 /addons/xbmc.addon/addon.xml
 /addons/xbmc.json/addon.xml
@@ -349,7 +350,7 @@ lib/cpluff/stamp-h1
 /project/cmake/xbmc-config.cmake
 /project/cmake/*.error
 /project/cmake/addons/build
-/project/cmake/addons/depends/win32/build
+/project/cmake/addons/depends/build
 /project/cmake/addons/output
 
 # /project/Win32BuildSetup/
@@ -756,6 +757,7 @@ lib/cpluff/stamp-h1
 /xbmc/visualizations/fishBMC/Makefile
 
 #/xbmc/win32/
+/xbmc/win32/XBMC_PC.rc
 # no longer used
 /xbmc/win32/git_rev.h
 
