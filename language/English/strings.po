@@ -2313,6 +2313,7 @@ msgctxt "#550"
 msgid "Sort by: %s"
 msgstr ""
 
+#: xbmc/view/GUIViewState.cpp
 msgctxt "#551"
 msgid "Name"
 msgstr ""
@@ -5061,30 +5062,25 @@ msgctxt "#13020"
 msgid "Is another session active, perhaps over ssh?"
 msgstr ""
 
-#: xbmc\linux\HALManager.cpp
 #: xbmc\storage\MediaManager.cpp
 msgctxt "#13021"
 msgid "Mounted removable harddrive"
 msgstr ""
 
-#: xbmc\linux\HALManager.cpp
 #: xbmc\storage\MediaManager.cpp
 msgctxt "#13022"
 msgid "Unsafe device removal"
 msgstr ""
 
-#: xbmc\linux\HALManager.cpp
 #: xbmc\storage\MediaManager.cpp
 msgctxt "#13023"
 msgid "Successfully removed device"
 msgstr ""
 
-#: xbmc\linux\HALManager.cpp
 msgctxt "#13024"
 msgid "Joystick plugged"
 msgstr ""
 
-#: xbmc\linux\HALManager.cpp
 msgctxt "#13025"
 msgid "Joystick unplugged"
 msgstr ""
@@ -7967,7 +7963,10 @@ msgctxt "#19139"
 msgid "Name of the new group"
 msgstr ""
 
-#empty string with id 19140
+#: xbmc/pvr/windows/GUIWindowPVRSearch.cpp
+msgctxt "#19140"
+msgid "Search..."
+msgstr ""
 
 msgctxt "#19141"
 msgid "Group"
@@ -15559,7 +15558,7 @@ msgstr ""
 
 #: system/settings/rbp.xml
 msgctxt "#36548"
-msgid "Limits resolution of GUI to save memory. Does not affect video playback. Use 1080 for unlimited. Requires restart."
+msgid "Limits resolution of GUI to save memory. Does not affect video playback. Requires restart."
 msgstr ""
 
 #empty strings from id 36549 to 36599
@@ -15789,4 +15788,29 @@ msgstr ""
 #: system/settings/settings.xml
 msgctxt "#37025"
 msgid "Configure audio encoder settings such as quality and compression level"
+msgstr ""
+
+#: system/settings/rbp.xml
+msgctxt "#37026"
+msgid "Auto"
+msgstr ""
+
+#: system/settings/rbp.xml
+msgctxt "#37027"
+msgid "540"
+msgstr ""
+
+#: system/settings/rbp.xml
+msgctxt "#37028"
+msgid "720"
+msgstr ""
+
+#: system/settings/rbp.xml
+msgctxt "#37029"
+msgid "900"
+msgstr ""
+
+#: system/settings/rbp.xml
+msgctxt "#37030"
+msgid "Unlimited"
 msgstr ""
