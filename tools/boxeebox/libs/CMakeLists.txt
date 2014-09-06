@@ -632,7 +632,7 @@ ExternalProject_Add(
 
 ExternalProject_Add(
     libdaemon
-    URL                   http://0pointer.de/lennart/projects/libdaemon/libdaemon-0.14.tar.gz
+    URL                   http://pkgs.fedoraproject.org/repo/pkgs/libdaemon/libdaemon-0.14.tar.gz/509dc27107c21bcd9fbf2f95f5669563/libdaemon-0.14.tar.gz
     URL_MD5               509dc27107c21bcd9fbf2f95f5669563
     CONFIGURE_COMMAND     ac_cv_func_setpgrp_void=no <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-static --disable-shared --disable-lynx
     BUILD_COMMAND         make
