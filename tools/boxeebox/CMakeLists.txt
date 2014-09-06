@@ -139,6 +139,7 @@ set(libs
 	libcrypto.so.1.0.0
 	libreadline.so.6
 	libafpclient.so.0
+	libffi.so.6
 )
 
 foreach(lib ${libs})
