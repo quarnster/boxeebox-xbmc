@@ -58,6 +58,10 @@
 #include "../dvdplayer/DVDCodecs/Video/DVDVideoCodec.h"
 #include "../dvdplayer/DVDCodecs/DVDCodecUtils.h"
 
+#ifdef HAVE_LIBVA
+  #include "../dvdplayer/DVDCodecs/Video/VAAPI.h"
+#endif
+
 #define MAXPRESENTDELAY 0.500
 
 /* at any point we want an exclusive lock on rendermanager */
@@ -926,7 +930,12 @@ int CXBMCRenderManager::AddVideoPicture(DVDVideoPicture& pic)
 #endif
 #ifdef HAVE_LIBVA
   else if(pic.format == RENDER_FMT_VAAPI)
-    m_pRenderer->AddProcessor(*pic.vaapi, index);
+    m_pRenderer->AddProcessor(pic.vaapi, index);
+  else if(pic.format == RENDER_FMT_VAAPINV12)
+  {
+    m_pRenderer->AddProcessor(pic.vaapi, index);
+    CDVDCodecUtils::CopyNV12Picture(&image, &pic.vaapi->DVDPic);
+  }
 #endif
 #ifdef HAS_LIBSTAGEFRIGHT
   else if(pic.format == RENDER_FMT_EGLIMG)
@@ -935,6 +944,10 @@ int CXBMCRenderManager::AddVideoPicture(DVDVideoPicture& pic)
 #if defined(TARGET_ANDROID)
   else if(pic.format == RENDER_FMT_MEDIACODEC)
     m_pRenderer->AddProcessor(pic.mediacodec, index);
+#endif
+#ifdef HAS_IMXVPU
+  else if(pic.format == RENDER_FMT_IMXMAP)
+    m_pRenderer->AddProcessor(pic.IMXBuffer, index);
 #endif
 
   m_pRenderer->ReleaseImage(index, false);
@@ -989,10 +1002,10 @@ EINTERLACEMETHOD CXBMCRenderManager::AutoInterlaceMethodInternal(EINTERLACEMETHO
   if (mInt == VS_INTERLACEMETHOD_NONE)
     return VS_INTERLACEMETHOD_NONE;
 
-  if(!m_pRenderer->Supports(mInt))
+  if(m_pRenderer && !m_pRenderer->Supports(mInt))
     mInt = VS_INTERLACEMETHOD_AUTO;
 
-  if (mInt == VS_INTERLACEMETHOD_AUTO)
+  if (m_pRenderer && mInt == VS_INTERLACEMETHOD_AUTO)
     return m_pRenderer->AutoInterlaceMethod();
 
   return mInt;

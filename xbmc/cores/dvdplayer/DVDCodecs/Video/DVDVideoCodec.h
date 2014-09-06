@@ -26,6 +26,8 @@
 #include <string>
 #include "cores/VideoRenderers/RenderFormats.h"
 
+
+
 extern "C" {
 #include "libavcodec/avcodec.h"
 }
@@ -46,16 +48,16 @@ struct DVDCodecAvailableType
 #define FRAME_TYPE_D 4
 
 namespace DXVA { class CSurfaceContext; }
-namespace VAAPI { struct CHolder; }
+namespace VAAPI { class CVaapiRenderPicture; }
 namespace VDPAU { class CVdpauRenderPicture; }
 class COpenMax;
 class COpenMaxVideo;
 struct OpenMaxVideoBuffer;
 class CDVDVideoCodecStageFright;
-class CISMDBuffer;
 class CDVDMediaCodecInfo;
-
+class CDVDVideoCodecIMXBuffer;
 typedef void* EGLImageKHR;
+
 
 // should be entirely filled by all codecs
 struct DVDVideoPicture
@@ -76,7 +78,7 @@ struct DVDVideoPicture
       VDPAU::CVdpauRenderPicture* vdpau;
     };
     struct {
-      VAAPI::CHolder* vaapi;
+      VAAPI::CVaapiRenderPicture* vaapi;
     };
 
     struct {
@@ -100,6 +102,11 @@ struct DVDVideoPicture
      struct {
       CDVDMediaCodecInfo *mediacodec;
     };   
+
+    struct {
+      CDVDVideoCodecIMXBuffer *IMXBuffer;
+    };
+
   };
 
   unsigned int iFlags;
@@ -197,7 +204,7 @@ public:
   /*
    * returns true if successfull
    * the data is cleared to zero
-   */
+   */ 
   virtual bool ClearPicture(DVDVideoPicture* pDvdVideoPicture)
   {
     memset(pDvdVideoPicture, 0, sizeof(DVDVideoPicture));

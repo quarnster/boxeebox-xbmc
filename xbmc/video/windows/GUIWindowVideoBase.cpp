@@ -207,9 +207,19 @@ bool CGUIWindowVideoBase::OnMessage(CGUIMessage& message)
         {
           return OnInfo(iItem);
         }
-        else if (iAction == ACTION_PLAYER_PLAY && !g_application.m_pPlayer->IsPlayingVideo())
+        else if (iAction == ACTION_PLAYER_PLAY)
         {
-          return OnResumeItem(iItem);
+          // if playback is paused or playback speed != 1, return
+          if (g_application.m_pPlayer->IsPlayingVideo())
+          {
+            if (g_application.m_pPlayer->IsPausedPlayback())
+              return false;
+            if (g_application.m_pPlayer->GetPlaySpeed() != 1)
+              return false;
+          }
+
+          // not playing video, or playback speed == 1
+          return OnResumeItem(iItem);          
         }
         else if (iAction == ACTION_DELETE_ITEM)
         {
@@ -688,11 +698,9 @@ bool CGUIWindowVideoBase::ShowIMDB(CFileItem *item, const ScraperPtr &info2, boo
         }
 
         // got all movie details :-)
-        OutputDebugString("got details\n");
         pDlgProgress->Close();
 
         // now show the imdb info
-        OutputDebugString("show info\n");
 
         // remove directory caches and reload images
         CUtil::DeleteVideoDatabaseDirectoryCache();
@@ -1456,21 +1464,6 @@ bool CGUIWindowVideoBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     }
   case CONTEXT_BUTTON_RENAME:
     OnRenameItem(itemNumber);
-    return true;
-  case CONTEXT_BUTTON_MARK_WATCHED:
-    {
-      int newSelection = m_viewControl.GetSelectedItem() + 1;
-      CGUIDialogVideoInfo::MarkWatched(item, true);
-      m_viewControl.SetSelectedItem(newSelection);
-
-      CUtil::DeleteVideoDatabaseDirectoryCache();
-      Refresh();
-      return true;
-    }
-  case CONTEXT_BUTTON_MARK_UNWATCHED:
-    CGUIDialogVideoInfo::MarkWatched(item, false);
-    CUtil::DeleteVideoDatabaseDirectoryCache();
-    Refresh();
     return true;
   case CONTEXT_BUTTON_PLAY_AND_QUEUE:
     return OnPlayAndQueueMedia(item);
