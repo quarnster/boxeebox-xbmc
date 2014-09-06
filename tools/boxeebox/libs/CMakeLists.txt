@@ -89,8 +89,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
     ncurses
-    URL                   http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.7.tar.gz
-    URL_MD5               cce05daf61a64501ef6cd8da1f727ec6
+    URL                   http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz
+    URL_MD5               8cb9c412e5f2d96bc6f459aa8c6282a1
     CONFIGURE_COMMAND     ${BASIC_CONF} 
     BUILD_COMMAND         make
     INSTALL_COMMAND       make install
