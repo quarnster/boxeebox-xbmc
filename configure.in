@@ -720,7 +720,6 @@ case $use_platform in
      use_arch="arm"
      use_cpu=arm1176jzf-s
      use_hardcoded_tables="yes"
-     use_alsa="no"
      ARCH="arm"
      AC_DEFINE(HAS_EGLGLES, [1], [Define if supporting EGL based GLES Framebuffer])
      USE_OMXLIB=1; AC_DEFINE([HAVE_OMXLIB],[1],["Define to 1 if OMX libs is enabled"])
@@ -1422,14 +1421,14 @@ else
   DISABLE_PROJECTM=0
 fi
 
-# skin touched
-use_skin_touched=no
-if [[ -f "addons/skin.touched/addon.xml" ]]; then 
-  use_skin_touched=yes
-  USE_SKIN_TOUCHED=1
-  AC_DEFINE([HAS_SKIN_TOUCHED], [1], [Whether to build skin touched.])
+# touch skin
+use_touch_skin=no
+if [[ -f "addons/skin.re-touched/addon.xml" ]]; then 
+  use_touch_skin=yes
+  USE_TOUCH_SKIN=1
+  AC_DEFINE([HAS_TOUCH_SKIN], [1], [Whether to build the touch skin.])
 else
-  USE_SKIN_TOUCHED=0
+  USE_TOUCH_SKIN=0
 fi
 
 # libssh
@@ -1662,13 +1661,13 @@ else
 fi
 
 # FFmpeg
-FFMPEG_LIBNAMES="libavcodec >= 55.69.100
-                 libavfilter >= 4.11.100
-                 libavformat >= 55.48.100
-                 libavutil >= 52.92.100
-                 libpostproc >= 52.3.100
-                 libswscale >= 2.6.100
-                 libswresample >= 0.19.100"
+FFMPEG_LIBNAMES="libavcodec >= 56.1.100
+                 libavfilter >= 5.1.100
+                 libavformat >= 56.4.101
+                 libavutil >= 54.7.100
+                 libpostproc >= 53.0.100
+                 libswscale >= 3.0.100
+                 libswresample >= 1.1.100"
 
 ffmpeg_build="${abs_top_srcdir}/tools/depends/target/ffmpeg"
 FFMPEG_VER_SHA=$(grep "VERSION=" ${ffmpeg_build}/FFMPEG-VERSION | sed 's/VERSION=//g')
@@ -2132,10 +2131,10 @@ else
   final_message="$final_message\n  ProjectM:\tNo"
 fi
 
-if test "$use_skin_touched" = "yes"; then
-  final_message="$final_message\n  Skin Touched:\tYes"
+if test "$use_touch_skin" = "yes"; then
+  final_message="$final_message\n  Touch skin:\tYes"
 else
-  final_message="$final_message\n  Skin Touched:\tNo"
+  final_message="$final_message\n  Touch skin:\tNo"
 fi
 
 if test "$use_x11" = "yes"; then
@@ -2497,8 +2496,8 @@ if test "$use_wayland" = "yes"; then
 OUTPUT_FILES="$OUTPUT_FILES xbmc/windowing/tests/wayland/Makefile"
 fi
 
-if test "$use_skin_touched" = "yes"; then
-OUTPUT_FILES="$OUTPUT_FILES addons/skin.touched/media/Makefile"
+if test "$use_touch_skin" = "yes"; then
+OUTPUT_FILES="$OUTPUT_FILES addons/skin.re-touched/media/Makefile"
 fi
 
 if test "$use_codec_libstagefright" = "yes"; then
@@ -2541,7 +2540,7 @@ AC_SUBST(FFMPEG_LIBDIR)
 AC_SUBST(USE_STATIC_FFMPEG)
 AC_SUBST(GNUTLS_ALL_LIBS)
 AC_SUBST(VORBISENC_ALL_LIBS)
-AC_SUBST(USE_SKIN_TOUCHED)
+AC_SUBST(USE_TOUCH_SKIN)
 AC_SUBST(USE_LIBAV_HACKS)
 AC_SUBST(PYTHON_VERSION)
 AC_SUBST(OUTPUT_FILES)

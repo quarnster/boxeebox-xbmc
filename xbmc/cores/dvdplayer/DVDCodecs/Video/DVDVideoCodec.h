@@ -108,6 +108,10 @@ struct DVDVideoPicture
       CDVDVideoCodecIMXBuffer *IMXBuffer;
     };
 
+    struct {
+      CDVDVideoCodecIMXBuffer *IMXBuffer;
+    };
+
   };
 
   unsigned int iFlags;
