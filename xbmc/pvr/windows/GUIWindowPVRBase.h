@@ -93,8 +93,6 @@ namespace PVR
 
     static std::map<bool, std::string> m_selectedItemPaths;
 
-    static std::map<bool, std::string> m_selectedItemPaths;
-
     CCriticalSection m_critSection;
     bool m_bRadio;
 
