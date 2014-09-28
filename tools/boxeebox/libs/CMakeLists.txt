@@ -535,8 +535,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	curl
-	URL 			https://github.com/bagder/curl/archive/curl-7_36_0.tar.gz
-	URL_MD5 		ef711c160603fe06127c0dcd5091178a
+	GIT_REPOSITORY 			https://github.com/bagder/curl.git
+	GIT_TAG 		        d9762a7cdb35e70f8cb0bf1c2f8019e8391616e1
 	PATCH_COMMAND           ./buildconf
 	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn --enable-threaded-resolver
 	BUILD_COMMAND 		make
