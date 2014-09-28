@@ -155,7 +155,7 @@ public:
   CLinuxRenderer      *m_pRenderer;
 #endif
 
-  unsigned int GetProcessorSize();
+  unsigned int GetOptimalBufferSize();
 
   // Supported pixel formats, can be called before configure
   std::vector<ERenderFormat> SupportedFormats();
