@@ -521,46 +521,8 @@ bool CApplication::OnEvent(XBMC_Event& newEvent)
         actionId = newEvent.touch.action;
       else
       {
-        int iWin = g_windowManager.GetActiveWindow() & WINDOW_ID_MASK;
-        // change this if we have a dialog up
-        if (g_windowManager.HasModalDialog())
-        {
-          iWin = g_windowManager.GetTopMostModalDialogID() & WINDOW_ID_MASK;
-        }
-        if (iWin == WINDOW_DIALOG_FULLSCREEN_INFO)
-        { // fullscreen info dialog - special case
-          CButtonTranslator::GetInstance().TranslateTouchAction(iWin, newEvent.touch.action, newEvent.touch.pointers, actionId);
-          if (actionId <= 0)
-            iWin = WINDOW_FULLSCREEN_VIDEO;  // fallthrough to the main window
-        }
-        if (actionId <= 0)
-        {
-          if (iWin == WINDOW_FULLSCREEN_VIDEO)
-          {
-            // current active window is full screen video.
-            if (g_application.m_pPlayer->IsInMenu())
-            {
-              // if player is in some sort of menu, (ie DVDMENU) map buttons differently
-              CButtonTranslator::GetInstance().TranslateTouchAction(WINDOW_VIDEO_MENU, newEvent.touch.action, newEvent.touch.pointers, actionId);
-            }
-            else if (g_PVRManager.IsStarted() && g_application.CurrentFileItem().HasPVRChannelInfoTag())
-            {
-              // check for PVR specific keymaps in FULLSCREEN_VIDEO window
-              CButtonTranslator::GetInstance().TranslateTouchAction(WINDOW_FULLSCREEN_LIVETV, newEvent.touch.action, newEvent.touch.pointers, actionId);
-
-              // if no PVR specific action/mapping is found, fall back to default
-              if (actionId <= 0)
-                CButtonTranslator::GetInstance().TranslateTouchAction(iWin, newEvent.touch.action, newEvent.touch.pointers, actionId);
-            }
-            else
-            {
-              // in any other case use the fullscreen window section of keymap.xml to map key->action
-              CButtonTranslator::GetInstance().TranslateTouchAction(iWin, newEvent.touch.action, newEvent.touch.pointers, actionId);
-            }
-          }
-          else  // iWin != WINDOW_FULLSCREEN_VIDEO
-            CButtonTranslator::GetInstance().TranslateTouchAction(iWin, newEvent.touch.action, newEvent.touch.pointers, actionId);
-        }
+        int iWin = g_application.GetActiveWindowID();
+        CButtonTranslator::GetInstance().TranslateTouchAction(iWin, newEvent.touch.action, newEvent.touch.pointers, actionId);
       }
 
       if (actionId <= 0)
@@ -2352,7 +2314,7 @@ bool CApplication::OnKey(const CKey& key)
   g_Mouse.SetActive(false);
 
   // get the current active window
-  int iWin = g_windowManager.GetActiveWindow() & WINDOW_ID_MASK;
+  int iWin = GetActiveWindowID();
 
   // this will be checked for certain keycodes that need
   // special handling if the screensaver is active
@@ -2386,48 +2348,7 @@ bool CApplication::OnKey(const CKey& key)
     return true;
   }
 
-  // change this if we have a dialog up
-  if (g_windowManager.HasModalDialog())
-  {
-    iWin = g_windowManager.GetTopMostModalDialogID() & WINDOW_ID_MASK;
-  }
-  if (iWin == WINDOW_DIALOG_FULLSCREEN_INFO)
-  { // fullscreen info dialog - special case
-    action = CButtonTranslator::GetInstance().GetAction(iWin, key);
-
-    if (!key.IsAnalogButton())
-      CLog::LogF(LOGDEBUG, "%s pressed, trying fullscreen info action %s", g_Keyboard.GetKeyName((int) key.GetButtonCode()).c_str(), action.GetName().c_str());
-
-    if (OnAction(action))
-      return true;
-
-    // fallthrough to the main window
-    iWin = WINDOW_FULLSCREEN_VIDEO;
-  }
-  if (iWin == WINDOW_FULLSCREEN_VIDEO)
-  {
-    // current active window is full screen video.
-    if (g_application.m_pPlayer->IsInMenu())
-    {
-      // if player is in some sort of menu, (ie DVDMENU) map buttons differently
-      action = CButtonTranslator::GetInstance().GetAction(WINDOW_VIDEO_MENU, key);
-    }
-    else if (g_PVRManager.IsStarted() && g_application.CurrentFileItem().HasPVRChannelInfoTag())
-    {
-      // check for PVR specific keymaps in FULLSCREEN_VIDEO window
-      action = CButtonTranslator::GetInstance().GetAction(WINDOW_FULLSCREEN_LIVETV, key, false);
-
-      // if no PVR specific action/mapping is found, fall back to default
-      if (action.GetID() == 0)
-        action = CButtonTranslator::GetInstance().GetAction(iWin, key);
-    }
-    else
-    {
-      // in any other case use the fullscreen window section of keymap.xml to map key->action
-      action = CButtonTranslator::GetInstance().GetAction(iWin, key);
-    }
-  }
-  else
+  if (iWin != WINDOW_FULLSCREEN_VIDEO)
   {
     // current active window isnt the fullscreen window
     // just use corresponding section from keymap.xml
@@ -2594,10 +2515,10 @@ bool CApplication::OnAction(const CAction &action)
   }
   
   // The action PLAYPAUSE behaves as ACTION_PAUSE if we are currently
-  // playing or ACTION_PLAYER_PLAY if we are not playing.
+  // playing or ACTION_PLAYER_PLAY if we are seeking (FF/RW) or not playing.
   if (action.GetID() == ACTION_PLAYER_PLAYPAUSE)
   {
-    if (m_pPlayer->IsPlaying())
+    if (m_pPlayer->IsPlaying() && m_pPlayer->GetPlaySpeed() == 1)
       return OnAction(CAction(ACTION_PAUSE));
     else
       return OnAction(CAction(ACTION_PLAYER_PLAY));
@@ -2741,36 +2662,33 @@ bool CApplication::OnAction(const CAction &action)
       return true;
     }
 
-    // pause : pauses current audio song
-    if (action.GetID() == ACTION_PAUSE && m_pPlayer->GetPlaySpeed() == 1)
+    // pause : toggle pause action
+    if (action.GetID() == ACTION_PAUSE)
     {
       m_pPlayer->Pause();
-#ifdef HAS_KARAOKE
+      // go back to normal play speed on unpause
+      if (!m_pPlayer->IsPaused() && m_pPlayer->GetPlaySpeed() != 1)
+        m_pPlayer->SetPlaySpeed(1, g_application.m_muted);
+
+      #ifdef HAS_KARAOKE
       m_pKaraokeMgr->SetPaused( m_pPlayer->IsPaused() );
 #endif
-      if (!m_pPlayer->IsPaused())
-      { // unpaused - set the playspeed back to normal
-        m_pPlayer->SetPlaySpeed(1, g_application.m_muted);
-      }
       g_audioManager.Enable(m_pPlayer->IsPaused());
+      return true;
+    }
+    // play: unpause or set playspeed back to normal
+    if (action.GetID() == ACTION_PLAYER_PLAY)
+    {
+      // if currently paused - unpause
+      if (m_pPlayer->IsPaused())
+        return OnAction(CAction(ACTION_PAUSE));
+      // if we do a FF/RW then go back to normal speed
+      if (m_pPlayer->GetPlaySpeed() != 1)
+        m_pPlayer->SetPlaySpeed(1, g_application.m_muted);
       return true;
     }
     if (!m_pPlayer->IsPaused())
     {
-      // if we do a FF/RW in my music then map PLAY action togo back to normal speed
-      // if we are playing at normal speed, then allow play to pause
-      if (action.GetID() == ACTION_PLAYER_PLAY || action.GetID() == ACTION_PAUSE)
-      {
-        if (m_pPlayer->GetPlaySpeed() != 1)
-        {
-          m_pPlayer->SetPlaySpeed(1, g_application.m_muted);
-        }
-        else
-        {
-          m_pPlayer->Pause();
-        }
-        return true;
-      }
       if (action.GetID() == ACTION_PLAYER_FORWARD || action.GetID() == ACTION_PLAYER_REWIND)
       {
         int iPlaySpeed = m_pPlayer->GetPlaySpeed();
@@ -3340,6 +3258,9 @@ int CApplication::GetActiveWindowID(void)
     else if (g_PVRManager.IsStarted() && g_application.CurrentFileItem().HasPVRChannelInfoTag())
       iWin = WINDOW_FULLSCREEN_LIVETV;
   }
+  // special casing for PVR radio
+  if (iWin == WINDOW_VISUALISATION && g_PVRManager.IsStarted() && g_application.CurrentFileItem().HasPVRChannelInfoTag())
+    iWin = WINDOW_FULLSCREEN_RADIO;
 
   // Return the window id
   return iWin;

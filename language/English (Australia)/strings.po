@@ -5121,6 +5121,18 @@ msgctxt "#13456"
 msgid "Hardware accelerated"
 msgstr "Hardware accelerated"
 
+msgctxt "#13457"
+msgid "Prefer VAAPI render method"
+msgstr "Prefer VAAPI render method"
+
+msgctxt "#13458"
+msgid "Allow hardware acceleration (OMXPlayer)"
+msgstr "Allow hardware acceleration (OMXPlayer)"
+
+msgctxt "#13459"
+msgid "Use OMXPlayer for decoding of video files."
+msgstr "Use OMXPlayer for decoding of video files."
+
 msgctxt "#13500"
 msgid "A/V sync method"
 msgstr "A/V sync method"
@@ -6068,6 +6080,18 @@ msgstr "VDPAU - Bob"
 msgctxt "#16326"
 msgid "DXVA-HD"
 msgstr "DXVA-HD"
+
+msgctxt "#16327"
+msgid "VAAPI Bob"
+msgstr "VAAPI Bob"
+
+msgctxt "#16328"
+msgid "VAAPI Motion Adaptive"
+msgstr "VAAPI Motion Adaptive"
+
+msgctxt "#16329"
+msgid "VAAPI Motion Compensated"
+msgstr "VAAPI Motion Compensated"
 
 msgctxt "#16400"
 msgid "Post-processing"
@@ -12557,17 +12581,13 @@ msgctxt "#36432"
 msgid "Select virtual keyboard layouts."
 msgstr "Select virtual keyboard layouts."
 
-msgctxt "#36500"
-msgid "Stereoscopic mode (current)"
-msgstr "Stereoscopic mode (current)"
-
-msgctxt "#36501"
-msgid "Stereoscopic mode"
-msgstr "Stereoscopic mode"
+msgctxt "#36433"
+msgid "If enabled VAAPI render method is prefered. This puts less load on the CPU but driver may hang!"
+msgstr "If enabled VAAPI render method is preferred. This puts less load on the CPU but driver may hang!"
 
 msgctxt "#36502"
-msgid "None"
-msgstr "None"
+msgid "Disabled"
+msgstr "Disabled"
 
 msgctxt "#36503"
 msgid "Over/Under"

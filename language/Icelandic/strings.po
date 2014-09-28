@@ -12445,17 +12445,9 @@ msgctxt "#36431"
 msgid "Defines whether video decoding should be performed in software (requires more CPU) or with hardware acceleration where possible."
 msgstr "Skilgrinir hvort myndvinnsla verður gerð í hugbúnaði (þarfnast meira af örgjörvanum) eða gerð í vélbúnaðarhraðli ef hægt er."
 
-msgctxt "#36500"
-msgid "Stereoscopic mode (current)"
-msgstr "Þrívíddarhamur (núverandi)"
-
-msgctxt "#36501"
-msgid "Stereoscopic mode"
-msgstr "Þrívíddarhamur"
-
 msgctxt "#36502"
-msgid "None"
-msgstr "Enginn"
+msgid "Disabled"
+msgstr "Óvirkt"
 
 msgctxt "#36503"
 msgid "Over/Under"

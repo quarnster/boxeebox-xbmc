@@ -163,7 +163,7 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
 #else
   hwSupport += "MediaCodec:no ";
 #endif
-#if defined(HAVE_LIBOPENMAX) && defined(TARGET_POSIX)
+#if defined(HAVE_LIBOPENMAX)
   hwSupport += "OpenMax:yes ";
 #elif defined(TARGET_POSIX)
   hwSupport += "OpenMax:no ";
@@ -349,6 +349,7 @@ CDVDOverlayCodec* CDVDFactoryCodec::CreateOverlayCodec( CDVDStreamInfo &hint )
       break;
 
     case AV_CODEC_ID_SSA:
+    case AV_CODEC_ID_ASS:
       pCodec = OpenCodec(new CDVDOverlayCodecSSA(), hint, options);
       if( pCodec ) return pCodec;
 

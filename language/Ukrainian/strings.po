@@ -11529,17 +11529,9 @@ msgctxt "#36428"
 msgid "Record"
 msgstr "Запис"
 
-msgctxt "#36500"
-msgid "Stereoscopic mode (current)"
-msgstr "Стереоскопічний режим (поточний)"
-
-msgctxt "#36501"
-msgid "Stereoscopic mode"
-msgstr "Стереоскопічний режим"
-
 msgctxt "#36502"
-msgid "None"
-msgstr "Нічого"
+msgid "Disabled"
+msgstr "Вимкн."
 
 msgctxt "#36503"
 msgid "Over/Under"

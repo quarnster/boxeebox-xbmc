@@ -62,6 +62,21 @@ CGUIWindowPVRBase::~CGUIWindowPVRBase(void)
 {
 }
 
+void CGUIWindowPVRBase::SetSelectedItemPath(bool bRadio, const std::string path)
+{
+  m_selectedItemPaths.at(bRadio) = path;
+}
+
+std::string CGUIWindowPVRBase::GetSelectedItemPath(bool bRadio)
+{
+  if (!m_selectedItemPaths.at(bRadio).empty())
+    return m_selectedItemPaths.at(bRadio);
+  else if (g_PVRManager.IsPlaying())
+    return g_application.CurrentFile();
+
+  return "";
+}
+
 void CGUIWindowPVRBase::Notify(const Observable &obs, const ObservableMessage msg)
 {
   UpdateSelectedItemPath();
@@ -117,7 +132,7 @@ void CGUIWindowPVRBase::OnInitWindow(void)
   CGUIMediaWindow::OnInitWindow();
 
   // mark item as selected by channel path
-  m_viewControl.SetSelectedItem(m_selectedItemPaths.at(m_bRadio));
+  m_viewControl.SetSelectedItem(GetSelectedItemPath(m_bRadio));
 }
 
 void CGUIWindowPVRBase::OnDeinitWindow(int nextWindowID)
@@ -700,7 +715,7 @@ bool CGUIWindowPVRBase::Update(const std::string &strDirectory, bool updateFilte
 void CGUIWindowPVRBase::UpdateButtons(void)
 {
   CGUIMediaWindow::UpdateButtons();
-  SET_CONTROL_LABEL(CONTROL_BTNCHANNELGROUPS, g_localizeStrings.Get(19141) + ": " + (m_group->GroupType() == PVR_GROUP_TYPE_INTERNAL ? g_localizeStrings.Get(19287) : m_group->GroupName()));
+  SET_CONTROL_LABEL(CONTROL_BTNCHANNELGROUPS, g_localizeStrings.Get(19141) + ": " + m_group->GroupName());
 }
 
 void CGUIWindowPVRBase::UpdateSelectedItemPath()
