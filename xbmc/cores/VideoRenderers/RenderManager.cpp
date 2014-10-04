@@ -43,6 +43,8 @@
   #include "IntelSMDRenderer.h"
 #elif defined(HAS_GL)
   #include "LinuxRendererGL.h"
+#elif defined(HAS_MMAL)
+  #include "MMALRenderer.h"
 #elif HAS_GLES == 2
   #include "LinuxRendererGLES.h"
 #elif defined(HAS_DX)
@@ -425,6 +427,8 @@ unsigned int CXBMCRenderManager::PreInit()
     m_pRenderer = new CIntelSMDRenderer();
 #elif defined(HAS_GL)
     m_pRenderer = new CLinuxRendererGL();
+#elif defined(HAS_MMAL)
+    m_pRenderer = new CMMALRenderer();
 #elif HAS_GLES == 2
     m_pRenderer = new CLinuxRendererGLES();
 #elif defined(HAS_DX)
@@ -485,6 +489,14 @@ bool CXBMCRenderManager::Flush()
     else
       return true;
   }
+
+  m_queued.clear();
+  m_discard.clear();
+  m_free.clear();
+  m_presentsource = 0;
+  for (int i = 1; i < m_QueueSize; i++)
+    m_free.push_back(i);
+
   return true;
 }
 
@@ -951,6 +963,10 @@ int CXBMCRenderManager::AddVideoPicture(DVDVideoPicture& pic)
 #ifdef HAS_IMXVPU
   else if(pic.format == RENDER_FMT_IMXMAP)
     m_pRenderer->AddProcessor(pic.IMXBuffer, index);
+#endif
+#ifdef HAS_MMAL
+  else if(pic.format == RENDER_FMT_MMAL)
+    m_pRenderer->AddProcessor(pic.MMALBuffer, index);
 #endif
 
   m_pRenderer->ReleaseImage(index, false);

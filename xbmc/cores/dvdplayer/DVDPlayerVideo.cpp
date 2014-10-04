@@ -999,6 +999,7 @@ static std::string GetRenderFormatName(ERenderFormat format)
     case RENDER_FMT_ISMD:      return "ISMD";
     case RENDER_FMT_MEDIACODEC:return "MEDIACODEC";
     case RENDER_FMT_IMXMAP:    return "IMXMAP";
+    case RENDER_FMT_MMAL:      return "MMAL";
     case RENDER_FMT_NONE:      return "NONE";
   }
   return "UNKNOWN";

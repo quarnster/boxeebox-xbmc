@@ -194,7 +194,7 @@ bool CAddonMgr::CheckUserDirs(const cp_cfg_element_t *settings)
   while (itr != elements.end())
   {
     std::string path = GetExtValue(*itr++, "@path");
-    if (!CFile::Exists(path))
+    if (!CDirectory::Exists(path))
     {
       if (!CUtil::CreateDirectoryEx(path))
       {
@@ -770,7 +770,7 @@ bool CAddonMgr::GetExtList(cp_cfg_element_t *base, const char *path, vector<std:
   const char *all = m_cpluff->lookup_cfg_value(base, path);
   if (!all || *all == 0)
     return false;
-  StringUtils::Tokenize(all, result, " ");
+  StringUtils::Tokenize(all, result, ' ');
   return true;
 }
 

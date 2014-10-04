@@ -679,7 +679,7 @@ void CUtil::ClearTempFonts()
 {
   CStdString searchPath = "special://temp/fonts/";
 
-  if (!CFile::Exists(searchPath))
+  if (!CDirectory::Exists(searchPath))
     return;
 
   CFileItemList items;
@@ -735,7 +735,7 @@ CStdString CUtil::GetNextPathname(const CStdString &path_template, int max)
   for (int i = 0; i <= max; i++)
   {
     CStdString name = StringUtils::Format(path_template.c_str(), i);
-    if (!CFile::Exists(name))
+    if (!CFile::Exists(name) && !CDirectory::Exists(name))
       return name;
   }
   return "";
@@ -1884,6 +1884,26 @@ void CUtil::ScanForExternalSubtitles(const std::string& strMovie, std::vector<st
   std::string strMovieFileNameNoExt(URIUtils::ReplaceExtension(strMovieFileName, ""));
   strLookInPaths.push_back(strPath);
   
+  CURL url(strMovie);
+  std::string isoFileNameNoExt;
+  if (url.IsProtocol("bluray"))
+      url = CURL(url.GetHostName());
+  //a path inside an iso
+  if (url.IsProtocol("udf"))
+  {
+    std::string isoPath = url.GetHostName();
+    URIUtils::RemoveSlashAtEnd(isoPath);
+    CFileItem iso(isoPath, false);
+
+    if (iso.IsDiscImage())
+    {
+      std::string isoFileName;
+      URIUtils::Split(iso.GetPath(), isoPath, isoFileName);
+      isoFileNameNoExt = URIUtils::ReplaceExtension(isoFileName, "");
+      strLookInPaths.push_back(isoPath);
+    }
+  }
+  
   if (!CMediaSettings::Get().GetAdditionalSubtitleDirectoryChecked() && !CSettings::Get().GetString("subtitles.custompath").empty()) // to avoid checking non-existent directories (network) every time..
   {
     if (!g_application.getNetwork().IsAvailable() && !URIUtils::IsHD(CSettings::Get().GetString("subtitles.custompath")))
@@ -1985,7 +2005,8 @@ void CUtil::ScanForExternalSubtitles(const std::string& strMovie, std::vector<st
       {
         URIUtils::Split(items[j]->GetPath(), strPath, strItem);
         
-        if (StringUtils::StartsWithNoCase(strItem, strMovieFileNameNoExt))
+        if (StringUtils::StartsWithNoCase(strItem, strMovieFileNameNoExt)
+          || (!isoFileNameNoExt.empty() && StringUtils::StartsWithNoCase(strItem, isoFileNameNoExt)))
         {
           // is this a rar or zip-file
           if (URIUtils::IsRAR(strItem) || URIUtils::IsZIP(strItem))
@@ -2133,6 +2154,12 @@ void CUtil::GetExternalStreamDetailsFromFilename(const CStdString& strVideo, con
   // we check left part - if it's same as video base name - strip it
   if (StringUtils::StartsWithNoCase(toParse, videoBaseName))
     toParse = toParse.substr(videoBaseName.length());
+  else if (URIUtils::GetExtension(strStream) == ".sub" && URIUtils::IsInArchive(strStream))
+  {
+    // exclude parsing of vobsub file names that embedded in an archive
+    CLog::Log(LOGDEBUG, "%s - skipping archived vobsub filename parsing: %s", __FUNCTION__, strStream.c_str());
+    toParse.clear();
+  }
 
   // trim any non-alphanumeric char in the begining
   std::string::iterator result = std::find_if(toParse.begin(), toParse.end(), ::isalnum);

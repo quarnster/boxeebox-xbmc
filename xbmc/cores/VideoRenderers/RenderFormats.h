@@ -40,6 +40,7 @@ enum ERenderFormat {
   RENDER_FMT_ISMD,
   RENDER_FMT_MEDIACODEC,
   RENDER_FMT_IMXMAP,
+  RENDER_FMT_MMAL,
 };
 
 #endif
