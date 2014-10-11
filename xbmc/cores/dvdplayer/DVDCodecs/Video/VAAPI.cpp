@@ -1061,8 +1061,6 @@ void CDecoder::FiniVAAPIOutput()
   m_vaapiOutput.Dispose();
   m_vaapiConfigured = false;
 
-  VAStatus status;
-
   // destroy decoder context
   if (m_vaapiConfig.contextId != VA_INVALID_ID)
     CheckSuccess(vaDestroyContext(m_vaapiConfig.dpy, m_vaapiConfig.contextId));
@@ -2100,7 +2098,6 @@ bool COutput::EnsureBufferPool()
 
 void COutput::ReleaseBufferPool(bool precleanup)
 {
-  VAStatus status;
   CVaapiRenderPicture *pic;
 
   CSingleLock lock(m_bufferPool.renderPicSec);
@@ -2966,7 +2963,6 @@ bool CFFmpegPostproc::Init(EINTERLACEMETHOD method)
 bool CFFmpegPostproc::AddPicture(CVaapiDecodedPicture &inPic)
 {
   VASurfaceID surf = inPic.videoSurface;
-  VASurfaceStatus surf_status;
   VAImage image;
   uint8_t *buf;
   if (m_DVDPic.pts != DVD_NOPTS_VALUE && inPic.DVDPic.pts != DVD_NOPTS_VALUE)
