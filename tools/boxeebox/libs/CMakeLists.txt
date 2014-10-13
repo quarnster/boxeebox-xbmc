@@ -225,13 +225,22 @@ ExternalProject_Add(
 	BUILD_IN_SOURCE 	1
 )
 
+file(WRITE ${CMAKE_BINARY_DIR}/libressl_configure_helper.sh
+"
+export CC=${TARGET}-gcc
+export CXX=${TARGET}-g++
+export CFLAGS=-I${TARGET_DIR}/include
+export LDFLAGS=-L${TARGET_DIR}/lib
+export LIBS=\"-lpthread -lrt\"
+${CMAKE_BINARY_DIR}/libressl-prefix/src/libressl/configure --prefix=${TARGET_DIR} --host=${TARGET} 
+")
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/libressl_configure_helper.sh)
+
 ExternalProject_Add(
-	openssl
-	URL                     ftp://ftp.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.0.1h.tar.gz
-	URL_MD5                 8d6d684a9430d5cc98a62a5d8fbda8cf
-	PATCH_COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-cflags.patch
-	  COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-nodocs.patch
-	CONFIGURE_COMMAND 	CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib AR=${TARGET}-ar <SOURCE_DIR>/Configure --prefix=${SYSROOT}/usr/local shared --openssldir=/ --libdir=lib linux-elf threads enable-camellia enable-seed enable-tlsext enable-rfc3779 enable-cms enable-md2 no-krb5 no-mdc2 no-rc5 no-ec no-ec2mno-ecdh no-ecdsa no-srp
+	libressl
+	URL                     http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.1.0.tar.gz
+	URL_MD5                 be04526bee59d710cf2bff188c6d1f9e
+	CONFIGURE_COMMAND 	    ${CMAKE_BINARY_DIR}/libressl_configure_helper.sh
 	BUILD_COMMAND           make 
 	INSTALL_COMMAND 	make install
 	BUILD_IN_SOURCE 	1
@@ -489,7 +498,7 @@ ExternalProject_Add(
 	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DWITH_STATIC_LIB=ON -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND 	make install
-	DEPENDS                 libgcrypt openssl
+	DEPENDS                 libgcrypt libressl
 )
 
 ExternalProject_Add(
@@ -530,17 +539,28 @@ ExternalProject_Add(
         BUILD_COMMAND           make DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
         INSTALL_COMMAND         make install DESTDIR=${SYSROOT}
         BUILD_IN_SOURCE         1
-        DEPENDS                 zlib openssl
+        DEPENDS                 zlib libressl
 )
+
+file(WRITE ${CMAKE_BINARY_DIR}/curl_configure_helper.sh
+"
+export CC=${TARGET}-gcc
+export CXX=${TARGET}-g++
+export CFLAGS=-I${TARGET_DIR}/include
+export LDFLAGS=-L${TARGET_DIR}/lib
+export LIBS=\"-lpthread -lrt\"
+${CMAKE_BINARY_DIR}/curl-prefix/src/curl/configure --prefix=${SYSROOT}/usr/local --host=${TARGET} --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn --enable-threaded-resolver
+")
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/curl_configure_helper.sh)
 
 ExternalProject_Add(
 	curl
 	GIT_REPOSITORY 			https://github.com/bagder/curl.git
 	GIT_TAG 		        d9762a7cdb35e70f8cb0bf1c2f8019e8391616e1
 	PATCH_COMMAND           ./buildconf
-	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn --enable-threaded-resolver
-	BUILD_COMMAND 		make
-	DEPENDS                 openssl zlib bzip2 rtmpdump
+	CONFIGURE_COMMAND 	    ${CMAKE_BINARY_DIR}/curl_configure_helper.sh 
+	BUILD_COMMAND           make
+	DEPENDS                 libressl zlib bzip2 rtmpdump
 )
 
 file(WRITE ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh
@@ -613,7 +633,7 @@ ExternalProject_Add(
 	BUILD_COMMAND 		HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make ${PARALLEL}
 	INSTALL_COMMAND 	HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make install
 	BUILD_IN_SOURCE 	1
-	DEPENDS zlib expat bzip2 gdbm openssl sqlite libffi
+	DEPENDS zlib expat bzip2 gdbm libressl sqlite libffi
 )
 
 ExternalProject_Add(
