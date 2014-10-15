@@ -527,7 +527,7 @@ ExternalProject_Add(
         rtmpdump
         GIT_REPOSITORY          https://github.com/BurntSushi/rtmpdump-ksv.git
         CONFIGURE_COMMAND       ""
-        BUILD_COMMAND           make DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
+        BUILD_COMMAND           make CRYPTO=OPENSSL DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
         INSTALL_COMMAND         make install DESTDIR=${SYSROOT}
         BUILD_IN_SOURCE         1
         DEPENDS                 zlib openssl
