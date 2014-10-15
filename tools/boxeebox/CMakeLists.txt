@@ -135,8 +135,8 @@ set(libs
 	libcddb.so.2
 	libbluray.so.1
 	libgif.so.6
-	libssl.so.27
-	libcrypto.so.30
+	libssl.so.1.0.0
+	libcrypto.so.1.0.0
 	libreadline.so.6
 	libafpclient.so.0
 	libffi.so.6
