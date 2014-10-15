@@ -227,8 +227,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	openssl
-	URL                     ftp://ftp.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.0.1h.tar.gz
-	URL_MD5                 8d6d684a9430d5cc98a62a5d8fbda8cf
+	URL                     https://www.openssl.org/source/openssl-1.0.1j.tar.gz
+	URL_MD5                 f7175c9cd3c39bb1907ac8bba9df8ed3
 	PATCH_COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-cflags.patch
 	  COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-nodocs.patch
 	CONFIGURE_COMMAND 	CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib AR=${TARGET}-ar <SOURCE_DIR>/Configure --prefix=${SYSROOT}/usr/local shared --openssldir=/ --libdir=lib linux-elf threads enable-camellia enable-seed enable-tlsext enable-rfc3779 enable-cms enable-md2 no-krb5 no-mdc2 no-rc5 no-ec no-ec2mno-ecdh no-ecdsa no-srp
