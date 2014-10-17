@@ -1,6 +1,7 @@
 #pragma once
+
 /*
- *      Copyright (C) 2011-2013 Team XBMC
+ *      Copyright (C) 2005-2014 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,31 +20,33 @@
  *
  */
 
+#include "File.h"
 #include "IFile.h"
 
-struct hdhomerun_device_t;
-class DllHdHomeRun;
 
 namespace XFILE
 {
-  class CHomeRunFile : public IFile
+
+  class CBlurayFile : public IFile
   {
-    public:
-      CHomeRunFile();
-      ~CHomeRunFile();
+  public:
+    CBlurayFile();
+    virtual ~CBlurayFile();
 
-      virtual bool          Exists(const CURL& url);
-      virtual int64_t       Seek(int64_t iFilePosition, int iWhence);
-      virtual int           Stat(const CURL& url, struct __stat64* buffer);
-      virtual int64_t       GetPosition();
-      virtual int64_t       GetLength();
+    virtual bool Open(const CURL& url);
+    virtual bool Exists(const CURL& url);
+    virtual int Stat(const CURL& url, struct __stat64* buffer);
 
-      virtual bool          Open(const CURL& url);
-      virtual void          Close();
-      virtual ssize_t       Read(void* lpBuf, size_t uiBufSize);
-      virtual int           GetChunkSize();
-    private:
-      struct hdhomerun_device_t* m_device;
-      DllHdHomeRun* m_pdll;
+    virtual ssize_t Read(void* lpBuf, size_t uiBufSize);
+    virtual int64_t Seek(int64_t iFilePosition, int iWhence = SEEK_SET);
+    virtual void Close();
+    virtual int64_t GetPosition();
+    virtual int64_t GetLength();
+
+  protected:
+    CFile m_file;
+
+  private:
+    CURL RemoveProtocol(const CURL& url);
   };
 }
