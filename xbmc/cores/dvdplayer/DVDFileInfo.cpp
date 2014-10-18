@@ -67,7 +67,7 @@ bool CDVDFileInfo::GetFileDuration(const std::string &path, int& duration)
   if (!input->Open(path.c_str(), ""))
     return false;
 
-  demux.reset(CDVDFactoryDemuxer::CreateDemuxer(input.get(), true));
+  demux.reset(CDVDFactoryDemuxer::CreateDemuxer(input.get()));
   if (!demux.get())
     return false;
 
@@ -126,7 +126,7 @@ bool CDVDFileInfo::ExtractThumb(const std::string &strPath,
 
   try
   {
-    pDemuxer = CDVDFactoryDemuxer::CreateDemuxer(pInputStream, true);
+    pDemuxer = CDVDFactoryDemuxer::CreateDemuxer(pInputStream);
     if(!pDemuxer)
     {
       delete pInputStream;
@@ -346,7 +346,7 @@ bool CDVDFileInfo::GetFileStreamDetails(CFileItem *pItem)
     return false;
   }
 
-  CDVDDemux *pDemuxer = CDVDFactoryDemuxer::CreateDemuxer(pInputStream, true);
+  CDVDDemux *pDemuxer = CDVDFactoryDemuxer::CreateDemuxer(pInputStream);
   if (pDemuxer)
   {
     bool retVal = DemuxerToStreamDetails(pInputStream, pDemuxer, pItem->GetVideoInfoTag()->m_streamDetails, strFileNameAndPath);
