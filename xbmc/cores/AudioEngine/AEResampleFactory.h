@@ -1,7 +1,6 @@
 #pragma once
-
 /*
- *      Copyright (C) 2005-2013 Team XBMC
+ *      Copyright (C) 2010-2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,29 +19,17 @@
  *
  */
 
-#include "guilib/GUIDialog.h"
+#include "cores/AudioEngine/Interfaces/AEResample.h"
 
-namespace ADDON
+class IAEResample;
+
+namespace ActiveAE
 {
-  class CVisualisation;
-}
-class CFileItemList;
 
-class CGUIDialogVisualisationPresetList :
-      public CGUIDialog
+class CAEResampleFactory
 {
 public:
-  CGUIDialogVisualisationPresetList(void);
-  virtual ~CGUIDialogVisualisationPresetList(void);
-  virtual bool OnMessage(CGUIMessage &message);
-  virtual void FrameMove();
-
-protected:
-  virtual void OnInitWindow();
-  virtual void OnDeinitWindow(int nextWindowID);
-  void SetVisualisation(ADDON::CVisualisation *addon);
-  void Update();
-  ADDON::CVisualisation* m_viz; //TODO get rid
-  CFileItemList* m_vecPresets;
-  unsigned m_currentPreset;
+  static IAEResample *Create();
 };
+
+}

@@ -1,7 +1,5 @@
-#pragma once
-
 /*
- *      Copyright (C) 2005-2013 Team XBMC
+ *      Copyright (C) 2010-2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,29 +18,23 @@
  *
  */
 
-#include "guilib/GUIDialog.h"
+#include "settings/Settings.h"
+#include "AEResampleFactory.h"
+#include "cores/AudioEngine/Engines/ActiveAE/ActiveAEResampleFFMPEG.h"
+#if defined(TARGET_RASPBERRY_PI)
+  #include "cores/AudioEngine/Engines/ActiveAE/ActiveAEResamplePi.h"
+#endif
 
-namespace ADDON
+namespace ActiveAE
 {
-  class CVisualisation;
+
+IAEResample *CAEResampleFactory::Create()
+{
+#if defined(TARGET_RASPBERRY_PI)
+  if (CSettings::Get().GetInt("audiooutput.processquality") == AE_QUALITY_GPU)
+    return new CActiveAEResamplePi();
+#endif
+  return new CActiveAEResampleFFMPEG();
 }
-class CFileItemList;
 
-class CGUIDialogVisualisationPresetList :
-      public CGUIDialog
-{
-public:
-  CGUIDialogVisualisationPresetList(void);
-  virtual ~CGUIDialogVisualisationPresetList(void);
-  virtual bool OnMessage(CGUIMessage &message);
-  virtual void FrameMove();
-
-protected:
-  virtual void OnInitWindow();
-  virtual void OnDeinitWindow(int nextWindowID);
-  void SetVisualisation(ADDON::CVisualisation *addon);
-  void Update();
-  ADDON::CVisualisation* m_viz; //TODO get rid
-  CFileItemList* m_vecPresets;
-  unsigned m_currentPreset;
-};
+}
