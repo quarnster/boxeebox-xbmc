@@ -25,6 +25,7 @@
 
 #include "cores/AudioEngine/AEFactory.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
+#include "cores/AudioEngine/AEResampleFactory.h"
 
 #include "ActiveAE.h"
 #include "ActiveAEStream.h"
@@ -44,6 +45,7 @@ CActiveAEStream::CActiveAEStream(AEAudioFormat *format)
   m_paused = false;
   m_rgain = 1.0;
   m_volume = 1.0;
+  SetVolume(1.0);
   m_amplify = 1.0;
   m_streamSpace = m_format.m_frameSize * m_format.m_frames;
   m_streamDraining = false;
@@ -93,7 +95,7 @@ void CActiveAEStream::InitRemapper()
   for(unsigned int i=0; i<m_format.m_channelLayout.Count(); i++)
   {
     avLast = avCur;
-    avCur = CActiveAEResample::GetAVChannel(m_format.m_channelLayout[i]);
+    avCur = CAEUtil::GetAVChannel(m_format.m_channelLayout[i]);
     if(avCur < avLast)
     {
       needRemap = true;
@@ -105,8 +107,8 @@ void CActiveAEStream::InitRemapper()
   {
     CLog::Log(LOGDEBUG, "CActiveAEStream::%s - initialize remapper", __FUNCTION__);
 
-    m_remapper = new CActiveAEResample();
-    uint64_t avLayout = CActiveAEResample::GetAVChannelLayout(m_format.m_channelLayout);
+    m_remapper = CAEResampleFactory::Create();
+    uint64_t avLayout = CAEUtil::GetAVChannelLayout(m_format.m_channelLayout);
 
     // build layout according to ffmpeg channel order
     // we need this for reference
@@ -117,7 +119,7 @@ void CActiveAEStream::InitRemapper()
     {
       for(unsigned int j=0; j<m_format.m_channelLayout.Count(); j++)
       {
-        idx = m_remapper->GetAVChannelIndex(m_format.m_channelLayout[j], avLayout);
+        idx = CAEUtil::GetAVChannelIndex(m_format.m_channelLayout[j], avLayout);
         if (idx == (int)i)
         {
           ffmpegLayout += m_format.m_channelLayout[j];
@@ -133,7 +135,7 @@ void CActiveAEStream::InitRemapper()
     {
       for(unsigned int j=0; j<m_format.m_channelLayout.Count(); j++)
       {
-        idx = m_remapper->GetAVChannelIndex(m_format.m_channelLayout[j], avLayout);
+        idx = CAEUtil::GetAVChannelIndex(m_format.m_channelLayout[j], avLayout);
         if (idx == (int)i)
         {
           remapLayout += ffmpegLayout[j];
@@ -146,13 +148,13 @@ void CActiveAEStream::InitRemapper()
     m_remapper->Init(avLayout,
                      m_format.m_channelLayout.Count(),
                      m_format.m_sampleRate,
-                     CActiveAEResample::GetAVSampleFormat(m_format.m_dataFormat),
+                     CAEUtil::GetAVSampleFormat(m_format.m_dataFormat),
                      CAEUtil::DataFormatToUsedBits(m_format.m_dataFormat),
                      CAEUtil::DataFormatToDitherBits(m_format.m_dataFormat),
                      avLayout,
                      m_format.m_channelLayout.Count(),
                      m_format.m_sampleRate,
-                     CActiveAEResample::GetAVSampleFormat(m_format.m_dataFormat),
+                     CAEUtil::GetAVSampleFormat(m_format.m_dataFormat),
                      CAEUtil::DataFormatToUsedBits(m_format.m_dataFormat),
                      CAEUtil::DataFormatToDitherBits(m_format.m_dataFormat),
                      false,
@@ -195,7 +197,7 @@ unsigned int CActiveAEStream::GetSpace()
 unsigned int CActiveAEStream::AddData(uint8_t* const *data, unsigned int offset, unsigned int frames, double pts)
 {
   Message *msg;
-  int copied = 0;
+  unsigned int copied = 0;
   int sourceFrames = frames;
   uint8_t* const *buf = data;
 
@@ -430,8 +432,9 @@ double CActiveAEStream::GetResampleRatio()
 
 bool CActiveAEStream::SetResampleRatio(double ratio)
 {
+  if (ratio != m_streamResampleRatio)
+    AE.SetStreamResampleRatio(this, ratio);
   m_streamResampleRatio = ratio;
-  AE.SetStreamResampleRatio(this, m_streamResampleRatio);
   return true;
 }
 

@@ -73,7 +73,7 @@ int PCMCodec::ReadPCM(BYTE *pBuffer, int size, int *actualsize)
 {
   *actualsize = 0;
 
-  int iAmountRead = m_file.Read(pBuffer, 2 * (size / 2));
+  ssize_t iAmountRead = m_file.Read(pBuffer, 2 * (size / 2));
   if (iAmountRead > 0)
   {
     uint16_t *buffer = (uint16_t*) pBuffer;
@@ -101,7 +101,7 @@ void PCMCodec::SetMimeParams(const std::string& strMimeParams)
   m_Channels = 2;
   m_SampleRate = 44100;
 
-  std::vector<std::string> mimeParams = StringUtils::Split(strMimeParams, ";");
+  std::vector<std::string> mimeParams = StringUtils::Split(strMimeParams, ';');
   for (std::vector<std::string>::const_iterator i = mimeParams.begin(); i != mimeParams.end(); ++i)
   {
     std::vector<std::string> thisParam = StringUtils::Split(*i, "=", 2);

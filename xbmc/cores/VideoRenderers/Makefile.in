@@ -21,6 +21,9 @@ SRCS += OverlayRendererGL.cpp
 endif
 
 SRCS += IntelSMDRenderer.cpp
+ifeq (@USE_MMAL@,1)
+SRCS += MMALRenderer.cpp
+endif
 
 LIB = VideoRenderer.a
 

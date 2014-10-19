@@ -287,7 +287,7 @@ JSONRPC_STATUS CAudioLibrary::GetRecentlyAddedAlbums(const std::string &method, 
   CFileItemList items;
   for (unsigned int index = 0; index < albums.size(); index++)
   {
-    std::string path = StringUtils::Format("musicdb://recentlyaddedalbums/%i/", albums[index].idAlbum);
+    std::string path = StringUtils::Format("musicdb://recentlyaddedalbums/%li/", albums[index].idAlbum);
 
     CFileItemPtr item;
     FillAlbumItem(albums[index], path, item);
@@ -337,7 +337,7 @@ JSONRPC_STATUS CAudioLibrary::GetRecentlyPlayedAlbums(const std::string &method,
   CFileItemList items;
   for (unsigned int index = 0; index < albums.size(); index++)
   {
-    std::string path = StringUtils::Format("musicdb://recentlyplayedalbums/%i/", albums[index].idAlbum);
+    std::string path = StringUtils::Format("musicdb://recentlyplayedalbums/%li/", albums[index].idAlbum);
 
     CFileItemPtr item;
     FillAlbumItem(albums[index], path, item);
@@ -519,11 +519,7 @@ JSONRPC_STATUS CAudioLibrary::SetSongDetails(const std::string &method, ITranspo
 JSONRPC_STATUS CAudioLibrary::Scan(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
   std::string directory = parameterObject["directory"].asString();
-  std::string cmd;
-  if (directory.empty())
-    cmd = "updatelibrary(music)";
-  else
-    cmd = StringUtils::Format("updatelibrary(music, %s)", StringUtils::Paramify(directory).c_str());
+  std::string cmd = StringUtils::Format("updatelibrary(music, %s, %s)", StringUtils::Paramify(directory).c_str(), parameterObject["showdialogs"].asBoolean() ? "true" : "false");
 
   CApplicationMessenger::Get().ExecBuiltIn(cmd);
   return ACK;
@@ -545,7 +541,8 @@ JSONRPC_STATUS CAudioLibrary::Export(const std::string &method, ITransportLayer 
 
 JSONRPC_STATUS CAudioLibrary::Clean(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
-  CApplicationMessenger::Get().ExecBuiltIn("cleanlibrary(music)");
+  std::string cmd = StringUtils::Format("cleanlibrary(music, %s)", parameterObject["showdialogs"].asBoolean() ? "true" : "false");
+  CApplicationMessenger::Get().ExecBuiltIn(cmd);
   return ACK;
 }
 

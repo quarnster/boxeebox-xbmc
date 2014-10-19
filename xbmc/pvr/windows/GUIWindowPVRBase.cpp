@@ -48,18 +48,38 @@
 using namespace PVR;
 using namespace EPG;
 
+std::map<bool, std::string> CGUIWindowPVRBase::m_selectedItemPaths;
+
 CGUIWindowPVRBase::CGUIWindowPVRBase(bool bRadio, int id, const std::string &xmlFile) :
   CGUIMediaWindow(id, xmlFile.c_str()),
   m_bRadio(bRadio)
 {
+  m_selectedItemPaths[false] = "";
+  m_selectedItemPaths[true] = "";
 }
 
 CGUIWindowPVRBase::~CGUIWindowPVRBase(void)
 {
 }
 
+void CGUIWindowPVRBase::SetSelectedItemPath(bool bRadio, const std::string path)
+{
+  m_selectedItemPaths.at(bRadio) = path;
+}
+
+std::string CGUIWindowPVRBase::GetSelectedItemPath(bool bRadio)
+{
+  if (!m_selectedItemPaths.at(bRadio).empty())
+    return m_selectedItemPaths.at(bRadio);
+  else if (g_PVRManager.IsPlaying())
+    return g_application.CurrentFile();
+
+  return "";
+}
+
 void CGUIWindowPVRBase::Notify(const Observable &obs, const ObservableMessage msg)
 {
+  UpdateSelectedItemPath();
   CGUIMessage m(GUI_MSG_REFRESH_LIST, GetID(), 0, msg);
   CApplicationMessenger::Get().SendGUIMessage(m);
 }
@@ -104,7 +124,20 @@ void CGUIWindowPVRBase::OnInitWindow(void)
 
   m_vecItems->SetPath(GetDirectoryPath());
 
+  // use the path of the current playing channel if no previous selection exists
+  // to mark the corresponding item in the list as selected
+  if (m_selectedItemPaths.at(m_bRadio).empty() && g_PVRManager.IsPlaying())
+    m_selectedItemPaths.at(m_bRadio) = g_application.CurrentFile();
+
   CGUIMediaWindow::OnInitWindow();
+
+  // mark item as selected by channel path
+  m_viewControl.SetSelectedItem(GetSelectedItemPath(m_bRadio));
+}
+
+void CGUIWindowPVRBase::OnDeinitWindow(int nextWindowID)
+{
+  UpdateSelectedItemPath();
 }
 
 bool CGUIWindowPVRBase::OnMessage(CGUIMessage& message)
@@ -113,7 +146,10 @@ bool CGUIWindowPVRBase::OnMessage(CGUIMessage& message)
   {
     case GUI_MSG_WINDOW_INIT:
     {
-      m_group = g_PVRManager.GetPlayingGroup(m_bRadio);
+      CPVRChannelGroupPtr group = g_PVRManager.GetPlayingGroup(m_bRadio);
+      if (m_group != group)
+        m_viewControl.SetSelectedItem(0);
+      m_group = group;
       SetProperty("IsRadio", m_bRadio ? "true" : "");
     }
     break;
@@ -679,5 +715,10 @@ bool CGUIWindowPVRBase::Update(const std::string &strDirectory, bool updateFilte
 void CGUIWindowPVRBase::UpdateButtons(void)
 {
   CGUIMediaWindow::UpdateButtons();
-  SET_CONTROL_LABEL(CONTROL_BTNCHANNELGROUPS, g_localizeStrings.Get(19141) + ": " + (m_group->GroupType() == PVR_GROUP_TYPE_INTERNAL ? g_localizeStrings.Get(19287) : m_group->GroupName()));
+  SET_CONTROL_LABEL(CONTROL_BTNCHANNELGROUPS, g_localizeStrings.Get(19141) + ": " + m_group->GroupName());
+}
+
+void CGUIWindowPVRBase::UpdateSelectedItemPath()
+{
+  m_selectedItemPaths.at(m_bRadio) = m_viewControl.GetSelectedItemPath();
 }

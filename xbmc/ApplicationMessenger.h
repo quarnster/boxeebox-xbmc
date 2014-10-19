@@ -20,11 +20,9 @@
  *
  */
 
-#include "threads/CriticalSection.h"
 #include "utils/StdString.h"
 #include "guilib/WindowIDs.h"
 #include "threads/Thread.h"
-#include "threads/Event.h"
 #include <boost/shared_ptr.hpp>
 
 #include <queue>
@@ -93,6 +91,7 @@ namespace MUSIC_INFO
 #define TMSG_CECTOGGLESTATE       316
 #define TMSG_CECACTIVATESOURCE    317
 #define TMSG_CECSTANDBY           318
+#define TMSG_SETVIDEORESOLUTION   319
 
 #define TMSG_NETWORKMESSAGE         500
 

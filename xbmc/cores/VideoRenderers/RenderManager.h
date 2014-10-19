@@ -42,6 +42,7 @@ struct DVDVideoPicture;
 #define ERRORBUFFSIZE 30
 
 class CWinRenderer;
+class CMMALRenderer;
 class CLinuxRenderer;
 class CLinuxRendererGL;
 class CLinuxRendererGLES;
@@ -147,6 +148,8 @@ public:
   CIntelSMDRenderer   *m_pRenderer;
 #elif defined(HAS_GL)
   CLinuxRendererGL    *m_pRenderer;
+#elif defined(HAS_MMAL)
+  CMMALRenderer       *m_pRenderer;
 #elif HAS_GLES == 2
   CLinuxRendererGLES  *m_pRenderer;
 #elif defined(HAS_DX)
@@ -155,7 +158,7 @@ public:
   CLinuxRenderer      *m_pRenderer;
 #endif
 
-  unsigned int GetProcessorSize();
+  unsigned int GetOptimalBufferSize();
 
   // Supported pixel formats, can be called before configure
   std::vector<ERenderFormat> SupportedFormats();

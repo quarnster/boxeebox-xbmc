@@ -42,7 +42,8 @@ bool URIUtils::IsInPath(const CStdString &uri, const CStdString &baseURI)
 {
   CStdString uriPath = CSpecialProtocol::TranslatePath(uri);
   CStdString basePath = CSpecialProtocol::TranslatePath(baseURI);
-  return StringUtils::StartsWith(uriPath, basePath);
+
+  return !basePath.empty() && StringUtils::StartsWith(uriPath, basePath);
 }
 
 /* returns filename extension including period of filename */
@@ -842,7 +843,8 @@ bool URIUtils::IsInternetStream(const CURL& url, bool bStrictCheck /* = false */
 
   // Special case these
   if (url.IsProtocol("ftp") || url.IsProtocol("ftps")  ||
-      url.IsProtocol("dav") || url.IsProtocol("davs"))
+      url.IsProtocol("dav") || url.IsProtocol("davs")  ||
+      url.IsProtocol("sftp"))
     return bStrictCheck;
 
   std::string protocol = url.GetTranslatedProtocol();

@@ -77,6 +77,11 @@ namespace PVR
 
     bool GetPlayingTag(EPG::CEpgInfoTag &tag) const;
 
+    /*!
+    * @brief Get playing TV group.
+    */
+    std::string GetPlayingTVGroup();
+
   private:
     void ResetProperties(void);
     void ClearQualityInfo(PVR_SIGNAL_STATUS &qualityInfo);
@@ -148,11 +153,11 @@ namespace PVR
     std::string                     m_strBackendName;
     std::string                     m_strBackendVersion;
     std::string                     m_strBackendHost;
-    std::string                     m_strBackendDiskspace;
     std::string                     m_strBackendTimers;
     std::string                     m_strBackendRecordings;
     std::string                     m_strBackendChannels;
-    std::string                     m_strTotalDiskspace;
+    long long                       m_iBackendUsedDiskspace;
+    long long                       m_iBackendTotalDiskspace;
     unsigned int                    m_iDuration;
 
     bool                            m_bHasNonRecordingTimers;
@@ -162,6 +167,7 @@ namespace PVR
     bool                            m_bIsPlayingEncryptedStream;
     bool                            m_bHasTVChannels;
     bool                            m_bHasRadioChannels;
+    std::string                     m_strPlayingTVGroup;
     //@}
 
     PVR_SIGNAL_STATUS               m_qualityInfo;       /*!< stream quality information */

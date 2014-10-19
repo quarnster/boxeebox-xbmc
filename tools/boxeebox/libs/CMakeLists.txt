@@ -89,8 +89,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
     ncurses
-    URL                   http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.7.tar.gz
-    URL_MD5               cce05daf61a64501ef6cd8da1f727ec6
+    URL                   http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz
+    URL_MD5               8cb9c412e5f2d96bc6f459aa8c6282a1
     CONFIGURE_COMMAND     ${BASIC_CONF} 
     BUILD_COMMAND         make
     INSTALL_COMMAND       make install
@@ -227,8 +227,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	openssl
-	URL                     ftp://ftp.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.0.1h.tar.gz
-	URL_MD5                 8d6d684a9430d5cc98a62a5d8fbda8cf
+	URL                     https://www.openssl.org/source/openssl-1.0.1j.tar.gz
+	URL_MD5                 f7175c9cd3c39bb1907ac8bba9df8ed3
 	PATCH_COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-cflags.patch
 	  COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-nodocs.patch
 	CONFIGURE_COMMAND 	CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib AR=${TARGET}-ar <SOURCE_DIR>/Configure --prefix=${SYSROOT}/usr/local shared --openssldir=/ --libdir=lib linux-elf threads enable-camellia enable-seed enable-tlsext enable-rfc3779 enable-cms enable-md2 no-krb5 no-mdc2 no-rc5 no-ec no-ec2mno-ecdh no-ecdsa no-srp
@@ -283,8 +283,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	sqlite
-	URL 		    http://www.sqlite.org/2014/sqlite-autoconf-3080500.tar.gz
-	URL_MD5 	    0544ef6d7afd8ca797935ccc2685a9ed
+	URL 		    http://www.sqlite.org/2014/sqlite-autoconf-3080700.tar.gz
+	URL_MD5 	    10cf856d953d8152cdaf180623102a23
 	CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET}  --disable-shared --enable-static --enable-threadsafe --disable-readline --enable-dynamic-extensions
 	BUILD_COMMAND       make CXXFLAGS+=-DSQLITE_ENABLE_COLUMN_METADATA=1 CFLAGS+=-DSQLITE_TEMP_STORE=3  CFLAGS+=-DSQLITE_ENABLE_STAT3 CFLAGS+=-DSQLITE_DEFAULT_MMAP_SIZE=268435456
 )
@@ -323,9 +323,9 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	pcre
-	URL 			http://sourceforge.net/projects/pcre/files/pcre/8.35/pcre-8.35.tar.bz2/download
-	URL_MD5 		6aacb23986adccd9b3bc626c00979958
-	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-stack-for-recursion --enable-pcre8 --disable-pcre16 --disable-pcre32 --enable-jit --enable-utf --enable-unicode-properties --enable-newline-is-anycrlf
+	URL 			http://sourceforge.net/projects/pcre/files/pcre/8.36/pcre-8.36.tar.bz2/download
+	URL_MD5 		b767bc9af0c20bc9c1fe403b0d41ad97
+	CONFIGURE_COMMAND 	${BASIC_CONF} --enable-utf8 --enable-unicode-properties
 )
 
 ExternalProject_Add(
@@ -473,8 +473,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
     libbluray
-    URL                         ftp://ftp.videolan.org/pub/videolan/libbluray/0.6.0/libbluray-0.6.0.tar.bz2
-    URL_MD5                     697886c09ef058bb9a2954ee5ee4f140
+    URL                         ftp://ftp.videolan.org/pub/videolan/libbluray/0.6.2/libbluray-0.6.2.tar.bz2
+    URL_MD5                     f4d2f2cab53f976cbb22cbae069057bd
     CONFIGURE_COMMAND           ${BASIC_CONF} --disable-examples --disable-doxygen-doc
     BUILD_COMMAND               make
     INSTALL_COMMAND             make install
@@ -515,7 +515,7 @@ ExternalProject_Add(
 ExternalProject_Add(
         nfs
         GIT_REPOSITORY          https://github.com/sahlberg/libnfs.git
-        GIT_TAG                 390ff38ad1689f0708cdb18811b3b7d5d616cba7
+        GIT_TAG                 ab1af6953ce7be7d6887dc65172100fff8a5af30
         PATCH_COMMAND           ./bootstrap
         CONFIGURE_COMMAND       ${BASIC_CONF} --disable-examples --disable-tirpc
         BUILD_COMMAND           make
@@ -527,7 +527,7 @@ ExternalProject_Add(
         rtmpdump
         GIT_REPOSITORY          https://github.com/BurntSushi/rtmpdump-ksv.git
         CONFIGURE_COMMAND       ""
-        BUILD_COMMAND           make DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
+        BUILD_COMMAND           make CRYPTO=OPENSSL DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
         INSTALL_COMMAND         make install DESTDIR=${SYSROOT}
         BUILD_IN_SOURCE         1
         DEPENDS                 zlib openssl
@@ -535,8 +535,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	curl
-	URL 			https://github.com/bagder/curl/archive/curl-7_36_0.tar.gz
-	URL_MD5 		ef711c160603fe06127c0dcd5091178a
+	GIT_REPOSITORY 			https://github.com/bagder/curl.git
+	GIT_TAG 		        d9762a7cdb35e70f8cb0bf1c2f8019e8391616e1
 	PATCH_COMMAND           ./buildconf
 	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn --enable-threaded-resolver
 	BUILD_COMMAND 		make
@@ -618,7 +618,7 @@ ExternalProject_Add(
 
 ExternalProject_Add(
     libdaemon
-    URL                   http://0pointer.de/lennart/projects/libdaemon/libdaemon-0.14.tar.gz
+    URL                   http://pkgs.fedoraproject.org/repo/pkgs/libdaemon/libdaemon-0.14.tar.gz/509dc27107c21bcd9fbf2f95f5669563/libdaemon-0.14.tar.gz
     URL_MD5               509dc27107c21bcd9fbf2f95f5669563
     CONFIGURE_COMMAND     ac_cv_func_setpgrp_void=no <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-static --disable-shared --disable-lynx
     BUILD_COMMAND         make
@@ -721,8 +721,8 @@ add_custom_target(dummylibs ALL DEPENDS DEPENDS ${TARGET_DIR}/lib/libEGL.so ${TA
 ExternalProject_Add(
 	ffmpeg
 	GIT_REPOSITORY           https://github.com/xbmc/FFmpeg.git
-	GIT_TAG                  2.3-Helix-alpha2
-	CONFIGURE_COMMAND        <SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --prefix=${TARGET_DIR} --disable-shared --enable-static --disable-programs --enable-gpl --disable-devices --disable-doc --disable-ffplay --disable-ffmpeg --disable-ffprobe --disable-ffserver --enable-runtime-cpudetect --enable-postproc --enable-pthreads --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=ipod --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2 --enable-protocol=http --enable-zlib --extra-version="xbmc-2.3-Helix-alpha2"
+	GIT_TAG                  2.4.2-Helix-alpha5
+	CONFIGURE_COMMAND        <SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --cpu=i686 --prefix=${TARGET_DIR} --disable-shared --enable-static --disable-programs --enable-gpl --disable-devices --disable-doc --disable-ffplay --disable-ffmpeg --disable-ffprobe --disable-ffserver --enable-runtime-cpudetect --enable-postproc --enable-pthreads --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=ipod --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2 --enable-protocol=http --enable-zlib
 	BUILD_COMMAND            make ${PARALLEL}
 	DEPENDS                  yasm
 )

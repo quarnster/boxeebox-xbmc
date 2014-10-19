@@ -148,9 +148,11 @@ bool CGUIWindowAddonBrowser::OnMessage(CGUIMessage& message)
   return CGUIMediaWindow::OnMessage(message);
 }
 
-void CGUIWindowAddonBrowser::GetContextButtons(int itemNumber,
-                                               CContextButtons& buttons)
+void CGUIWindowAddonBrowser::GetContextButtons(int itemNumber, CContextButtons& buttons)
 {
+  if (itemNumber < 0 || itemNumber >= m_vecItems->Size())
+    return;
+
   CFileItemPtr pItem = m_vecItems->Get(itemNumber);
   if (!pItem->IsPath("addons://enabled/"))
     buttons.Add(CONTEXT_BUTTON_SCAN,24034);
@@ -228,6 +230,14 @@ class UpdateAddons : public IRunnable
   }
 };
 
+class UpdateRepos : public IRunnable
+{
+  virtual void Run()
+  {
+    CAddonInstaller::Get().UpdateRepos(true, true);
+  }
+};
+
 bool CGUIWindowAddonBrowser::OnClick(int iItem)
 {
   CFileItemPtr item = m_vecItems->Get(iItem);
@@ -240,6 +250,14 @@ bool CGUIWindowAddonBrowser::OnClick(int iItem)
     std::string path;
     if (CGUIDialogFileBrowser::ShowAndGetFile(shares, "*.zip", g_localizeStrings.Get(24041), path))
       CAddonInstaller::Get().InstallFromZip(path);
+    return true;
+  }
+  else if (item->GetPath() == "addons://check/")
+  {
+    // perform the check for updates
+    UpdateRepos updater;
+    if (CGUIDialogBusy::Wait(&updater))
+      Refresh();
     return true;
   }
   if (item->GetPath() == "addons://update_all/")

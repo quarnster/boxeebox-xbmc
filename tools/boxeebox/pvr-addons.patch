@@ -13,3 +13,4 @@ diff --git a/xbmc-pvr-addons/configure.ac b/xbmc-pvr-addons/configure.ac
  
  AC_ARG_ENABLE([mysql],
    [AS_HELP_STRING([--disable-mysql],
+   

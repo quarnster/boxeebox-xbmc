@@ -42,7 +42,10 @@
 #include "pvr/PVRManager.h"
 #include "pvr/channels/PVRChannel.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
+#include "pvr/recordings/PVRRecordings.h"
 #include "cores/IPlayer.h"
+#include "cores/playercorefactory/PlayerCoreConfig.h"
+#include "cores/playercorefactory/PlayerCoreFactory.h"
 #include "settings/MediaSettings.h"
 
 using namespace JSONRPC;
@@ -74,6 +77,58 @@ JSONRPC_STATUS CPlayerOperations::GetActivePlayers(const std::string &method, IT
     picture["playerid"] = GetPlaylist(Picture);
     picture["type"] = "picture";
     result.append(picture);
+  }
+
+  return OK;
+}
+
+JSONRPC_STATUS CPlayerOperations::GetPlayers(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
+{
+  std::string media = parameterObject["media"].asString();
+  result = CVariant(CVariant::VariantTypeArray);
+  VECPLAYERCORES players;
+
+  if (media == "all")
+    CPlayerCoreFactory::Get().GetPlayers(players);
+  else
+  {
+    bool video = false;
+    if (media == "video")
+      video = true;
+
+    CPlayerCoreFactory::Get().GetPlayers(players, true, video);
+  }
+
+  for (VECPLAYERCORES::const_iterator itPlayer = players.begin(); itPlayer != players.end(); ++itPlayer)
+  {
+    PLAYERCOREID playerId = *itPlayer;
+    const CPlayerCoreConfig* playerConfig = CPlayerCoreFactory::Get().GetPlayerConfig(playerId);
+    if (playerConfig == NULL)
+      continue;
+
+    CVariant player(CVariant::VariantTypeObject);
+    player["playercoreid"] = static_cast<int>(playerId);
+    player["name"] = playerConfig->GetName();
+
+    switch (playerConfig->GetType())
+    {
+      case EPC_EXTPLAYER:
+        player["type"] = "external";
+        break;
+
+      case EPC_UPNPPLAYER:
+        player["type"] = "remote";
+        break;
+
+      default:
+        player["type"] = "internal";
+        break;
+    }
+
+    player["playsvideo"] = playerConfig->PlaysVideo();
+    player["playsaudio"] = playerConfig->PlaysAudio();
+
+    result.push_back(player);
   }
 
   return OK;
@@ -461,9 +516,11 @@ JSONRPC_STATUS CPlayerOperations::Rotate(const std::string &method, ITransportLa
 
 JSONRPC_STATUS CPlayerOperations::Open(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
-  CVariant optionShuffled = parameterObject["options"]["shuffled"];
-  CVariant optionRepeat = parameterObject["options"]["repeat"];
-  CVariant optionResume = parameterObject["options"]["resume"];
+  CVariant options = parameterObject["options"];
+  CVariant optionShuffled = options["shuffled"];
+  CVariant optionRepeat = options["repeat"];
+  CVariant optionResume = options["resume"];
+  CVariant optionPlayer = options["playercoreid"];
 
   if (parameterObject["item"].isObject() && parameterObject["item"].isMember("playlistid"))
   {
@@ -537,7 +594,28 @@ JSONRPC_STATUS CPlayerOperations::Open(const std::string &method, ITransportLaye
     if (channel == NULL)
       return InvalidParams;
 
-    CApplicationMessenger::Get().MediaPlay(CFileItem(*channel.get()));
+    if ((g_PVRManager.IsPlayingRadio() && channel.get()->IsRadio()) ||
+        (g_PVRManager.IsPlayingTV() && !channel.get()->IsRadio()))
+      g_PVRManager.PerformChannelSwitch(*channel.get(), false);
+    else
+      CApplicationMessenger::Get().MediaPlay(CFileItem(*channel.get()));
+
+    return ACK;
+  }
+  else if (parameterObject["item"].isObject() && parameterObject["item"].isMember("recordingid"))
+  {
+    if (!g_PVRManager.IsStarted())
+      return FailedToExecute;
+
+    CPVRRecordings *recordingsContainer = g_PVRRecordings;
+    if (recordingsContainer == NULL)
+      return FailedToExecute;
+
+    CFileItemPtr fileItem = recordingsContainer->GetById((int)parameterObject["item"]["recordingid"].asInteger());
+    if (fileItem == NULL)
+      return InvalidParams;
+
+    CApplicationMessenger::Get().MediaPlay(*fileItem);
     return ACK;
   }
   else
@@ -570,6 +648,31 @@ JSONRPC_STATUS CPlayerOperations::Open(const std::string &method, ITransportLaye
       }
       else
       {
+        // Handle the "playerid" option
+        if (!optionPlayer.isNull())
+        {
+          PLAYERCOREID playerId = EPC_NONE;
+          if (optionPlayer.isInteger())
+          {
+            playerId = (PLAYERCOREID)optionPlayer.asInteger();
+            // check if the there's actually a player with the given player ID
+            if (CPlayerCoreFactory::Get().GetPlayerConfig(playerId) == NULL)
+              return InvalidParams;
+
+            // check if the player can handle at least the first item in the list
+            VECPLAYERCORES possiblePlayers;
+            CPlayerCoreFactory::Get().GetPlayers(*list.Get(0).get(), possiblePlayers);
+            VECPLAYERCORES::const_iterator matchingPlayer = std::find(possiblePlayers.begin(), possiblePlayers.end(), playerId);
+            if (matchingPlayer == possiblePlayers.end())
+              return InvalidParams;
+          }
+          else if (!optionPlayer.isString() || optionPlayer.asString().compare("default") != 0)
+            return InvalidParams;
+
+          // set the next player to be used
+          g_application.m_eForcedNextPlayer = playerId;
+        }
+
         // Handle "shuffled" option
         if (optionShuffled.isBoolean())
           list.SetProperty("shuffled", optionShuffled);
@@ -1463,7 +1566,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const std:
         if (g_application.m_pPlayer->HasPlayer())
         {
           result = CVariant(CVariant::VariantTypeObject);
-          int index = CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream;
+          int index = g_application.m_pPlayer->GetSubtitle();
           if (index >= 0)
           {
             SPlayerSubtitleStreamInfo info;
