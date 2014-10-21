@@ -425,14 +425,6 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-	vorbis-tools
-	URL 			http://downloads.xiph.org/releases/vorbis/vorbis-tools-1.4.0.tar.gz
-	URL_MD5 		567e0fb8d321b2cd7124f8208b8b90e6
-	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF}
-	DEPENDS flac
-)
-
-ExternalProject_Add(
 	libass
 	GIT_REPOSITORY   	https://github.com/libass/libass.git
 	GIT_TAG 		0.11.2
