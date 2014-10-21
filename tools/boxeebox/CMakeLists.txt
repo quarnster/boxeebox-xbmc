@@ -112,7 +112,6 @@ set(libs
 	libtalloc.so.2
 	libtevent.so.0
 	libmpeg2.so.0	
-	libFLAC.so
 	libmodplug.so
 	libogg.so
 	libvorbisfile.so
