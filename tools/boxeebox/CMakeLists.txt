@@ -55,7 +55,7 @@ ExternalProject_Add(
 
 set(local ${SYSROOT}/usr/local)
 
-file(WRITE ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh
+file(WRITE ${CMAKE_BINARY_DIR}/kodi_configure_helper.sh
 "
 #!/bin/sh
 PF=`${SYSROOT}/usr/bin/${TARGET}-pkg-config --libs python`
@@ -71,25 +71,25 @@ export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
 ${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --build=i686-linux --with-ffmpeg --disable-gl --disable-pulse --disable-sdl --enable-mysql --disable-x11 --with-platform=linux32 --enable-gles --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=yes --enable-libusb --with-lirc-device=/var/run/lirc/lircd --enable-airplay
 "
 )
-execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh)
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/kodi_configure_helper.sh)
 
 add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/../../Makefile
-	COMMAND PATH=$ENV{PATH}:${SYSROOT}/usr/bin ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh
+	COMMAND PATH=$ENV{PATH}:${SYSROOT}/usr/bin ${CMAKE_BINARY_DIR}/kodi_configure_helper.sh
 	DEPENDS libs ${CMAKE_SOURCE_DIR}/../../configure
 )
 
 add_custom_target(
-	xbmc ALL
+	kodi ALL
 	COMMAND PATH=$ENV{PATH}:${SYSROOT}/usr/bin make ${PARALLEL}
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../../
 	DEPENDS ${CMAKE_SOURCE_DIR}/../../Makefile
 )
 
 add_custom_target(
-	xbmc-install
+	kodi-install
 	COMMAND PATH=$ENV{PATH}:${SYSROOT}/usr/bin make install
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../../
-	DEPENDS ${CMAKE_SOURCE_DIR}/../../xbmc.bin
+	DEPENDS ${CMAKE_SOURCE_DIR}/../../kodi.bin
 )
 
 set(libs
@@ -193,30 +193,30 @@ set(shares
 foreach(share ${shares})
 	add_custom_target(
 		${share}
-		COMMAND 		${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/share/xbmc/${share} ${TARGET_DIR}/${share}
-		DEPENDS			xbmc-install
+		COMMAND 		${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/share/kodi/${share} ${TARGET_DIR}/${share}
+		DEPENDS			kodi-install
 	)
 endforeach()
 
 add_custom_target(
 	shares
-	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/lib/xbmc/addons ${TARGET_DIR}/addons
-	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/lib/xbmc/system ${TARGET_DIR}/system
+	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/lib/kodi/addons ${TARGET_DIR}/addons
+	COMMAND 			${CMAKE_COMMAND} -E copy_directory ${SYSROOT}/usr/local/lib/kodi/system ${TARGET_DIR}/system
 	DEPENDS 			${shares}
 )
 
 if(HAVE_PV)
-	set(COPY ${HAVE_PV} ${CMAKE_BINARY_DIR}/xbmc.bin > ${TARGET_DIR}/xbmc.bin)
+	set(COPY ${HAVE_PV} ${CMAKE_BINARY_DIR}/kodi.bin > ${TARGET_DIR}/kodi.bin)
 else()
-	set(COPY ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/xbmc.bin ${TARGET_DIR}/xbmc.bin)
+	set(COPY ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/kodi.bin ${TARGET_DIR}/kodi.bin)
 endif()
 
 add_custom_target(
 	quickdist
-	COMMAND 			${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/../../xbmc.bin ${CMAKE_BINARY_DIR}/xbmc.bin
-	COMMAND 			${SYSROOT}/usr/bin/i686-pc-linux-gnu-strip ${CMAKE_BINARY_DIR}/xbmc.bin
+	COMMAND 			${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/../../kodi.bin ${CMAKE_BINARY_DIR}/kodi.bin
+	COMMAND 			${SYSROOT}/usr/bin/i686-pc-linux-gnu-strip ${CMAKE_BINARY_DIR}/kodi.bin
 	COMMAND 			${COPY}
-	DEPENDS 			xbmc ${CMAKE_SOURCE_DIR}/../../xbmc.bin
+	DEPENDS 			kodi ${CMAKE_SOURCE_DIR}/../../kodi.bin
 )
 
 add_custom_target(
