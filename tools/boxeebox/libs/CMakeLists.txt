@@ -417,30 +417,11 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-	flac
-	URL 			http://downloads.xiph.org/releases/flac/flac-1.2.1.tar.gz
-	URL_MD5 		153c8b15a54da428d1f0fadc756c22c7
-	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-oggtest --disable-xmms-plugin
-	BUILD_COMMAND 		""
-	INSTALL_COMMAND		make -C src ${PARALLEL} install
-		COMMAND 	make -C include ${PARALLEL} install
-	DEPENDS libvorbis
-)
-
-ExternalProject_Add(
 	libao
 	URL 			http://downloads.xiph.org/releases/ao/libao-1.2.0.tar.gz
 	URL_MD5 		9f5dd20d7e95fd0dd72df5353829f097
 	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-pulse
 	BUILD_COMMAND 		make ${PARALLEL}
-)
-
-ExternalProject_Add(
-	vorbis-tools
-	URL 			http://downloads.xiph.org/releases/vorbis/vorbis-tools-1.4.0.tar.gz
-	URL_MD5 		567e0fb8d321b2cd7124f8208b8b90e6
-	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF}
-	DEPENDS flac
 )
 
 ExternalProject_Add(

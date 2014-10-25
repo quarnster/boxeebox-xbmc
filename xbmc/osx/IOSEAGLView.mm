@@ -44,7 +44,7 @@
 #import <OpenGLES/ES2/glext.h>
 #import "IOSEAGLView.h"
 #if defined(TARGET_DARWIN_IOS_ATV2)
-#import "xbmc/osx/atv2/XBMCController.h"
+#import "xbmc/osx/atv2/KodiController.h"
 #elif defined(TARGET_DARWIN_IOS)
 #import "xbmc/osx/ios/XBMCController.h"
 #endif
@@ -64,6 +64,7 @@
 @implementation IOSEAGLView
 @synthesize animating;
 @synthesize xbmcAlive;
+@synthesize readyToRun;
 @synthesize pause;
 @synthesize currentScreen;
 @synthesize framebufferResizeRequested;
@@ -123,9 +124,16 @@
     //if no retina display scale detected yet -
     //ensure retina resolution on supported devices mainScreen
     //even on older iOS SDKs
-    if (ret == 1.0 && screen == [UIScreen mainScreen] && CDarwinUtils::DeviceHasRetina())
+    double screenScale = 1.0;
+    if (ret == 1.0 && screen == [UIScreen mainScreen] && CDarwinUtils::DeviceHasRetina(screenScale))
     {
-      ret = 2.0;//all retina devices have a scale factor of 2.0
+      ret = screenScale;//set scale factor from our static list in case older SDKs report 1.0
+    }
+
+    // fix for ip6 plus which seems to report 2.0 when not compiled with ios8 sdk
+    if (CDarwinUtils::DeviceHasRetina(screenScale) && screenScale == 3.0)
+    {
+      ret = screenScale;
     }
   }
   return ret;
@@ -370,7 +378,7 @@
   CCocoaAutoPool outerpool;
   // set up some xbmc specific relationships
   XBMC::Context context;
-  bool readyToRun = true;
+  readyToRun = true;
 
   // signal we are alive
   NSConditionLock* myLock = arg;

@@ -10,10 +10,10 @@ TOC
 -----------------------------------------------------------------------------
 1. Introduction
 -----------------------------------------------------------------------------
-The goal of this project is to get XBMC running smoothly on the Boxee Box.
+The goal of this project is to get Kodi running smoothly on the Boxee Box.
 The build scripts will download, compile and install all dependencies,
 including cross compilers. In other words, you don't need to have any
-Boxeebox or XBMC related code or SDK's installed on your system and even if you had
+Boxeebox or Kodi related code or SDK's installed on your system and even if you had
 they won't be used.
 Successful build environments have included OSX 10.8.3 and Ubuntu.
 
@@ -31,15 +31,22 @@ sudo apt-get install cmake make gcc texinfo gawk bison flex swig default-jre gpe
 3.  Building
 -----------------------------------------------------------------------------
 #to be performed in bash
+
+#Main repo
 For master (currently Helix) git clone https://github.com/quarnster/boxeebox-xbmc.git
 For Gotham git clone https://github.com/quarnster/boxeebox-xbmc.git -b Gotham
+
+#Test repo
+For master (currently Helix) git clone https://github.com/quarnster/boxeebox-xbmc.git
+For Gotham git clone https://github.com/quarnster/boxeebox-xbmc.git -b Gotham
+
 cd boxeebox-xbmc
 ./bootstrap
 automake --add-missing
 cd tools/boxeebox
 mkdir build
 cd build
-cmake -DTARGET_DIR=<WHERE_YOU_WANT_TO_INSTALL_XBMC> ..
+cmake -DTARGET_DIR=<WHERE_YOU_WANT_TO_INSTALL_KODI> ..
 make egl
 make pvr
 make
@@ -55,7 +62,7 @@ respect them:
 make refresh
 #done
 
-Changes in the XBMC directory should be picked up automatically.
+Changes in the Kodi directory should be picked up automatically.
 
 -----------------------------------------------------------------------------
 4.  Installing
@@ -69,12 +76,12 @@ make dist
 -----------------------------------------------------------------------------
 5.  How to run
 -----------------------------------------------------------------------------
-As of Boxee+Hacks version 1.5.1, XBMC booting is enabled natively, this requires
-your XBMC folder to be in the root of a USB flash drive or SD card.  This is a
-convienient way of using XBMC.
+As of Boxee+Hacks version 1.5.1, Kodi booting is enabled natively, this requires
+your Kodi folder to be in the root of a USB flash drive or SD card.  This is a
+convienient way of using Kodi.
 
 The method below will give the developers more valuable information to help fix bugs.
-To run XBMC on the Boxee Box, telnet into your box (requires Boxee+Hacks):
+To run Kodi on the Boxee Box, telnet into your box (requires Boxee+Hacks):
 // to be performed in your favourite client on Windows (PuTTY) or in a terminal in Linux
 telnet BOXEE_IP 2323 # the Boxee+Hacks default password is "secret"; BOXEE_IP is your Boxee Box IP address
 
@@ -84,19 +91,19 @@ killall Boxee #kill boxee process
 /etc/rc3.d/U94boxeehal stop #kill boxee hal service
 killall BoxeeHal #kill boxee hal process
 
-cd PATH_TO_XBMC_STORAGE #use 'df' command to determine your XBMC storage device
+cd PATH_TO_KODI_STORAGE #use 'df' command to determine your Kodi storage device
 #only choose one of the below commands to run; do not run them all
-#below cmd will start XBMC normally
-GCONV_PATH=$PWD/gconv AE_ENGINE=active PYTHONPATH=$PWD/python2.7:$PWD/python2.7/lib-dynload XBMC_HOME=$PWD ./xbmc.bin
+#below cmd will start Kodi normally
+GCONV_PATH=$PWD/gconv AE_ENGINE=active PYTHONPATH=$PWD/python2.7:$PWD/python2.7/lib-dynload XBMC_HOME=$PWD ./kodi.bin
 
-#below cmd will start XBMC in background mode
-GCONV_PATH=$PWD/gconv AE_ENGINE=active PYTHONPATH=$PWD/python2.7:$PWD/python2.7/lib-dynload XBMC_HOME=$PWD ./xbmc.bin &
+#below cmd will start Kodi in background mode
+GCONV_PATH=$PWD/gconv AE_ENGINE=active PYTHONPATH=$PWD/python2.7:$PWD/python2.7/lib-dynload XBMC_HOME=$PWD ./kodi.bin &
 
-#below cmd will start XBMC in portable mode
-GCONV_PATH=$PWD/gconv AE_ENGINE=active PYTHONPATH=$PWD/python2.7:$PWD/python2.7/lib-dynload XBMC_HOME=$PWD ./xbmc.bin -p
+#below cmd will start Kodi in portable mode
+GCONV_PATH=$PWD/gconv AE_ENGINE=active PYTHONPATH=$PWD/python2.7:$PWD/python2.7/lib-dynload XBMC_HOME=$PWD ./kodi.bin -p
 
-#below cmd will start XBMC in portable/background mode
-GCONV_PATH=$PWD/gconv AE_ENGINE=active PYTHONPATH=$PWD/python2.7:$PWD/python2.7/lib-dynload XBMC_HOME=$PWD ./xbmc.bin -p &
+#below cmd will start Kodi in portable/background mode
+GCONV_PATH=$PWD/gconv AE_ENGINE=active PYTHONPATH=$PWD/python2.7:$PWD/python2.7/lib-dynload XBMC_HOME=$PWD ./kodi.bin -p &
 
 -----------------------------------------------------------------------------
 6.  References
@@ -113,9 +120,12 @@ http://gtvhacker.com/index.php/Boxee
 -----------------------------------------------------------------------------
 7.  Discussion & Development
 -----------------------------------------------------------------------------
-Interested in discussing XBMC on Boxee Box, or lending a hand to the project?
+Interested in discussing Kodi on Boxee Box, or lending a hand to the project?
 Visit us here:  http://boxeed.in/forums/viewforum.php?f=13
 As well, github:  https://github.com/quarnster/boxeebox-xbmc
+
+Test repo: https://github.com/quasar1/boxeebox-xbmc.git
+Test builds: https://github.com/quasar1/boxeebox-xbmc/releases
 
 Thanks to everyone who has helped with getting this port up and running.
 
