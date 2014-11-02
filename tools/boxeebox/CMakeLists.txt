@@ -68,7 +68,7 @@ export PYTHON_NOVERSIONCHECK=\"y\"
 export PYTHON=\"${local}/bin/python\"
 export PYTHON_CPPFLAGS=\"-I${local}/include/python2.7\"
 export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
-${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --build=i686-linux --with-ffmpeg --disable-gl --disable-pulse --disable-sdl --enable-mysql --disable-x11 --with-platform=linux32 --enable-gles --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=yes --enable-libusb --with-lirc-device=/var/run/lirc/lircd --enable-airplay
+${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --build=i686-linux --with-ffmpeg --disable-gl --disable-pulse --disable-sdl --enable-mysql --disable-x11 --with-platform=linux32 --enable-gles --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=no --enable-libusb --with-lirc-device=/var/run/lirc/lircd --enable-airplay
 "
 )
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/kodi_configure_helper.sh)
@@ -120,7 +120,6 @@ set(libs
 	libenca.so.0
 	libass.so.5
 	libao.so
-	libcec.so.2	
 	libfribidi.so.0
 	libfreetype.so.6
 	libgcrypt.so.20
