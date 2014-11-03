@@ -417,7 +417,7 @@ ExternalProject_Add(
 ExternalProject_Add(
 	libass
 	GIT_REPOSITORY   	https://github.com/libass/libass.git
-	GIT_TAG 		0.11.2
+	GIT_TAG                 0.12.0
 	PATCH_COMMAND           ./autogen.sh
 	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules --enable-asm --disable-test
 	DEPENDS libpng libenca fribidi freetype2 fontconfig yasm
