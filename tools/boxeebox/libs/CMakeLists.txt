@@ -454,13 +454,13 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libssh
-	URL 			http://www.libssh.org/files/0.5/libssh-0.5.3.tar.gz
-	URL_MD5 		9ad01838d3b89d98e900e0f6260a88cc
+	URL                     http://git.libssh.org/projects/libssh.git/snapshot/libssh-0.6.3.tar.gz
+	URL_MD5                 5b0fd1dbf2effef2322f6251f6c7ca11
 	PATCH_COMMAND 		sed -e "s,add_subdirectory\(examples\),,g" -i CMakeLists.txt
-	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DWITH_STATIC_LIB=ON -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
+	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DCMAKE_INSTALL_PREFIX=${TARGET_DIR} -DWITH_STATIC_LIB=1 -DWITH_SERVER=OFF  -DWITH_GCRYPT=OFF -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND 	make install
-	DEPENDS                 libgcrypt openssl
+	DEPENDS                 openssl
 )
 
 ExternalProject_Add(
