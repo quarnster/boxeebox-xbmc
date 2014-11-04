@@ -463,8 +463,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
 
   // if format can be nonblocking, let's use that
   m_pFormatContext->flags |= AVFMT_FLAG_NONBLOCK;
-  
-#ifdef HAS_INTEL_SMD
+ifdef HAS_INTEL_SMD
   m_pFormatContext->flags |= AVFMT_FLAG_GENPTS;
 #endif
 
