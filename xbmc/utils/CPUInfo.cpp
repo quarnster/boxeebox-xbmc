@@ -573,7 +573,8 @@ float CCPUInfo::getCPUFrequency()
       fscanf(m_fCPUFreq,"%*s");
     }
 
-    value = avg/cpus;
+    if (cpus > 0)
+      value = avg/cpus;
   }
   return value;
 #endif
