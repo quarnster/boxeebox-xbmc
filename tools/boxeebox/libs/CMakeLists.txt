@@ -507,14 +507,14 @@ export CXX=${TARGET}-g++
 export CFLAGS=-I${TARGET_DIR}/include
 export LDFLAGS=-L${TARGET_DIR}/lib
 export LIBS=\"-lpthread -lrt\"
-${CMAKE_BINARY_DIR}/dbus-prefix/src/dbus/configure --prefix=${TARGET_DIR} --host=${TARGET} --without-x --disable-xml-docs --disable-doxygen-docs ac_cv_have_abstract_sockets=yes
+${CMAKE_BINARY_DIR}/dbus-prefix/src/dbus/configure --prefix=${TARGET_DIR} --host=${TARGET} --without-x --disable-xml-docs --disable-doxygen-docs --without-dbus-glib --disable-tests ac_cv_have_abstract_sockets=yes
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh)
 
 ExternalProject_Add(
         dbus
-        URL               http://dbus.freedesktop.org/releases/dbus/dbus-1.6.14.tar.gz
-        URL_MD5           1c22aebdf952e92908800f1ec2aeb0c4
+        URL               http://dbus.freedesktop.org/releases/dbus/dbus-1.9.2.tar.gz
+        URL_MD5           a568c8853eeced5a4346fa2dd8e9eda6
         CONFIGURE_COMMAND ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
