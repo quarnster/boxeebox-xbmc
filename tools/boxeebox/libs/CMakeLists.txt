@@ -472,7 +472,7 @@ ExternalProject_Add(
 ExternalProject_Add(
         nfs
         GIT_REPOSITORY          https://github.com/sahlberg/libnfs.git
-        GIT_TAG                 ab1af6953ce7be7d6887dc65172100fff8a5af30
+        GIT_TAG                 4a58e6145568fd21ef956ae6ac3d3c37ef209a57
         PATCH_COMMAND           ./bootstrap
         CONFIGURE_COMMAND       ${BASIC_CONF} --disable-examples --disable-tirpc
         BUILD_COMMAND           make
