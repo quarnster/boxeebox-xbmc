@@ -451,9 +451,9 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	util-linux
-	URL			https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.1.tar.gz
-	URL_MD5			ec45435f9d3d4a2590f4837e6acc9e73
-	CONFIGURE_COMMAND	${BASIC_CONF} --without-ncurses
+	URL                     https://www.kernel.org/pub/linux/utils/util-linux/v2.25/util-linux-2.25.2.tar.gz
+	URL_MD5                 f4b25b1c89e9021cc19911e8a2d2c2e5
+	CONFIGURE_COMMAND	${BASIC_CONF} --without-ncurses --without-python
 	BUILD_COMMAND		""
 	INSTALL_COMMAND		make install-uuidincHEADERS
 )
