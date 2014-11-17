@@ -60,7 +60,7 @@ file(WRITE ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh
 #!/bin/sh
 PF=`${SYSROOT}/usr/bin/${TARGET}-pkg-config --libs python`
 export LDFLAGS=\"-L${local}/lib -lgcc -lm -ltinyxml -lgdl -lismd_core -lismd_viddec -lismd_vidpproc -lismd_audio -lismd_vidrend -lismd_demux -lismd_bufmon -losal -lplatform_config -Wl,-rpath=${SYSROOT}/usr/local/lib -Wl,-rpath=${SYSROOT}/lib -Wl,-rpath=${SYSROOT}/usr/lib\"
-export CFLAGS=\"-DTARGET_BOXEE=1 -DTIXML_USE_STL -mmmx -msse -msse2 -I${local}/include -DHAS_INTEL_SMD -march=i686\"
+export CFLAGS=\"-DTARGET_BOXEE=1 -DTIXML_USE_STL -mmmx -msse -msse2 -msse3 -I${local}/include -DHAS_INTEL_SMD -march=i686\"
 export CXXFLAGS=\"$CFLAGS\"
 export FREETYPE2_CFLAGS=\"-I${local}/include/freetype2\"
 export PYTHON_VERSION=\"2.7.2\"
@@ -68,7 +68,7 @@ export PYTHON_NOVERSIONCHECK=\"y\"
 export PYTHON=\"${local}/bin/python\"
 export PYTHON_CPPFLAGS=\"-I${local}/include/python2.7\"
 export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
-${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --disable-gl --disable-pulse --disable-sdl --enable-mysql --disable-x11 --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=yes --enable-libusb --with-lirc-device=/var/run/lirc/lircd --enable-airplay
+${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --disable-gl --disable-pulse --disable-sdl --enable-mysql --disable-x11 --with-arch=i686 --with-platform=linux --enable-gles --enable-external-libraries --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=no --enable-libusb --with-lirc-device=/var/run/lirc/lircd --enable-airplay
 "
 )
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/xbmc_configure_helper.sh)
@@ -122,7 +122,6 @@ set(libs
 	libenca.so.0
 	libass.so.5
 	libao.so
-	libcec.so.2	
 	libfribidi.so.0
 	libfreetype.so.6
 	libgcrypt.so.20
@@ -132,7 +131,7 @@ set(libs
 	libxslt.so
 	libshairplay.so.0
 	airport.key
-	libplist.so.1
+	libplist.so.3
 	libcddb.so.2
 	libbluray.so.1
 	libgif.so.6
@@ -140,6 +139,7 @@ set(libs
 	libcrypto.so.1.0.0
 	libreadline.so.6
 	libafpclient.so.0
+	libffi.so.6
 )
 
 foreach(lib ${libs})
