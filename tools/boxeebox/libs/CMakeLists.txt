@@ -560,8 +560,8 @@ execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh)
 
 ExternalProject_Add(
         dbus
-        URL               http://dbus.freedesktop.org/releases/dbus/dbus-1.6.14.tar.gz
-        URL_MD5           1c22aebdf952e92908800f1ec2aeb0c4
+        URL               http://dbus.freedesktop.org/releases/dbus/dbus-1.9.2.tar.gz
+        URL_MD5           a568c8853eeced5a4346fa2dd8e9eda6
         CONFIGURE_COMMAND ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
