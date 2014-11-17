@@ -554,7 +554,7 @@ export CXX=${TARGET}-g++
 export CFLAGS=-I${TARGET_DIR}/include
 export LDFLAGS=-L${TARGET_DIR}/lib
 export LIBS=\"-lpthread -lrt\"
-${CMAKE_BINARY_DIR}/dbus-prefix/src/dbus/configure --prefix=${TARGET_DIR} --host=${TARGET} --without-x --disable-xml-docs --disable-doxygen-docs ac_cv_have_abstract_sockets=yes
+${CMAKE_BINARY_DIR}/dbus-prefix/src/dbus/configure --prefix=${TARGET_DIR} --host=${TARGET} --without-x --disable-xml-docs --disable-doxygen-docs --without-dbus-glib --disable-tests ac_cv_have_abstract_sockets=yes
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh)
 
