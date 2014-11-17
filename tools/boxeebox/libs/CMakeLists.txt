@@ -48,31 +48,6 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-    libplist
-    URL                   http://www.libimobiledevice.org/downloads/libplist-1.8.tar.bz2
-    URL_MD5               2a9e0258847d50f9760dc3ece25f4dc6
-    PATCH_COMMAND         sed -ie "s/TARGET_LINK_LIBRARIES( plist /TARGET_LINK_LIBRARIES( plist m z  /" src/CMakeLists.txt
-    COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/libplist-patches/0001-dontbuildswig.patch
-    BUILD_COMMAND         ${BASIC_CMAKE}          
-    COMMAND               make CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib 
-    INSTALL_COMMAND       make install
-    DEPENDS               libxml2
-)
-
-ExternalProject_Add(
-    libshairplay
-    GIT_REPOSITORY        https://github.com/juhovh/shairplay.git
-    PATCH_COMMAND         ./autogen.sh
-	COMMAND            patch -p1 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/xcode-llmvfix.patch
-	COMMAND            patch -p0 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/01-add_fairplay_handshake.patch
-    CONFIGURE_COMMAND     ${BASIC_CONF} --sysconfdir=/
-      BUILD_COMMAND       make
-	COMMAND            make install
-    INSTALL_COMMAND       cp -P ${CMAKE_BINARY_DIR}/libshairplay-prefix/src/libshairplay/airport.key ${SYSROOT}/usr/local/lib
-    DEPENDS               libxml2 libplist
-)
-
-ExternalProject_Add(
     ncurses
     URL                   http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.7.tar.gz
 	URL_MD5               cce05daf61a64501ef6cd8da1f727ec6
@@ -645,6 +620,29 @@ ExternalProject_Add(
     BUILD_COMMAND         make
     BUILD_IN_SOURCE       1
     DEPENDS               libffi python pcre zlib libxml2
+)
+
+ExternalProject_Add(
+    libplist
+    URL                   http://www.libimobiledevice.org/downloads/libplist-1.12.tar.bz2
+    URL_MD5               8b04b0f09f2398022dcd4fba75012997
+    CONFIGURE_COMMAND     ${BASIC_CONF} --without-cython
+    BUILD_COMMAND         make CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib                  
+    INSTALL_COMMAND       make install
+    DEPENDS               libxml2 glib
+)
+
+ExternalProject_Add(
+    libshairplay
+    GIT_REPOSITORY        https://github.com/juhovh/shairplay.git
+    PATCH_COMMAND         ./autogen.sh
+        COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/xcode-llmvfix.patch
+        COMMAND           patch -p0 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/01-add_fairplay_handshake.patch
+    CONFIGURE_COMMAND     ${BASIC_CONF} --sysconfdir=/
+      BUILD_COMMAND       make
+        COMMAND           make install
+    INSTALL_COMMAND       cp -P ${CMAKE_BINARY_DIR}/libshairplay-prefix/src/libshairplay/airport.key ${SYSROOT}/usr/local/lib
+        DEPENDS           libxml2 libplist
 )
 
 file(WRITE ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh
