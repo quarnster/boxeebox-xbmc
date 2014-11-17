@@ -131,7 +131,7 @@ set(libs
 	libxslt.so
 	libshairplay.so.0
 	airport.key
-	libplist.so.1
+	libplist.so.3
 	libcddb.so.2
 	libbluray.so.1
 	libgif.so.6
