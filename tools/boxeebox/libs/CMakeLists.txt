@@ -155,8 +155,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libenca
-	URL		    https://github.com/nijel/enca/archive/1.14.tar.gz
-	URL_MD5		    17e94759a1cb3e12cb8fe9e9439a1c18
+	URL		    https://github.com/nijel/enca/archive/1.16.tar.gz
+	URL_MD5		    4f39869a757e96deb372884e6f474a27
 	CONFIGURE_COMMAND   ac_cv_file__dev_random=yes ac_cv_file__dev_urandom=no ac_cv_file__dev_srandom=no ac_cv_file__dev_arandom=no ${BASIC_CONF} --disable-external --without-librecode --disable-rpath --with-gnu-ld
 	BUILD_COMMAND       make
 	BUILD_IN_SOURCE     1
