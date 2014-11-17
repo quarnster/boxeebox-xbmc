@@ -745,7 +745,7 @@ std::string CSysInfo::GetOsPrettyNameWithVersion(void)
     if (!osName.empty() && osNameVer.find(osName) == std::string::npos)
       osNameVer = osName + osNameVer;
     if (osNameVer.empty())
-      osNameVer = "Unknown Linux Distribution";
+      osNameVer = "D-Link Boxee Box Linux 32-bit i686";
   }
 
   if (osNameVer.find(GetOsVersion()) == std::string::npos)

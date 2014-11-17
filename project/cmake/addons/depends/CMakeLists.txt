@@ -1,4 +1,4 @@
-project(xbmc-addons-depends)
+project(kodi-addons-depends)
 
 cmake_minimum_required(VERSION 2.8)
 
@@ -14,7 +14,7 @@ endif()
 
 include(ExternalProject)
 
-if(NOT CMAKE_INSTALL_PREFIX)
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/../output/depends)
 else()
   file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}" CMAKE_INSTALL_PREFIX)
@@ -107,21 +107,11 @@ foreach(file ${cmake_input_files})
         set(INSTALL_COMMAND "")
       endif()
 
-      # check if there's a deps.txt containing dependencies on other libraries
-      if(EXISTS ${dir}/deps.txt})
-        file(STRINGS ${dir}/deps.txt deps)
-        message(STATUS "${id} dependencies: ${deps}")
-        set(DEPENDS_COMMAND DEPENDS ${deps})
-      else()
-        set(DEPENDS_COMMAND "")
-      endif()
-
       # prepare the setup of the call to externalproject_add()
       set(EXTERNALPROJECT_SETUP PREFIX build/${id}
                                 CMAKE_ARGS ${BUILD_ARGS}
                                 PATCH_COMMAND ${PATCH_COMMAND}
-                                "${INSTALL_COMMAND}"
-                                "${DEPENDS_COMMAND}")
+                                "${INSTALL_COMMAND}")
 
       # if there's an url defined we need to pass that to externalproject_add()
       if(DEFINED url AND NOT "${url}" STREQUAL "")
@@ -146,6 +136,13 @@ foreach(file ${cmake_input_files})
                             SOURCE_DIR ${dir}
                             "${EXTERNALPROJECT_SETUP}"
                            )
+      endif()
+
+      # check if there's a deps.txt containing dependencies on other libraries
+      if(EXISTS ${dir}/deps.txt)
+        file(STRINGS ${dir}/deps.txt deps)
+        message(STATUS "${id} dependencies: ${deps}")
+        add_dependencies(${id} ${deps})
       endif()
     endif()
   endif()

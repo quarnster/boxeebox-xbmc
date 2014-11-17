@@ -34,8 +34,10 @@
 #include "guilib/GraphicContext.h"
 #include "cores/IPlayer.h"
 
-#ifdef HAS_SDL
+#if SDL_VERSION == 1
 #include <SDL/SDL_stdinc.h>
+#elif SDL_VERSION == 2
+#include <SDL2/SDL_stdinc.h>
 #else
 #define SDL_memset4(dst, val, len)		\
 do {						\
@@ -1532,12 +1534,12 @@ void CTeletextDecoder::DoRenderPage(int startrow, int national_subset_bak)
     {
       RenderCharBB(m_RenderInfo.PageChar[index + col], &m_RenderInfo.PageAtrb[index + col]);
 
-      if (m_RenderInfo.PageAtrb[index + col].doubleh && m_RenderInfo.PageChar[index + col] != 0xff)  /* disable lower char in case of doubleh setting in l25 objects */
+      if (m_RenderInfo.PageAtrb[index + col].doubleh && m_RenderInfo.PageChar[index + col] != 0xff && row < 24-1)  /* disable lower char in case of doubleh setting in l25 objects */
         m_RenderInfo.PageChar[index + col + 40] = 0xff;
-      if (m_RenderInfo.PageAtrb[index + col].doublew)  /* skip next column if double width */
+      if (m_RenderInfo.PageAtrb[index + col].doublew && col < 40-1)  /* skip next column if double width */
       {
         col++;
-        if (m_RenderInfo.PageAtrb[index + col-1].doubleh && m_RenderInfo.PageChar[index + col] != 0xff)  /* disable lower char in case of doubleh setting in l25 objects */
+        if (m_RenderInfo.PageAtrb[index + col - 1].doubleh && m_RenderInfo.PageChar[index + col] != 0xff && row < 24-1)  /* disable lower char in case of doubleh setting in l25 objects */
           m_RenderInfo.PageChar[index + col + 40] = 0xff;
       }
     }
@@ -2732,8 +2734,6 @@ int CTeletextDecoder::RenderChar(color_t *buffer,    // pointer to render buffer
     case 0xF2:
     case 0xF3:
     case 0xF4:
-    case 0xF5:
-    case 0xF6:
       Char = arrowtable[Char - 0xED];
       break;
     default:

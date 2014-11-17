@@ -63,31 +63,6 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-    libplist
-    URL                   http://www.libimobiledevice.org/downloads/libplist-1.8.tar.bz2
-    URL_MD5               2a9e0258847d50f9760dc3ece25f4dc6
-    PATCH_COMMAND         sed -ie "s/TARGET_LINK_LIBRARIES( plist /TARGET_LINK_LIBRARIES( plist m z  /" src/CMakeLists.txt
-    COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/libplist-patches/0001-dontbuildswig.patch
-    BUILD_COMMAND         ${BASIC_CMAKE}          
-    COMMAND               make CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib 
-    INSTALL_COMMAND       make install
-    DEPENDS               libxml2
-)
-
-ExternalProject_Add(
-    libshairplay
-    GIT_REPOSITORY        https://github.com/juhovh/shairplay.git
-    PATCH_COMMAND         ./autogen.sh
-	COMMAND            patch -p1 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/xcode-llmvfix.patch
-	COMMAND            patch -p0 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/01-add_fairplay_handshake.patch
-    CONFIGURE_COMMAND     ${BASIC_CONF} --sysconfdir=/
-      BUILD_COMMAND       make
-	COMMAND            make install
-    INSTALL_COMMAND       cp -P ${CMAKE_BINARY_DIR}/libshairplay-prefix/src/libshairplay/airport.key ${SYSROOT}/usr/local/lib
-    DEPENDS               libxml2 libplist
-)
-
-ExternalProject_Add(
     ncurses
     URL                   http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz
     URL_MD5               8cb9c412e5f2d96bc6f459aa8c6282a1
@@ -170,8 +145,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libenca
-	URL		    https://github.com/nijel/enca/archive/1.14.tar.gz
-	URL_MD5		    17e94759a1cb3e12cb8fe9e9439a1c18
+	URL                 https://github.com/nijel/enca/archive/1.16.tar.gz
+	URL_MD5             4f39869a757e96deb372884e6f474a27
 	CONFIGURE_COMMAND   ac_cv_file__dev_random=yes ac_cv_file__dev_urandom=no ac_cv_file__dev_srandom=no ac_cv_file__dev_arandom=no ${BASIC_CONF} --disable-external --without-librecode --disable-rpath --with-gnu-ld
 	BUILD_COMMAND       make
 	BUILD_IN_SOURCE     1
@@ -185,16 +160,6 @@ ExternalProject_Add(
 	BUILD_COMMAND       make
     INSTALL_COMMAND         make install
     BUILD_IN_SOURCE         1
-)
-
-ExternalProject_Add(
-	libcec
-	URL                 https://github.com/Pulse-Eight/libcec/archive/libcec-2.1.3.tar.gz
-	URL_MD5             ee2f2c71516cea30ac992ddbe8f7ed1c
-	PATCH_COMMAND       ./bootstrap
-	CONFIGURE_COMMAND   ${BASIC_CONF} --sysconfdir=/etc
-	BUILD_COMMAND       make
-	INSTALL_COMMAND     make install
 )
 
 ExternalProject_Add(
@@ -283,8 +248,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	sqlite
-	URL 		    http://www.sqlite.org/2014/sqlite-autoconf-3080700.tar.gz
-	URL_MD5 	    10cf856d953d8152cdaf180623102a23
+	URL 		    http://www.sqlite.org/2014/sqlite-autoconf-3080701.tar.gz
+	URL_MD5 	    8ee4541ebb3e5739e7ef5e9046e30063
 	CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET}  --disable-shared --enable-static --enable-threadsafe --disable-readline --enable-dynamic-extensions
 	BUILD_COMMAND       make CXXFLAGS+=-DSQLITE_ENABLE_COLUMN_METADATA=1 CFLAGS+=-DSQLITE_TEMP_STORE=3  CFLAGS+=-DSQLITE_ENABLE_STAT3 CFLAGS+=-DSQLITE_DEFAULT_MMAP_SIZE=268435456
 )
@@ -417,6 +382,17 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
+	flac
+	URL 			http://downloads.xiph.org/releases/flac/flac-1.2.1.tar.gz
+	URL_MD5 		153c8b15a54da428d1f0fadc756c22c7
+	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-oggtest --disable-xmms-plugin
+	BUILD_COMMAND 		""
+	INSTALL_COMMAND		make -C src ${PARALLEL} install
+		COMMAND 	make -C include ${PARALLEL} install
+	DEPENDS libvorbis
+)
+
+ExternalProject_Add(
 	libao
 	URL 			http://downloads.xiph.org/releases/ao/libao-1.2.0.tar.gz
 	URL_MD5 		9f5dd20d7e95fd0dd72df5353829f097
@@ -427,7 +403,7 @@ ExternalProject_Add(
 ExternalProject_Add(
 	libass
 	GIT_REPOSITORY   	https://github.com/libass/libass.git
-	GIT_TAG 		0.11.2
+	GIT_TAG                 0.12.0
 	PATCH_COMMAND           ./autogen.sh
 	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules --enable-asm --disable-test
 	DEPENDS libpng libenca fribidi freetype2 fontconfig yasm
@@ -464,20 +440,20 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libssh
-	URL 			http://www.libssh.org/files/0.5/libssh-0.5.3.tar.gz
-	URL_MD5 		9ad01838d3b89d98e900e0f6260a88cc
+	URL                     http://git.libssh.org/projects/libssh.git/snapshot/libssh-0.6.3.tar.gz
+	URL_MD5                 5b0fd1dbf2effef2322f6251f6c7ca11
 	PATCH_COMMAND 		sed -e "s,add_subdirectory\(examples\),,g" -i CMakeLists.txt
-	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DWITH_STATIC_LIB=ON -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
+	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DCMAKE_INSTALL_PREFIX=${TARGET_DIR} -DWITH_STATIC_LIB=1 -DWITH_SERVER=OFF  -DWITH_GCRYPT=OFF -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND 	make install
-	DEPENDS                 libgcrypt openssl
+	DEPENDS                 openssl
 )
 
 ExternalProject_Add(
 	util-linux
-	URL			https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.1.tar.gz
-	URL_MD5			ec45435f9d3d4a2590f4837e6acc9e73
-	CONFIGURE_COMMAND	${BASIC_CONF} --without-ncurses
+	URL                     https://www.kernel.org/pub/linux/utils/util-linux/v2.25/util-linux-2.25.2.tar.gz
+	URL_MD5                 f4b25b1c89e9021cc19911e8a2d2c2e5
+	CONFIGURE_COMMAND	${BASIC_CONF} --without-ncurses --without-python
 	BUILD_COMMAND		""
 	INSTALL_COMMAND		make install-uuidincHEADERS
 )
@@ -496,7 +472,7 @@ ExternalProject_Add(
 ExternalProject_Add(
         nfs
         GIT_REPOSITORY          https://github.com/sahlberg/libnfs.git
-        GIT_TAG                 ab1af6953ce7be7d6887dc65172100fff8a5af30
+        GIT_TAG                 4a58e6145568fd21ef956ae6ac3d3c37ef209a57
         PATCH_COMMAND           ./bootstrap
         CONFIGURE_COMMAND       ${BASIC_CONF} --disable-examples --disable-tirpc
         BUILD_COMMAND           make
@@ -516,8 +492,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	curl
-	GIT_REPOSITORY 			https://github.com/bagder/curl.git
-	GIT_TAG 		        d9762a7cdb35e70f8cb0bf1c2f8019e8391616e1
+	GIT_REPOSITORY          https://github.com/bagder/curl.git
+	GIT_TAG                 800094802e29935e2785fb9d33c3b3a6af0ad818
 	PATCH_COMMAND           ./buildconf
 	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn --enable-threaded-resolver
 	BUILD_COMMAND 		make
@@ -531,14 +507,14 @@ export CXX=${TARGET}-g++
 export CFLAGS=-I${TARGET_DIR}/include
 export LDFLAGS=-L${TARGET_DIR}/lib
 export LIBS=\"-lpthread -lrt\"
-${CMAKE_BINARY_DIR}/dbus-prefix/src/dbus/configure --prefix=${TARGET_DIR} --host=${TARGET} --without-x --disable-xml-docs --disable-doxygen-docs ac_cv_have_abstract_sockets=yes
+${CMAKE_BINARY_DIR}/dbus-prefix/src/dbus/configure --prefix=${TARGET_DIR} --host=${TARGET} --without-x --disable-xml-docs --disable-doxygen-docs --without-dbus-glib --disable-tests ac_cv_have_abstract_sockets=yes
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh)
 
 ExternalProject_Add(
         dbus
-        URL               http://dbus.freedesktop.org/releases/dbus/dbus-1.6.14.tar.gz
-        URL_MD5           1c22aebdf952e92908800f1ec2aeb0c4
+        URL               http://dbus.freedesktop.org/releases/dbus/dbus-1.9.2.tar.gz
+        URL_MD5           a568c8853eeced5a4346fa2dd8e9eda6
         CONFIGURE_COMMAND ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh
         BUILD_COMMAND     make
         INSTALL_COMMAND   make install
@@ -626,6 +602,29 @@ ExternalProject_Add(
     DEPENDS               libffi python pcre zlib libxml2
 )
 
+ExternalProject_Add(
+    libplist
+    URL                   http://www.libimobiledevice.org/downloads/libplist-1.12.tar.bz2
+    URL_MD5               8b04b0f09f2398022dcd4fba75012997
+    CONFIGURE_COMMAND     ${BASIC_CONF} --without-cython
+    BUILD_COMMAND         make CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib                  
+    INSTALL_COMMAND       make install
+    DEPENDS               libxml2 glib
+)
+
+ExternalProject_Add(
+    libshairplay
+    GIT_REPOSITORY        https://github.com/juhovh/shairplay.git
+    PATCH_COMMAND         ./autogen.sh
+        COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/xcode-llmvfix.patch
+        COMMAND           patch -p0 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/01-add_fairplay_handshake.patch
+    CONFIGURE_COMMAND     ${BASIC_CONF} --sysconfdir=/
+      BUILD_COMMAND       make
+        COMMAND           make install
+    INSTALL_COMMAND       cp -P ${CMAKE_BINARY_DIR}/libshairplay-prefix/src/libshairplay/airport.key ${SYSROOT}/usr/local/lib
+        DEPENDS           libxml2 libplist
+)
+
 file(WRITE ${CMAKE_BINARY_DIR}/avahi_configure_helper.sh
 "
 export CC=${TARGET}-gcc
@@ -702,7 +701,7 @@ add_custom_target(dummylibs ALL DEPENDS DEPENDS ${TARGET_DIR}/lib/libEGL.so ${TA
 ExternalProject_Add(
 	ffmpeg
 	GIT_REPOSITORY           https://github.com/xbmc/FFmpeg.git
-	GIT_TAG                  2.4.2-Helix-alpha5
+	GIT_TAG                  2.4.3-Helix-beta1
 	CONFIGURE_COMMAND        <SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --cpu=i686 --prefix=${TARGET_DIR} --disable-shared --enable-static --disable-programs --enable-gpl --disable-devices --disable-doc --disable-ffplay --disable-ffmpeg --disable-ffprobe --disable-ffserver --enable-runtime-cpudetect --enable-postproc --enable-pthreads --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=ipod --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2 --enable-protocol=http --enable-zlib
 	BUILD_COMMAND            make ${PARALLEL}
 	DEPENDS                  yasm
