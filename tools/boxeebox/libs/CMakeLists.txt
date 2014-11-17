@@ -173,16 +173,6 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-	libcec
-	URL 				https://github.com/Pulse-Eight/libcec/archive/libcec-2.1.3.tar.gz
-	URL_MD5				ee2f2c71516cea30ac992ddbe8f7ed1c
-	PATCH_COMMAND       ./bootstrap
-	CONFIGURE_COMMAND 	${BASIC_CONF} --sysconfdir=/etc
-	BUILD_COMMAND       make
-    INSTALL_COMMAND     make install
-)
-
-ExternalProject_Add(
 	bzip2
 	URL					http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
 	URL_MD5				00b516f4704d4a7cb50a1d97e6e8e15b
