@@ -45,7 +45,6 @@
 #else
   #pragma message("NOTICE: No audio sink for target platform.  Audio output will not be available.")
 #endif
-#include "Sinks/AESinkProfiler.h"
 #include "Sinks/AESinkNULL.h"
 
 #include "settings/AdvancedSettings.h"

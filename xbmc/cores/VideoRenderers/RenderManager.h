@@ -100,10 +100,11 @@ public:
    *
    * @param bStop reference to stop flag of calling thread
    * @param timestamp of frame delivered with AddVideoPicture
+   * @param pts used for lateness detection
    * @param source depreciated
    * @param sync signals frame, top, or bottom field
    */
-  void FlipPage(volatile bool& bStop, double timestamp = 0.0, int source = -1, EFIELDSYNC sync = FS_NONE);
+  void FlipPage(volatile bool& bStop, double timestamp = 0.0, double pts = 0.0, int source = -1, EFIELDSYNC sync = FS_NONE);
   unsigned int PreInit();
   void UnInit();
   bool Flush();
@@ -181,6 +182,12 @@ public:
   int WaitForBuffer(volatile bool& bStop, int timeout = 100);
 
   /**
+   * Can be called by player for lateness detection. This is done best by
+   * looking at the end of the queue.
+   */
+  bool GetStats(double &sleeptime, double &pts, int &bufferLevel);
+
+  /**
    * Video player call this on flush in oder to discard any queued frames
    */
   void DiscardBuffer();
@@ -227,6 +234,7 @@ protected:
 
   struct SPresent
   {
+    double         pts;
     double         timestamp;
     EFIELDSYNC     presentfield;
     EPRESENTMETHOD presentmethod;
@@ -238,6 +246,8 @@ protected:
 
   ERenderFormat   m_format;
 
+  double     m_sleeptime;
+  double     m_presentpts;
   double     m_presentcorr;
   double     m_presenterr;
   double     m_errorbuff[ERRORBUFFSIZE];

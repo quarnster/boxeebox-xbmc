@@ -96,6 +96,7 @@ DIRECTORY_ARCHIVES=$(DVDPLAYER_ARCHIVES) \
                    xbmc/storage/storage.a \
                    xbmc/utils/utils.a \
                    xbmc/video/dialogs/videodialogs.a \
+                   xbmc/video/videosync/videosync.a \
                    xbmc/video/video.a \
                    xbmc/video/windows/videowindows.a \
                    xbmc/view/view.a \
@@ -333,7 +334,7 @@ CLEAN_FILES += $(CHECK_PROGRAMS) $(CHECK_EXTENSIONS)
 
 all : $(FINAL_TARGETS)
 	@echo '-----------------------'
-	@echo 'XBMC built successfully'
+	@echo '@APP_NAME@ built successfully'
 	@echo '-----------------------'
 
 include Makefile.include
@@ -555,15 +556,16 @@ ifeq ($(findstring osx,@ARCH@), osx)
 else
 install: install-binaries install-arch install-datas
 
-apk: apk-clean install
-	make -C tools/android/packaging
+apk obb apk-unsigned apk-obb apk-obb-unsigned apk-noobb: install
+	make -C tools/android/packaging $@
 
-apk-clean:
-	make -C tools/android/packaging clean
+apk-clean apk-sign:
+	make -C tools/android/packaging $@
 
 install-binaries: install-scripts
 	@echo "Copying @APP_NAME_LC@ binary to $(DESTDIR)$(libdir)/@APP_NAME_LC@/"
 	@install -d $(DESTDIR)$(libdir)/@APP_NAME_LC@
+	@cd $(DESTDIR)$(libdir); [ -L xbmc ] || [ -d xbmc ] || ln -s @APP_NAME_LC@ xbmc
 ifeq (1,@USE_XRANDR@)
 	@install @APP_NAME_LC@-xrandr $(DESTDIR)$(libdir)/@APP_NAME_LC@/@APP_NAME_LC@-xrandr
 endif
@@ -603,14 +605,15 @@ endif
 install-scripts:
 	@install -d $(DESTDIR)$(bindir)
 	@install tools/Linux/@APP_NAME_LC@.sh $(DESTDIR)$(bindir)/@APP_NAME_LC@
-	@cd $(DESTDIR)$(bindir); [ -L xbmc ] || ln -s @APP_NAME_LC@ xbmc
+	@cd $(DESTDIR)$(bindir); [ -L xbmc ] || [ -f xbmc ] || ln -s @APP_NAME_LC@ xbmc
 	@install tools/Linux/@APP_NAME_LC@-standalone.sh $(DESTDIR)$(bindir)/@APP_NAME_LC@-standalone
-	@cd $(DESTDIR)$(bindir); [ -L xbmc-standalone ] ||  ln -s @APP_NAME_LC@-standalone xbmc-standalone
+	@cd $(DESTDIR)$(bindir); [ -L xbmc-standalone ] || [ -f xbmc-standalone ] ||  ln -s @APP_NAME_LC@-standalone xbmc-standalone
 	@install -d $(DESTDIR)$(datarootdir)/@APP_NAME_LC@
+	@cd $(DESTDIR)$(datarootdir); [ -L xbmc ] || [ -d xbmc ] || ln -s @APP_NAME_LC@ xbmc
 	@install -m 0644 tools/Linux/FEH.py $(DESTDIR)$(datarootdir)/@APP_NAME_LC@/FEH.py
 	@install -d $(DESTDIR)$(datarootdir)/xsessions
 	@install -m 0644 tools/Linux/@APP_NAME_LC@-xsession.desktop $(DESTDIR)$(datarootdir)/xsessions/@APP_NAME_LC@.desktop
-	@cd $(DESTDIR)$(datarootdir)/xsessions; [ -L xbmc.desktop ] || ln -s @APP_NAME_LC@.desktop xbmc.desktop
+	@cd $(DESTDIR)$(datarootdir)/xsessions; [ -L xbmc.desktop ] || [ -f xbmc.desktop ] || ln -s @APP_NAME_LC@.desktop xbmc.desktop
 
 install-datas: install-scripts
 	@echo "Copying support and legal files..."
@@ -661,9 +664,10 @@ endif
 	@for f in project/cmake/scripts/common/*.cmake; do \
 	  install -m 0644 $$f $(DESTDIR)$(libdir)/@APP_NAME_LC@; \
 	done
+	@cd $(DESTDIR)$(includedir); [ -L xbmc ] || [ -d xbmc ] || ln -s @APP_NAME_LC@ xbmc
 
 uninstall:
-	@echo "Removing Kodi..."
+	@echo "Removing @APP_NAME@..."
 	@rm -rf $(DESTDIR)$(libdir)/@APP_NAME_LC@
 	@rm -rf $(DESTDIR)$(datarootdir)/@APP_NAME_LC@ $(DESTDIR)$(bindir)/@APP_NAME_LC@
 	@rm -rf $(DESTDIR)$(bindir)/@APP_NAME_LC@-standalone

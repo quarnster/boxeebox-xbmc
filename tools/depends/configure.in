@@ -190,7 +190,7 @@ case $host in
     esac
     case $host in
       *86*-apple-darwin)
-        found_sdk_version=[`$use_xcodebuild -showsdks | grep macosx | sort |  tail -n 1 | grep -oE 'macosx[0-9.0-9]+' | cut -c 7-$NF`]
+        found_sdk_version=[`$use_xcodebuild -showsdks | sed -E -n 's/.*macosx([0-9]+)\.([0-9]+)/\1.\2/p' | sort  -n -t. -k1,1 -k2,2 | tail -n 1`]
         case $use_xcode in
           5.* | 5.*.* )
             use_toolchain="${use_xcodepath}/Toolchains/XcodeDefault.xctoolchain"
@@ -209,6 +209,7 @@ case $host in
           10.7);;
           10.8);;
           10.9);;
+          10.10);;
           *)
             AC_MSG_ERROR(error in configure of --with-sdk=$use_sdk)
         esac
@@ -245,11 +246,11 @@ case $host in
         use_sdk="${use_sdk:-$found_sdk_version}"
         sdk_name=iphoneos$use_sdk
         case $use_xcode in
-          5.* | 5.*.* )
-            use_toolchain="${use_xcodepath}/Toolchains/XcodeDefault.xctoolchain"
+          3.*.* | 4.* | 4.*.*)
+            use_toolchain="${use_toolchain:-`$use_xcodebuild -version -sdk $sdk_name PlatformPath`/Developer}"
             ;;
           *)
-            use_toolchain="${use_toolchain:-`$use_xcodebuild -version -sdk $sdk_name PlatformPath`/Developer}"
+            use_toolchain="${use_xcodepath}/Toolchains/XcodeDefault.xctoolchain"
             ;;
         esac
         
@@ -258,6 +259,7 @@ case $host in
           5.*);;
           6.*);;
           7.*);;
+          8.*);;
             *)
               AC_MSG_ERROR(error in configure of --with-sdk=$use_sdk)
             ;;

@@ -64,34 +64,34 @@ bool CDVDVideoCodecSMD::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
   // since hardware is not always compatible
   if(hints.width * hints.height <= 720 * 576 && hints.width * hints.height > 0 &&
       hints.software &&
-      (hints.codec == CODEC_ID_MPEG4))
+      (hints.codec == AV_CODEC_ID_MPEG4))
   {
     return false;
   }
 
   switch (hints.codec)
   {
-  case CODEC_ID_MPEG1VIDEO:
+  case AV_CODEC_ID_MPEG1VIDEO:
     codec_type = ISMD_CODEC_TYPE_MPEG2;
     m_pFormatName = "SMD-mpeg1";
     break;
-  case CODEC_ID_MPEG2VIDEO:
+  case AV_CODEC_ID_MPEG2VIDEO:
     codec_type = ISMD_CODEC_TYPE_MPEG2;
     m_pFormatName = "SMD-mpeg2";
     break;
-  case CODEC_ID_H264:
+  case AV_CODEC_ID_H264:
     codec_type = ISMD_CODEC_TYPE_H264;
     m_pFormatName = "SMD-h264";
     break;
-  case CODEC_ID_VC1:
+  case AV_CODEC_ID_VC1:
     codec_type = ISMD_CODEC_TYPE_VC1;
     m_pFormatName = "SMD-vc1";
     break;
-  case CODEC_ID_WMV3:
+  case AV_CODEC_ID_WMV3:
     codec_type = ISMD_CODEC_TYPE_VC1;
     m_pFormatName = "SMD-wmv3";
     break;
-  case CODEC_ID_MPEG4:
+  case AV_CODEC_ID_MPEG4:
     codec_type = ISMD_CODEC_TYPE_MPEG4;
     m_pFormatName = "SMD-mpeg4";
     break;

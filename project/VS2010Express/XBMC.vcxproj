@@ -69,7 +69,7 @@
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DXSDK_DIR)Include;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">xbmc-test</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">$(ProjectName)-test</TargetName>
     <CustomBuildBeforeTargets Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     </CustomBuildBeforeTargets>
   </PropertyGroup>
@@ -207,7 +207,6 @@
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\Engines\ActiveAE\ActiveAEStream.cpp" />
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\Sinks\AESinkDirectSound.cpp" />
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\Sinks\AESinkNULL.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\AudioEngine\Sinks\AESinkProfiler.cpp" />
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\Sinks\AESinkWASAPI.cpp" />
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\Utils\AEBitstreamPacker.cpp" />
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\Utils\AEBuffer.cpp" />
@@ -217,6 +216,7 @@
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\Utils\AEPackIEC61937.cpp" />
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\Utils\AEStreamInfo.cpp" />
     <ClCompile Include="..\..\xbmc\cores\AudioEngine\Utils\AEUtil.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\DataCacheCore.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecPassthrough.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Video\DVDVideoCodec.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxBXA.cpp" />
@@ -806,6 +806,7 @@
     <ClInclude Include="..\..\xbmc\ApplicationPlayer.h" />
     <ClInclude Include="..\..\xbmc\AppParamParser.h" />
     <ClInclude Include="..\..\xbmc\CompileInfo.h" />
+    <ClInclude Include="..\..\xbmc\cores\DataCacheCore.h" />
     <CustomBuild Include="..\..\xbmc\GitRevision.h">
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CALL update_git_rev.bat</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\xbmc\win32\git_rev.h</Outputs>
@@ -832,7 +833,6 @@
     <ClInclude Include="..\..\xbmc\cores\AudioEngine\Interfaces\ThreadedAE.h" />
     <ClInclude Include="..\..\xbmc\cores\AudioEngine\Sinks\AESinkDirectSound.h" />
     <ClInclude Include="..\..\xbmc\cores\AudioEngine\Sinks\AESinkNULL.h" />
-    <ClInclude Include="..\..\xbmc\cores\AudioEngine\Sinks\AESinkProfiler.h" />
     <ClInclude Include="..\..\xbmc\cores\AudioEngine\Sinks\AESinkWASAPI.h" />
     <ClInclude Include="..\..\xbmc\cores\AudioEngine\Utils\AEBitstreamPacker.h" />
     <ClInclude Include="..\..\xbmc\cores\AudioEngine\Utils\AEBuffer.h" />
@@ -1139,6 +1139,7 @@
     <ClCompile Include="..\..\xbmc\utils\win32\Win32Log.cpp" />
     <ClCompile Include="..\..\xbmc\utils\XSLTUtils.cpp" />
     <ClCompile Include="..\..\xbmc\video\PlayerController.cpp" />
+    <ClCompile Include="..\..\xbmc\video\videosync\VideoSyncD3D.cpp" />
     <ClCompile Include="..\..\xbmc\video\VideoThumbLoader.cpp" />
     <ClCompile Include="..\..\xbmc\music\MusicThumbLoader.cpp" />
     <ClCompile Include="..\..\xbmc\ThumbnailCache.cpp" />
@@ -2025,6 +2026,8 @@
     <ClInclude Include="..\..\xbmc\DatabaseManager.h" />
     <ClInclude Include="..\..\xbmc\ThumbLoader.h" />
     <ClInclude Include="..\..\xbmc\video\PlayerController.h" />
+    <ClInclude Include="..\..\xbmc\video\videosync\VideoSync.h" />
+    <ClInclude Include="..\..\xbmc\video\videosync\VideoSyncD3D.h" />
     <ClInclude Include="..\..\xbmc\video\VideoThumbLoader.h" />
     <ClInclude Include="..\..\xbmc\music\MusicThumbLoader.h" />
     <ClInclude Include="..\..\xbmc\ThumbnailCache.h" />
