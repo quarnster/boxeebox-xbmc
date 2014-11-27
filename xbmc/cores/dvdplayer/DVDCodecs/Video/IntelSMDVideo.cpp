@@ -921,6 +921,7 @@ void CIntelSMDVideo::Reset()
   VERBOSE();
 
   m_bFlushFlag = true;
+  m_sessionDepth = 0;
 
   CSingleLock lock(m_bufferLock);
   if (m_buffer)
@@ -1176,19 +1177,55 @@ int CIntelSMDVideo::AddInput(unsigned char *pData, size_t size, double dts, doub
   g_IntelSMDGlobals.GetPortStatus(g_IntelSMDGlobals.GetVidDecInput(), curDepth, maxDepth);
   unsigned int queueLen =  curDepth + m_buffer->m_buffers.size();
 
-  const unsigned int maxQueue = ISMD_VIDEO_BUFFER_QUEUE;
+  if (queueLen > m_sessionDepth) {
+    m_sessionDepth = queueLen;
+  }
   ismd_vidrend_stream_position_info_t position;
   ismd_vidrend_get_stream_position(g_IntelSMDGlobals.GetVidRender(), &position);
 
-  if (
+  unsigned int minQueue           = maxDepth/4;   // Start batching buffers more aggressively when queueLen is less than this.
+  unsigned int maxQueue           = minQueue*3;   // Stop batching buffers once this amount is queued.
+
+  // Allow holding up to this amount of buffers in m_buffer
+  // before submitting them to the driver.
+  static unsigned int maxBufferBatch     = 5;
+  static unsigned int count              = 0;
+
+
+  bool haveFilledInitialBuffer    = m_sessionDepth                >=     maxQueue;
+  bool haveTimeStamp              = position.segment_time         !=     ISMD_NO_PTS && ismd_ret == ISMD_SUCCESS; // Just keep emitting frames until we figure out where we are
+  bool haveEnoughBuffersAvailable = queueLen                      <      maxQueue;
+
+  if (haveFilledInitialBuffer && queueLen < minQueue && maxBufferBatch < maxQueue) {
+    // Not filling up fast enough, fill up queue and try larger batches
+    m_sessionDepth = 0;
+    haveFilledInitialBuffer = false;
+    maxBufferBatch++;
+    count = 0;
+  } else if (maxBufferBatch > 1 && queueLen >= maxQueue) {
+    count++;
+    if (count > 5) {
+      // Keeps filling up too fast, decrease batching
+      count = 0;
+      maxBufferBatch--;
+    }
+  }
+
+  bool canBatch                   = m_buffer->m_buffers.size()    <      maxBufferBatch;
+
+  bool preferToBuffer =
      !m_bFlushFlag &&
-      queueLen < maxQueue &&
-      position.segment_time != ISMD_NO_PTS && // Just keep emitting frames until we figure out where we are
-      ismd_ret == ISMD_SUCCESS)
+      haveTimeStamp &&
+      haveEnoughBuffersAvailable &&
+      (canBatch || !haveFilledInitialBuffer);
+
+  if (preferToBuffer)
   {
     // Report that the frame is "dropped" just to queue up frames a bit
     return VC_BUFFER;
   }
+  // Otherwise we report back with the VC_PICTURE bit set so that the
+  // buffer is transferred to the renderer.
   if (m_bFlushFlag)
   {
     m_bFlushFlag = false;

@@ -102,6 +102,7 @@ private:
   void vc1_viddec_init (Vc1Viddec *viddec);
   void SetDefaults();
 
+  unsigned int  m_sessionDepth;
   bool          m_IsConfigured;
   unsigned int  m_width;
   unsigned int  m_height;
