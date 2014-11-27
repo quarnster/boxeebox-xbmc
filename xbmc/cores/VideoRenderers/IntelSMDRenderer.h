@@ -110,6 +110,7 @@ protected:
   unsigned m_iFlags;
 
   ERenderFormat m_format;
+  unsigned m_extendedFormat;
 
   YUVMEMORYBUFFERS m_YUVMemoryTexture;
   int m_iYV12RenderBuffer;

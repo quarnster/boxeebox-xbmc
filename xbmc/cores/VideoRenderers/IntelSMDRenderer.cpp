@@ -176,7 +176,7 @@ void CIntelSMDRenderer::UnInit()
 {
   VERBOSE();
 
-  if(m_format != RENDER_FMT_ISMD && !m_bNullRendering)
+  if(m_extendedFormat != RENDER_FMT_ISMD && !m_bNullRendering)
   {
     ReleaseYUVBuffers();
     g_IntelSMDGlobals.DeleteVideoRender();
@@ -258,7 +258,8 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
       m_destWidth == d_width &&
       m_destHeight == d_height &&
       m_iFlags == flags &&
-      m_format == format
+      m_format == format &&
+      m_extendedFormat == extended_format
       )
   {
     if(m_fps != fps && fps > 20)
@@ -276,14 +277,15 @@ bool CIntelSMDRenderer::Configure(unsigned int width, unsigned int height, unsig
   m_iFlags = flags;
   m_fps = fps;
   m_format = format;
+  m_extendedFormat = extended_format;
 
-  if (m_format != RENDER_FMT_ISMD && !m_bNullRendering)
+  if (m_extendedFormat != RENDER_FMT_ISMD && !m_bNullRendering)
   {
     AllocateYUVBuffers();
     g_IntelSMDGlobals.CreateVideoRender(GDL_VIDEO_PLANE);
   }
 
-  if (m_format == RENDER_FMT_ISMD)
+  if (m_extendedFormat == RENDER_FMT_ISMD)
     CLog::Log(LOGINFO, "%s - Video rendering using SMD decoder", __DEBUG_ID__);
   else if (m_bNullRendering)
     CLog::Log(LOGINFO, "%s - Video rendering using NULL renderer", __DEBUG_ID__);
@@ -363,7 +365,7 @@ void CIntelSMDRenderer::FlushAndSync(ismd_port_handle_t inputPort, bool flush, d
     CLog::Log(LOGINFO, "%s: flushing start: %.2f, base: %.2f", __DEBUG_ID__, start/90000.0, base/90000.0);
     g_IntelSMDGlobals.SetVideoRenderBaseTime(base);
     g_IntelSMDGlobals.SendStartPacket(start, inputPort);
-    if (m_format == RENDER_FMT_ISMD)
+    if (m_extendedFormat == RENDER_FMT_ISMD)
     {
       g_IntelSMDGlobals.SetVideoDecoderState(ISMD_DEV_STATE_PLAY);
     }
@@ -416,7 +418,7 @@ bool CIntelSMDRenderer::AddVideoPicture(DVDVideoPicture *picture, int index)
   if (picture->pts < 0)
     picture->pts = 0;
 
-  if (picture->format != RENDER_FMT_ISMD) {
+  if (picture->extended_format != RENDER_FMT_ISMD) {
     m_PTS = picture->pts;
     if (m_PTS < 0)
       m_PTS = 0;
@@ -530,7 +532,7 @@ int CIntelSMDRenderer::GetImage(YV12Image *image, /*double pts,*/ int source, bo
   if (!m_bConfigured)
     return -1;
 
-  if(m_format == RENDER_FMT_ISMD || m_bNullRendering)
+  if(m_extendedFormat == RENDER_FMT_ISMD || m_bNullRendering)
   {
     return 0;
   }
@@ -566,9 +568,9 @@ int CIntelSMDRenderer::GetImage(YV12Image *image, /*double pts,*/ int source, bo
 void CIntelSMDRenderer::ReleaseImage(int source, bool preserve)
 {
   VERBOSE2();
-  if(m_format != RENDER_FMT_ISMD)
+  if(m_extendedFormat != RENDER_FMT_ISMD)
   {
-    // If the frame isn't late... 
+    // If the frame isn't late...
     if (m_PTS <= 0 || m_PTS >= (CDVDClock::GetMasterClock()->GetClock()-0.25*DVD_TIME_BASE)) {
       // render it
       RenderYUVBUffer(m_YUVMemoryTexture[m_iYV12RenderBuffer]);

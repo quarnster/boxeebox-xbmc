@@ -11,6 +11,13 @@ set(PARALLEL "-j8" CACHE STRING "Arguments for make for parallel builds")
 set(TARGET i686-pc-linux-gnu)
 set(TARGET_DIR ${CMAKE_SOURCE_DIR}/dist CACHE PATH "Directory to install everything to")
 set(BOXEEBOX_IP "boxeebox" CACHE STRING "ipaddress or hostname of your boxeebox (only used for remote debugging)")
+set(ENABLE_MYSQL ON CACHE BOOL "Whether to build with mysql support or not")
+if(ENABLE_MYSQL)
+	set(MYSQL_CONF_PARAM "--enable-mysql")
+else()
+	set(MYSQL_CONF_PARAM "--disable-mysql")
+endif()
+
 message("Using Sysroot: ${SYSROOT}")
 
 
@@ -46,7 +53,7 @@ ExternalProject_Add(
 	libs
 	URL 				${CMAKE_SOURCE_DIR}/libs
 	CMAKE_COMMAND 		PATH=$ENV{PATH}:${SYSROOT}/usr/bin cmake
-	CMAKE_ARGS			-DSYSROOT=${SYSROOT} -DPARALLEL=${PARALLEL}
+	CMAKE_ARGS			-DSYSROOT=${SYSROOT} -DPARALLEL=${PARALLEL} -DENABLE_MYSQL=${ENABLE_MYSQL}
 	BUILD_COMMAND 		PATH=$ENV{PATH}:${SYSROOT}/usr/bin make
 	INSTALL_COMMAND		""
 	DEPENDS				toolchain
@@ -68,7 +75,7 @@ export PYTHON_NOVERSIONCHECK=\"y\"
 export PYTHON=\"${local}/bin/python\"
 export PYTHON_CPPFLAGS=\"-I${local}/include/python2.7\"
 export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
-${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --build=i686-linux --with-ffmpeg --disable-gl --disable-pulse --disable-sdl --enable-mysql --disable-x11 --with-platform=linux32 --enable-gles --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=no --enable-libusb --with-lirc-device=/var/run/lirc/lircd --enable-airplay
+${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --build=i686-linux --with-ffmpeg --disable-gl --disable-pulse --disable-sdl ${MYSQL_CONF_PARAM} --disable-x11 --with-platform=linux32 --enable-gles --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=no --enable-libusb --with-lirc-device=/var/run/lirc/lircd --disable-sdl --enable-airplay
 "
 )
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/kodi_configure_helper.sh)
@@ -93,52 +100,56 @@ add_custom_target(
 )
 
 set(libs
-	libjasper.so.1	
-	libpng15.so.15	
-	libyajl.so.2
-	libssh.so.4
-	liblzo2.so.2
-	libtiff.so.5
-	libpython2.7.so.1.0
-	libpcre.so.1
+	airport.key
+	libafpclient.so.0
+	libao.so
+	libass.so.5
+	libavahi-client.so.3
+	libavahi-common.so.3
+	libavahi-core.so.7
+	libbluray.so.1
+	libcddb.so.2
 	libcdio.so.14
-	libtag.so.1
-	libsmbclient.so.0
-	libnfs.so.4
-	librtmp.so.1
+	libcrypto.so.1.0.0
+	libcurl.so.4
 	libdbus-1.so
+	libenca.so.0
 	libexpat.so
-	libtdb.so.1
-	libtalloc.so.2
-	libtevent.so.0
-	libmpeg2.so.0	
+	libffi.so.6
 	libFLAC.so
+	libfontconfig.so.1
+	libfreetype.so.6
+	libfribidi.so.0
+	libgcrypt.so.20
+	libgdbm.so.4
+	libgif.so.6
+	libjasper.so.1
+	liblzo2.so.2
 	libmodplug.so
+	libmpeg2.so.0
+	libnfs.so.4
 	libogg.so
-	libvorbisfile.so
+	libpcre.so.1
+	libplist.so.3
+	libpng15.so.15
+	libpython2.7.so.1.0
+	libreadline.so.6
+	librtmp.so.1
+	libshairplay.so.0
+	libsmbclient.so.0
+	libssh.so.4
+	libssl.so.1.0.0
+	libtag.so.1
+	libtalloc.so.2
+	libtdb.so.1
+	libtevent.so.0
+	libtiff.so.5
 	libvorbis.so
 	libvorbisenc.so
-	libenca.so.0
-	libass.so.5
-	libao.so
-	libfribidi.so.0
-	libfreetype.so.6
-	libgcrypt.so.20
-	libcurl.so.4
-	libfontconfig.so.1
+	libvorbisfile.so
 	libxml2.so
 	libxslt.so
-	libshairplay.so.0
-	airport.key
-	libplist.so.3
-	libcddb.so.2
-	libbluray.so.1
-	libgif.so.6
-	libssl.so.1.0.0
-	libcrypto.so.1.0.0
-	libreadline.so.6
-	libafpclient.so.0
-	libffi.so.6
+	libyajl.so.2
 )
 
 foreach(lib ${libs})

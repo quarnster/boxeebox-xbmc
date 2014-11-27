@@ -1227,7 +1227,8 @@ bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
   pDvdVideoPicture->color_matrix = 0;
   pDvdVideoPicture->iFlags = DVP_FLAG_ALLOCATED;
   //pDvdVideoPicture->iFlags = 0;
-  pDvdVideoPicture->format = RENDER_FMT_ISMD;
+  pDvdVideoPicture->format = RENDER_FMT_BYPASS;
+  pDvdVideoPicture->extended_format = RENDER_FMT_ISMD;
   pDvdVideoPicture->ismdbuf = m_buffer;
 
   m_buffer = NULL;
@@ -1280,8 +1281,11 @@ bool CIntelSMDVideo::GetPicture(DVDVideoPicture *pDvdVideoPicture)
 
 bool CIntelSMDVideo::ClearPicture(DVDVideoPicture *pDvdVideoPicture)
 {
-  if (pDvdVideoPicture->format != RENDER_FMT_ISMD)
+  if (pDvdVideoPicture->format != RENDER_FMT_BYPASS)
     return false;
+  if (pDvdVideoPicture->extended_format != RENDER_FMT_ISMD)
+     return false;
+  pDvdVideoPicture->extended_format = 0;
   delete pDvdVideoPicture->ismdbuf;
   pDvdVideoPicture->ismdbuf = NULL;
   return true;
