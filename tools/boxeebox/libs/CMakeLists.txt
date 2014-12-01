@@ -4,6 +4,7 @@ set(TARGET "i686-pc-linux-gnu")
 set(TARGET_DIR ${SYSROOT}/usr/local)
 set(BASIC_CONF <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-static --disable-nls)
 set(BASIC_CMAKE CFLAGS=-I${TARGET_DIR}/include CC=${TARGET}-gcc CXX=${TARGET}-g++ RANLIB=${TARGET}-ranlib cmake -DPKG_CONFIG_EXECUTABLE=${TARGET}-pkg-config -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_INSTALL_PREFIX=${TARGET_DIR} -DZLIB_ROOT=${SYSROOT}/usr -DZLIB_LIBRARIES=${SYSROOT}/usr/lib/libz.so -DZLIB_INCLUDE_DIRS=${SYSROOT}/usr/include <SOURCE_DIR>)
+set(ENABLE_MYSQL ON CACHE BOOL "Whether to build with mysql support or not")
 
 set(PYTHON_VERSION 2.7.2)
 
@@ -66,7 +67,7 @@ ExternalProject_Add(
     ncurses
     URL                   http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz
     URL_MD5               8cb9c412e5f2d96bc6f459aa8c6282a1
-    CONFIGURE_COMMAND     ${BASIC_CONF} 
+    CONFIGURE_COMMAND     ${BASIC_CONF}
     BUILD_COMMAND         make
     INSTALL_COMMAND       make install
 )
@@ -105,13 +106,14 @@ ExternalProject_Add(
     DEPENDS               readline ncurses
 )
 
+if(ENABLE_MYSQL)
 ExternalProject_Add(
 	mysql
 	URL 		  http://mysql.mirrors.pair.com/Downloads/MySQL-5.1/mysql-5.1.72.tar.gz
 	URL_MD5 	  ed79cd48e3e7402143548917813cdb80
 	PATCH_COMMAND
 	    COMMAND       patch -Np1  < ${CMAKE_SOURCE_DIR}/01-mysqlclient-cross-compile.patch
-	CONFIGURE_COMMAND <SOURCE_DIR>/configure CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib --prefix=${TARGET_DIR} --host=${TARGET} ac_cv_c_stack_direction=-1 ac_cv_sys_restartable_syscalls=yes --localstatedir=/storage/.mysql --with-unix-socket-path=/var/tmp/mysql.socket --with-tcp-port=3306 --enable-static --disable-shared --with-low-memory --enable-largefile --with-big-tables --with-mysqld-user=mysqld --with-extra-charsets=all --with-extra-charsets=complex --with-named-thread-libs=-lc --with-named-curses-libs=-lncurses --enable-thread-safe-client --enable-assembler --enable-local-infile --without-debug --without-docs --without-man --with-readline --without-libwrap --without-server --without-embedded-server --without-libedit --with-query-cache --with-pthread --with-named-thread-libs=-lpthread
+	CONFIGURE_COMMAND ac_cv_c_bigendian=no <SOURCE_DIR>/configure CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib --prefix=${TARGET_DIR} --host=${TARGET} ac_cv_c_stack_direction=-1 ac_cv_sys_restartable_syscalls=yes --localstatedir=/storage/.mysql --with-unix-socket-path=/var/tmp/mysql.socket --with-tcp-port=3306 --enable-static --disable-shared --with-low-memory --enable-largefile --with-big-tables --with-mysqld-user=mysqld --with-extra-charsets=all --with-extra-charsets=complex --with-named-thread-libs=-lc --with-named-curses-libs=-lncurses --enable-thread-safe-client --enable-assembler --enable-local-infile --without-debug --without-docs --without-man --with-readline --without-libwrap --without-server --without-embedded-server --without-libedit --with-query-cache --with-pthread --with-named-thread-libs=-lpthread
 	BUILD_COMMAND     make -C include my_config.h
 	    COMMAND       make -C mysys libmysys.a
 	    COMMAND       make -C strings libmystrings.a
@@ -129,6 +131,7 @@ ExternalProject_Add(
 	    COMMAND       sudo ln -sf ${SYSROOT}/usr/local/bin/mysql_config /usr/bin/mysql_config
 	    DEPENDS       readline ncurses
 )
+endif()
 
 ExternalProject_Add(
     libxslt
@@ -137,19 +140,31 @@ ExternalProject_Add(
     PATCH_COMMAND     sed -ie "s|runtest$$(EXEEXT)||" "libxslt/Makefile.in"
 	COMMAND        sed -ie "s|testrecurse$$(EXEEXT)||" "libxslt/Makefile.in"
 	COMMAND        sed -ie "s|xsltproc||" "libxslt/Makefile.in"
-    CONFIGURE_COMMAND ${BASIC_CONF} --without-python --with-debug --with-debugger --with-mem-debug --without-crypto --with-libxml-prefix=${TARGET_DIR} 
+    CONFIGURE_COMMAND ${BASIC_CONF} --without-python --with-debug --with-debugger --with-mem-debug --without-crypto --with-libxml-prefix=${TARGET_DIR}
     BUILD_COMMAND     make
     INSTALL_COMMAND   make install
     DEPENDS libxml2
 )
 
 ExternalProject_Add(
+	iconv
+	URL                  http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
+	URL_MD5              e34509b1623cec449dfeb73d7ce9c6c6
+	CONFIGURE_COMMAND    ${BASIC_CONF}
+	BUILD_COMMAND        make
+)
+
+
+ExternalProject_Add(
 	libenca
 	URL                 https://github.com/nijel/enca/archive/1.16.tar.gz
 	URL_MD5             4f39869a757e96deb372884e6f474a27
+	PATCH_COMMAND       sed -i -e "s,.(AM_V_CC).(COMPILE),cc," "tools/Makefile.in"
+	COMMAND             sed -i -e "s,.(AM_V_CCLD).(LINK),cc -o \$@," "tools/Makefile.in" VERBATIM
 	CONFIGURE_COMMAND   ac_cv_file__dev_random=yes ac_cv_file__dev_urandom=no ac_cv_file__dev_srandom=no ac_cv_file__dev_arandom=no ${BASIC_CONF} --disable-external --without-librecode --disable-rpath --with-gnu-ld
 	BUILD_COMMAND       make
 	BUILD_IN_SOURCE     1
+	DEPENDS             iconv
 )
 
 ExternalProject_Add(
@@ -197,7 +212,7 @@ ExternalProject_Add(
 	PATCH_COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-cflags.patch
 	  COMMAND               patch -p1 < ${CMAKE_SOURCE_DIR}/openssl-patches/openssl-nodocs.patch
 	CONFIGURE_COMMAND 	CC=${TARGET}-gcc RANLIB=${TARGET}-ranlib AR=${TARGET}-ar <SOURCE_DIR>/Configure --prefix=${SYSROOT}/usr/local shared --openssldir=/ --libdir=lib linux-elf threads enable-camellia enable-seed enable-tlsext enable-rfc3779 enable-cms enable-md2 no-krb5 no-mdc2 no-rc5 no-ec no-ec2mno-ecdh no-ecdsa no-srp
-	BUILD_COMMAND           make 
+	BUILD_COMMAND           make
 	INSTALL_COMMAND 	make install
 	BUILD_IN_SOURCE 	1
 	DEPENDS                 zlib
@@ -215,7 +230,7 @@ ExternalProject_Add(
 	URL			http://sourceforge.net/projects/flex/files/flex-2.5.39.tar.bz2/download
 	URL_MD5			77d44c6bb8c0705e0017ab9a84a1502b
 	PATCH_COMMAND 		sed -e "s/AR\ =\ ar/AR\ =\ ${TARGET}-ar/g" -i Makefile.in
-	CONFIGURE_COMMAND	${BASIC_CONF}
+	CONFIGURE_COMMAND	ac_cv_func_realloc_0_nonnull=yes ac_cv_func_malloc_0_nonnull=yes ${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
@@ -230,6 +245,7 @@ ExternalProject_Add(
 	yajl
 	GIT_REPOSITORY  	https://github.com/lloyd/yajl.git
 	GIT_TAG			2.1.0
+	UPDATE_COMMAND           ""
 	CONFIGURE_COMMAND 	${BASIC_CMAKE}
 )
 
@@ -258,14 +274,14 @@ ExternalProject_Add(
 	libcdio
 	URL			http://ftp.gnu.org/gnu/libcdio/libcdio-0.90.tar.gz
 	URL_MD5			1b245b023fb03a58d030fd2800db3247
-	CONFIGURE_COMMAND 	${BASIC_CONF}
+	CONFIGURE_COMMAND 	${BASIC_CONF} --disable-example-progs --without-cpp-progs --without-cd-drive --without-cd-info --without-cdda-player  --without-cd-read --without-iso-info --without-iso-read
 )
 
 ExternalProject_Add(
         libcddb
         URL                   http://prdownloads.sourceforge.net/libcddb/libcddb-1.3.2.tar.bz2
 	URL_MD5               8bb4a6f542197e8e9648ae597cd6bc8a
-	CONFIGURE_COMMAND     ${BASIC_CONF}
+	CONFIGURE_COMMAND     ac_cv_func_realloc_0_nonnull=yes ac_cv_func_malloc_0_nonnull=yes ${BASIC_CONF}
 	DEPENDS               libcdio
 )
 
@@ -333,7 +349,7 @@ ExternalProject_Add(
 	URL 			http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.11.1.tar.gz
 	URL_MD5 		e75e303b4f7756c2b16203a57ac87eba
 	CONFIGURE_COMMAND 	${BASIC_CONF} --with-default-fonts=/usr/share/fonts/liberation --disable-docs --without-add-fonts --disable-dependency-tracking ac_cv_path_FREETYPE_CONFIG=${SYSROOT}/usr/local/bin/freetype-config
-	DEPENDS fribidi freetype2 zlib expat libxml2 
+	DEPENDS fribidi freetype2 zlib expat libxml2
 )
 
 ExternalProject_Add(
@@ -404,6 +420,7 @@ ExternalProject_Add(
 	libass
 	GIT_REPOSITORY   	https://github.com/libass/libass.git
 	GIT_TAG                 0.12.0
+	UPDATE_COMMAND           ""
 	PATCH_COMMAND           ./autogen.sh
 	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules --enable-asm --disable-test
 	DEPENDS libpng libenca fribidi freetype2 fontconfig yasm
@@ -473,6 +490,7 @@ ExternalProject_Add(
         nfs
         GIT_REPOSITORY          https://github.com/sahlberg/libnfs.git
         GIT_TAG                 4a58e6145568fd21ef956ae6ac3d3c37ef209a57
+        UPDATE_COMMAND          ""
         PATCH_COMMAND           ./bootstrap
         CONFIGURE_COMMAND       ${BASIC_CONF} --disable-examples --disable-tirpc
         BUILD_COMMAND           make
@@ -484,6 +502,7 @@ ExternalProject_Add(
         rtmpdump
         GIT_REPOSITORY          https://github.com/BurntSushi/rtmpdump-ksv.git
         CONFIGURE_COMMAND       ""
+        UPDATE_COMMAND          ""
         BUILD_COMMAND           make CRYPTO=OPENSSL DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
         INSTALL_COMMAND         make install DESTDIR=${SYSROOT}
         BUILD_IN_SOURCE         1
@@ -495,6 +514,7 @@ ExternalProject_Add(
 	GIT_REPOSITORY          https://github.com/bagder/curl.git
 	GIT_TAG                 800094802e29935e2785fb9d33c3b3a6af0ad818
 	PATCH_COMMAND           ./buildconf
+	UPDATE_COMMAND          ""
 	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn --enable-threaded-resolver
 	BUILD_COMMAND 		make
 	DEPENDS                 openssl zlib bzip2 rtmpdump
@@ -582,12 +602,20 @@ ExternalProject_Add(
 )
 
 
+ExternalProject_Add(
+	gettext
+	URL                  http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.3.tar.gz
+	URL_MD5              c365029ffc866fc4e485d9e5ca60b260
+	CONFIGURE_COMMAND    ${BASIC_CONF}
+	BUILD_COMMAND        make
+	DEPENDS iconv
+)
 
 file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
 "
-export CFLAGS=-march=i686
+export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include\"
 export LIBS=\"-lpthread -lz -lffi\"
-${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --build=${TARGET} CFLAGS=-march=i686 CROSS_COMPILE=${TARGET}- CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no 
+${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=yes --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
 
@@ -595,11 +623,11 @@ ExternalProject_Add(
     glib
     URL                   https://github.com/GNOME/glib/archive/2.40.0.tar.gz
     URL_MD5               4e453a219faf86e51f47191a1f8cb910
-    PATCH_COMMAND         ./autogen.sh
+    PATCH_COMMAND         NOCONFIGURE=yes ./autogen.sh
     CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
     BUILD_COMMAND         make
     BUILD_IN_SOURCE       1
-    DEPENDS               libffi python pcre zlib libxml2
+    DEPENDS               libffi python pcre zlib libxml2 iconv gettext
 )
 
 ExternalProject_Add(
@@ -607,7 +635,7 @@ ExternalProject_Add(
     URL                   http://www.libimobiledevice.org/downloads/libplist-1.12.tar.bz2
     URL_MD5               8b04b0f09f2398022dcd4fba75012997
     CONFIGURE_COMMAND     ${BASIC_CONF} --without-cython
-    BUILD_COMMAND         make CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib                  
+    BUILD_COMMAND         make CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib
     INSTALL_COMMAND       make install
     DEPENDS               libxml2 glib
 )
@@ -618,6 +646,7 @@ ExternalProject_Add(
     PATCH_COMMAND         ./autogen.sh
         COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/xcode-llmvfix.patch
         COMMAND           patch -p0 < ${CMAKE_SOURCE_DIR}/libshairplay-patches/01-add_fairplay_handshake.patch
+    UPDATE_COMMAND          ""
     CONFIGURE_COMMAND     ${BASIC_CONF} --sysconfdir=/
       BUILD_COMMAND       make
         COMMAND           make install
@@ -703,6 +732,7 @@ ExternalProject_Add(
 	GIT_REPOSITORY           https://github.com/xbmc/FFmpeg.git
 	GIT_TAG                  2.4.3-Helix-beta1
 	CONFIGURE_COMMAND        <SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --cpu=i686 --prefix=${TARGET_DIR} --disable-shared --enable-static --disable-programs --enable-gpl --disable-devices --disable-doc --disable-ffplay --disable-ffmpeg --disable-ffprobe --disable-ffserver --enable-runtime-cpudetect --enable-postproc --enable-pthreads --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=ipod --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2 --enable-protocol=http --enable-zlib
+	UPDATE_COMMAND           ""
 	BUILD_COMMAND            make ${PARALLEL}
 	DEPENDS                  yasm
 )

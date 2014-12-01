@@ -15,7 +15,7 @@ The build scripts will download, compile and install all dependencies,
 including cross compilers. In other words, you don't need to have any
 Boxeebox or Kodi related code or SDK's installed on your system and even if you had
 they won't be used.
-Successful build environments have included OSX 10.8.3 and Ubuntu.
+Successful build environments have included OSX 10.10 and Ubuntu.
 
 -----------------------------------------------------------------------------
 2.  Prerequisites
@@ -25,32 +25,62 @@ to be case sensitive.
 
 An appropriate apt-get line is:
 
-sudo apt-get install cmake make gcc texinfo gawk bison flex swig default-jre gperf nasm automake autoconf autopoint libtool libsdl1.2-dev libsdl-image1.2-dev liblzo2-dev liblockdev1-dev libxslt1-dev libxml2-dev libncurses5-dev libmysqlclient-dev libavahi-compat-libdnssd-dev libltdl-dev avahi-daemon intltool 
+sudo apt-get install cmake make gcc texinfo gawk bison flex swig default-jre gperf nasm automake autoconf autopoint libtool libsdl1.2-dev libsdl-image1.2-dev liblzo2-dev liblockdev1-dev libxslt1-dev libxml2-dev libncurses5-dev libmysqlclient-dev libavahi-compat-libdnssd-dev libltdl-dev avahi-daemon intltool
+
+
+# OSX pre requisites
+
+A case sensitive file system is required, which you can create as a sparse disc image via the "Disc Utility".
+
+Having Homebrew installed (http://brew.sh/) is recommended to make prerequisite installation easier, but
+nothing in the build process requires it specifically.
+
+As my OSX setup wasn't clean I'm unsure of the exact tools needed to be installed, but the following would be a good start:
+
+brew install gcc intltool cmake bison flex swig automake autoconf autopoint libtool sdl sdl_image lzo
+
 
 -----------------------------------------------------------------------------
 3.  Building
 -----------------------------------------------------------------------------
 #to be performed in bash
 
-#Main repo
-For master (currently Helix) git clone https://github.com/quarnster/boxeebox-xbmc.git
-For Gotham git clone https://github.com/quarnster/boxeebox-xbmc.git -b Gotham
-
-#Test repo
-For master (currently Helix) git clone https://github.com/quasar1/boxeebox-xbmc.git
-For Gotham git clone https://github.com/quasar1/boxeebox-xbmc.git -b Gotham
-
+git clone --depth 1 https://github.com/quarnster/boxeebox-xbmc.git
 cd boxeebox-xbmc
 ./bootstrap
 automake --add-missing
 cd tools/boxeebox
 mkdir build
 cd build
-cmake -DTARGET_DIR=<WHERE_YOU_WANT_TO_INSTALL_KODI> ..
-make egl
-make pvr
+cmake -DTARGET_DIR=../target_dir ..
 make
 #done
+
+# Cross building on OSX tips
+
+I didn't bother trying to get mysql built as I'm not using it anyway. Hence you might need to
+"cmake -DENABLE_MYSQL=Off -DTARGET_DIR=blah .."
+
+OSX nowadays use clang as the default complier and doesn't even ship with gcc. Unfortunately
+gcc is a bit cranky and in my experience will not compile successfully with clang. I suggest
+installing a somewhat recent version of gcc (e.g via "brew install gcc"), and
+setting these environment variables:
+
+export CC=/usr/local/bin/gcc-4.9
+export CXX=/usr/local/bin/g++-4.9
+export CPP=/usr/local/bin/cpp-4.9
+export LD=/usr/local/bin/gcc-4.9
+
+Then rather than running the generic "make", run "make toolchain". Once finished, run this in your shell:
+
+unset CC
+unset CXX
+unset CPP
+unset LD
+export PATH=$PATH:$PWD/../sysroot/usr/bin
+
+and then run "make".
+
 
 Please do submit a pull request with any tweaks needed to make it build alright this far.
 #Making changes to libs/*, toolchain/* or intel/*

@@ -6,6 +6,7 @@ SRCS+= EGLNativeTypeAndroid.cpp
 SRCS+= EGLNativeTypeBoxee.cpp
 SRCS+= EGLNativeTypeRaspberryPI.cpp
 SRCS+= EGLNativeTypeWayland.cpp
+SRCS+= EGLNativeTypeIMX.cpp
 SRCS+= EGLWrapper.cpp
 
 # Wayland specific detail
