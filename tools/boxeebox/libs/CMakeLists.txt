@@ -146,14 +146,19 @@ ExternalProject_Add(
     DEPENDS libxml2
 )
 
-ExternalProject_Add(
-	iconv
-	URL                  http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
-	URL_MD5              e34509b1623cec449dfeb73d7ce9c6c6
-	CONFIGURE_COMMAND    ${BASIC_CONF}
-	BUILD_COMMAND        make
-)
-
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+	ExternalProject_Add(
+		iconv
+		URL                  http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
+		URL_MD5              e34509b1623cec449dfeb73d7ce9c6c6
+		CONFIGURE_COMMAND    ${BASIC_CONF}
+		BUILD_COMMAND        make
+	)
+	set(ICONV_TYPE yes)
+else()
+	add_custom_target(iconv COMMAND ${CMAKE_COMMAND} -E echo "iconv isn't built on linux, because it isn't needed (???)")
+	set(ICONV_TYPE no)
+endif()
 
 ExternalProject_Add(
 	libenca
@@ -615,7 +620,7 @@ file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
 "
 export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include\"
 export LIBS=\"-lpthread -lz -lffi\"
-${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=yes --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
+${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=${ICONV_TYPE} --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
 
