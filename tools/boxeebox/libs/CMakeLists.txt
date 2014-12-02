@@ -156,7 +156,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 	)
 	set(ICONV_TYPE yes)
 else()
-	add_custom_target(iconv COMMAND ${CMAKE_COMMAND} -E echo "iconv isn't built on linux, because it isn't needed (???)")
+	add_custom_target(iconv COMMENT "iconv isn't built on linux, because it isn't needed (???)")
 	set(ICONV_TYPE no)
 endif()
 
