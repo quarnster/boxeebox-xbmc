@@ -146,19 +146,13 @@ ExternalProject_Add(
     DEPENDS libxml2
 )
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-	ExternalProject_Add(
-		iconv
-		URL                  http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
-		URL_MD5              e34509b1623cec449dfeb73d7ce9c6c6
-		CONFIGURE_COMMAND    ${BASIC_CONF}
-		BUILD_COMMAND        make
-	)
-	set(ICONV_TYPE yes)
-else()
-	add_custom_target(iconv COMMENT "iconv isn't built on linux, because it isn't needed (???)")
-	set(ICONV_TYPE no)
-endif()
+ExternalProject_Add(
+	iconv
+	URL                  http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
+	URL_MD5              e34509b1623cec449dfeb73d7ce9c6c6
+	CONFIGURE_COMMAND    <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib
+	BUILD_COMMAND        make
+)
 
 ExternalProject_Add(
 	libenca
@@ -484,7 +478,7 @@ ExternalProject_Add(
 	samba
 	URL                     http://ftp.samba.org/pub/samba/stable/samba-3.6.24.tar.gz
 	URL_MD5                 d98425c0c2b73e08f048d31ffc727fb0
-	CONFIGURE_COMMAND	CC=${TARGET}-gcc CFLAGS=-I${SYSROOT}/usr/local/include LDFLAGS=-L${SYSROOT}/usr/local/lib ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 ./configure --prefix=${TARGET_DIR} --host=${TARGET} samba_cv_CC_NEGATIVE_ENUM_VALUES=yes libreplace_cv_HAVE_GETADDRINFO=no ac_cv_file__proc_sys_kernel_core_pattern=yes  samba_cv_HAVE_STAT_ST_FLAGS=no samba_cv_DARWIN_INITGROUPS=no --without-ldap --without-krb5 --without-ads --disable-cups --enable-swat=no --with-winbind=no --without-dnsupdate --without-libsmbsharemodes --without-pam --without-pam_smbpass --without-libaddns
+	CONFIGURE_COMMAND	CC=${TARGET}-gcc CFLAGS=-I${SYSROOT}/usr/local/include LDFLAGS=-L${SYSROOT}/usr/local/lib ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 ./configure --prefix=${TARGET_DIR} --host=${TARGET} samba_cv_CC_NEGATIVE_ENUM_VALUES=yes libreplace_cv_HAVE_GETADDRINFO=no ac_cv_file__proc_sys_kernel_core_pattern=yes  samba_cv_HAVE_STAT_ST_FLAGS=no samba_cv_DARWIN_INITGROUPS=no --without-ldap --without-krb5 --without-ads --disable-cups --enable-swat=no --with-winbind=no --without-dnsupdate --without-libsmbsharemodes --without-pam --without-pam_smbpass --without-libaddns --with-libiconv=${TARGET_DIR}
  	BUILD_COMMAND 		${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} libsmbclient libtalloc libtevent libtdb
 	INSTALL_COMMAND 	${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/source3 make ${PARALLEL} installlibsmbclient installlibtalloc installlibtevent installlibtdb
 	BUILD_IN_SOURCE 	1
@@ -611,6 +605,7 @@ ExternalProject_Add(
 	gettext
 	URL                  http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.3.tar.gz
 	URL_MD5              c365029ffc866fc4e485d9e5ca60b260
+	PATCH_COMMAND        patch -p1 -N < ${CMAKE_SOURCE_DIR}/gettext-dont_build_docs_and_examples.patch
 	CONFIGURE_COMMAND    ${BASIC_CONF}
 	BUILD_COMMAND        make
 	DEPENDS iconv
@@ -619,8 +614,10 @@ ExternalProject_Add(
 file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
 "
 export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include\"
-export LIBS=\"-lpthread -lz -lffi\"
-${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=${ICONV_TYPE} --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
+export CPPFLAGS=\"-I${TARGET_DIR}/include\"
+export LDFLAGS=\"-L${TARGET_DIR}/lib\"
+export LIBS=\"-lpthread -lrt -ldl -lresolv -lz -lffi\"
+${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --build=${TARGET} CFLAGS=-march=i686 CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=${ICONV_TYPE} --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
 
