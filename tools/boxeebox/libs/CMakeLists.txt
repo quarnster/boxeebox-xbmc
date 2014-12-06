@@ -611,6 +611,7 @@ ExternalProject_Add(
 	gettext
 	URL                  http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.3.tar.gz
 	URL_MD5              c365029ffc866fc4e485d9e5ca60b260
+	PATCH_COMMAND        patch -p1 -N < ${CMAKE_SOURCE_DIR}/gettext-dont_build_docs_and_examples.patch
 	CONFIGURE_COMMAND    ${BASIC_CONF}
 	BUILD_COMMAND        make
 	DEPENDS iconv
