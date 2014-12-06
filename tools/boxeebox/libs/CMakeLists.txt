@@ -146,19 +146,13 @@ ExternalProject_Add(
     DEPENDS libxml2
 )
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-	ExternalProject_Add(
-		iconv
-		URL                  http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
-		URL_MD5              e34509b1623cec449dfeb73d7ce9c6c6
-		CONFIGURE_COMMAND    ${BASIC_CONF}
-		BUILD_COMMAND        make
-	)
-	set(ICONV_TYPE yes)
-else()
-	add_custom_target(iconv COMMENT "iconv isn't built on linux, because it isn't needed (???)")
-	set(ICONV_TYPE no)
-endif()
+ExternalProject_Add(
+	iconv
+	URL                  http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
+	URL_MD5              e34509b1623cec449dfeb73d7ce9c6c6
+	CONFIGURE_COMMAND    ${BASIC_CONF}
+	BUILD_COMMAND        make
+)
 
 ExternalProject_Add(
 	libenca
