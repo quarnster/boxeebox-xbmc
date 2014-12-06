@@ -568,7 +568,7 @@ export ac_cv_prog_AR=${TARGET}-ar
 export ac_cv_file__dev_ptmx=no
 export ac_cv_file__dev_ptc=no
 export enable_toolbox_glue=no
-./configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-ipv6  --build=${HOSTMACHINE} --target=${TARGET} --with-system-expat --with-system-ffi
+./configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-ipv6  --build=${HOSTMACHINE} --target=${TARGET} --with-system-expat --with-system-ffi --enable-unicode=ucs4
 ")
 
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/python_configure_helper.sh)
@@ -620,6 +620,7 @@ file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
 "
 export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include\"
 export LIBS=\"-lpthread -lz -lffi\"
+export PYTHON=\"${TARGET_DIR}/bin/python\"
 ${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=${ICONV_TYPE} --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
