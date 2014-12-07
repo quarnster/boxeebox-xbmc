@@ -7,7 +7,7 @@ set(BASIC_CMAKE CFLAGS=-I${TARGET_DIR}/include CC=${TARGET}-gcc CXX=${TARGET}-g+
 set(ENABLE_MYSQL ON CACHE BOOL "Whether to build with mysql support or not")
 set(ENABLE_ICONV OFF CACHE BOOL "Whether to build with iconv support or not")
 set(ENABLE_GETTEXT OFF CACHE BOOL "Whether to build with gettext support or not")
-set(ENABLE_GLIB_LINUX ON CACHE BOOL "Whether to build with glib_osx support or not")
+set(ENABLE_GLIB_LINUX ON CACHE BOOL "Whether to build with glib_linux support or not")
 set(ENABLE_GLIB_OSX OFF CACHE BOOL "Whether to build with glib_osx support or not")
 
 
