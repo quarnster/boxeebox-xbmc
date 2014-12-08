@@ -601,11 +601,40 @@ endif()
 
 if(ENABLE_GLIB_LINUX)
 
-file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
+file(WRITE ${CMAKE_BINARY_DIR}/pre_glib_configure_helper.sh
 "
 export CFLAGS=-march=i686
 export LIBS=\"-lpthread -lz -lffi\"
-${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --build=${TARGET} CFLAGS=-march=i686 CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no 
+${CMAKE_BINARY_DIR}/pre_glib-prefix/src/pre_glib/configure --prefix=${TARGET_DIR} --build=${TARGET} CFLAGS=-march=i686 CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no 
+")
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/pre_glib_configure_helper.sh)
+
+ExternalProject_Add(
+    pre_glib
+    URL                   https://github.com/GNOME/glib/archive/2.40.0.tar.gz
+    URL_MD5               4e453a219faf86e51f47191a1f8cb910
+    PATCH_COMMAND         NOCONFIGURE=yes ./autogen.sh
+    CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/pre_glib_configure_helper.sh
+    BUILD_COMMAND         make
+    BUILD_IN_SOURCE       1
+    DEPENDS               libffi python pcre zlib libxml2 dbus libdaemon
+)
+
+file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
+"
+export CC=${TARGET}-gcc
+export CXX=${TARGET}-g++
+export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include\"
+export LIBS=\"-lpthread -lrt -ldl -lresolv -lz -lffi\"
+export CPPFLAGS=\"-I${TARGET_DIR}/include -I${SYSROOT}/usr/include\"
+export LIBFFI_CFLAGS="-I${TARGET_DIR}/lib/libffi-3.1/include\"
+export LIBFFI_LIBS="-I${TARGET_DIR}/lib -lffi\"
+export PYTHON=\"${TARGET_DIR}/bin/python\"
+export ZLIB_CFLAGS="-I${TARGET_DIR}/include\"
+export ZLIB_LIBS="-I${TARGET_DIR}/lib -lz\"
+export PCRE_CFLAGS="-I${TARGET_DIR}/include\"
+export PCRE_LIBS="-I${TARGET_DIR}/lib -lpcre\"
+${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
 
@@ -613,11 +642,12 @@ ExternalProject_Add(
     glib
     URL                   https://github.com/GNOME/glib/archive/2.40.0.tar.gz
     URL_MD5               4e453a219faf86e51f47191a1f8cb910
-    PATCH_COMMAND         ./autogen.sh
+	PATCH_COMMAND         patch -p1 -N < ${CMAKE_SOURCE_DIR}/glib-01-dont-build-tests.patch
+          COMMAND         NOCONFIGURE=yes ./autogen.sh
     CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
     BUILD_COMMAND         make
     BUILD_IN_SOURCE       1
-    DEPENDS               libffi python pcre zlib libxml2 dbus libdaemon
+    DEPENDS               libffi python pcre zlib libxml2 dbus libdaemon pre_glib
 )
 endif()
 
