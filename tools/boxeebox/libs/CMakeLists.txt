@@ -5,6 +5,10 @@ set(TARGET_DIR ${SYSROOT}/usr/local)
 set(BASIC_CONF <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-static --disable-nls)
 set(BASIC_CMAKE CFLAGS=-I${TARGET_DIR}/include CC=${TARGET}-gcc CXX=${TARGET}-g++ RANLIB=${TARGET}-ranlib cmake -DPKG_CONFIG_EXECUTABLE=${TARGET}-pkg-config -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_INSTALL_PREFIX=${TARGET_DIR} -DZLIB_ROOT=${SYSROOT}/usr -DZLIB_LIBRARIES=${SYSROOT}/usr/lib/libz.so -DZLIB_INCLUDE_DIRS=${SYSROOT}/usr/include <SOURCE_DIR>)
 set(ENABLE_MYSQL ON CACHE BOOL "Whether to build with mysql support or not")
+set(ENABLE_ICONV OFF CACHE BOOL "Whether to build with iconv support or not")
+set(ENABLE_GETTEXT OFF CACHE BOOL "Whether to build with gettext support or not")
+set(ENABLE_GLIB_LINUX ON CACHE BOOL "Whether to build with glib_linux support or not")
+set(ENABLE_GLIB_OSX OFF CACHE BOOL "Whether to build with glib_osx support or not")
 
 set(PYTHON_VERSION 2.7.2)
 
@@ -146,6 +150,7 @@ ExternalProject_Add(
     DEPENDS libxml2
 )
 
+if(ENABLE_ICONV)
 ExternalProject_Add(
 	iconv
 	URL                  http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
@@ -153,19 +158,7 @@ ExternalProject_Add(
 	CONFIGURE_COMMAND    ${BASIC_CONF}
 	BUILD_COMMAND        make
 )
-
-
-ExternalProject_Add(
-	libenca
-	URL                 https://github.com/nijel/enca/archive/1.16.tar.gz
-	URL_MD5             4f39869a757e96deb372884e6f474a27
-	PATCH_COMMAND       sed -i -e "s,.(AM_V_CC).(COMPILE),cc," "tools/Makefile.in"
-	COMMAND             sed -i -e "s,.(AM_V_CCLD).(LINK),cc -o \$@," "tools/Makefile.in" VERBATIM
-	CONFIGURE_COMMAND   ac_cv_file__dev_random=yes ac_cv_file__dev_urandom=no ac_cv_file__dev_srandom=no ac_cv_file__dev_arandom=no ${BASIC_CONF} --disable-external --without-librecode --disable-rpath --with-gnu-ld
-	BUILD_COMMAND       make
-	BUILD_IN_SOURCE     1
-	DEPENDS             iconv
-)
+endif()
 
 ExternalProject_Add(
 	libusb
@@ -416,15 +409,6 @@ ExternalProject_Add(
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
-ExternalProject_Add(
-	libass
-	GIT_REPOSITORY   	https://github.com/libass/libass.git
-	GIT_TAG                 0.12.0
-	UPDATE_COMMAND           ""
-	PATCH_COMMAND           ./autogen.sh
-	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules --enable-asm --disable-test
-	DEPENDS libpng libenca fribidi freetype2 fontconfig yasm
-)
 # TODO:Fails due to libSDL
 ExternalProject_Add(
 	libmpeg2
@@ -590,7 +574,7 @@ ExternalProject_Add(
 	BUILD_COMMAND 		HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make ${PARALLEL}
 	INSTALL_COMMAND 	HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make install
 	BUILD_IN_SOURCE 	1
-	DEPENDS zlib expat bzip2 gdbm openssl sqlite libffi
+	DEPENDS zlib expat bzip2 gdbm openssl sqlite libffi libxml2
 )
 
 ExternalProject_Add(
@@ -601,16 +585,70 @@ ExternalProject_Add(
     BUILD_COMMAND         make
 )
 
-
+if(ENABLE_GETTEXT)
 ExternalProject_Add(
 	gettext
 	URL                  http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.3.tar.gz
 	URL_MD5              c365029ffc866fc4e485d9e5ca60b260
+	PATCH_COMMAND        patch -p1 -N < ${CMAKE_SOURCE_DIR}/gettext-dont_build_docs_and_examples.patch
 	CONFIGURE_COMMAND    ${BASIC_CONF}
 	BUILD_COMMAND        make
 	DEPENDS iconv
 )
+endif()
 
+if(ENABLE_GLIB_LINUX)
+
+file(WRITE ${CMAKE_BINARY_DIR}/pre_glib_configure_helper.sh
+"
+export CFLAGS=-march=i686
+export LIBS=\"-lpthread -lz -lffi\"
+${CMAKE_BINARY_DIR}/pre_glib-prefix/src/pre_glib/configure --prefix=${TARGET_DIR} --build=${TARGET} CFLAGS=-march=i686 CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no 
+")
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/pre_glib_configure_helper.sh)
+
+ExternalProject_Add(
+    pre_glib
+    URL                   https://github.com/GNOME/glib/archive/2.40.0.tar.gz
+    URL_MD5               4e453a219faf86e51f47191a1f8cb910
+    PATCH_COMMAND         NOCONFIGURE=yes ./autogen.sh
+    CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/pre_glib_configure_helper.sh
+    BUILD_COMMAND         make
+    BUILD_IN_SOURCE       1
+    DEPENDS               libffi python pcre zlib libxml2 dbus libdaemon
+)
+
+file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
+"
+export CC=${TARGET}-gcc
+export CXX=${TARGET}-g++
+export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include\"
+export LIBS=\"-lpthread -lrt -ldl -lresolv -lz -lffi\"
+export CPPFLAGS=\"-I${TARGET_DIR}/include -I${SYSROOT}/usr/include\"
+export LIBFFI_CFLAGS="-I${TARGET_DIR}/lib/libffi-3.1/include\"
+export LIBFFI_LIBS="-I${TARGET_DIR}/lib -lffi\"
+export ZLIB_CFLAGS="-I${TARGET_DIR}/include\"
+export ZLIB_LIBS="-I${TARGET_DIR}/lib -lz\"
+export PCRE_CFLAGS="-I${TARGET_DIR}/include\"
+export PCRE_LIBS="-I${TARGET_DIR}/lib -lpcre\"
+${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
+")
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
+
+ExternalProject_Add(
+    glib
+    URL                   https://github.com/GNOME/glib/archive/2.40.0.tar.gz
+    URL_MD5               4e453a219faf86e51f47191a1f8cb910
+	PATCH_COMMAND         patch -p1 -N < ${CMAKE_SOURCE_DIR}/glib-01-dont-build-tests.patch
+          COMMAND         NOCONFIGURE=yes ./autogen.sh
+    CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
+    BUILD_COMMAND         make
+    BUILD_IN_SOURCE       1
+    DEPENDS               libffi python pcre zlib libxml2 dbus libdaemon pre_glib
+)
+endif()
+
+if(ENABLE_GLIB_OSX)
 file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
 "
 export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include\"
@@ -629,6 +667,7 @@ ExternalProject_Add(
     BUILD_IN_SOURCE       1
     DEPENDS               libffi python pcre zlib libxml2 iconv gettext
 )
+endif()
 
 ExternalProject_Add(
     libplist
@@ -673,6 +712,28 @@ ExternalProject_Add(
     BUILD_COMMAND         make
     BUILD_IN_SOURCE       1
     DEPENDS               libdaemon libffi glib dbus expat
+)
+
+ExternalProject_Add(
+	libenca
+	URL                 https://github.com/nijel/enca/archive/1.16.tar.gz
+	URL_MD5             4f39869a757e96deb372884e6f474a27
+	PATCH_COMMAND       sed -i -e "s,.(AM_V_CC).(COMPILE),cc," "tools/Makefile.in"
+	COMMAND             sed -i -e "s,.(AM_V_CCLD).(LINK),cc -o \$@," "tools/Makefile.in" VERBATIM
+	CONFIGURE_COMMAND   ac_cv_file__dev_random=yes ac_cv_file__dev_urandom=no ac_cv_file__dev_srandom=no ac_cv_file__dev_arandom=no ${BASIC_CONF} --disable-external --without-librecode --disable-rpath --with-gnu-ld
+	BUILD_COMMAND       make
+	BUILD_IN_SOURCE     1
+	DEPENDS             avahi
+)
+
+ExternalProject_Add(
+	libass
+	GIT_REPOSITORY   	https://github.com/libass/libass.git
+	GIT_TAG                 0.12.0
+	UPDATE_COMMAND           ""
+	PATCH_COMMAND           ./autogen.sh
+	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules --enable-asm --disable-test
+	DEPENDS libpng libenca fribidi freetype2 fontconfig yasm
 )
 
 ExternalProject_Add(
@@ -736,4 +797,3 @@ ExternalProject_Add(
 	BUILD_COMMAND            make ${PARALLEL}
 	DEPENDS                  yasm
 )
-
