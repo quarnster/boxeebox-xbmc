@@ -10,8 +10,6 @@ set(ENABLE_GETTEXT OFF CACHE BOOL "Whether to build with gettext support or not"
 set(ENABLE_GLIB_LINUX ON CACHE BOOL "Whether to build with glib_linux support or not")
 set(ENABLE_GLIB_OSX OFF CACHE BOOL "Whether to build with glib_osx support or not")
 
-
-
 set(PYTHON_VERSION 2.7.2)
 
 find_package(PythonInterp)
