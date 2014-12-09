@@ -549,7 +549,7 @@ export ac_cv_prog_AR=${TARGET}-ar
 export ac_cv_file__dev_ptmx=no
 export ac_cv_file__dev_ptc=no
 export enable_toolbox_glue=no
-./configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-ipv6  --build=${HOSTMACHINE} --target=${TARGET} --with-system-expat --with-system-ffi --enable-unicode=ucs4
+./configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-ipv6  --build=${HOSTMACHINE} --target=${TARGET} --with-system-expat --with-system-ffi
 ")
 
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/python_configure_helper.sh)
@@ -576,7 +576,7 @@ ExternalProject_Add(
 	BUILD_COMMAND 		HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make ${PARALLEL}
 	INSTALL_COMMAND 	HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make install
 	BUILD_IN_SOURCE 	1
-	DEPENDS zlib expat bzip2 gdbm openssl sqlite libffi
+	DEPENDS zlib expat bzip2 gdbm openssl sqlite libffi libxml2
 )
 
 ExternalProject_Add(
@@ -629,7 +629,6 @@ export LIBS=\"-lpthread -lrt -ldl -lresolv -lz -lffi\"
 export CPPFLAGS=\"-I${TARGET_DIR}/include -I${SYSROOT}/usr/include\"
 export LIBFFI_CFLAGS="-I${TARGET_DIR}/lib/libffi-3.1/include\"
 export LIBFFI_LIBS="-I${TARGET_DIR}/lib -lffi\"
-export PYTHON=\"${TARGET_DIR}/bin/python\"
 export ZLIB_CFLAGS="-I${TARGET_DIR}/include\"
 export ZLIB_LIBS="-I${TARGET_DIR}/lib -lz\"
 export PCRE_CFLAGS="-I${TARGET_DIR}/include\"
