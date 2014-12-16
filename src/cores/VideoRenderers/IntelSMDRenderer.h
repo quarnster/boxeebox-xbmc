@@ -1,6 +1,6 @@
 #pragma once
 
-#include "xbmc/settings/VideoSettings.h"
+#include "src/settings/VideoSettings.h"
 #include "RenderFlags.h"
 #include "guilib/GraphicContext.h"
 #include "BaseRenderer.h"

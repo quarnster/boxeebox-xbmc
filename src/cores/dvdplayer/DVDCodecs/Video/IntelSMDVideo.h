@@ -29,7 +29,7 @@
 
 #include "DVDVideoCodec.h"
 #include "threads/Thread.h"
-#include "xbmc/threads/SingleLock.h"
+#include "src/threads/SingleLock.h"
 
 #define MAX_SIZE_PES_SEQUENCE_HEADER 16
 
