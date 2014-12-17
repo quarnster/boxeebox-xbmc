@@ -31,7 +31,7 @@ extern "C"
 }
 
 #include <queue>
-#include "src/threads/SingleLock.h"
+#include "xbmc/threads/SingleLock.h"
 #include "dvdplayer/DVDClock.h"
 
 extern char *dbg_id(const char *fmt, ...);
