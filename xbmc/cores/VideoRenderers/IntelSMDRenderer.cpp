@@ -25,16 +25,16 @@
 #ifdef HAS_INTEL_SMD
 
 #include "IntelSMDRenderer.h"
-#include "src/cores/IntelSMDGlobals.h"
+#include "xbmc/cores/IntelSMDGlobals.h"
 #include "settings/DisplaySettings.h"
 #include "settings/MediaSettings.h"
 #include "utils/log.h"
-#include "src/threads/SingleLock.h"
+#include "xbmc/threads/SingleLock.h"
 #include "../dvdplayer/DVDClock.h"
 #include "guilib/GUITexture.h"
 #include "guilib/TransformMatrix.h"
 #include "Application.h"
-#include "src/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h"
+#include "xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h"
 
 #include <ismd_core_protected.h>
 #include <ismd_vidrend.h>
