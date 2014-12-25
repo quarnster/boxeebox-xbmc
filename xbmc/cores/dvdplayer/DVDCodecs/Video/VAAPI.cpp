@@ -150,8 +150,11 @@ bool CVAAPIContext::CreateContext()
     CLog::Log(LOGDEBUG, "VAAPI - driver in use: %s", vaQueryVendorString(m_display));
 
   QueryCaps();
-  if (!m_profileCount || !m_attributeCount)
+  if (!m_profileCount)
     return false;
+
+  if (!m_attributeCount)
+    CLog::Log(LOGWARNING, "VAAPI - driver did not return anything from vlVaQueryDisplayAttributes");
 
   return true;
 }
@@ -240,7 +243,7 @@ bool CVAAPIContext::CheckSuccess(VAStatus status)
 {
   if (status != VA_STATUS_SUCCESS)
   {
-    CLog::Log(LOGERROR, "VAAPI error: %s", vaErrorStr(status));
+    CLog::Log(LOGERROR, "VAAPI::%s error: %s", __FUNCTION__, vaErrorStr(status));
     return false;
   }
   return true;
@@ -941,7 +944,7 @@ bool CDecoder::CheckSuccess(VAStatus status)
 {
   if (status != VA_STATUS_SUCCESS)
   {
-    CLog::Log(LOGERROR, "VAAPI - error: %s", vaErrorStr(status));
+    CLog::Log(LOGERROR, "VAAPI::%s - error: %s", __FUNCTION__, vaErrorStr(status));
     m_ErrorCount++;
 
     if(m_DisplayState == VAAPI_OPEN)
@@ -2307,7 +2310,7 @@ bool COutput::CheckSuccess(VAStatus status)
 {
   if (status != VA_STATUS_SUCCESS)
   {
-    CLog::Log(LOGERROR, "VAAPI - Error: %s(%d)", vaErrorStr(status), status);
+    CLog::Log(LOGERROR, "VAAPI::%s - Error: %s(%d)", __FUNCTION__, vaErrorStr(status), status);
     m_vaError = true;
     return false;
   }
@@ -2478,6 +2481,9 @@ bool CVppPostproc::PreInit(CVaapiConfig &config, SDiMethods *methods)
   // create config
   if (!CheckSuccess(vaCreateConfig(m_config.dpy, VAProfileNone, VAEntrypointVideoProc, NULL, 0, &m_configId)))
   {
+    if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+      CLog::Log(LOGDEBUG, "CVppPostproc::PreInit  - VPP init failed");
+
     return false;
   }
 
@@ -2492,6 +2498,9 @@ bool CVppPostproc::PreInit(CVaapiConfig &config, SDiMethods *methods)
                                      nb_surfaces,
                                      NULL, 0)))
   {
+    if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+      CLog::Log(LOGDEBUG, "CVppPostproc::PreInit  - VPP init failed");
+
     return false;
   }
   for (int i=0; i<nb_surfaces; i++)
@@ -2510,6 +2519,9 @@ bool CVppPostproc::PreInit(CVaapiConfig &config, SDiMethods *methods)
                                     &m_contextId)))
   {
     m_contextId = VA_INVALID_ID;
+    if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+      CLog::Log(LOGDEBUG, "CVppPostproc::PreInit  - VPP init failed");
+
     return false;
   }
 
@@ -2520,6 +2532,9 @@ bool CVppPostproc::PreInit(CVaapiConfig &config, SDiMethods *methods)
 
   if (!CheckSuccess(vaQueryVideoProcFilters(m_config.dpy, m_contextId, filters, &numFilters)))
   {
+    if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+      CLog::Log(LOGDEBUG, "CVppPostproc::PreInit  - VPP init failed");
+
     return false;
   }
 
@@ -2529,6 +2544,9 @@ bool CVppPostproc::PreInit(CVaapiConfig &config, SDiMethods *methods)
                                                deinterlacingCaps,
                                                &numDeinterlacingCaps)))
   {
+    if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+      CLog::Log(LOGDEBUG, "CVppPostproc::PreInit  - VPP init failed");
+
     return false;
   }
 
@@ -2913,7 +2931,7 @@ bool CVppPostproc::CheckSuccess(VAStatus status)
 {
   if (status != VA_STATUS_SUCCESS)
   {
-    CLog::Log(LOGERROR, "VAAPI - Error: %s(%d)", vaErrorStr(status), status);
+    CLog::Log(LOGERROR, "VAAPI::%s - Error: %s(%d)", __FUNCTION__, vaErrorStr(status), status);
     return false;
   }
   return true;
