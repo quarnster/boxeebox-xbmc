@@ -441,10 +441,13 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libssh
-	URL                     http://git.libssh.org/projects/libssh.git/snapshot/libssh-0.6.3.tar.gz
-	URL_MD5                 5b0fd1dbf2effef2322f6251f6c7ca11
-	PATCH_COMMAND 		sed -e "s,add_subdirectory\(examples\),,g" -i CMakeLists.txt
-	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DCMAKE_INSTALL_PREFIX=${TARGET_DIR} -DWITH_STATIC_LIB=1 -DWITH_SERVER=OFF  -DWITH_GCRYPT=OFF -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
+	URL                     http://git.libssh.org/projects/libssh.git/snapshot/libssh-a48711ae7ef890c94e2a824afb899df385c406ee.tar.gz
+	URL_MD5                 a31106e0060c6dce355b29bd5388b436
+	PATCH_COMMAND
+	COMMAND                 patch -p0 < ${CMAKE_SOURCE_DIR}/md5.patch
+	COMMAND                 sed -e "s,add_subdirectory\(examples\),,g" -i CMakeLists.txt
+	COMMAND                 sed -ie "s|-fstack-protector|-fnostack-protector|" "cmake/Modules/DefineCompilerFlags.cmake"
+	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DCMAKE_INSTALL_PREFIX=${TARGET_DIR} -DWITH_STATIC_LIB=1 -DWITH_SERVER=OFF  -DWITH_GCRYPT=OFF -DWITH_EXAMPLES=0 -DTHREADS_PTHREAD_ARG=0 -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND 	make install
 	DEPENDS                 openssl
