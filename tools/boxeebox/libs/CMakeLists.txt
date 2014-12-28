@@ -313,8 +313,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	freetype2
-	URL 			http://sourceforge.net/projects/freetype/files/freetype2/2.5.3/freetype-2.5.3.tar.gz/download
-	URL_MD5 		cafe9f210e45360279c730d27bf071e9
+	URL 			http://sourceforge.net/projects/freetype/files/freetype2/2.5.4/freetype-2.5.4.tar.gz/download
+	URL_MD5 		99c5ab378218218f25afcd5171898faf
 	CONFIGURE_COMMAND 	LIBPNG_CFLAGS=-I${SYSROOT}/usr/local/include LIBPNG_LDFLAGS=-L${SYSROOT}/usr/local/lib ${BASIC_CONF}
 	BUILD_COMMAND		make ${PARALLEL}
 	DEPENDS                 libpng
