@@ -43,8 +43,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libgcrypt
-	URL 			ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.6.1.tar.gz
-	URL_MD5 		d155aa1b06fa879175922ba28f6a6509
+	URL 			ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.6.2.tar.gz
+	URL_MD5 		d19adc062edff0ebc7e887212733ef1f
 	CONFIGURE_COMMAND 	GPG_ERROR_CONFIG=${TARGET_DIR}/bin/gpg-error-config ${BASIC_CONF} --disable-asm
 	DEPENDS libgpg-error
 )
