@@ -502,7 +502,7 @@ ExternalProject_Add(
 	GIT_TAG                 curl-7_39_0
 	PATCH_COMMAND           ./buildconf
 	UPDATE_COMMAND          ""
-	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn --enable-threaded-resolver
+	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn --enable-threaded-resolver --without-gnutls
 	BUILD_COMMAND 		make
 	DEPENDS                 openssl zlib bzip2 rtmpdump
 )
@@ -606,7 +606,7 @@ file(WRITE ${CMAKE_BINARY_DIR}/pre_glib_configure_helper.sh
 "
 export CFLAGS=-march=i686
 export LIBS=\"-lpthread -lz -lffi\"
-${CMAKE_BINARY_DIR}/pre_glib-prefix/src/pre_glib/configure --prefix=${TARGET_DIR} --build=${TARGET} CFLAGS=-march=i686 CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no 
+${CMAKE_BINARY_DIR}/pre_glib-prefix/src/pre_glib/configure --prefix=${TARGET_DIR} --build=${TARGET} CFLAGS=-march=i686 CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no 
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/pre_glib_configure_helper.sh)
 
@@ -625,16 +625,16 @@ file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
 "
 export CC=${TARGET}-gcc
 export CXX=${TARGET}-g++
-export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include\"
+export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include -I${SYSROOT}/usr/include\"
 export LIBS=\"-lpthread -lrt -ldl -lresolv -lz -lffi\"
 export CPPFLAGS=\"-I${TARGET_DIR}/include -I${SYSROOT}/usr/include\"
 export LIBFFI_CFLAGS="-I${TARGET_DIR}/lib/libffi-3.1/include\"
 export LIBFFI_LIBS="-I${TARGET_DIR}/lib -lffi\"
-export ZLIB_CFLAGS="-I${TARGET_DIR}/include\"
-export ZLIB_LIBS="-I${TARGET_DIR}/lib -lz\"
+export ZLIB_CFLAGS="-I${SYSROOT}/usr/include\"
+export ZLIB_LIBS="-I${SYSROOT}/usr/lib -lz\"
 export PCRE_CFLAGS="-I${TARGET_DIR}/include\"
 export PCRE_LIBS="-I${TARGET_DIR}/lib -lpcre\"
-${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
+${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
 
@@ -656,7 +656,7 @@ file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
 "
 export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include\"
 export LIBS=\"-lpthread -lz -lffi\"
-${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=yes --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
+${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=yes --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
 
@@ -792,11 +792,54 @@ add_custom_command(OUTPUT ${TARGET_DIR}/lib/libGLESv2.so
 add_custom_target(dummylibs ALL DEPENDS DEPENDS ${TARGET_DIR}/lib/libEGL.so ${TARGET_DIR}/lib/libGLESv2.so)
 
 ExternalProject_Add(
+	gmp
+	URL 				https://gmplib.org/download/gmp/gmp-6.0.0a.tar.bz2
+	URL_MD5				b7ff2d88cae7f8085bd5006096eed470
+	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib --enable-shared --enable-cxx --enable-cxx ABI=32
+	BUILD_COMMAND 		make ${PARALLEL}
+	INSTALL_COMMAND     make install
+)
+
+file(WRITE ${CMAKE_BINARY_DIR}/nettle_configure_helper.sh
+"
+export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include\"
+export CPPFLAGS=-I${TARGET_DIR}/include
+export LDFLAGS=-L${TARGET_DIR}/lib
+${CMAKE_BINARY_DIR}/nettle-prefix/src/nettle/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib --enable-shared --disable-openssl
+")
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/nettle_configure_helper.sh)
+
+ExternalProject_Add(
+    nettle
+    URL                   http://ftp.gnu.org/gnu/nettle/nettle-2.7.1.tar.gz
+    URL_MD5               003d5147911317931dd453520eb234a5
+    CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/nettle_configure_helper.sh
+    BUILD_COMMAND         make
+    BUILD_IN_SOURCE       1
+    DEPENDS               openssl gmp
+)
+
+ExternalProject_Add(
+    gnutls
+    URL                   ftp://ftp.gnutls.org/gcrypt/gnutls/v3.3/gnutls-3.3.10.tar.xz
+    URL_MD5               c0a72b2c0553fe1c4992e30835808012
+	PATCH_COMMAND         patch -p0 < ${CMAKE_SOURCE_DIR}/size-max.patch   
+    CONFIGURE_COMMAND     <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib --enable-shared --without-p11-kit --disable-nls --enable-local-libopts GMP_CFLAGS=${TARGET_DIR}/include
+    BUILD_COMMAND         make
+    BUILD_IN_SOURCE       1
+    DEPENDS               nettle
+)
+
+ExternalProject_Add(
 	ffmpeg
 	GIT_REPOSITORY           https://github.com/xbmc/FFmpeg.git
-	GIT_TAG                  2.5.2-Isengard-alpha
-	CONFIGURE_COMMAND        <SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --cpu=i686 --prefix=${TARGET_DIR} --disable-shared --enable-static --disable-programs --enable-gpl --disable-devices --disable-doc --disable-ffplay --disable-ffmpeg --disable-ffprobe --disable-ffserver --enable-runtime-cpudetect --enable-postproc --enable-pthreads --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=ipod --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2 --enable-protocol=http --enable-zlib --disable-sdl
+	GIT_TAG                  2.5.2-Isengard-alpha 
+	PATCH_COMMAND            sed -i".bak" -e "s%pkg_config_default=pkg-config%export PKG_CONFIG_LIBDIR=${TARGET_DIR}/lib/pkgconfig:${SYSROOT}/usr/lib/pkgconfig%" configure
+	CONFIGURE_COMMAND        <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --cross-prefix=${TARGET}- --enable-cross-compile --target-os=linux --sysroot=${SYSROOT} --extra-ldflags=-L${TARGET_DIR}/lib --extra-cflags=-L${TARGET_DIR}/include --arch=i686 --cpu=i686 --enable-shared --disable-static --sysinclude={TARGET_DIR}/include --disable-programs --enable-gpl --disable-devices --disable-doc --disable-ffplay --disable-ffmpeg --disable-ffprobe --disable-ffserver --enable-runtime-cpudetect --enable-postproc --enable-pthreads --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=mpegts --enable-muxer=ipod --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2 --enable-protocol=http --disable-vaapi --disable-vdpau --enable-nonfree --enable-asm --enable-libvorbis --enable-muxer=ogg --enable-encoder=libvorbis --enable-bzlib --enable-optimizations --enable-yasm --disable-sdl --enable-gnutls --enable-zlib --extra-libs=-lrt --extra-libs=-lpthread --extra-libs=-lgnutls --extra-libs=-lnettle --extra-libs=-lhogweed --extra-libs=-lgmp --extra-libs=-lz --incdir=${TARGET}/include --libdir=${TARGET}/lib --pkg-config=pkg-config
 	UPDATE_COMMAND           ""
 	BUILD_COMMAND            make ${PARALLEL}
-	DEPENDS                  yasm
+	INSTALL_COMMAND          make install
+	COMMAND                  ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_BINARY_DIR}/ffmpeg-prefix/src/ffmpeg-build/i686-pc-linux-gnu/include ${TARGET_DIR}/include
+	COMMAND                  ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_BINARY_DIR}/ffmpeg-prefix/src/ffmpeg-build/i686-pc-linux-gnu/lib/pkgconfig ${TARGET_DIR}/lib/pkgconfig
+	DEPENDS                  yasm gnutls zlib bzip2 libvorbis nettle
 )

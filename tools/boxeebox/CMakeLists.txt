@@ -75,7 +75,7 @@ export PYTHON_NOVERSIONCHECK=\"y\"
 export PYTHON=\"${local}/bin/python\"
 export PYTHON_CPPFLAGS=\"-I${local}/include/python2.7\"
 export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
-${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --build=i686-linux --with-ffmpeg --disable-gl --disable-pulse --disable-sdl ${MYSQL_CONF_PARAM} --disable-x11 --with-platform=linux32 --enable-gles --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=no --enable-libusb --with-lirc-device=/var/run/lirc/lircd --disable-sdl --enable-airplay
+${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --build=i686-linux --with-ffmpeg=shared --disable-gl --disable-pulse --disable-sdl ${MYSQL_CONF_PARAM} --disable-x11 --with-platform=linux32 --enable-gles --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=no --enable-libusb --with-lirc-device=/var/run/lirc/lircd --disable-sdl --enable-airplay
 "
 )
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/kodi_configure_helper.sh)
@@ -150,6 +150,19 @@ set(libs
 	libxml2.so
 	libxslt.so
 	libyajl.so.2
+	libavcodec.so.56
+	libavdevice.so.56
+	libavfilter.so.5
+	libavformat.so.56
+	libpostproc.so.53
+	libavutil.so.54
+	libswresample.so.1
+	libswscale.so.3
+	libgmp.so.10
+	libgnutls.so.28
+	libgnutls-openssl.so.27
+	libhogweed.so.2
+	libnettle.so.4
 )
 
 foreach(lib ${libs})
