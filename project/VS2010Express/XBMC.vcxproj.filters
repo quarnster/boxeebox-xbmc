@@ -2563,9 +2563,6 @@
     <ClCompile Include="..\..\xbmc\utils\test\TestSortUtils.cpp">
       <Filter>utils\test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\utils\test\TestStdString.cpp">
-      <Filter>utils\test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\utils\test\TestStopwatch.cpp">
       <Filter>utils\test</Filter>
     </ClCompile>
@@ -4443,9 +4440,6 @@
     <ClInclude Include="..\..\xbmc\utils\Splash.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\utils\StdString.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\utils\Stopwatch.h">
       <Filter>utils</Filter>
     </ClInclude>
@@ -6056,10 +6050,5 @@
     <CustomBuild Include="..\..\xbmc\win32\git_revision.t">
       <Filter>win32</Filter>
     </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\xbmc\interfaces\swig\ControlListAddItemMethods.i">
-      <Filter>interfaces\swig</Filter>
-    </None>
   </ItemGroup>
 </Project>

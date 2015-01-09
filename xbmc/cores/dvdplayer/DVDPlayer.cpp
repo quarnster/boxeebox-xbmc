@@ -201,6 +201,14 @@ static bool PredicateAudioPriority(const SelectionStream& lh, const SelectionStr
     std::string audio_language = g_langInfo.GetAudioLanguage();
     PREDICATE_RETURN(g_LangCodeExpander.CompareLangCodes(audio_language, lh.language)
                    , g_LangCodeExpander.CompareLangCodes(audio_language, rh.language));
+
+    bool hearingimp = CSettings::Get().GetBool("accessibility.audiohearing");
+    PREDICATE_RETURN(!hearingimp ? !(lh.flags & CDemuxStream::FLAG_HEARING_IMPAIRED) : lh.flags & CDemuxStream::FLAG_HEARING_IMPAIRED
+                   , !hearingimp ? !(rh.flags & CDemuxStream::FLAG_HEARING_IMPAIRED) : rh.flags & CDemuxStream::FLAG_HEARING_IMPAIRED);
+
+    bool visualimp = CSettings::Get().GetBool("accessibility.audiovisual");
+    PREDICATE_RETURN(!visualimp ? !(lh.flags & CDemuxStream::FLAG_VISUAL_IMPAIRED) : lh.flags & CDemuxStream::FLAG_VISUAL_IMPAIRED
+                   , !visualimp ? !(rh.flags & CDemuxStream::FLAG_VISUAL_IMPAIRED) : rh.flags & CDemuxStream::FLAG_VISUAL_IMPAIRED);
   }
 
   PREDICATE_RETURN(lh.flags & CDemuxStream::FLAG_DEFAULT
@@ -278,6 +286,10 @@ public:
     {
       PREDICATE_RETURN(g_LangCodeExpander.CompareLangCodes(subtitle_language, lh.language)
                      , g_LangCodeExpander.CompareLangCodes(subtitle_language, rh.language));
+
+      bool hearingimp = CSettings::Get().GetBool("accessibility.subhearing");
+      PREDICATE_RETURN(!hearingimp ? !(lh.flags & CDemuxStream::FLAG_HEARING_IMPAIRED) : lh.flags & CDemuxStream::FLAG_HEARING_IMPAIRED
+                     , !hearingimp ? !(rh.flags & CDemuxStream::FLAG_HEARING_IMPAIRED) : rh.flags & CDemuxStream::FLAG_HEARING_IMPAIRED);
     }
 
     PREDICATE_RETURN(lh.flags & CDemuxStream::FLAG_DEFAULT
@@ -492,6 +504,22 @@ void CSelectionStreams::Update(CDVDInputStream* input, CDVDDemux* demuxer, std::
   }
   g_dataCacheCore.SignalAudioInfoChange();
   g_dataCacheCore.SignalVideoInfoChange();
+}
+
+int CSelectionStreams::CountSource(StreamType type, StreamSource source) const
+{
+  CSingleLock lock(m_section);
+  int count = 0;
+  for(size_t i=0;i<m_Streams.size();i++)
+  {
+    if(type && m_Streams[i].type != type)
+      continue;
+    if (source && m_Streams[i].source != source)
+      continue;
+    count++;
+    continue;
+  }
+  return count;
 }
 
 void CDVDPlayer::CreatePlayers()
@@ -849,6 +877,7 @@ void CDVDPlayer::OpenDefaultStreams(bool reset)
   PredicateSubtitlePriority psp(as.language);
   streams = m_SelectionStreams.Get(STREAM_SUBTITLE, psp);
   valid   = false;
+  CloseStream(m_CurrentSubtitle, false);
   for(SelectionStreams::iterator it = streams.begin(); it != streams.end() && !valid; ++it)
   {
     if(OpenStream(m_CurrentSubtitle, it->id, it->source))
@@ -996,6 +1025,15 @@ bool CDVDPlayer::IsValidStream(CCurrentStream& stream)
         return false;
     }
 
+    return true;
+  }
+  if (source == STREAM_SOURCE_VIDEOMUX)
+  {
+    CDemuxStream* st = m_pCCDemuxer->GetStream(stream.id);
+    if (st == NULL || st->disabled)
+      return false;
+    if (st->type != stream.type)
+      return false;
     return true;
   }
 
@@ -1413,14 +1451,14 @@ void CDVDPlayer::Process()
             break;
 
           first = false;
-          if (m_pCCDemuxer->GetNrOfStreams() != m_SelectionStreams.IndexOf(STREAM_SUBTITLE,STREAM_SOURCE_VIDEOMUX,-1)+1)
+          if (m_pCCDemuxer->GetNrOfStreams() != m_SelectionStreams.CountSource(STREAM_SUBTITLE, STREAM_SOURCE_VIDEOMUX))
           {
             m_SelectionStreams.Clear(STREAM_SUBTITLE, STREAM_SOURCE_VIDEOMUX);
             m_SelectionStreams.Update(NULL, m_pCCDemuxer, "");
             OpenDefaultStreams(false);
           }
           CDemuxStream *pSubStream = m_pCCDemuxer->GetStream(pkt->iStreamId);
-          if (pSubStream)
+          if (pSubStream && m_CurrentSubtitle.id == pkt->iStreamId && m_CurrentSubtitle.source == STREAM_SOURCE_VIDEOMUX)
             ProcessSubData(pSubStream, pkt);
           else
             CDVDDemuxUtils::FreeDemuxPacket(pkt);
@@ -2859,10 +2897,10 @@ void CDVDPlayer::GetGeneralInfo(std::string& strGeneralInfo)
       if( apts != DVD_NOPTS_VALUE && vpts != DVD_NOPTS_VALUE )
         dDiff = (apts - vpts) / DVD_TIME_BASE;
 
-      CStdString strEDL;
+      std::string strEDL;
       strEDL += StringUtils::Format(", edl:%s", m_Edl.GetInfo().c_str());
 
-      CStdString strBuf;
+      std::string strBuf;
       CSingleLock lock(m_StateSection);
       if(m_StateInput.cache_bytes >= 0)
       {
