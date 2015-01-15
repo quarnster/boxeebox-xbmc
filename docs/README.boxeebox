@@ -49,6 +49,7 @@ git clone --depth 1 https://github.com/quarnster/boxeebox-xbmc.git
 cd boxeebox-xbmc
 ./bootstrap
 automake --add-missing
+chmod +x tools/depends/native/TexturePacker/src/autogen.sh
 make -C tools/depends/native/TexturePacker
 cd tools/boxeebox
 mkdir build
