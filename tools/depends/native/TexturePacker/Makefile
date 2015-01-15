@@ -27,7 +27,7 @@ endif
 
 SOURCE=$(ROOT_DIR)/src
 
-APP=$(PLATFORM)/TexturePacker
+APP=$(SOURCE)/TexturePacker
 APPBIN=$(PREFIX)/bin/TexturePacker
 
 all: .installed-$(PLATFORM)
