@@ -95,8 +95,8 @@ void CVideoDatabase::CreateTables()
   m_pDS->exec("CREATE TABLE settings ( idFile integer, Deinterlace bool,"
               "ViewMode integer,ZoomAmount float, PixelRatio float, VerticalShift float, AudioStream integer, SubtitleStream integer,"
               "SubtitleDelay float, SubtitlesOn bool, Brightness float, Contrast float, Gamma float,"
-              "VolumeAmplification float, AudioDelay float, OutputToAllSpeakers bool, ResumeTime integer, Crop bool, CropLeft integer,"
-              "CropRight integer, CropTop integer, CropBottom integer, Sharpness float, NoiseReduction float, NonLinStretch bool, PostProcess bool,"
+              "VolumeAmplification float, AudioDelay float, OutputToAllSpeakers bool, ResumeTime integer,"
+              "Sharpness float, NoiseReduction float, NonLinStretch bool, PostProcess bool,"
               "ScalingMethod integer, DeinterlaceMode integer, StereoMode integer, StereoInvert bool)\n");
 
   CLog::Log(LOGINFO, "create stacktimes table");
@@ -2935,6 +2935,9 @@ void CVideoDatabase::DeleteTvShow(int idTvShow, bool bKeepId /* = false */)
 
     BeginTransaction();
 
+    set<int> paths;
+    GetPathsForTvShow(idTvShow, paths);
+
     std::string strSQL=PrepareSQL("SELECT episode.idEpisode FROM episode WHERE episode.idShow=%i",idTvShow);
     m_pDS2->query(strSQL.c_str());
     while (!m_pDS2->eof())
@@ -2954,9 +2957,6 @@ void CVideoDatabase::DeleteTvShow(int idTvShow, bool bKeepId /* = false */)
       strSQL=PrepareSQL("delete from tvshow where idShow=%i", idTvShow);
       m_pDS->exec(strSQL.c_str());
 
-      // TODO: why do we invalidate the path hash here??
-      set<int> paths;
-      GetPathsForTvShow(idTvShow, paths);
       for (set<int>::const_iterator i = paths.begin(); i != paths.end(); ++i)
       {
         std::string path = GetSingleValue(PrepareSQL("SELECT strPath FROM path WHERE idPath=%i", *i));
@@ -3039,6 +3039,11 @@ void CVideoDatabase::DeleteEpisode(int idEpisode, bool bKeepId /* = false */)
     // the ancilliary tables are still purged
     if (!bKeepId)
     {
+      int idFile = GetDbId(PrepareSQL("SELECT idFile FROM episode WHERE idEpisode=%i", idEpisode));
+      std::string path = GetSingleValue(PrepareSQL("SELECT strPath FROM path JOIN files ON files.idPath=path.idPath WHERE files.idFile=%i", idFile));
+      if (!path.empty())
+        InvalidatePathHash(path);
+
       std::string strSQL = PrepareSQL("delete from episode where idEpisode=%i", idEpisode);
       m_pDS->exec(strSQL.c_str());
     }
@@ -3713,11 +3718,6 @@ bool CVideoDatabase::GetVideoSettings(const std::string &strFilenameAndPath, CVi
       settings.m_SubtitleStream = m_pDS->fv("SubtitleStream").get_asInt();
       settings.m_ViewMode = m_pDS->fv("ViewMode").get_asInt();
       settings.m_ResumeTime = m_pDS->fv("ResumeTime").get_asInt();
-      settings.m_Crop = m_pDS->fv("Crop").get_asBool();
-      settings.m_CropLeft = m_pDS->fv("CropLeft").get_asInt();
-      settings.m_CropRight = m_pDS->fv("CropRight").get_asInt();
-      settings.m_CropTop = m_pDS->fv("CropTop").get_asInt();
-      settings.m_CropBottom = m_pDS->fv("CropBottom").get_asInt();
       settings.m_DeinterlaceMode = (EDEINTERLACEMODE)m_pDS->fv("DeinterlaceMode").get_asInt();
       settings.m_InterlaceMethod = (EINTERLACEMETHOD)m_pDS->fv("Deinterlace").get_asInt();
       settings.m_VolumeAmplification = m_pDS->fv("VolumeAmplification").get_asFloat();
@@ -3764,7 +3764,7 @@ void CVideoDatabase::SetVideoSettings(const std::string& strFilenameAndPath, con
                        setting.m_OutputToAllSpeakers,setting.m_Sharpness,setting.m_NoiseReduction,setting.m_CustomNonLinStretch,setting.m_PostProcess,setting.m_ScalingMethod,
                        setting.m_DeinterlaceMode);
       std::string strSQL2;
-      strSQL2=PrepareSQL("ResumeTime=%i,Crop=%i,CropLeft=%i,CropRight=%i,CropTop=%i,CropBottom=%i,StereoMode=%i,StereoInvert=%i where idFile=%i\n", setting.m_ResumeTime, setting.m_Crop, setting.m_CropLeft, setting.m_CropRight, setting.m_CropTop, setting.m_CropBottom, setting.m_StereoMode, setting.m_StereoInvert, idFile);
+      strSQL2=PrepareSQL("ResumeTime=%i,StereoMode=%i,StereoInvert=%i where idFile=%i\n", setting.m_ResumeTime, setting.m_StereoMode, setting.m_StereoInvert, idFile);
       strSQL += strSQL2;
       m_pDS->exec(strSQL.c_str());
       return ;
@@ -3775,14 +3775,14 @@ void CVideoDatabase::SetVideoSettings(const std::string& strFilenameAndPath, con
       strSQL= "INSERT INTO settings (idFile,Deinterlace,ViewMode,ZoomAmount,PixelRatio, VerticalShift, "
                 "AudioStream,SubtitleStream,SubtitleDelay,SubtitlesOn,Brightness,"
                 "Contrast,Gamma,VolumeAmplification,AudioDelay,OutputToAllSpeakers,"
-                "ResumeTime,Crop,CropLeft,CropRight,CropTop,CropBottom,"
+                "ResumeTime,"
                 "Sharpness,NoiseReduction,NonLinStretch,PostProcess,ScalingMethod,DeinterlaceMode,StereoMode,StereoInvert) "
               "VALUES ";
       strSQL += PrepareSQL("(%i,%i,%i,%f,%f,%f,%i,%i,%f,%i,%f,%f,%f,%f,%f,%i,%i,%i,%i,%i,%i,%i,%f,%f,%i,%i,%i,%i,%i,%i)",
                            idFile, setting.m_InterlaceMethod, setting.m_ViewMode, setting.m_CustomZoomAmount, setting.m_CustomPixelRatio, setting.m_CustomVerticalShift,
                            setting.m_AudioStream, setting.m_SubtitleStream, setting.m_SubtitleDelay, setting.m_SubtitleOn, setting.m_Brightness,
                            setting.m_Contrast, setting.m_Gamma, setting.m_VolumeAmplification, setting.m_AudioDelay, setting.m_OutputToAllSpeakers,
-                           setting.m_ResumeTime, setting.m_Crop, setting.m_CropLeft, setting.m_CropRight, setting.m_CropTop, setting.m_CropBottom,
+                           setting.m_ResumeTime,
                            setting.m_Sharpness, setting.m_NoiseReduction, setting.m_CustomNonLinStretch, setting.m_PostProcess, setting.m_ScalingMethod,
                            setting.m_DeinterlaceMode, setting.m_StereoMode, setting.m_StereoInvert);
       m_pDS->exec(strSQL.c_str());

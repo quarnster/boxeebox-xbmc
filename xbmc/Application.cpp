@@ -595,7 +595,7 @@ void CApplication::Preflight()
 #endif
 }
 
-bool CApplication::Create()
+bool CApplication::SetupNetwork()
 {
 #if defined(HAS_LINUX_NETWORK)
   m_network = new CNetworkLinux();
@@ -605,6 +605,12 @@ bool CApplication::Create()
   m_network = new CNetwork();
 #endif
 
+  return m_network != NULL;
+}
+
+bool CApplication::Create()
+{
+  SetupNetwork();
   Preflight();
 
   for (int i = RES_HDTV_1080i; i <= RES_PAL60_16x9; i++)
@@ -734,7 +740,9 @@ bool CApplication::Create()
 
   std::string executable = CUtil::ResolveExecutablePath();
   CLog::Log(LOGNOTICE, "The executable running is: %s", executable.c_str());
-  CLog::Log(LOGNOTICE, "Local hostname: %s", m_network->GetHostName().c_str());
+  std::string hostname("[unknown]");
+  m_network->GetHostName(hostname);
+  CLog::Log(LOGNOTICE, "Local hostname: %s", hostname.c_str());
   std::string lowerAppName = CCompileInfo::GetAppName();
   StringUtils::ToLower(lowerAppName);
   CLog::Log(LOGNOTICE, "Log File is located: %s%s.log", g_advancedSettings.m_logFolder.c_str(), lowerAppName.c_str());
@@ -2589,8 +2597,12 @@ bool CApplication::OnAction(const CAction &action)
   // built in functions : execute the built-in
   if (action.GetID() == ACTION_BUILT_IN_FUNCTION)
   {
-    CBuiltins::Execute(action.GetName());
-    m_navigationTimer.StartZero();
+    if (!CBuiltins::IsSystemPowerdownCommand(action.GetName()) ||
+        g_PVRManager.CanSystemPowerdown())
+    {
+      CBuiltins::Execute(action.GetName());
+      m_navigationTimer.StartZero();
+    }
     return true;
   }
 
@@ -4723,7 +4735,7 @@ void CApplication::CheckShutdown()
       || m_musicInfoScanner->IsScanning()
       || m_videoInfoScanner->IsScanning()
       || g_windowManager.IsWindowActive(WINDOW_DIALOG_PROGRESS) // progress dialog is onscreen
-      || (CSettings::Get().GetBool("pvrmanager.enabled") && !g_PVRManager.IsIdle()))
+      || !g_PVRManager.CanSystemPowerdown(false))
   {
     m_shutdownTimer.StartZero();
     return;
@@ -4999,7 +5011,11 @@ bool CApplication::ExecuteXBMCAction(std::string actionStr)
 
   // user has asked for something to be executed
   if (CBuiltins::HasCommand(actionStr))
-    CBuiltins::Execute(actionStr);
+  {
+    if (!CBuiltins::IsSystemPowerdownCommand(actionStr) ||
+        g_PVRManager.CanSystemPowerdown())
+      CBuiltins::Execute(actionStr);
+  }
   else
   {
     // try translating the action from our ButtonTranslator
