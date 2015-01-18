@@ -1714,7 +1714,7 @@ void CDVDDemuxFFmpeg::GetL16Parameters(int &channels, int &samplerate)
         if (content.compare(pos, 9, "channels=", 9) == 0)
         {
           pos += 9; // move position to char after 'channels='
-          int len = content.find(';', pos);
+          size_t len = content.find(';', pos);
           if (len != std::string::npos)
             len -= pos;
           std::string no_channels(content, pos, len);
@@ -1732,7 +1732,7 @@ void CDVDDemuxFFmpeg::GetL16Parameters(int &channels, int &samplerate)
         else if (content.compare(pos, 5, "rate=", 5) == 0)
         {
           pos += 5; // move position to char after 'rate='
-          int len = content.find(';', pos);
+          size_t len = content.find(';', pos);
           if (len != std::string::npos)
             len -= pos;
           std::string rate(content, pos, len);
