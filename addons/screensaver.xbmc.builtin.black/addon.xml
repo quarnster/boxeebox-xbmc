@@ -1,14 +1,13 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="screensaver.xbmc.builtin.black"
        name="Black"
-       version="1.0.25"
+       version="1.0.26"
        provider-name="Team-Kodi">
   <extension point="xbmc.ui.screensaver" library=""/>
   <extension point="xbmc.addon.metadata">
     <summary lang="af">Sluimerskerm wat jou skerm swart maak.</summary>
     <summary lang="am">መመልከቻ ማዳኛ የእርስዎን መመልከቻ ጥቁር ያደርገዋል </summary>
     <summary lang="ar">شاشة التوقف التي تحول شاشتك لأسود</summary>
-    <summary lang="ast">Un curiapantalles que pon la pantalla en prieto</summary>
     <summary lang="be">Ахоўнік экрану што робіць экран чорным</summary>
     <summary lang="bg">Скрийнсейвър, който прави екрана черен</summary>
     <summary lang="ca">Estalvi de pantalla que posa la pantalla en negre</summary>
@@ -37,7 +36,7 @@
     <summary lang="is">Skjáhvíla sem sendir svart út á skjáinn</summary>
     <summary lang="it">Salvaschermo che trasforma il tuo schermo in nero</summary>
     <summary lang="ja">画面を黒くするスクリーンセーバー</summary>
-    <summary lang="ko">화면을 검게하는 화면보호기</summary>
+    <summary lang="ko">화면을 검게하는 화면 보호기</summary>
     <summary lang="lt">Ekrano užsklanda, kuri paverčia jūsų ekraną juodu fonu</summary>
     <summary lang="lv">Ekrānsaudzētājs, kas padara jūsu ekrānu melnu</summary>
     <summary lang="mk">Заштита на екран која го прави екранот црн</summary>
@@ -63,7 +62,6 @@
     <description lang="af">Die is 'n eenvoudige sluimerskerm wat jou skerm swart maak.</description>
     <description lang="am">ጥቁር ቀላል መመልከቻ ማዳኛ የእርስዎን መመልከቻ ጥቁር ያደርገዋል </description>
     <description lang="ar">بلاك شاشة توقف بسيطة تحول شاشتك لأسود</description>
-    <description lang="ast">Black ye un cenciellu curiapantalles que pon la pantalla en prieto.</description>
     <description lang="be">Black is a simple screensaver that will turn your screen black.</description>
     <description lang="bg">"Black" е просто скрийнсейвър, който ще направи екрана Ви черен.</description>
     <description lang="ca">Black és un estalvi de pantalla simple que posarà la teva pantalla en negre.</description>
