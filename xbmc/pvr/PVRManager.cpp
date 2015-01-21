@@ -216,7 +216,7 @@ void CPVRManager::OnSettingAction(const CSetting *setting)
   else if (settingId == "pvrclient.menuhook")
   {
     if (IsStarted())
-      Clients()->ProcessMenuHooks(-1, PVR_MENUHOOK_SETTING, NULL);
+      m_addons->ProcessMenuHooks(-1, PVR_MENUHOOK_SETTING, NULL);
   }
 }
 
@@ -236,8 +236,6 @@ bool CPVRManager::IsPVRWindowActive(void) const
       g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_OSD_CHANNELS) ||
       g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_GROUP_MANAGER) ||
       g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_GUIDE_INFO) ||
-      g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_OSD_CUTTER) ||
-      g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_OSD_DIRECTOR) ||
       g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_OSD_GUIDE) ||
       g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_GUIDE_SEARCH) ||
       g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_RECORDING_INFO) ||
@@ -862,19 +860,6 @@ void CPVRManager::ResetPlayingTag(void)
     m_guiInfo->ResetPlayingTag();
 }
 
-int CPVRManager::GetPreviousChannel(void)
-{
-  CPVRChannelPtr currentChannel;
-  if (GetCurrentChannel(currentChannel))
-  {
-    CPVRChannelGroupPtr selectedGroup = GetPlayingGroup(currentChannel->IsRadio());
-    CFileItemPtr channel = selectedGroup->GetLastPlayedChannel(currentChannel->ChannelID());
-    if (channel && channel->HasPVRChannelInfoTag())
-      return channel->GetPVRChannelInfoTag()->ChannelNumber();
-  }
-  return -1;
-}
-
 bool CPVRManager::ToggleRecordingOnChannel(unsigned int iChannelId)
 {
   bool bReturn = false;
@@ -943,7 +928,6 @@ bool CPVRManager::CheckParentalLock(const CPVRChannel &channel)
 bool CPVRManager::IsParentalLocked(const CPVRChannel &channel)
 {
   bool bReturn(false);
-  CSingleLock lock(m_managerStateMutex);
   if (!IsStarted())
     return bReturn;
   CPVRChannelPtr currentChannel(new CPVRChannel(false));
@@ -1655,12 +1639,10 @@ void CPVRManager::UpdateLastWatched(CPVRChannel &channel)
   // NOTE: method could be called with a fileitem copy as argument so we need to obtain the right channel instance
   CPVRChannelPtr channelPtr = m_channelGroups->GetChannelById(channel.ChannelID());
   channelPtr->SetLastWatched(tNow);
-  channelPtr->Persist();
 
   // update last watched timestamp for group
   CPVRChannelGroupPtr group = GetPlayingGroup(channel.IsRadio());
   group->SetLastWatched(tNow);
-  group->Persist();
 
   /* update last played group */
   m_channelGroups->SetLastPlayedGroup(group);
