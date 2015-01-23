@@ -1,5 +1,7 @@
+#pragma once
+
 /*
- *      Copyright (C) 2010-2013 Team XBMC
+ *      Copyright (C) 2005-2015 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -18,20 +20,12 @@
  *
  */
 
-#extension GL_OES_EGL_image_external : require
+#include "guilib/Key.h"
 
-precision mediump float;
-uniform samplerExternalOES m_samp0;
-varying vec4      m_cord0;
-
-uniform float     m_brightness;
-uniform float     m_contrast;
-
-void main ()
+class IActionListener
 {
-    vec4 color = texture2D(m_samp0, m_cord0.xy).rgba;
-    color = color * m_contrast;
-    color = color + m_brightness;
-
-    gl_FragColor.rgba = color;
-}
+public:
+  virtual ~IActionListener() {};
+  
+  virtual bool OnAction(const CAction &action) = 0;
+};

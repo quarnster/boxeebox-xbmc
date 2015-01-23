@@ -60,8 +60,11 @@ public:
   void Update();
   void FrameMove();
   void FrameFinish();
-  bool FrameWait(int ms);
-  void Render(bool clear, DWORD flags = 0, DWORD alpha = 255);
+  void FrameWait(int ms);
+  bool HasFrame();
+  void Render(bool clear, DWORD flags = 0, DWORD alpha = 255, bool gui = true);
+  bool IsGuiLayer();
+  bool IsVideoLayer();
   void SetupScreenshot();
 
   CRenderCapture* AllocRenderCapture();
@@ -144,7 +147,7 @@ public:
 
   void UpdateResolution();
 
-  bool RendererHandlesPresent() const;
+
 #if defined(HAS_INTEL_SMD)
   CIntelSMDRenderer   *m_pRenderer;
 #elif defined(HAS_GL)
@@ -261,6 +264,7 @@ protected:
 
 
   OVERLAY::CRenderer m_overlays;
+  bool m_renderedOverlay;
 
   void RenderCapture(CRenderCapture* capture);
   void RemoveCapture(CRenderCapture* capture);
@@ -269,9 +273,6 @@ protected:
   //set to true when adding something to m_captures, set to false when m_captures is made empty
   //std::list::empty() isn't thread safe, using an extra bool will save a lock per render when no captures are requested
   bool                       m_hasCaptures; 
-
-  // temporary fix for RendererHandlesPresent after #2811
-  bool m_firstFlipPage;
 };
 
 extern CXBMCRenderManager g_renderManager;
