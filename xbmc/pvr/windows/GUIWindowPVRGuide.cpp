@@ -21,6 +21,7 @@
 #include "GUIWindowPVRGuide.h"
 
 #include "Application.h"
+#include "GUIUserMessages.h"
 #include "dialogs/GUIDialogOK.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/Key.h"
@@ -209,6 +210,14 @@ bool CGUIWindowPVRGuide::OnMessage(CGUIMessage& message)
       }
       break;
     }
+    case GUI_MSG_CHANGE_VIEW_MODE:
+    {
+      // let's set the view mode first before update
+      CGUIWindowPVRBase::OnMessage(message);
+      Refresh(true);
+      bReturn = true;
+      break;
+    }
     case GUI_MSG_REFRESH_LIST:
       switch(message.GetParam1())
       {
@@ -265,10 +274,10 @@ void CGUIWindowPVRGuide::UpdateViewChannel()
   SET_CONTROL_LABEL(CONTROL_LABEL_HEADER2, GetGroup()->GroupName());
 
   m_vecItems->Clear();
-  if ((!bGotCurrentChannel || g_PVRManager.GetCurrentEpg(*m_vecItems) == 0) && currentChannel.get())
+  if (!bGotCurrentChannel || g_PVRManager.GetCurrentEpg(*m_vecItems) == 0)
   {
     CFileItemPtr item;
-    item.reset(new CFileItem("pvr://guide/" + currentChannel->ChannelName() + "/empty.epg", false));
+    item.reset(new CFileItem("pvr://guide/channel/empty.epg", false));
     item->SetLabel(g_localizeStrings.Get(19028));
     item->SetLabelPreformated(true);
     m_vecItems->Add(item);

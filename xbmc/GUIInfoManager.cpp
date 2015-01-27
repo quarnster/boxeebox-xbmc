@@ -4571,6 +4571,16 @@ std::string CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, std::
         return dateTime.GetAsLocalizedDate();
       break;
     }
+    if (item->HasEPGInfoTag())
+    {
+      if (item->GetEPGInfoTag()->FirstAiredAsLocalTime().IsValid())
+      {
+        CDateTime dateTime;
+        dateTime = item->GetEPGInfoTag()->FirstAiredAsLocalTime();
+        return dateTime.GetAsLocalizedDate(true);
+        break;
+      }
+    }
     break;
   case LISTITEM_GENRE:
     if (item->HasVideoInfoTag())
@@ -5662,7 +5672,7 @@ std::string CGUIInfoManager::GetSkinVariableString(int info,
 
 bool CGUIInfoManager::ConditionsChangedValues(const std::map<INFO::InfoPtr, bool>& map)
 {
-  for (std::map<INFO::InfoPtr, bool>::const_iterator it = map.begin() ; it != map.end() ; it++)
+  for (std::map<INFO::InfoPtr, bool>::const_iterator it = map.begin() ; it != map.end() ; ++it)
   {
     if (it->first->Get() != it->second)
       return true;

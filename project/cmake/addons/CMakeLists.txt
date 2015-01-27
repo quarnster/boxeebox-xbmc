@@ -25,7 +25,7 @@ endif()
 get_filename_component(APP_ROOT "${APP_ROOT}" ABSOLUTE)
 
 if(NOT BUILD_DIR)
-    set(BUILD_DIR "${CMAKE_BINARY_DIR}/build")
+  set(BUILD_DIR "${CMAKE_BINARY_DIR}/build")
 else()
   file(TO_CMAKE_PATH "${BUILD_DIR}" BUILD_DIR)
 endif()
@@ -36,6 +36,7 @@ if(NOT DEPENDS_PATH)
 else()
   file(TO_CMAKE_PATH "${DEPENDS_PATH}" DEPENDS_PATH)
 endif()
+get_filename_component(DEPENDS_PATH "${DEPENDS_PATH}" ABSOLUTE)
 
 # make sure CMAKE_PREFIX_PATH is set
 if(NOT CMAKE_PREFIX_PATH)
