@@ -599,7 +599,7 @@ msgstr "Wyświetlaj wideo w formacie 4:3 w trybie"
 
 msgctxt "#175"
 msgid "Moods"
-msgstr "Nastrój"
+msgstr "Nastroje"
 
 msgctxt "#176"
 msgid "Styles"
@@ -887,7 +887,7 @@ msgstr "Liczba kanałów"
 
 msgctxt "#254"
 msgid "DTS capable receiver"
-msgstr "Odbiornik wspiera DTS"
+msgstr "Obsługuje format DTS"
 
 msgctxt "#255"
 msgid "CDDB"
@@ -1063,15 +1063,15 @@ msgstr "Zakładki"
 
 msgctxt "#300"
 msgid "MP1 capable receiver"
-msgstr "Odbiornik wspiera MP1"
+msgstr "Obsługuje format MP1"
 
 msgctxt "#301"
 msgid "MP2 capable receiver"
-msgstr "Odbiornik wspiera MP2"
+msgstr "Obsługuje format MP2"
 
 msgctxt "#302"
 msgid "MP3 capable receiver"
-msgstr "Odbiornik wspiera MP3"
+msgstr "Obsługuje format MP3"
 
 msgctxt "#303"
 msgid "Delay"
@@ -1243,7 +1243,7 @@ msgstr "Zachowuj oryginalną głośność miksując w dół"
 
 msgctxt "#347"
 msgid "DTS-HD capable receiver"
-msgstr "Odbiornik wspiera DTS-HD"
+msgstr "Obsługuje format DTS-HD"
 
 msgctxt "#348"
 msgid "Enable passthrough"
@@ -1251,7 +1251,7 @@ msgstr "Dekoduj na zewnętrznym urządzeniu"
 
 msgctxt "#349"
 msgid "TrueHD capable receiver"
-msgstr "Odbiornik wspiera TrueHD"
+msgstr "Obsługuje format TrueHD"
 
 msgctxt "#350"
 msgid "Programs"
@@ -1275,7 +1275,7 @@ msgstr "Matrix"
 
 msgctxt "#355"
 msgid "Screensaver time"
-msgstr "Aktywuj wygaszacz po upływie"
+msgstr "Uruchom wygaszacz po upływie"
 
 msgctxt "#356"
 msgid "Screensaver mode"
@@ -1311,7 +1311,7 @@ msgstr "Sortuj: Plik"
 
 msgctxt "#364"
 msgid "Dolby Digital (AC3) capable receiver"
-msgstr "Odbiornik wspiera Dolby Digital (AC3)"
+msgstr "Obsługuje format Dolby Digital (AC3)"
 
 msgctxt "#365"
 msgid "Sort by: Name"
@@ -1639,7 +1639,7 @@ msgstr "Odtwarzaj automatycznie"
 
 msgctxt "#448"
 msgid "Dolby Digital Plus (E-AC3) capable receiver"
-msgstr "Odbiornik wspiera Dolby Digital Plus (E-AC3)"
+msgstr "Obsługuje format Dolby Digital Plus (E-AC3)"
 
 msgctxt "#449"
 msgid "Enabled"
@@ -2473,6 +2473,10 @@ msgctxt "#679"
 msgid "Verbose logging for CEC library"
 msgstr "Rejestruj komunikaty biblioteki CEC"
 
+msgctxt "#680"
+msgid "Verbose logging for VIDEO component"
+msgstr "Rejestruj komunikaty komponentu VIDEO"
+
 msgctxt "#700"
 msgid "Cleaning up library"
 msgstr "Czyszczenie biblioteki"
@@ -2823,7 +2827,7 @@ msgstr "Chciałbyś przeskanować teraz?"
 
 msgctxt "#802"
 msgid "%s of %s available"
-msgstr "%s z &s dostępne"
+msgstr "%s z %s dostępne"
 
 msgctxt "#850"
 msgid "Invalid port number entered"
@@ -3727,11 +3731,11 @@ msgstr "Spróbuj zmienić poziom ustawień, aby zobaczyć dodatkowe kategorie i 
 
 msgctxt "#10100"
 msgid "Yes/No dialogue"
-msgstr "Okno dialogowe Tak/Nie"
+msgstr "Okno Tak/Nie"
 
 msgctxt "#10101"
 msgid "Progress dialogue"
-msgstr "Okno postępu"
+msgstr "Pasek postępu"
 
 msgctxt "#10126"
 msgid "File browser"
@@ -3791,7 +3795,7 @@ msgstr "Szukanie napisów..."
 
 msgctxt "#10211"
 msgid "Looking for or caching subtitles..."
-msgstr "Szukanie lub wgrywanie napisów..."
+msgstr "Szukanie lub buforowanie napisów..."
 
 msgctxt "#10212"
 msgid "terminating"
@@ -3875,7 +3879,7 @@ msgstr "Informacje o filmie"
 
 msgctxt "#12000"
 msgid "Select dialogue"
-msgstr "Okno dialogowe Wybierz"
+msgstr "Okno Wybierz"
 
 msgctxt "#12001"
 msgid "Music/Info"
@@ -3883,7 +3887,7 @@ msgstr "Muzyka/Informacje"
 
 msgctxt "#12002"
 msgid "Dialogue OK"
-msgstr "Okno dialogowe OK"
+msgstr "Okno OK"
 
 msgctxt "#12003"
 msgid "Videos/Info"
@@ -3903,7 +3907,7 @@ msgstr "Wizualizacja dźwięku"
 
 msgctxt "#12008"
 msgid "File stacking dialogue"
-msgstr "Okno dialogowe scalania plików"
+msgstr "Okno scalania plików"
 
 msgctxt "#12009"
 msgid "Rebuild index..."
@@ -4091,7 +4095,7 @@ msgstr "Reaktywuj blokadę"
 
 msgctxt "#12354"
 msgid "Would you like to update it now?"
-msgstr "Czy chcesz zaktualizować teraz?"
+msgstr "Czy chcesz teraz zaktualizować?"
 
 msgctxt "#12356"
 msgid "Change lock"
@@ -4287,7 +4291,7 @@ msgstr "Niebezpieczne odłączenie urządzenia"
 
 msgctxt "#13023"
 msgid "Successfully removed device"
-msgstr "Bezpiecznie odłączenie urządzenia"
+msgstr "Bezpieczne odłączenie urządzenia"
 
 msgctxt "#13024"
 msgid "Joystick plugged"
@@ -4531,7 +4535,7 @@ msgstr "Alarm"
 
 msgctxt "#13209"
 msgid "Alarm clock interval (in minutes)"
-msgstr "Alarmuj w interwale (w minutach)"
+msgstr "Częstotliwość ponawiania alarmu (w minutach)"
 
 msgctxt "#13210"
 msgid "Started, alarm in %im"
@@ -4675,7 +4679,7 @@ msgstr "Aktywuj obsługę czcionek odwróconych"
 
 msgctxt "#13305"
 msgid "Show RSS news feeds"
-msgstr "Pokazuj wiadomości RSS"
+msgstr "Pokazuj wiadomości z kanałów RSS"
 
 msgctxt "#13306"
 msgid "Show parent folder items"
@@ -4747,7 +4751,7 @@ msgstr "Tylko prawy"
 
 msgctxt "#13323"
 msgid "Enable karaoke support"
-msgstr "Aktywuj obsługę karaoke"
+msgstr "Uruchom obsługę karaoke"
 
 msgctxt "#13324"
 msgid "Background transparency"
@@ -4835,7 +4839,7 @@ msgstr "Dodaj do kolejki"
 
 msgctxt "#13348"
 msgid "Search IMDb..."
-msgstr "Przeszukiwanie IMDb..."
+msgstr "Wyszukiwanie w IMDb..."
 
 msgctxt "#13349"
 msgid "Scan for new content"
@@ -4979,7 +4983,7 @@ msgstr "Ustawienia dźwięku i napisów"
 
 msgctxt "#13397"
 msgid "Enable subtitles"
-msgstr "Aktywuj napisy"
+msgstr "Pokazuj napisy"
 
 msgctxt "#13398"
 msgid "Shortcuts"
@@ -5495,7 +5499,7 @@ msgstr "Wprowadzone zmiany w konfiguracji wymagają"
 
 msgctxt "#14040"
 msgid "network setup.  Would you like to restart now?"
-msgstr " ponownego uruchomienia. Chcesz teraz ponownie uruchomić Kodi?"
+msgstr " ponownego uruchomienia. Czy chcesz teraz ponownie uruchomić Kodi?"
 
 msgctxt "#14041"
 msgid "Internet connection bandwidth limitation"
@@ -5871,7 +5875,7 @@ msgstr "Ogólne"
 
 msgctxt "#16002"
 msgid "Internet lookup"
-msgstr "Przeszukiwanie w Internecie"
+msgstr "Wyszukiwanie w Internecie"
 
 msgctxt "#16003"
 msgid "Player"
@@ -5939,7 +5943,7 @@ msgstr "Liniowo"
 
 msgctxt "#16022"
 msgid "Bob (inverted)"
-msgstr "Liniowo (odwrócony)"
+msgstr "Liniowo (odwrócone)"
 
 msgctxt "#16024"
 msgid "Cancelling..."
@@ -6019,19 +6023,19 @@ msgstr "Wszystkie wideo"
 
 msgctxt "#16101"
 msgid "Unwatched"
-msgstr "Nieoglądane"
+msgstr "Nieobejrzane"
 
 msgctxt "#16102"
 msgid "Watched"
-msgstr "Oglądane"
+msgstr "Obejrzane"
 
 msgctxt "#16103"
 msgid "Mark as watched"
-msgstr "Oznacz jako oglądane"
+msgstr "Oznacz jako obejrzane"
 
 msgctxt "#16104"
 msgid "Mark as unwatched"
-msgstr "Oznacz jako nieoglądane"
+msgstr "Oznacz jako nieobejrzane"
 
 msgctxt "#16105"
 msgid "Edit title"
@@ -6193,6 +6197,22 @@ msgctxt "#16329"
 msgid "VAAPI Motion Compensated"
 msgstr "Kompensacja ruchu VAAPI"
 
+msgctxt "#16330"
+msgid "MMAL - Advanced"
+msgstr "MMAL - Zaawansowane"
+
+msgctxt "#16331"
+msgid "MMAL - Advanced (Half)"
+msgstr "MMAL - Zaawansowane (połówkowe)"
+
+msgctxt "#16332"
+msgid "MMAL - Bob"
+msgstr "MMAL - Liniowo"
+
+msgctxt "#16333"
+msgid "MMAL - Bob (Half)"
+msgstr "MMAL - Liniowo (połówkowe)"
+
 msgctxt "#16400"
 msgid "Post-processing"
 msgstr "Przetwarzanie wideo"
@@ -6251,11 +6271,11 @@ msgstr "Jakość sygnału"
 
 msgctxt "#19009"
 msgid "SNR"
-msgstr "Stosunek sygnału do szumu"
+msgstr "SNR"
 
 msgctxt "#19010"
 msgid "BER"
-msgstr "Stopa błędu (BER)"
+msgstr "BER"
 
 msgctxt "#19011"
 msgid "UNC"
@@ -6267,11 +6287,11 @@ msgstr "Serwer TV"
 
 msgctxt "#19013"
 msgid "Free to air"
-msgstr "Kanały niekodowane"
+msgstr "Brak"
 
 msgctxt "#19014"
 msgid "Fixed"
-msgstr "Stała"
+msgstr "Stałe"
 
 msgctxt "#19015"
 msgid "Encryption"
@@ -6495,7 +6515,7 @@ msgstr "Przejdź do aktualnych"
 
 msgctxt "#19071"
 msgid "EPG update interval"
-msgstr "Odświeżaj przewodnik w interwale"
+msgstr "Częstotliwość odświeżania przewodnika"
 
 msgctxt "#19072"
 msgid "Do not store the EPG in the database"
@@ -6711,11 +6731,11 @@ msgstr "Ignoruj istniejące nagrania"
 
 msgctxt "#19126"
 msgid "Start time"
-msgstr "Czas rozpoczęcia"
+msgstr "Początek"
 
 msgctxt "#19127"
 msgid "End time"
-msgstr "Czas zakończenia"
+msgstr "Koniec"
 
 msgctxt "#19128"
 msgid "Start date"
@@ -6735,7 +6755,7 @@ msgstr "Maksymalny czas trwania"
 
 msgctxt "#19132"
 msgid "Include unknown genres"
-msgstr "Uwzględnij nieznane gatunki"
+msgstr "Uwzględniaj nieznane gatunki"
 
 msgctxt "#19133"
 msgid "Search string"
@@ -6743,7 +6763,7 @@ msgstr "Wyrażenie wyszukiwania"
 
 msgctxt "#19134"
 msgid "Include description"
-msgstr "Uwzględnij opis"
+msgstr "Uwzględniaj opis"
 
 msgctxt "#19135"
 msgid "Case sensitive"
@@ -6795,7 +6815,7 @@ msgstr "Grupy"
 
 msgctxt "#19147"
 msgid "The PVR backend does not support this action. Check the log for details."
-msgstr "Serwer TV nie wspiera tej operacji. Sprawdź szczegóły w pliku dziennika."
+msgstr "Serwer TV nie obsługuje tej operacji. Sprawdź szczegóły w pliku dziennika."
 
 msgctxt "#19148"
 msgid "Channel"
@@ -6959,7 +6979,7 @@ msgstr "Usługa TV"
 
 msgctxt "#19192"
 msgid "None of the connected PVR backends supports scanning for channels."
-msgstr "Żaden z podłączonych serwerów TV nie wspiera skanowania kanałów."
+msgstr "Żaden z podłączonych serwerów TV nie obsługuje skanowania kanałów."
 
 msgctxt "#19193"
 msgid "The channel scan cannot be started. Check the log for details."
@@ -7051,7 +7071,7 @@ msgstr "Wprowadź poprawny adres URL dla nowego kanału"
 
 msgctxt "#19215"
 msgid "The PVR backend does not support timers."
-msgstr "Serwer TV nie wspiera nagrywania wg harmonogramu."
+msgstr "Serwer TV nie obsługuje nagrywania wg harmonogramu."
 
 msgctxt "#19216"
 msgid "All radio channels"
@@ -7091,7 +7111,7 @@ msgstr "Nagrywanie anulowane"
 
 msgctxt "#19225"
 msgid "Recording scheduled"
-msgstr "Nagrywanie zaplanowane"
+msgstr "Zaplanowano nagrywanie"
 
 msgctxt "#19226"
 msgid "Recording started"
@@ -7286,8 +7306,8 @@ msgid "Add-on for the backend to be able to use PVR."
 msgstr "Dodatek umożliwiająca użycie funkcji serwera TV."
 
 msgctxt "#19274"
-msgid "Please visit kodi.tv/pvr to learn more."
-msgstr "Odwiedź kodi.tv/pvr, aby dowiedzieć się więcej."
+msgid "Please visit http://kodi.wiki/view/PVR to learn more."
+msgstr "Odwiedź strony wiki po więcej informacji: http://kodi.wiki/view/PVR"
 
 msgctxt "#19275"
 msgid "Conflict warning"
@@ -7603,11 +7623,11 @@ msgstr "Obce kraje/Wyprawy"
 
 msgctxt "#19633"
 msgid "Social/Spiritual Sciences"
-msgstr "Społeczny/Nauki duchowe"
+msgstr "Nauki społeczne i religijne"
 
 msgctxt "#19634"
 msgid "Further Education"
-msgstr "Dalszy rozwój"
+msgstr "Doskonalenie zawodowe"
 
 msgctxt "#19635"
 msgid "Languages"
@@ -7959,7 +7979,7 @@ msgstr "Aktywuj animacje"
 
 msgctxt "#20080"
 msgid "Disable RSS during music"
-msgstr "Ukrywaj wiadomości RSS podczas odtwarzania muzyki"
+msgstr "Ukrywaj kanały RSS podczas odtwarzania muzyki"
 
 msgctxt "#20081"
 msgid "Enable shortcut buttons"
@@ -8151,15 +8171,15 @@ msgstr "Powrót na górę"
 
 msgctxt "#20129"
 msgid "Weave"
-msgstr "Splot"
+msgstr "Weave"
 
 msgctxt "#20130"
 msgid "Weave (inverted)"
-msgstr "Splot (odwrócony)"
+msgstr "Weave (odwrócony)"
 
 msgctxt "#20131"
 msgid "Blend"
-msgstr "Mieszanina"
+msgstr "Blend"
 
 msgctxt "#20132"
 msgid "Restart video"
@@ -8291,7 +8311,7 @@ msgstr "z"
 
 msgctxt "#20164"
 msgid "Locking not supported"
-msgstr "Blokowanie niedostępne"
+msgstr "Blokowanie nieobsługiwane"
 
 msgctxt "#20165"
 msgid "Not locked"
@@ -8399,7 +8419,7 @@ msgstr "Niestandardowe"
 
 msgctxt "#20191"
 msgid "Enable debug logging"
-msgstr "Rejestruj komunikaty diagnostyczne w dzienniku"
+msgstr "Rejestruj informacje diagnostyczne w dzienniku"
 
 msgctxt "#20192"
 msgid "Download additional information during updates"
@@ -8559,15 +8579,15 @@ msgstr "Sortuj: Identyfikator"
 
 msgctxt "#20317"
 msgid "Scanning movies using %s"
-msgstr "Przeszukiwanie filmów przy użyciu %s"
+msgstr "Wyszukiwanie filmów przy użyciu %s"
 
 msgctxt "#20318"
 msgid "Scanning music videos using %s"
-msgstr "Przeszukiwanie teledysków przy użyciu %s"
+msgstr "Wyszukiwanie teledysków przy użyciu %s"
 
 msgctxt "#20319"
 msgid "Scanning tvshows using %s"
-msgstr "Przeszukiwanie seriali przy użyciu %s"
+msgstr "Wyszukiwanie seriali przy użyciu %s"
 
 msgctxt "#20320"
 msgid "Scanning artists using %s"
@@ -8575,7 +8595,7 @@ msgstr "Wyszukiwanie wykonawców przy użyciu %s"
 
 msgctxt "#20321"
 msgid "Scanning albums using %s"
-msgstr "Przeszukiwanie albumów przy użyciu %s"
+msgstr "Wyszukiwanie albumów przy użyciu %s"
 
 msgctxt "#20323"
 msgid "Movie plot"
@@ -8755,7 +8775,7 @@ msgstr "* Wszystkie sezony"
 
 msgctxt "#20367"
 msgid "Hide watched"
-msgstr "Ukrywaj oglądane"
+msgstr "Ukrywaj obejrzane"
 
 msgctxt "#20368"
 msgid "Prod code"
@@ -8763,7 +8783,7 @@ msgstr "Kod Prod."
 
 msgctxt "#20369"
 msgid "Show plot for unwatched items"
-msgstr "Pokazuj fabułę dla nieoglądanych pozycji"
+msgstr "Pokazuj fabułę dla nieobejrzanych pozycji"
 
 msgctxt "#20370"
 msgid "* Hidden to prevent spoilers *"
@@ -9015,7 +9035,7 @@ msgstr "Pomijaj ścieżkę podczas aktualizacji biblioteki"
 
 msgctxt "#20433"
 msgid "Extract thumbnails and video information"
-msgstr "Ekstrahuj miniatury i informacje o wideo"
+msgstr "Wykonuj ekstrakcję miniatur i informacji o wideo"
 
 msgctxt "#20434"
 msgid "Sets"
@@ -9235,7 +9255,7 @@ msgstr "Zastępuj czcionki w napisach ASS/SSA"
 
 msgctxt "#21369"
 msgid "Enable mouse and touch screen support"
-msgstr "Aktywuj obsługę myszy i ekranu dotykowego"
+msgstr "Uruchom obsługę myszy i ekranu dotykowego"
 
 msgctxt "#21370"
 msgid "Play navigation sounds during media playback"
@@ -9263,7 +9283,7 @@ msgstr "Normalny"
 
 msgctxt "#21376"
 msgid "Letterbox"
-msgstr "Letterbox"
+msgstr "Czarne pasy"
 
 msgctxt "#21377"
 msgid "Widescreen"
@@ -9295,7 +9315,7 @@ msgstr "Pokazuj pasek przewijania"
 
 msgctxt "#21384"
 msgid "Make watched filtering a toggle in video library"
-msgstr "Filtr oglądanych pozycji jako przełącznik w trybie biblioteki"
+msgstr "Filtr obejrzanych pozycji jako przełącznik w trybie biblioteki"
 
 msgctxt "#21385"
 msgid "Open"
@@ -9323,11 +9343,11 @@ msgstr "Zarządzanie poziomem użycia energii"
 
 msgctxt "#21391"
 msgid "High power"
-msgstr "Wysokie zużycie"
+msgstr "Wysoka wydajność"
 
 msgctxt "#21392"
 msgid "Low power"
-msgstr "Niskie zużycie"
+msgstr "Niska wydajność"
 
 msgctxt "#21393"
 msgid "High standby"
@@ -9351,7 +9371,7 @@ msgstr "Pixel shader v2 wysokiej jakości"
 
 msgctxt "#21398"
 msgid "Enable playlist at startup"
-msgstr "Aktywuj listę odtwarzania po uruchomieniu"
+msgstr "Odtwarzaj wybraną listę mediów po uruchomieniu"
 
 msgctxt "#21399"
 msgid "Use tween animations"
@@ -9811,11 +9831,11 @@ msgstr "Kategoria"
 
 msgctxt "#21867"
 msgid "Byline"
-msgstr "Łącze autora"
+msgstr "Nagłówek"
 
 msgctxt "#21868"
 msgid "Byline title"
-msgstr "Nazwa łącza"
+msgstr "Nazwa nagłówka"
 
 msgctxt "#21869"
 msgid "Credit"
@@ -10527,7 +10547,7 @@ msgstr "Zatrzymuj odtwarzanie podczas wyszukiwania napisów"
 
 msgctxt "#24106"
 msgid "Specify where downloaded subtitles should be saved, the same location as the video or a custom location."
-msgstr "Określa lokalizację przechowywania pobranych napisów, czy w tej samej lokalizacji co plik wideo czy w lokalizacji zdefiniowanej przez użytkownika."
+msgstr "Określa lokalizację przechowywania pobranych napisów, w tej samej lokalizacji co plik wideo czy w lokalizacji zdefiniowanej przez użytkownika."
 
 msgctxt "#24107"
 msgid "Searching for subtitles ..."
@@ -10611,11 +10631,19 @@ msgstr "Pobieraj pierwszy plik napisów automatycznie"
 
 msgctxt "#24127"
 msgid "Automatically download first subtitle from the search result list"
-msgstr "Aktywuje pobieranie automatyczne pierwszego pliku napisów z listy wyników wyszukiwania."
+msgstr "Umożliwia pobieranie automatyczne pierwszego pliku napisów z listy wyników wyszukiwania."
 
 msgctxt "#24128"
 msgid "Configuration has been moved"
 msgstr "Konfiguracja została przeniesiona"
+
+msgctxt "#24129"
+msgid "The configuration of XBMC has been moved to the new location for Kodi. Please refer to http://kodi.wiki/view/Migration - this message will not be shown again!"
+msgstr "Konfiguracja XBMC została przeniesiona do nowej lokalizacji dla Kodi. \nOdwiedź strony wiki po więcej informacji: http://kodi.wiki/view/Migration - ten komunikat nie zostanie więcej wyświetlony!"
+
+msgctxt "#24999"
+msgid "Hide incompatible"
+msgstr "Ukrywaj niekompatybilne"
 
 msgctxt "#25000"
 msgid "Notifications"
@@ -10655,7 +10683,7 @@ msgstr "Nieudane odtwarzanie dysku Blu-ray"
 
 msgctxt "#25009"
 msgid "The menu of this Blu-ray is not supported"
-msgstr "Menu tego dysku Blu-ray nie jest wspierane"
+msgstr "Menu tego dysku Blu-ray nie jest obsługiwane"
 
 msgctxt "#29800"
 msgid "Library Mode"
@@ -10859,7 +10887,7 @@ msgstr "Używaj"
 
 msgctxt "#33056"
 msgid "Watch your"
-msgstr "Oglądaj"
+msgstr "Obejrzyj"
 
 msgctxt "#33057"
 msgid "Listen to"
@@ -10915,7 +10943,7 @@ msgstr "Niestandardowe tło"
 
 msgctxt "#33071"
 msgid "Custom backgrounds"
-msgstr "Niestandardowe tło"
+msgstr "Niestandardowe tła"
 
 msgctxt "#33072"
 msgid "View Readme"
@@ -11211,7 +11239,7 @@ msgstr "Nie używaj niestandardowej mapy klawiszy dla tego urządzenia"
 
 msgctxt "#35100"
 msgid "Enable joystick and gamepad support"
-msgstr "Aktywuj wsparcie dla dżojstika oraz gamepada"
+msgstr "Uruchom obsługę dżojstika i pada"
 
 msgctxt "#35102"
 msgid "Disable joystick when this device is present"
@@ -11275,11 +11303,11 @@ msgstr "Urządzenia wyłączane podczas zatrzymywania Kodi"
 
 msgctxt "#36009"
 msgid "Put devices in standby mode when activating screensaver"
-msgstr "Usypiaj urządzenia aktywując wygaszacz ekranu"
+msgstr "Usypiaj urządzenia uruchamiając wygaszacz ekranu"
 
 msgctxt "#36010"
 msgid "Wake devices when deactivating screensaver"
-msgstr "Wybudzaj urządzenia dezaktywując wygaszacz ekranu"
+msgstr "Wybudzaj urządzenia zatrzymując wygaszacz ekranu"
 
 msgctxt "#36011"
 msgid "Could not detect the CEC com port. Set it up manually."
@@ -11311,7 +11339,7 @@ msgstr "Połączono z urządzeniem HDMI"
 
 msgctxt "#36020"
 msgid "Make Kodi the active source when starting"
-msgstr "Ustaw Kodi aktywnym źródłem podczas uruchamiania"
+msgstr "Ustawiaj Kodi aktywnym źródłem podczas uruchamiania"
 
 msgctxt "#36021"
 msgid "Physical address (overrules HDMI port)"
@@ -11439,7 +11467,7 @@ msgstr "Określa schemat dźwiękowy używany przez interfejs użytkownika."
 
 msgctxt "#36111"
 msgid "Turn this off to remove the scrolling RSS news ticker."
-msgstr "Określa czy przewijanie wiadomości RSS jest aktywne"
+msgstr "Określa czy przewijanie wiadomości RSS jest aktywne."
 
 msgctxt "#36112"
 msgid "Edit the RSS feeds."
@@ -11487,7 +11515,7 @@ msgstr "Wyświetla na listach dodatkową pozycję (..), która służy do nawiga
 
 msgctxt "#36123"
 msgid "Show file extensions on media files. For example, 'You Enjoy Myself.mp3' would be simply be shown as 'You Enjoy Myself'."
-msgstr "Aktywuje wyświetlanie rozszerzeń plików multimedialnych. Na przykład, \"Innuendo.mp3\" zostanie wyświetlone jako \"Innuendo\"."
+msgstr "Umożliwia wyświetlanie rozszerzeń plików multimedialnych. Na przykład, \"Innuendo.mp3\" zostanie wyświetlone jako \"Innuendo\"."
 
 msgctxt "#36124"
 msgid "Ignore certain tokens during sort operations. For example, 'The Simpsons' would be sorted as 'Simpsons'."
@@ -11559,11 +11587,11 @@ msgstr "Aktywuje bibliotekę wideo."
 
 msgctxt "#36141"
 msgid "Show plot information for unwatched media in the Video Library."
-msgstr "Wyświetla fabułę dla nieoglądanych mediów w bibliotece wideo."
+msgstr "Pokazuje fabułę dla nieobejrzanych pozycji w bibliotece wideo."
 
 msgctxt "#36143"
 msgid "Get thumbnails for actors when scanning media."
-msgstr "Aktywuje pobieranie portretów aktorów podczas skanowania mediów."
+msgstr "Umożliwia pobieranie portretów aktorów podczas skanowania mediów."
 
 msgctxt "#36144"
 msgid "Remove the TV show season node, toggles between 'If only one season' (default), 'Always' and 'Never'."
@@ -11571,11 +11599,11 @@ msgstr "Usuwa podział seriali na sezony, wybór pomiędzy \"Jeśli tylko jeden 
 
 msgctxt "#36145"
 msgid "Group movies into 'Movie sets' when browsing the movie library."
-msgstr "Aktywuje grupowanie filmów w serie podczas przeglądania biblioteki filmów."
+msgstr "Umożliwia grupowanie filmów w serie podczas przeglądania biblioteki filmów."
 
 msgctxt "#36146"
 msgid "Check for new media files on Kodi startup."
-msgstr "Aktywuje uaktualnianie biblioteki po uruchomieniu Kodi."
+msgstr "Umożliwia uaktualnianie biblioteki po uruchomieniu Kodi."
 
 msgctxt "#36147"
 msgid "Hide the library scanning progress bar during scans."
@@ -11599,7 +11627,7 @@ msgstr "Kategoria zawierająca ustawienia związane z odtwarzaniem wideo."
 
 msgctxt "#36152"
 msgid "Enable automatic playback of the next file in the list."
-msgstr "Aktywuje automatycznie odtwarzanie kolejnej pozycji na liście."
+msgstr "Umożliwia automatycznie odtwarzanie kolejnej pozycji na liście."
 
 msgctxt "#36153"
 msgid "Adjust the method used to process and display video."
@@ -11611,35 +11639,35 @@ msgstr "Używa skalerów wysokiej jakości, kiedy wielkość skalowania przekrac
 
 msgctxt "#36155"
 msgid "Enable VDPAU hardware decoding of video files, mainly used for NVIDIA graphics and in some circumstances AMD graphics."
-msgstr "Aktywuje sprzętowe dekodowanie plików wideo przy pomocy VDPAU, używane głównie przez procesory graficzne NVidia i w określonych warunkach przez procesory graficzne AMD."
+msgstr "Umożliwia sprzętowe dekodowanie plików wideo przy pomocy VDPAU, używane głównie przez procesory graficzne NVidia i w określonych warunkach przez procesory graficzne AMD."
 
 msgctxt "#36156"
 msgid "Enable VAAPI hardware decoding of video files, mainly used for Intel graphics and in some circumstances AMD graphics."
-msgstr "Aktywuje sprzętowe dekodowanie plików wideo przy pomocy VAAPI, używane głównie przez procesory graficzne Intela i w określonych warunkach przez procesory graficzne AMD."
+msgstr "Umożliwia sprzętowe dekodowanie plików wideo przy pomocy VAAPI, używane głównie przez procesory graficzne Intela i w określonych warunkach przez procesory graficzne AMD."
 
 msgctxt "#36158"
 msgid "Enable DXVA2 hardware decoding of video files."
-msgstr "Aktywuje sprzętowe dekodowanie plików wideo przy pomocy DXVA2."
+msgstr "Umożliwia sprzętowe dekodowanie plików wideo przy pomocy DXVA2."
 
 msgctxt "#36159"
 msgid "Enable CrystalHD decoding of video files."
-msgstr "Aktywuje dekodowanie plików wideo przy pomocy CrystalHD."
+msgstr "Umożliwia dekodowanie plików wideo przy pomocy CrystalHD."
 
 msgctxt "#36160"
 msgid "Enable VDA hardware decoding of video files."
-msgstr "Aktywuje sprzętowe dekodowanie plików wideo przy pomocy VDA."
+msgstr "Umożliwia sprzętowe dekodowanie plików wideo przy pomocy VDA."
 
 msgctxt "#36161"
 msgid "Enable OpenMax hardware decoding of video files."
-msgstr "Aktywuje sprzętowe dekodowanie plików wideo przy pomocy OpenMax."
+msgstr "Umożliwia sprzętowe dekodowanie plików wideo przy pomocy OpenMax."
 
 msgctxt "#36162"
 msgid "Enable VideoToolbox hardware decoding of video files."
-msgstr "Aktywuje sprzętowe dekodowanie plików wideo przy pomocy VideoToolbox."
+msgstr "Umożliwia sprzętowe dekodowanie plików wideo przy pomocy VideoToolbox."
 
 msgctxt "#36163"
 msgid "Enable decoding of video files using pixel buffer objects."
-msgstr "Aktywuje sprzętowe dekodowanie plików wideo przy pomocy obiektów bufora pikseli."
+msgstr "Umożliwia sprzętowe dekodowanie plików wideo przy pomocy obiektów bufora pikseli."
 
 msgctxt "#36164"
 msgid "Allow the refresh rate of the display to be changed so that it best matches the video frame rate. This may yield smoother video playback."
@@ -11663,7 +11691,7 @@ msgstr "Maksymalna prędkość dopasowania wideo do aktualnej częstotliwości o
 
 msgctxt "#36169"
 msgid "Select the quality of resampling for cases where the audio output needs to be at a different sampling rate from that used by the source. [Low] is fast and will have minimal impact on system resources such as the use of the CPU, [Medium] & [High] will use progressively more system resources."
-msgstr "Określa jakość próbkowania w przypadku, gdy urządzenie podłączone do wyjścia dźwięku wymaga innego próbkowania niż to używane przez źródło. [Niska] jest szybkie i ma minimalny wpływ na zasoby systemowe takie, jak użycie procesora, [Średnia] i [Wysoka] będzie używać proporcjonalnie więcej zasobów systemowych."
+msgstr "Określa jakość próbkowania w przypadku, gdy urządzenie podłączone do wyjścia dźwięku wymaga innego próbkowania niż to używane przez źródło. [Niska] jest szybkie i ma minimalny wpływ na zasoby systemowe takie, jak użycie procesora, [Średnia] i [Wysoka] używa proporcjonalnie więcej zasobów systemowych."
 
 msgctxt "#36170"
 msgid "Allow video player to ignoring aspect ratio by a certain amount to fill a larger amount of the screen with video."
@@ -11675,19 +11703,19 @@ msgstr "Określa poziom powiększenia materiałów wideo o proporcjach 4:3 na wy
 
 msgctxt "#36172"
 msgid "VDPAU studio level conversion provides a way for advanced applications like Kodi to influence the colour space conversion."
-msgstr "Poziom konwersji VDPAU dostarcza zaawansowanym aplikacjom takim, jak Kodi wpływać na konwersję przestrzeni kolorów."
+msgstr "Poziom konwersji studyjnej VDPAU pozwala zaawansowanym aplikacjom takim jak Kodi, wpływać na konwersję przestrzeni kolorów."
 
 msgctxt "#36173"
 msgid "Enable upscaling using VDPAU."
-msgstr "Aktywuje skalowanie przy pomocy VDPAU."
+msgstr "Umożliwia skalowanie wideo przy pomocy VDPAU."
 
 msgctxt "#36174"
 msgid "Enable Teletext when watching a live TV stream."
-msgstr "Aktywuje teletekst podczas oglądania telewizji."
+msgstr "Umożliwia wyświetlanie teletekstu podczas oglądania telewizji."
 
 msgctxt "#36175"
 msgid "Scale Teletext to 4:3 ratio."
-msgstr "Aktywuje skalowanie teletekstu do proporcji 4:3."
+msgstr "Umożliwia skalowanie teletekstu do proporcji 4:3."
 
 msgctxt "#36176"
 msgid "Category containing settings for how video file lists are handled."
@@ -11699,7 +11727,7 @@ msgstr "Wybór pomiędzy dostępnymi funkcjami: Wybierz, Odtwórz (domyślnie), 
 
 msgctxt "#36178"
 msgid "Extract thumbnails and metadata information such as codec and aspect ratio from videos."
-msgstr "Aktywuje ekstrakcję miniatur i informacji, takich jak kodeki i proporcje obrazu, wyświetlanych w trybie biblioteki."
+msgstr "Umożliwia ekstrakcję miniatur i informacji takich, jak kodeki i proporcje obrazu."
 
 msgctxt "#36179"
 msgid "When a file is scanned into the library it will display the metadata title instead of the file name."
@@ -11707,7 +11735,7 @@ msgstr "Gdy plik jest skanowany i dodawany do biblioteki będzie wyświetlany ty
 
 msgctxt "#36180"
 msgid "Extract thumbnails and information, such as codecs and aspect ratio, to display in Library Mode."
-msgstr "Aktywuje ekstrakcję miniatur i informacji, takich jak kodeki i proporcje obrazu, wyświetlanych w trybie biblioteki."
+msgstr "Umożliwia ekstrakcję miniatur i informacji takich, jak kodeki i proporcje obrazu, wyświetlanych w trybie biblioteki."
 
 msgctxt "#36181"
 msgid "No info available yet."
@@ -11747,7 +11775,7 @@ msgstr "Określa zestaw znaków czcionki używanych przez napisy."
 
 msgctxt "#36190"
 msgid "Override ASS/SSA subtitles fonts."
-msgstr "Zastępuje czcionki w napisach ASS/SSA."
+msgstr "Umożliwia zastąpienie czcionek w napisach ASS/SSA."
 
 msgctxt "#36191"
 msgid "Set a custom directory for your subtitles. This can be a file share."
@@ -11791,7 +11819,7 @@ msgstr "Domyślnie używany ekstraktor metadanych teledysków podczas aktualizac
 
 msgctxt "#36201"
 msgid "Settings for PVR/Live TV features."
-msgstr "Ustawienia funkcji odtwarzania i nagrywania programów telewizyjnych"
+msgstr "Ustawienia funkcji odtwarzania i nagrywania programów telewizyjnych."
 
 msgctxt "#36202"
 msgid "Category for general settings for PVR/Live TV features."
@@ -11799,11 +11827,11 @@ msgstr "Kategoria z ogólnymi ustawieniami odtwarzania i nagrywania programów t
 
 msgctxt "#36203"
 msgid "Enable the Personal Video Recorder (PVR) features in Kodi. This requires that at least one PVR Add-on is installed."
-msgstr "Aktywuje funkcje odtwarzania i nagrywania telewizji (PVR) w Kodi. Do działania wymaga zainstalowanego, co najmniej jednego, klienta TV."
+msgstr "Umożliwia odtwarzanie i nagrywanie telewizji (PVR) w Kodi. Do działania wymaga zainstalowanego, co najmniej jednego, klienta TV."
 
 msgctxt "#36204"
 msgid "Import channel groups from the PVR backend (if supported). Will delete user created groups if they're not found on the backend."
-msgstr "Importuje grupy kanałów z serwera TV (jeśli wspierane). Wszystkie grupy stworzone przez użytkownika zostaną usunięte, jeśli nie znajdują się na serwerze."
+msgstr "Importuje grupy kanałów z serwera TV (jeśli obsługiwane). Wszystkie grupy stworzone przez użytkownika zostaną usunięte, jeśli nie znajdują się na serwerze."
 
 msgctxt "#36205"
 msgid "Sort the channels by channel number on the backend, but use Kodi's own numbering for channels."
@@ -11819,11 +11847,11 @@ msgstr "Otwiera menedżera kanałów, który umożliwia zmianę kolejności kana
 
 msgctxt "#36208"
 msgid "Instruct the backend to search for channels (if supported)."
-msgstr "Wymusza na serwerze TV wyszukiwanie kanałów (jeśli wspierane)."
+msgstr "Wymusza na serwerze TV wyszukiwanie kanałów (jeśli obsługiwane)."
 
 msgctxt "#36209"
 msgid "Delete channel/EPG database and reimport the data from the backend afterwards."
-msgstr "Usuwa kanały i bazę przewodnika telewizyjnego, a następnie importuje je ponownie z serwera."
+msgstr "Usuwa kanały i bazę przewodnika programów, a następnie importuje je ponownie z serwera."
 
 msgctxt "#36210"
 msgid "Prevent the 'connection lost' notification window from displaying when Kodi is unable to talk to the PVR backend server."
@@ -11847,35 +11875,35 @@ msgstr "Folder, w którym składowane są ikony kanałów."
 
 msgctxt "#36217"
 msgid "Scan for missing channel icons."
-msgstr "Aktywuje wyszukiwanie brakujących ikony kanałów."
+msgstr "Umożliwia wyszukiwanie brakujących ikony kanałów."
 
 msgctxt "#36218"
 msgid "Category for electronic programming guide settings."
-msgstr "Kategoria z ustawieniami przewodnika telewizyjnego"
+msgstr "Kategoria z ustawieniami przewodnika programów."
 
 msgctxt "#36220"
 msgid "Number of days of EPG data to import from backends."
-msgstr "Określa liczbę dni, dla których importowane będą dane do przewodnika telewizyjnego z serwerów."
+msgstr "Określa liczbę dni, dla których importowane będą dane do przewodnika programów z serwerów."
 
 msgctxt "#36221"
 msgid "Time between EPG data imports from backends."
-msgstr "Określa interwał pomiędzy importami danych do przewodnika telewizyjnego z serwerów."
+msgstr "Określa interwał pomiędzy importami danych do przewodnika programów z serwerów."
 
 msgctxt "#36222"
 msgid "Do not import EPG data while playing TV to minimise CPU usage."
-msgstr "Zapobiega importowaniu danych przewodnika telewizyjnego podczas odtwarzania multimediów, aby zminimalizować obciążenie procesora."
+msgstr "Zapobiega importowaniu danych przewodnika programów podczas odtwarzania multimediów, aby zminimalizować obciążenie procesora."
 
 msgctxt "#36223"
 msgid "By default, EPG data is stored in a local database to speed up importing when Kodi is restarted."
-msgstr "Domyślnie dane przewodnika telewizyjnego są przechowywane w lokalnej bazie danych, aby przyśpieszyć importowanie podczas ponownego uruchomienia Kodi."
+msgstr "Domyślnie dane przewodnika programów są przechowywane w lokalnej bazie danych, aby przyśpieszyć importowanie podczas ponownego uruchomienia Kodi."
 
 msgctxt "#36224"
 msgid "Hide \"no information available\" labels when no EPG data can be retrieved for a channel."
-msgstr "Ukrywa komunikat \"brak dostępnych informacji\", gdy brak informacji o kanale w przewodniku telewizyjnym."
+msgstr "Ukrywa komunikat \"brak dostępnych informacji\", gdy brak informacji o kanale w przewodniku programów."
 
 msgctxt "#36225"
 msgid "Delete the EPG database in Kodi and reimport the data afterwards from the backend."
-msgstr "Usuwa lokalną bazę przewodnika, a następnie importuje ją ponownie z serwera."
+msgstr "Usuwa lokalną bazę przewodnika programów, a następnie importuje ją ponownie z serwera."
 
 msgctxt "#36226"
 msgid "Category for PVR playback and channel switching settings."
@@ -11887,11 +11915,11 @@ msgstr "Wyświetla strumień wybranego kanału w oknie zamiast na pełnym ekrani
 
 msgctxt "#36228"
 msgid "Continue with the last viewed channel on startup."
-msgstr "Aktywuje odtwarzanie ostatnio oglądanego kanału telewizyjnego po uruchomieniu."
+msgstr "Umożliwia odtwarzanie ostatnio oglądanego kanału telewizyjnego po uruchomieniu."
 
 msgctxt "#36229"
 msgid "Display signal quality information in the codec information window (if supported by the Add-on and backend)."
-msgstr "Wyświetla informację o jakości sygnału w oknie informacyjnym kodeka (jeśli wspierane przez klienta i serwer)."
+msgstr "Wyświetla informację o jakości sygnału w oknie informacyjnym kodeka (jeśli obsługiwane przez klienta i serwer)."
 
 msgctxt "#36230"
 msgid "How long Kodi will wait to change the channel if the channel isn't being received. Useful for over-the-air channels that occasionally lose signal strength."
@@ -11915,19 +11943,19 @@ msgstr "Określa czas trwania nagrania po naciśnięciu przycisku nagrywania."
 
 msgctxt "#36235"
 msgid "Priority of the recording. Higher number means higher priority. Not supported by all Add-ons and backends."
-msgstr "Priorytet nagrywania. Większa liczba oznacza wyższy priorytet. Nie wszystkie klienty i serwery wspierają tę funkcję."
+msgstr "Priorytet nagrywania. Większa liczba oznacza wyższy priorytet. Nie wszystkie klienty i serwery obsługują tę funkcję."
 
 msgctxt "#36236"
 msgid "Delete recording after this time. Not supported by all Add-ons and backends."
-msgstr "Usuwa nagrania po upłynięciu określonego tutaj czasu. Nie wszystkie klienty i serwery wspierają tę funkcję."
+msgstr "Usuwa nagrania po upłynięciu określonego tutaj czasu. Nie wszystkie klienty i serwery obsługują tę funkcję."
 
 msgctxt "#36237"
 msgid "Start recordings before the actual time. Not supported by all Add-ons and backends."
-msgstr "Rozpoczyna nagrywanie przed planowanym rozpoczęciem nagrania. Nie wszystkie klienty i serwery wspierają tę funkcję."
+msgstr "Rozpoczyna nagrywanie przed planowanym rozpoczęciem nagrania. Nie wszystkie klienty i serwery obsługują tę funkcję."
 
 msgctxt "#36238"
 msgid "End recordings after the actual time. Not supported by all Add-ons and backends."
-msgstr "Kończy nagrywanie po planowanym zakończeniu nagrania. Nie wszystkie klienty i serwery wspierają tę funkcję."
+msgstr "Kończy nagrywanie po planowanym zakończeniu nagrania. Nie wszystkie klienty i serwery obsługują tę funkcję."
 
 msgctxt "#36239"
 msgid "Display a notification when timers are added, finished or removed by the backend."
@@ -11943,7 +11971,7 @@ msgstr "Uruchamia \"polecenie wznowienia\", kiedy Kodi będzie zamykane lub prze
 
 msgctxt "#36242"
 msgid "The command will not be executed when a recording will be started within this timeout."
-msgstr "Polecenie nie zostanie wykonane, jeśli nagranie nie rozpocznie się przed upłynięciem wprowadzonego tutaj czasu."
+msgstr "Polecenie nie zostanie wykonane, jeśli nagranie nie rozpocznie się przed upłynięciem wprowadzonegoczasu."
 
 msgctxt "#36243"
 msgid "The command to execute."
@@ -11963,11 +11991,11 @@ msgstr "Określa godzinę uruchamiania polecenia wybudzenia."
 
 msgctxt "#36247"
 msgid "Category for parental control settings if the PVR backend server supports parental controls."
-msgstr "Kategoria z ustawieniami kontroli rodzicielskiej, jeśli używany serwer TV wspiera kontrolę rodzicielską."
+msgstr "Kategoria z ustawieniami kontroli rodzicielskiej, jeśli używany serwer TV obsługuje kontrolę rodzicielską."
 
 msgctxt "#36248"
 msgid "Asks for a pin code to access parental locked channels. Channels can be marked as locked in the channels editor on the general tab. Parental locked channels can not be played or recorded without entering a pin code, and the EPG information is hidden for those channels."
-msgstr "Prosi o kod PIN przed uzyskaniem dostępu do zablokowanych kanałów rodzicielskich. Kanały mogą być oznaczone jako zamknięte w edytorze kanałów w karcie Ogólne. Zablokowane kanały rodzicielskie nie mogą być odtwarzane lub nagrane bez wprowadzania kodu PIN, dodatkowo informacje przewodnika dla tych kanałów są ukryte."
+msgstr "Prosi o kod PIN przed uzyskaniem dostępu do zablokowanych kanałów rodzicielskich. Kanały mogą być oznaczone jako zamknięte w edytorze kanałów w karcie Ogólne. Zablokowane kanały rodzicielskie nie mogą być odtwarzane lub nagrane bez wprowadzania kodu PIN, dodatkowo informacje przewodnika programów dla tych kanałów są ukryte."
 
 msgctxt "#36249"
 msgid "Enter a new pin code to unlock parental locked channels."
@@ -11979,11 +12007,11 @@ msgstr "Prosi ponownie o podanie kodu PIN podczas próby uzyskania dostępu do k
 
 msgctxt "#36251"
 msgid "Category for any specific settings for your PVR backend, if the PVR backend supports changing those settings in Kodi."
-msgstr "Kategoria ze specyficznymi ustawieniami serwera TV, jeśli używany serwer TV wspiera zmianę tych ustawień z poziomu Kodi."
+msgstr "Kategoria ze specyficznymi ustawieniami serwera TV, jeśli używany serwer TV obsługuje zmianę tych ustawień z poziomu Kodi."
 
 msgctxt "#36252"
 msgid "This option will bring you to any specific settings for your PVR backend, if the PVR backend supports changing those settings in Kodi."
-msgstr "Umożliwia ustawienie specyficznych ustawień serwera TV, jeśli serwer wspiera zmianę tych ustawień z poziomu Kodi."
+msgstr "Umożliwia ustawienie specyficznych ustawień serwera TV, jeśli serwer obsługuje zmianę tych ustawień z poziomu Kodi."
 
 msgctxt "#36253"
 msgid "Section that contains settings related to music files and how they are handled."
@@ -11999,7 +12027,7 @@ msgstr "Określa czy wykonawcy, którzy pojawiają się tylko w kompilacjach, b�
 
 msgctxt "#36256"
 msgid "Automatically fetch album and artist information via scrapers during scan."
-msgstr "Automatycznie pobiera informacje o albumie i wykonawcy podczas skanowania."
+msgstr "Pobiera automatycznie informacje o albumie i wykonawcy podczas skanowania."
 
 msgctxt "#36257"
 msgid "Select the default album information source."
@@ -12055,11 +12083,11 @@ msgstr "Zmniejsza głośność pliku, gdy występuje przesterowanie."
 
 msgctxt "#36271"
 msgid "Smoothly fade from one audio track to the next. You can set the amount of overlap from 1-15 seconds."
-msgstr "Aktywuje płynne przechodzenie z jednej ścieżki dźwiękowej do następnej. Można ustawić długość nakładania się dźwięków w przedziale od 1-15 sekund."
+msgstr "Umożliwia płynne przechodzenie z jednej ścieżki dźwiękowej do następnej. Można ustawić długość nakładania się dźwięków w przedziale od 1-15 sekund."
 
 msgctxt "#36272"
 msgid "Allow crossfading to occur when both tracks are from the same album."
-msgstr "Aktywuje płynne przechodzenie między kolejnymi utworami, jeśli pochodzą z tego samego albumu."
+msgstr "Umożliwia płynne przechodzenie między kolejnymi utworami, jeśli pochodzą z tego samego albumu."
 
 msgctxt "#36273"
 msgid "Select the visualisation that will be displayed while listening to music."
@@ -12067,7 +12095,7 @@ msgstr "Określa wizualizację, która będzie wyświetlana podczas odtwarzania 
 
 msgctxt "#36274"
 msgid "Read the tag information from song files. For large directories this can slow down read time, especially over a network."
-msgstr "Aktywuje wczytywanie znaczników z plików utworów. W przypadku dużych katalogów może spowolnić czas odczytu, zwłaszcza w sieci."
+msgstr "Umożliwia wczytywanie znaczników z plików utworów. W przypadku dużych katalogów może spowolnić czas odczytu, zwłaszcza w sieci."
 
 msgctxt "#36275"
 msgid "Control the way that the names of songs are displayed in the user interface. In order to function properly, tag reading needs to be enabled."
@@ -12103,11 +12131,11 @@ msgstr "Kategoria zawierająca ustawienia związane z obsługą dysków CD-Audio
 
 msgctxt "#36283"
 msgid "Autorun CDs when inserted in drive."
-msgstr "Aktywuje odtwarzanie dysków CD-Audio automatycznie po włożeniu do napędu."
+msgstr "Umożliwia odtwarzanie dysków CD-Audio automatycznie po włożeniu do napędu."
 
 msgctxt "#36284"
 msgid "Read the information belonging to an audio CD from an internet database."
-msgstr "Aktywuje wczytywanie informacji o CD-Audio z internetowej bazy danych."
+msgstr "Umożliwia wczytywanie informacji o CD-Audio z internetowej bazy danych."
 
 msgctxt "#36285"
 msgid "Select the location on your hard drive where ripped tracks will be saved to."
@@ -12263,19 +12291,19 @@ msgstr "Kategoria zawierająca ustawienia związane z usługą UPnP."
 
 msgctxt "#36323"
 msgid "Enable the UPnP server. This allows you to stream media to a UPnP client."
-msgstr "Aktywuje serwer UPnP. Umożliwia to strumieniowanie mediów do klientów UPnP."
+msgstr "Uruchamia serwer UPnP, który umożliwia strumieniowanie mediów do klientów UPnP."
 
 msgctxt "#36324"
 msgid "When a manual or automatical library update occurs, notify UPnP clients."
-msgstr "Aktywuje powiadamianie klientów UPnP o aktualizacji biblioteki."
+msgstr "Umożliwia powiadamianie klientów UPnP o aktualizacji biblioteki."
 
 msgctxt "#36325"
 msgid "Enable the UPnP client. This allows you to stream media from any UPnP server with a control point and control playback from that server."
-msgstr "Aktywuje klienta UPnP. Umożliwia to strumieniowanie mediów z dowolnego serwera UPnP z punktem kontroli oraz kontrolowanie odtwarzania."
+msgstr "Uruchamia klienta UPnP. Umożliwia to odtwarzanie mediów z dowolnego serwera UPnP z punktem kontroli oraz kontrolowanie odtwarzania."
 
 msgctxt "#36326"
 msgid "Enable the UPnP control point. This allows you to stream media to any UPnP client and control playback from Kodi."
-msgstr "Aktywuje punkt kontroli UPnP. Umożliwia to strumieniowanie mediów do dowolnego klienta oraz kontrolowanie odtwarzania z poziomu Kodi."
+msgstr "Uruchamia punkt kontroli UPnP. Umożliwia to strumieniowanie mediów do dowolnego klienta oraz kontrolowanie odtwarzania z poziomu Kodi."
 
 msgctxt "#36327"
 msgid "Category containing settings for how the webserver service is handled."
@@ -12283,7 +12311,7 @@ msgstr "Kategoria zawierająca ustawienia związane z usługą serwera webowego.
 
 msgctxt "#36328"
 msgid "Enable remote users to control Kodi through the built-in webserver."
-msgstr "Aktywuje zdalne sterowanie Kodi poprzez wbudowany serwer webowy."
+msgstr "Umożliwia zdalne sterowanie Kodi poprzez wbudowany serwer webowy."
 
 msgctxt "#36329"
 msgid "Define the webserver port."
@@ -12347,7 +12375,7 @@ msgstr "Zezwala Kodi odbierać treści AirPlay z innych urządzeń i aplikacji."
 
 msgctxt "#36344"
 msgid "Enable AirPlay password protection."
-msgstr "Aktywuje ochronę dostępu do usługi AirPlay przy pomocy hasła."
+msgstr "Umożliwia ochronę dostępu do usługi AirPlay przy pomocy hasła."
 
 msgctxt "#36345"
 msgid "Sets the AirPlay password."
@@ -12391,7 +12419,7 @@ msgstr "Wyświetla Kodi w pełnoekranowym oknie. Główną korzyścią tego tryb
 
 msgctxt "#36355"
 msgid "In a multi-screen configuration, the screens where Kodi is not displayed are blacked out."
-msgstr "W konfiguracji z wieloma wyświetlaczami, wyświetlacze gdzie Kodi nie jest wyświetlany są wygaszane."
+msgstr "W konfiguracji z wieloma wyświetlaczami, wyświetlacze, na których Kodi nie jest wyświetlane, są wygaszane."
 
 msgctxt "#36356"
 msgid "Eliminate vertical tearing."
@@ -12419,7 +12447,7 @@ msgstr "Określa konfigurację odtwarzania: [Stała] - właściwości odtwarzani
 
 msgctxt "#36362"
 msgid "Select the number of channels supported by the audio connection, or the number of speakers if connected by analog connections. This setting does not apply to passthrough audio. Note - SPDIF supports 2.0 channels only but can still output multichannel audio using a format supported by passthrough."
-msgstr "Określa liczbę kanałów wspieranych przez złącze dźwiękowe lub liczbę głośników podłączonych do złącz analogowych. To ustawienie nie ma wpływu na ustawienie przepuszczania dźwięku. Uwaga - złącze SPDIF wspiera tylko kanały 2.0, ale umożliwia przepuszczanie wspieranych formatów wielokanałowych."
+msgstr "Określa liczbę kanałów obsługiwanych przez złącze dźwiękowe lub liczbę głośników podłączonych do złącz analogowych. To ustawienie nie ma wpływu na ustawienie przepuszczania dźwięku. Uwaga - złącze SPDIF obsługuje tylko kanały 2.0, ale umożliwia przepuszczanie obsługiwanych formatów wielokanałowych."
 
 msgctxt "#36363"
 msgid "Boost AC3 streams that have been downmixed to 2 channels."
@@ -12431,11 +12459,11 @@ msgstr "Zaznacz, aby aktywować miksowanie dźwięku 2 kanałowego do liczby kan
 
 msgctxt "#36365"
 msgid "Select this option if your receiver is capable of decoding AC3 streams."
-msgstr "Zaznacz tę opcję, jeśli urządzenie dekodowania wspiera dekodowanie strumienia AC3."
+msgstr "Zaznacz tę opcję, jeśli urządzenie dekodowania obsługuje dekodowanie strumienia AC3."
 
 msgctxt "#36366"
 msgid "Select this option if your receiver is capable of decoding DTS streams."
-msgstr "Zaznacz tę opcję, jeśli urządzenie dekodowania wspiera dekodowanie strumienia DTS."
+msgstr "Zaznacz tę opcję, jeśli urządzenie dekodowania obsługuje dekodowanie strumienia DTS."
 
 msgctxt "#36367"
 msgid "Select the maximum number of audio channels/speakers available for audio decoded. If optical/coax digital outputs are used this must be set to 2.0"
@@ -12443,15 +12471,15 @@ msgstr "Określa maksymalną liczbę kanałów/głośników dostępnych dla zdek
 
 msgctxt "#36368"
 msgid "Select to enable the passthrough audio options for playback of encoded audio such as Dolby Digital."
-msgstr "Aktywuje przesyłanie zakodowanego dźwięku w formatach takich jak Dolby Digital, do zewnętrznego urządzenia dekodowania np. telewizora lub amplitunera."
+msgstr "Umożliwia przesyłanie zakodowanego dźwięku w formatach takich jak Dolby Digital, do zewnętrznego urządzenia dekodowania np. telewizora lub amplitunera."
 
 msgctxt "#36369"
 msgid "Select this option if your receiver is capable of decoding TrueHD streams."
-msgstr "Zaznacz tę opcję, jeśli urządzenie dekodowania obsługuje strumień TrueHD."
+msgstr "Zaznacz tę opcję, jeśli urządzenie dekodowania obsługuje dekodowanie strumienia TrueHD."
 
 msgctxt "#36370"
 msgid "Select this option if your receiver is capable of decoding DTS-HD streams."
-msgstr "Zaznacz tę opcję, jeśli urządzenie dekodowania wspiera dekodowanie strumienia DTS-HD."
+msgstr "Zaznacz tę opcję, jeśli urządzenie dekodowania obsługuje dekodowanie strumienia DTS-HD."
 
 msgctxt "#36371"
 msgid "Select the device to be used for playback of audio that has been decoded such as mp3."
@@ -12459,7 +12487,7 @@ msgstr "Określa urządzenie używane do odtwarzania dźwięku zdekodowanego w f
 
 msgctxt "#36372"
 msgid "Select the device to be used for playback of encoded formats, these are any of the formats below in the 'capable receiver' options."
-msgstr "Określa zewnętrzne urządzenie używane do odtwarzania zakodowanych formatów, zaznacz wspierane formaty w opcjach poniżej."
+msgstr "Określa zewnętrzne urządzenie używane do odtwarzania zakodowanych formatów, zaznacz obsługiwane formaty w opcjach poniżej."
 
 msgctxt "#36373"
 msgid "Configure how interface sounds are handled, such as menu navigation and important notifications."
@@ -12539,7 +12567,7 @@ msgstr "Kategoria zawierająca ustawienia funkcji diagnozowania błędów."
 
 msgctxt "#36392"
 msgid "Turn debug logging on or off. Useful for troubleshooting."
-msgstr "Aktywuje rejestrowanie w pliku dziennika komunikatów diagnostycznych. Pomocne w rozwiązywaniu problemów."
+msgstr "Umożliwia rejestrowanie w pliku dziennika informacji diagnostycznych. Pomocne w rozwiązywaniu problemów."
 
 msgctxt "#36393"
 msgid "Folder used to save screenshots taken within Kodi."
@@ -12547,7 +12575,7 @@ msgstr "Folder używany do zapisywania zrzutów ekranu Kodi."
 
 msgctxt "#36394"
 msgid "Enables log messages from additional libraries to be included in the log."
-msgstr "Aktywuje rejestrowanie w pliku dziennika komunikatów diagnostycznych dodatkowych bibliotek."
+msgstr "Umożliwia rejestrowanie w pliku dziennika komunikatów diagnostycznych dodatkowych bibliotek."
 
 msgctxt "#36395"
 msgid "Category containing settings for the master lock function."
@@ -12571,43 +12599,43 @@ msgstr "Kategoria zawierająca ustawienia związane z funkcją buforowania."
 
 msgctxt "#36400"
 msgid "Enable cache for playback of Video, Audio or DVDs from hard disk."
-msgstr "Aktywuje buforowanie odtwarzania wideo, muzyki i DVD z dysku twardego."
+msgstr "Umożliwia buforowanie odtwarzania wideo, muzyki i DVD z dysku twardego."
 
 msgctxt "#36401"
 msgid "Enable cache for playback of Video from DVD-ROM."
-msgstr "Aktywuje buforowanie odtwarzania wideo z dysków DVD-ROM."
+msgstr "Umożliwia buforowanie odtwarzania wideo z dysków DVD-ROM."
 
 msgctxt "#36402"
 msgid "Enable cache for Video playback from Local Network."
-msgstr "Aktywuje buforowanie odtwarzania wideo z sieci lokalnej."
+msgstr "Umożliwia buforowanie odtwarzania wideo z sieci lokalnej."
 
 msgctxt "#36403"
 msgid "Enable cache for Video playback from Internet."
-msgstr "Aktywuje buforowanie odtwarzania wideo z Internetu."
+msgstr "Umożliwia buforowanie odtwarzania wideo z Internetu."
 
 msgctxt "#36404"
 msgid "Enable cache for playback of Audio from DVD-ROM."
-msgstr "Aktywuje buforowanie odtwarzania dźwięku z dysków DVD-ROM."
+msgstr "Umożliwia buforowanie odtwarzania dźwięku z dysków DVD-ROM."
 
 msgctxt "#36405"
 msgid "Enable cache for Audio playback from Local Network."
-msgstr "Aktywuje buforowanie odtwarzania dźwięku z sieci lokalnej."
+msgstr "Umożliwia buforowanie odtwarzania dźwięku z sieci lokalnej."
 
 msgctxt "#36406"
 msgid "Enable cache for Audio playback from Internet."
-msgstr "Aktywuje buforowanie odtwarzania dźwięku z Internetu."
+msgstr "Umożliwia buforowanie odtwarzania dźwięku z Internetu."
 
 msgctxt "#36407"
 msgid "Enable cache for playback of DVD from DVD-ROM."
-msgstr "Aktywuje buforowanie odtwarzania DVD z dysków DVD-ROM."
+msgstr "Umożliwia buforowanie odtwarzania DVD z dysków DVD-ROM."
 
 msgctxt "#36408"
 msgid "Enable cache for DVD playback from Local Network."
-msgstr "Aktywuje buforowanie odtwarzania DVD z sieci lokalnej."
+msgstr "Umożliwia buforowanie odtwarzania DVD z sieci lokalnej."
 
 msgctxt "#36409"
 msgid "Enable cache of unknown types from Internet."
-msgstr "Aktywuje buforowanie odtwarzania nieznanych mediów z Internetu."
+msgstr "Umożliwia buforowanie odtwarzania nieznanych mediów z Internetu."
 
 msgctxt "#36410"
 msgid "No info available yet."
@@ -12655,7 +12683,7 @@ msgstr "Pomijanie miksera VDPAU oszczędza zasoby na mało wydajnych systemach, 
 
 msgctxt "#36422"
 msgid "Enable hardware video decode using AMLogic decoder."
-msgstr "Aktywuje sprzętowe dekodowanie wideo przy pomocy dekodera AMLogic."
+msgstr "Umożliwia sprzętowe dekodowanie wideo przy pomocy dekodera AMLogic."
 
 msgctxt "#36424"
 msgid "Select what will happen when an EPG item is selected: [Show context menu] will trigger the contextual menu from where you can choose further actions; [Switch to channel] will instantly tune to the related channel; [Show information] will display a detailed information with plot and further options; [Record] will create a recording timer for the selected item."
@@ -12671,7 +12699,7 @@ msgstr "Przełącz na kanał"
 
 msgctxt "#36427"
 msgid "Show information"
-msgstr "Pokaż informacje"
+msgstr "Pokazuj informacje"
 
 msgctxt "#36428"
 msgid "Record"
@@ -12679,11 +12707,11 @@ msgstr "Nagraj"
 
 msgctxt "#36429"
 msgid "Select this if the audio out connection only supports multichannel audio as Dolby Digital 5.1, such as an SPDIF connection.  If your system supports LPCM multichannel sound via HDMI, leave this disabled."
-msgstr "Zaznacz tę opcję, gdy złącze dźwiękowe wspiera wielokanałowy dźwięk tylko w formacie Dolby Digital 5.1,  np. złącze SPDIF. Jeśli Twój system wspiera wielokanałowy dźwięk w formacie LPCM przez HDMI, pozostaw tę opcję nieaktywną."
+msgstr "Zaznacz tę opcję, gdy złącze dźwiękowe obsługuje wielokanałowy dźwięk tylko w formacie Dolby Digital 5.1,  np. złącze SPDIF. Jeśli Twój system obsługuje wielokanałowy dźwięk w formacie LPCM przez HDMI, pozostaw tę opcję nieaktywną."
 
 msgctxt "#36430"
 msgid "Configure how video processing will be accelerated. This includes things like decoding and scaling."
-msgstr "Określa sposób akceleracji przetwarzania wideo. Obejmuje to dekodowanie i skalowanie."
+msgstr "Określa sposób sprzętowej akceleracji przetwarzania wideo, z uwzględnieniem dekodowania i skalowania."
 
 msgctxt "#36431"
 msgid "Defines whether video decoding should be performed in software (requires more CPU) or with hardware acceleration where possible."
@@ -12703,7 +12731,7 @@ msgstr "Dopuszczaj sprzętową akcelerację (MMAL)"
 
 msgctxt "#36435"
 msgid "Use DVDPlayer for decoding of video files with MMAL acceleration."
-msgstr "Aktywuje użycie domyślnego odtwarzacza do dekodowania plików wideo przy pomocy akceleracji MMAL."
+msgstr "Umożliwia użycie domyślnego odtwarzacza do dekodowania plików wideo, przy pomocy akceleracji MMAL."
 
 msgctxt "#36500"
 msgid "Stereoscopic 3D mode (current)"
@@ -12807,7 +12835,7 @@ msgstr "Określa tryb odtwarzania wideo 3D. [Pytaj] wyświetli okno wyboru trybu
 
 msgctxt "#36538"
 msgid "[Enabled] Switch GUI (and some TVs) back to 2D mode when playback ended. [Disabled] GUI and TV will stay in stereoscopic 3D mode. For video playlists the stereoscopic 3D mode won't change between videos, not even for non stereoscopic ones."
-msgstr "[Aktywne] Przełącza interfejs użytkownika (i niektóre telewizory) z powrotem do trybu 2D, gdy odtwarzanie zostanie zakończone. [Nieaktywne] Interfejs użytkownika pozostanie w stereoskopowym trybie 3D. W przypadku list odtwarzania stereofoniczny tryb 3D nie zostanie zmieniony pomiędzy pozycjami wideo."
+msgstr "[Aktywne] Przełącza interfejs użytkownika (i niektóre telewizory) z powrotem do trybu 2D po zakończeniu odtwarzania. [Nieaktywne] Interfejs użytkownika i telewizor pozostanie w stereoskopowym trybie 3D. W przypadku list odtwarzania stereofoniczny tryb 3D nie zostanie zmieniony pomiędzy pozycjami wideo, nawet dla materiałów 2D."
 
 msgctxt "#36539"
 msgid "Changes the stereoscopic 3D mode of the user interface."
@@ -12831,7 +12859,7 @@ msgstr "Zaznaczenie tej opcji zwiększy głośność dialogów w stosunku do dź
 
 msgctxt "#36544"
 msgid "Enable hardware decoding of video files."
-msgstr "Aktywuje sprzętowe dekodowanie plików wideo."
+msgstr "Umożliwia sprzętowe dekodowanie plików wideo."
 
 msgctxt "#36545"
 msgid "Stereoscopic 3D depth of subtitles"
@@ -12851,7 +12879,7 @@ msgstr "Ogranicza rozdzielczość interfejsu użytkownika w celu oszczędzenia p
 
 msgctxt "#36549"
 msgid "Use iOS8 compatible AirPlay support. If you have trouble with older iOS devices detecting Kodi as a valid target try switching this off. This option takes effect on the next restart of Kodi only!"
-msgstr "Przełącza AirPlay w trybie kompatybilności z iOS8. Jeśli masz problemy z wykrywaniem Kodi jako poprawnego źródła, na urządzeniach ze starszymi wersjami iOS, spróbuj odznaczyć tę opcję. Ta opcja do poprawnego działania wymaga ponownego uruchomienia Kodi!"
+msgstr "Przełącza AirPlay w tryb kompatybilności z iOS8. Jeśli masz problemy z wykrywaniem Kodi jako poprawnego źródła, na urządzeniach ze starszymi wersjami iOS, spróbuj odznaczyć tę opcję. Ta opcja do poprawnego działania wymaga ponownego uruchomienia Kodi!"
 
 msgctxt "#36600"
 msgid "Category containing the settings for how the music library is handled."
@@ -12991,7 +13019,7 @@ msgstr "Znajdź w"
 
 msgctxt "#37016"
 msgid "Select this option if your receiver is capable of decoding E-AC3 streams."
-msgstr "Zaznacz tę opcję, jeśli urządzenie dekodowania wspiera dekodowanie strumienia E-AC3."
+msgstr "Zaznacz tę opcję, jeśli urządzenie dekodowania obsługuje dekodowanie strumienia E-AC3."
 
 msgctxt "#37017"
 msgid "Dual audio output"
@@ -13019,11 +13047,11 @@ msgstr "Chcesz zatrzymać odtwarzanie na zdalnym urządzeniu?"
 
 msgctxt "#37024"
 msgid "Select this if the audio out connection only supports multichannel audio as Dolby Digital 5.1, this allows multichannel audio such as AAC5.1 or FLAC5.1 to be listened to in 5.1 surround sound. Note - Not recommended on Pi as this requires a lot of CPU."
-msgstr "Zaznacz tę opcję, gdy złącze dźwiękowe wspiera wielokanałowy dźwięk tylko w formacie Dolby Digital 5.1, a chcesz odtwarzać wielokanałowy dźwięk w formatach AACS5.1 lub FLAC5.1 na systemie dźwięku przestrzennego 5.1. Uwaga - nierekomendowane dla platformy Pi z powodu silnego użycia procesora."
+msgstr "Zaznacz tę opcję, gdy złącze dźwiękowe obsługuje wielokanałowy dźwięk tylko w formacie Dolby Digital 5.1, a chcesz odtwarzać wielokanałowy dźwięk w formatach AACS5.1 lub FLAC5.1 na systemie dźwięku przestrzennego 5.1. Uwaga - nierekomendowane dla platformy Pi z powodu intesywnego użycia procesora."
 
 msgctxt "#37025"
 msgid "Configure audio encoder settings such as quality and compression level"
-msgstr "Określa ustawienia kodeków dźwięku takie, jak jakość i poziom kompresji."
+msgstr "Określa ustawienia kodeków dźwięku takie jak jakość i poziom kompresji."
 
 msgctxt "#37026"
 msgid "Auto"
@@ -13047,8 +13075,8 @@ msgstr "Nieograniczony"
 
 msgctxt "#37031"
 msgid "Specifies how Blu-rays should be opened/played back. Disc menus are not fully supported yet and may cause problems."
-msgstr "Określa sposób otwierania/odtwarzania dysków Blu-ray. Menu dysków nie są w pełni wspierane i mogą powodować problemy."
+msgstr "Określa sposób otwierania/odtwarzania dysków Blu-ray. Menu dysku nie jest w pełni obsługiwane i może powodować problemy."
 
 msgctxt "#38010"
 msgid "GPU accelerated"
-msgstr "Akceleracja GPU"
+msgstr "Akceleracja sprzętowa"

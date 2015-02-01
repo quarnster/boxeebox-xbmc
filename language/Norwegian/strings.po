@@ -747,7 +747,7 @@ msgstr "Pikselforhold"
 
 msgctxt "#218"
 msgid "DVD drive"
-msgstr "DVD-drev"
+msgstr "DVD-enhet"
 
 msgctxt "#219"
 msgid "Please insert disc"
@@ -1899,7 +1899,7 @@ msgstr "Velg spilleliste"
 
 msgctxt "#525"
 msgid "New playlist..."
-msgstr "Ny spilleliste"
+msgstr "Ny spilleliste..."
 
 msgctxt "#526"
 msgid "Add to playlist"
@@ -1975,7 +1975,7 @@ msgstr "DVD"
 
 msgctxt "#544"
 msgid "Media info"
-msgstr "Mediainformasjon"
+msgstr "Mediainfo"
 
 msgctxt "#545"
 msgid "Audio output device"
@@ -3201,6 +3201,10 @@ msgctxt "#1260"
 msgid "Announce these services to other systems via Zeroconf"
 msgstr "Annonser disse tjenestene til andre systemer med Zeroconf"
 
+msgctxt "#1268"
+msgid "iOS 8 compatibility mode"
+msgstr "iOS 8 kompatibilitetsmodus"
+
 msgctxt "#1269"
 msgid "Allow volume control"
 msgstr "Tillat volumkontroll"
@@ -3239,7 +3243,7 @@ msgstr "Egendefinert passthrough-enhet"
 
 msgctxt "#1375"
 msgid "Temperature"
-msgstr "Tempratur"
+msgstr "Temperatur"
 
 msgctxt "#1376"
 msgid "Pressure"
@@ -3683,7 +3687,7 @@ msgstr "Ja/Nei-dialog"
 
 msgctxt "#10101"
 msgid "Progress dialogue"
-msgstr "Forløpsdialgboks"
+msgstr "Framdriftsviser"
 
 msgctxt "#10126"
 msgid "File browser"
@@ -4135,15 +4139,15 @@ msgstr "Batterinivå"
 
 msgctxt "#12396"
 msgid "Auto updates: On"
-msgstr "Automatiske oppdateringer: på"
+msgstr "Oppdateringer: På"
 
 msgctxt "#12397"
 msgid "Auto updates: Notify"
-msgstr "Automatiske oppdateringer: varsle"
+msgstr "Oppdateringer: Varsle"
 
 msgctxt "#12398"
 msgid "Auto updates: Never"
-msgstr "Automatiske oppdateringer: av"
+msgstr "Oppdateringer: Av"
 
 msgctxt "#12600"
 msgid "Weather"
@@ -4895,11 +4899,11 @@ msgstr "Spornavnsjablong - høyre"
 
 msgctxt "#13388"
 msgid "Preset"
-msgstr "%s forhåndsinnstillinger"
+msgstr "Forvalg"
 
 msgctxt "#13389"
 msgid "There are no presets available\nfor this visualisation"
-msgstr "Det er ingen forhåndsinnstillinger tilgjengelig&#10;for denne visualiseringen"
+msgstr "Det er ingen forvalg tilgjengelig\nfor denne visualiseringen"
 
 msgctxt "#13390"
 msgid "There are no settings available\nfor this visualisation"
@@ -4971,7 +4975,7 @@ msgstr "Bildeinformasjon"
 
 msgctxt "#13407"
 msgid "%s presets"
-msgstr "%s forhåndsinnstillinger"
+msgstr "%s forvalg"
 
 msgctxt "#13408"
 msgid "(IMDb user rating)"
@@ -5591,7 +5595,7 @@ msgstr "Farger"
 
 msgctxt "#14079"
 msgid "Timezone country"
-msgstr "Tidssone, land"
+msgstr "Tidssone (land)"
 
 msgctxt "#14080"
 msgid "Timezone"
@@ -5879,7 +5883,7 @@ msgstr "Bob (invertert)"
 
 msgctxt "#16024"
 msgid "Cancelling..."
-msgstr "Kansellerer ..."
+msgstr "Avbryter..."
 
 msgctxt "#16025"
 msgid "Enter the artist name"
@@ -6887,7 +6891,7 @@ msgstr "Fortsett siste kanal ved oppstart"
 
 msgctxt "#19190"
 msgid "Background"
-msgstr "Bakgrunn"
+msgstr "Bakgrunnen"
 
 msgctxt "#19191"
 msgid "PVR service"
@@ -7221,10 +7225,6 @@ msgctxt "#19273"
 msgid "Add-on for the backend to be able to use PVR."
 msgstr "Utvidelse for at tjenerdelen skal kunne bruke PVR."
 
-msgctxt "#19274"
-msgid "Please visit kodi.tv/pvr to learn more."
-msgstr "Vennligst besøk kodi.tv/pvr for mer informasjon."
-
 msgctxt "#19275"
 msgid "Conflict warning"
 msgstr "Konflikt advarsel"
@@ -7279,7 +7279,7 @@ msgstr "Alle kanaler"
 
 msgctxt "#19288"
 msgid "Foreground"
-msgstr "Forsiden"
+msgstr "Forgrunnen"
 
 msgctxt "#19499"
 msgid "Other/Unknown"
@@ -7315,7 +7315,7 @@ msgstr "Romantikk"
 
 msgctxt "#19507"
 msgid "Serious/Classical/Religious/Historical Movie/Drama"
-msgstr "Seriøst/Klassisk/Religiøst/Historisk film/Drama"
+msgstr "Seriøst/Klassisk/Religiøst/Historisk/Drama"
 
 msgctxt "#19508"
 msgid "Adult Movie/Drama"
@@ -7815,7 +7815,7 @@ msgstr "Spør etter informasjon for alle album"
 
 msgctxt "#20060"
 msgid "Media info"
-msgstr "Mediainformasjon"
+msgstr "Mediainfo"
 
 msgctxt "#20061"
 msgid "Separate"
@@ -8323,7 +8323,7 @@ msgstr "UPnP"
 
 msgctxt "#20188"
 msgid "Announce library updates via UPnP"
-msgstr "Kunngjøre bibliotek oppdateringer via UPnP"
+msgstr "Kunngjøre biblioteksoppdateringer via UPnP"
 
 msgctxt "#20189"
 msgid "Enable auto scrolling for plot & review"
@@ -8444,6 +8444,10 @@ msgstr "Secure Shell (SSH/SFTP)"
 msgctxt "#20261"
 msgid "Apple Filing Protocol (AFP)"
 msgstr "Apple Filprotokoll (AFP)"
+
+msgctxt "#20262"
+msgid "Zeroconf Browser"
+msgstr "Zeroconf-utforsker"
 
 msgctxt "#20300"
 msgid "Web server directory (HTTP)"
@@ -8759,11 +8763,11 @@ msgstr "Fjern kobling til TV-serie"
 
 msgctxt "#20386"
 msgid "Recently added movies"
-msgstr "Filmer lagt til nylig"
+msgstr "Filmer nylig lagt til"
 
 msgctxt "#20387"
 msgid "Recently added episodes"
-msgstr "Episoder lagt til nylig"
+msgstr "Episoder nylig lagt til"
 
 msgctxt "#20388"
 msgid "Studios"
@@ -8775,7 +8779,7 @@ msgstr "Musikkvideoer"
 
 msgctxt "#20390"
 msgid "Recently added music videos"
-msgstr "Musikkvideoer lagt til nylig"
+msgstr "Musikkvideoer nylig lagt til"
 
 msgctxt "#20391"
 msgid "Music video"
@@ -8943,7 +8947,7 @@ msgstr "Overskriv gamle filer?"
 
 msgctxt "#20432"
 msgid "Exclude path from library updates"
-msgstr "Ekskluder sti fra biblioteksoppdateringer"
+msgstr "Utelat sti fra biblioteksoppdateringer"
 
 msgctxt "#20433"
 msgid "Extract thumbnails and video information"
@@ -9727,7 +9731,7 @@ msgstr "Bildetekst"
 
 msgctxt "#21863"
 msgid "Author"
-msgstr "Laget av"
+msgstr "Utvikler"
 
 msgctxt "#21864"
 msgid "Headline"
@@ -9883,7 +9887,7 @@ msgstr "Oppdater bibliotek ved oppstart"
 
 msgctxt "#22001"
 msgid "Hide progress of library updates"
-msgstr "Skjul forløpet av biblioteksoppdateringer"
+msgstr "Skjul fremdrift av biblioteksoppdateringer"
 
 msgctxt "#22002"
 msgid "DNS suffix"
@@ -10263,7 +10267,7 @@ msgstr "Utvidelsen har ikke den korrekte strukturen"
 
 msgctxt "#24046"
 msgid "%s is used by the following installed Add-on(s)"
-msgstr "%s er brukt av følgende installerte utvidelse(r)"
+msgstr "%s er brukt av følgende utvidelse(r):"
 
 msgctxt "#24047"
 msgid "This Add-on cannot be uninstalled"
@@ -10544,6 +10548,10 @@ msgstr "Automatisk last ned første undertekst"
 msgctxt "#24127"
 msgid "Automatically download first subtitle from the search result list"
 msgstr "Automatisk last ned første undertekst fra søksresultatlisten"
+
+msgctxt "#24999"
+msgid "Hide incompatible"
+msgstr "Skjul inkompatible"
 
 msgctxt "#25000"
 msgid "Notifications"

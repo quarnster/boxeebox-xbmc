@@ -2473,6 +2473,10 @@ msgctxt "#679"
 msgid "Verbose logging for CEC library"
 msgstr "Podrobné logování pro knihovnu CEC"
 
+msgctxt "#680"
+msgid "Verbose logging for VIDEO component"
+msgstr "Podrobné logování pro VIDEO komponent"
+
 msgctxt "#700"
 msgid "Cleaning up library"
 msgstr "Čistím knihovnu"
@@ -6193,6 +6197,22 @@ msgctxt "#16329"
 msgid "VAAPI Motion Compensated"
 msgstr "Kompenzovaný VAAPI Motion"
 
+msgctxt "#16330"
+msgid "MMAL - Advanced"
+msgstr "MMAL - Pokročilé"
+
+msgctxt "#16331"
+msgid "MMAL - Advanced (Half)"
+msgstr "MMAL - Pokročilé (Half)"
+
+msgctxt "#16332"
+msgid "MMAL - Bob"
+msgstr "MMAL - Bob metoda"
+
+msgctxt "#16333"
+msgid "MMAL - Bob (Half)"
+msgstr "MMAL - Bob metoda (Half)"
+
 msgctxt "#16400"
 msgid "Post-processing"
 msgstr "Následné zpracování"
@@ -7286,8 +7306,8 @@ msgid "Add-on for the backend to be able to use PVR."
 msgstr "Doplněk rozhraní PVR serveru je možno pro PVR použit."
 
 msgctxt "#19274"
-msgid "Please visit kodi.tv/pvr to learn more."
-msgstr "Chcete vědět víc? Navštivte stránku kodi.tv/pvr."
+msgid "Please visit http://kodi.wiki/view/PVR to learn more."
+msgstr "Chcete vědět víc ? Navštivte stránku: http://kodi.wiki/view/PVR."
 
 msgctxt "#19275"
 msgid "Conflict warning"
@@ -10459,7 +10479,7 @@ msgstr "Doplňky knihoven"
 
 msgctxt "#24083"
 msgid "Information libraries"
-msgstr "Informace o klihovně"
+msgstr "Informace o knihovně"
 
 msgctxt "#24084"
 msgid "Visualisation libraries"
@@ -10616,6 +10636,14 @@ msgstr "Automaticky stáhnou první titulky se seznamu výsledku hledání"
 msgctxt "#24128"
 msgid "Configuration has been moved"
 msgstr "Konfigurace byla přesunuta"
+
+msgctxt "#24129"
+msgid "The configuration of XBMC has been moved to the new location for Kodi. Please refer to http://kodi.wiki/view/Migration - this message will not be shown again!"
+msgstr "Konfigurace systému Kodi byla přesunuta do nového umístění. Více informací naleznete zde: http://kodi.wiki/view/Migration - tato zpráva již nebude znovu zobrazena!"
+
+msgctxt "#24999"
+msgid "Hide incompatible"
+msgstr "Skrýt nekompatibilní"
 
 msgctxt "#25000"
 msgid "Notifications"

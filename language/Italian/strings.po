@@ -43,7 +43,7 @@ msgstr "Kodi SVN"
 
 msgctxt "#7"
 msgid "File manager"
-msgstr "File"
+msgstr "Gestione File"
 
 msgctxt "#8"
 msgid "Weather"
@@ -2431,15 +2431,15 @@ msgstr "Specifica il logging per componente..."
 
 msgctxt "#669"
 msgid "Verbose logging for SMB library"
-msgstr "Logging prolisso per le librerie SMB"
+msgstr "Logging prolisso per la libreria SMB"
 
 msgctxt "#670"
 msgid "Verbose logging for CURL library (http, dav)"
-msgstr "Logging prolisso per le librerie CURL (http, dav)"
+msgstr "Logging prolisso per la libreria CURL (http, dav)"
 
 msgctxt "#671"
 msgid "Verbose logging for CMYTH library"
-msgstr "Logging prolisso per le librerie CMYTH"
+msgstr "Logging prolisso per la libreria CMYTH"
 
 msgctxt "#672"
 msgid "Verbose logging for FFMPEG libraries"
@@ -2447,7 +2447,7 @@ msgstr "Logging prolisso per le librerie FFMPEG"
 
 msgctxt "#673"
 msgid "Verbose logging for RTMP library"
-msgstr "Logging prolisso per le librerie RTMP"
+msgstr "Logging prolisso per la libreria RTMP"
 
 msgctxt "#674"
 msgid "Verbose logging for DBUS calls"
@@ -2455,11 +2455,11 @@ msgstr "Logging prolisso per le chiamate DBUS"
 
 msgctxt "#675"
 msgid "Verbose logging for JSON-RPC requests"
-msgstr "Logging verboso per le richieste JSON-RPC"
+msgstr "Logging prolisso per le richieste JSON-RPC"
 
 msgctxt "#676"
 msgid "Verbose logging for AUDIO component"
-msgstr "Logging verboso per le componenti audio"
+msgstr "Logging prolisso per il componente AUDIO"
 
 msgctxt "#677"
 msgid "Verbose logging for AirTunes library"
@@ -2472,6 +2472,10 @@ msgstr "Logging prolisso per le componenti UPnP"
 msgctxt "#679"
 msgid "Verbose logging for CEC library"
 msgstr "Logging prolisso per la libreria CEC"
+
+msgctxt "#680"
+msgid "Verbose logging for VIDEO component"
+msgstr "Logging prolisso per il componente VIDEO"
 
 msgctxt "#700"
 msgid "Cleaning up library"
@@ -2811,7 +2815,7 @@ msgstr "Accesso a Internet"
 
 msgctxt "#799"
 msgid "Library Update"
-msgstr "Aggiornamento Libreria"
+msgstr "Aggiornamento libreria"
 
 msgctxt "#800"
 msgid "Music library needs to rescan tags from files."
@@ -3261,6 +3265,14 @@ msgctxt "#1378"
 msgid "Intensity"
 msgstr "Intensità"
 
+msgctxt "#1379"
+msgid "Ragged"
+msgstr "Irregolare"
+
+msgctxt "#1380"
+msgid "Very"
+msgstr "Molto"
+
 msgctxt "#1381"
 msgid "Extreme"
 msgstr "Estremo"
@@ -3269,9 +3281,29 @@ msgctxt "#1382"
 msgid "Whirls"
 msgstr "Turbine"
 
+msgctxt "#1383"
+msgid "Sky Is Clear"
+msgstr "Il Cielo è Chiaro"
+
 msgctxt "#1384"
 msgid "Broken"
 msgstr "Non funzionante"
+
+msgctxt "#1385"
+msgid "Tornado"
+msgstr "Tornado"
+
+msgctxt "#1386"
+msgid "Tropical"
+msgstr "Tropicale"
+
+msgctxt "#1387"
+msgid "Hurricane"
+msgstr "Uragano"
+
+msgctxt "#1388"
+msgid "Cold"
+msgstr "Freddo"
 
 msgctxt "#1389"
 msgid "Windy"
@@ -3280,6 +3312,26 @@ msgstr "Ventoso"
 msgctxt "#1390"
 msgid "Settings"
 msgstr "Impostazioni"
+
+msgctxt "#1391"
+msgid "Breeze"
+msgstr "Ventoso"
+
+msgctxt "#1392"
+msgid "Gentle"
+msgstr "Gentile"
+
+msgctxt "#1393"
+msgid "High wind, near gale"
+msgstr "Molto Ventoso, quasi tempesta"
+
+msgctxt "#1394"
+msgid "Severe"
+msgstr "Intenso"
+
+msgctxt "#1395"
+msgid "Violent"
+msgstr "Violento"
 
 msgctxt "#1396"
 msgid "Drifting"
@@ -4115,15 +4167,15 @@ msgstr "Tempo di vita del sistema"
 
 msgctxt "#12391"
 msgid "Minutes"
-msgstr "Minuti"
+msgstr "minuti"
 
 msgctxt "#12392"
 msgid "Hours"
-msgstr "Ore"
+msgstr "ore"
 
 msgctxt "#12393"
 msgid "Days"
-msgstr "Giorni"
+msgstr "giorni"
 
 msgctxt "#12394"
 msgid "Total uptime"
@@ -4135,15 +4187,15 @@ msgstr "Livello Batteria"
 
 msgctxt "#12396"
 msgid "Auto updates: On"
-msgstr "Aggiornamenti automatici: On"
+msgstr "Auto aggiornamenti: On"
 
 msgctxt "#12397"
 msgid "Auto updates: Notify"
-msgstr "Aggiornamenti automatici: Notifica"
+msgstr "Auto aggiornamenti: Notifica"
 
 msgctxt "#12398"
 msgid "Auto updates: Never"
-msgstr "Aggiornamenti automatici: Mai"
+msgstr "Auto aggiornamenti: Mai"
 
 msgctxt "#12600"
 msgid "Weather"
@@ -5263,7 +5315,7 @@ msgstr "Minuto %d"
 
 msgctxt "#13555"
 msgid "%d Minutes"
-msgstr "%d Minuti"
+msgstr "%d minuti"
 
 msgctxt "#13600"
 msgid "Apple remote"
@@ -6095,11 +6147,11 @@ msgstr "Auto"
 
 msgctxt "#16317"
 msgid "Temporal (Half)"
-msgstr "Temporale (mezzo)"
+msgstr "Temporale (metà)"
 
 msgctxt "#16318"
 msgid "Temporal/Spatial (Half)"
-msgstr "Temporale/Spaziale (mezzo)"
+msgstr "Temporale/Spaziale (metà)"
 
 msgctxt "#16319"
 msgid "DXVA"
@@ -6144,6 +6196,22 @@ msgstr "Adattiva al movimento VAAPI"
 msgctxt "#16329"
 msgid "VAAPI Motion Compensated"
 msgstr "Compensazione del movimento VAAPI"
+
+msgctxt "#16330"
+msgid "MMAL - Advanced"
+msgstr "MMAL - Avanzato"
+
+msgctxt "#16331"
+msgid "MMAL - Advanced (Half)"
+msgstr "MMAL - Avanzato (metà)"
+
+msgctxt "#16332"
+msgid "MMAL - Bob"
+msgstr "MMAL - Bob"
+
+msgctxt "#16333"
+msgid "MMAL - Bob (Half)"
+msgstr "MMAL - Bob (metà)"
 
 msgctxt "#16400"
 msgid "Post-processing"
@@ -6447,7 +6515,7 @@ msgstr "Vai a oggi"
 
 msgctxt "#19071"
 msgid "EPG update interval"
-msgstr "Intervallo di aggiornamento dell' EPG"
+msgstr "Intervallo di aggiornamento dell'EPG"
 
 msgctxt "#19072"
 msgid "Do not store the EPG in the database"
@@ -7238,8 +7306,8 @@ msgid "Add-on for the backend to be able to use PVR."
 msgstr "add-on per il backend per poter usare PVR."
 
 msgctxt "#19274"
-msgid "Please visit kodi.tv/pvr to learn more."
-msgstr "Visitare kodi.tv/pvr per saperne di più."
+msgid "Please visit http://kodi.wiki/view/PVR to learn more."
+msgstr "Visita http://kodi.wiki/view/PVR per saperne di più."
 
 msgctxt "#19275"
 msgid "Conflict warning"
@@ -10568,6 +10636,14 @@ msgstr "Scarica automaticamente il primo sottotitolo della lista risultati ricer
 msgctxt "#24128"
 msgid "Configuration has been moved"
 msgstr "La configurazione è stata spostata"
+
+msgctxt "#24129"
+msgid "The configuration of XBMC has been moved to the new location for Kodi. Please refer to http://kodi.wiki/view/Migration - this message will not be shown again!"
+msgstr "La configurazione di XBMC è stata spostata alla nuova destinazione per Kodi. Per favore fai riferimento a http://kodi.wiki/view/Migration - questo messaggio non verrà mostrato di nuovo!"
+
+msgctxt "#24999"
+msgid "Hide incompatible"
+msgstr "Nascondi incompatibili"
 
 msgctxt "#25000"
 msgid "Notifications"

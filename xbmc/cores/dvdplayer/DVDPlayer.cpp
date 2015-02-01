@@ -575,7 +575,7 @@ CDVDPlayer::CDVDPlayer(IPlayerCallback& callback)
   m_OmxPlayerState.current_deinterlace = CMediaSettings::Get().GetCurrentVideoSettings().m_DeinterlaceMode;
   m_OmxPlayerState.interlace_method    = VS_INTERLACEMETHOD_MAX;
 #ifdef HAS_OMXPLAYER
-  m_omxplayer_mode                     = CSettings::Get().GetBool("videoplayer.useomxplayer");
+  m_omxplayer_mode                     = (EDECODEMETHOD)CSettings::Get().GetInt("videoplayer.decodingmethod") == VS_DECODEMETHOD_HARDWARE && CSettings::Get().GetBool("videoplayer.useomxplayer");
 #else
   m_omxplayer_mode                     = false;
 #endif
@@ -1712,7 +1712,7 @@ void CDVDPlayer::HandlePlaySpeed()
           &&  m_SpeedState.lasttime != GetTime())
     {
       m_SpeedState.lastpts  = m_dvdPlayerVideo->GetCurrentPts();
-      m_SpeedState.lasttime = (double) GetTime();
+      m_SpeedState.lasttime = GetTime();
       m_SpeedState.lastabstime = CDVDClock::GetAbsoluteClock();
       // check how much off clock video is when ff/rw:ing
       // a problem here is that seeking isn't very accurate
@@ -1727,6 +1727,13 @@ void CDVDPlayer::HandlePlaySpeed()
       double error;
       error  = m_clock.GetClock() - m_SpeedState.lastpts;
       error *= m_playSpeed / abs(m_playSpeed);
+
+      // allow a bigger error when going ff, the faster we go
+      // the the bigger is the error we allow
+      if (m_playSpeed > DVD_PLAYSPEED_NORMAL)
+      {
+        error /= m_playSpeed / DVD_PLAYSPEED_NORMAL;
+      }
 
       if(error > DVD_MSEC_TO_TIME(1000))
       {
@@ -2129,7 +2136,13 @@ void CDVDPlayer::OnExit()
     if (!m_bAbortRequest) CLog::Log(LOGNOTICE, "DVDPlayer: eof, waiting for queues to empty");
     CloseStream(m_CurrentAudio,    !m_bAbortRequest);
     CloseStream(m_CurrentVideo,    !m_bAbortRequest);
-    CloseStream(m_CurrentSubtitle, !m_bAbortRequest);
+
+    // the generalization principle was abused for subtitle player. actually it is not a stream player like
+    // video and audio. subtitle player does not run on its own thread, hence waitForBuffers makes
+    // no sense here. waitForBuffers is abused to clear overlay container (false clears container)
+    // subtitles are added from video player. after video player has finished, overlays have to be cleared.
+    CloseStream(m_CurrentSubtitle, false);  // clear overlay container
+
     CloseStream(m_CurrentTeletext, !m_bAbortRequest);
 
     // destroy objects
@@ -2232,15 +2245,18 @@ void CDVDPlayer::HandleMessages()
 
         CDVDMsgPlayerSeekChapter &msg(*((CDVDMsgPlayerSeekChapter*)pMsg));
         double start = DVD_NOPTS_VALUE;
+        double offset = 0;
+        int64_t beforeSeek = GetTime();
 
         // This should always be the case.
         if(m_pDemuxer && m_pDemuxer->SeekChapter(msg.GetChapter(), &start))
         {
           FlushBuffers(false, start, true);
+          offset = DVD_TIME_TO_MSEC(start) - beforeSeek;
           m_callback.OnPlayBackSeekChapter(msg.GetChapter());
         }
 
-        g_infoManager.SetDisplayAfterSeek();
+        g_infoManager.SetDisplayAfterSeek(2500, offset);
       }
       else if (pMsg->IsType(CDVDMsg::DEMUXER_RESET))
       {
@@ -2364,7 +2380,24 @@ void CDVDPlayer::HandleMessages()
         }
 
         // do a seek after rewind, clock is not in sync with current pts
-        if (m_playSpeed < 0 && speed >= 0)
+        if (m_omxplayer_mode)
+        {
+          // when switching from trickplay to normal, we may not have a full set of reference frames
+          // in decoder and we may get corrupt frames out. Seeking to current time will avoid this.
+          if ( (speed != DVD_PLAYSPEED_PAUSE && speed != DVD_PLAYSPEED_NORMAL) ||
+               (m_playSpeed != DVD_PLAYSPEED_PAUSE && m_playSpeed != DVD_PLAYSPEED_NORMAL) )
+          {
+            m_messenger.Put(new CDVDMsgPlayerSeek(GetTime(), (speed < 0), true, true, false, true));
+          }
+          else
+          {
+            m_OmxPlayerState.av_clock.OMXPause();
+          }
+
+          m_OmxPlayerState.av_clock.OMXSetSpeed(speed);
+          CLog::Log(LOGDEBUG, "%s::%s CDVDMsg::PLAYER_SETSPEED speed : %d (%d)", "CDVDPlayer", __FUNCTION__, speed, m_playSpeed);
+        }
+        else if (m_playSpeed < 0 && speed >= 0)
         {
           int64_t iTime = (int64_t)DVD_TIME_TO_MSEC(m_clock.GetClock() + m_State.time_offset);
           m_messenger.Put(new CDVDMsgPlayerSeek(iTime, true, true, false, false, true));
@@ -2389,23 +2422,6 @@ void CDVDPlayer::HandleMessages()
           m_DemuxerPausePending = (speed == DVD_PLAYSPEED_PAUSE);
           if (!m_DemuxerPausePending)
             m_pDemuxer->SetSpeed(speed);
-        }
-
-        if (m_omxplayer_mode)
-        {
-          int old_speed = m_playSpeed;
-          // when switching from trickplay to normal, we may not have a full set of reference frames
-          // in decoder and we may get corrupt frames out. Seeking to current time will avoid this.
-          if ( (speed != DVD_PLAYSPEED_PAUSE && speed != DVD_PLAYSPEED_NORMAL) ||
-               (old_speed != DVD_PLAYSPEED_PAUSE && old_speed != DVD_PLAYSPEED_NORMAL) )
-          {
-            m_messenger.Put(new CDVDMsgPlayerSeek(GetTime(), (speed < 0), true, true, false, true));
-          }
-          else
-            m_OmxPlayerState.av_clock.OMXPause();
-
-          m_OmxPlayerState.av_clock.OMXSetSpeed(speed);
-          CLog::Log(LOGDEBUG, "%s::%s CDVDMsg::PLAYER_SETSPEED speed : %d (%d)", "CDVDPlayer", __FUNCTION__, speed, old_speed);
         }
       }
       else if (pMsg->IsType(CDVDMsg::PLAYER_CHANNEL_SELECT_NUMBER) && m_messenger.GetPacketCount(CDVDMsg::PLAYER_CHANNEL_SELECT_NUMBER) == 0)
@@ -2819,10 +2835,10 @@ void CDVDPlayer::GetGeneralInfo(std::string& strGeneralInfo)
       if(m_StateInput.cache_bytes >= 0)
       {
         strBuf += StringUtils::Format(" cache:%s %2.0f%%"
-                                      , StringUtils::SizeToString(m_State.cache_bytes).c_str()
-                                      , m_State.cache_level * 100);
+                                      , StringUtils::SizeToString(m_StateInput.cache_bytes).c_str()
+                                      , m_StateInput.cache_level * 100);
         if(m_playSpeed == 0 || m_caching == CACHESTATE_FULL)
-          strBuf += StringUtils::Format(" %d sec", DVD_TIME_TO_SEC(m_State.cache_delay));
+          strBuf += StringUtils::Format(" %d sec", DVD_TIME_TO_SEC(m_StateInput.cache_delay));
       }
 
       strGeneralInfo = StringUtils::Format("C( ad:% 6.3f, a/v:% 6.3f%s, dcpu:%2i%% acpu:%2i%% vcpu:%2i%%%s af:%d%% vf:%d%% amp:% 5.2f )"
@@ -2855,10 +2871,10 @@ void CDVDPlayer::GetGeneralInfo(std::string& strGeneralInfo)
       if(m_StateInput.cache_bytes >= 0)
       {
         strBuf += StringUtils::Format(" cache:%s %2.0f%%"
-                                      , StringUtils::SizeToString(m_State.cache_bytes).c_str()
-                                      , m_State.cache_level * 100);
+                                      , StringUtils::SizeToString(m_StateInput.cache_bytes).c_str()
+                                      , m_StateInput.cache_level * 100);
         if(m_playSpeed == 0 || m_caching == CACHESTATE_FULL)
-          strBuf += StringUtils::Format(" %d sec", DVD_TIME_TO_SEC(m_State.cache_delay));
+          strBuf += StringUtils::Format(" %d sec", DVD_TIME_TO_SEC(m_StateInput.cache_delay));
       }
 
       strGeneralInfo = StringUtils::Format("C( ad:% 6.3f, a/v:% 6.3f%s, dcpu:%2i%% acpu:%2i%% vcpu:%2i%%%s )"
@@ -4249,6 +4265,8 @@ void CDVDPlayer::UpdatePlayState(double timeout)
   }
   else
     state.cache_bytes = 0;
+
+  UpdateClockMaster();
 
   state.timestamp = CDVDClock::GetAbsoluteClock();
 

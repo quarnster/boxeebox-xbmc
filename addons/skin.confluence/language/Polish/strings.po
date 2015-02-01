@@ -222,7 +222,7 @@ msgstr "Nie używaj tapet w roli tła"
 
 msgctxt "#31124"
 msgid "Show Background \"Now Playing\" Video"
-msgstr "Używaj odtwarzane wideo w roli tła"
+msgstr "Wyświetlaj panel Teraz odtwarzane w tle interfejsu"
 
 msgctxt "#31125"
 msgid "Show Background \"Now Playing\" Visualisation"
@@ -414,7 +414,7 @@ msgstr "Pobierz napisy"
 
 msgctxt "#31360"
 msgid "Watch as 2D"
-msgstr "Oglądaj jako 2D"
+msgstr "Odtwarzaj w trybie 2D"
 
 msgctxt "#31361"
 msgid "Change mode"
@@ -466,7 +466,7 @@ msgstr "[B]KONFIGURACJA DODATKÓW[/B][CR][CR]Zarządzanie zainstalowanymi dodatk
 
 msgctxt "#31409"
 msgid "[B]CONFIGURE TV SETTINGS[/B][CR][CR]Change full screen info · Manage EPG data settings"
-msgstr "[B]KONFIGURACJA TELEWIZJI[/B][CR][CR]Menu ekranowe · Przewodnik TV · Nagrywanie"
+msgstr "[B]KONFIGURACJA TELEWIZJI[/B][CR][CR]Menu ekranowe · Przewodnik programów · Nagrywanie"
 
 msgctxt "#31410"
 msgid "[B]CONFIGURE SERVICE SETTINGS[/B][CR][CR]Setup control of Kodi via UPnP and HTTP · Configure file sharing[CR]Enable Zeroconf · Configure AirPlay"
@@ -550,7 +550,7 @@ msgstr "Prognoza na weekend"
 
 msgctxt "#31904"
 msgid "Daily Forecast"
-msgstr "Prognoza codzienna"
+msgstr "Prognoza dzienna"
 
 msgctxt "#31905"
 msgid "Forecast"

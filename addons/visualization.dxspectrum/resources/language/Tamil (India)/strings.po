@@ -20,22 +20,6 @@ msgctxt "#30000"
 msgid "Mode"
 msgstr "முறை"
 
-msgctxt "#30001"
-msgid "Filled"
-msgstr "பூர்த்தி"
-
-msgctxt "#30002"
-msgid "Wireframe"
-msgstr "கம்பிச்சட்டம்"
-
-msgctxt "#30003"
-msgid "Points"
-msgstr "புள்ளிகள்"
-
-msgctxt "#30004"
-msgid "Bar Height"
-msgstr "பட்டை உயரம்"
-
 msgctxt "#30005"
 msgid "Small"
 msgstr "சிறிய"
@@ -44,25 +28,9 @@ msgctxt "#30006"
 msgid "Default"
 msgstr "இயல்புநிலை"
 
-msgctxt "#30007"
-msgid "Big"
-msgstr "பெரிய"
-
-msgctxt "#30008"
-msgid "Very Big"
-msgstr "மிக பெரிய"
-
 msgctxt "#30009"
 msgid "Speed"
 msgstr "வேகம்"
-
-msgctxt "#30010"
-msgid "Very Slow"
-msgstr "மிகவும் மெதுவாக"
-
-msgctxt "#30011"
-msgid "Slow"
-msgstr "மெதுவாக"
 
 msgctxt "#30012"
 msgid "Default"
@@ -71,7 +39,3 @@ msgstr "இயல்புநிலை"
 msgctxt "#30013"
 msgid "Fast"
 msgstr "வேகமாக"
-
-msgctxt "#30014"
-msgid "Very Fast"
-msgstr "மிக வேகமாக"

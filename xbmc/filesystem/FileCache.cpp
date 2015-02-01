@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2013 Team XBMC
+ *      Copyright (C) 2005-2014 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -44,20 +44,35 @@ public:
     m_stamp = XbmcThreads::SystemClockMillis();
     m_pos   = 0;
     m_pause = 0;
+    m_size = 0;
+    m_time = 0;
   }
 
-  void Reset(int64_t pos)
+  void Reset(int64_t pos, bool bResetAll = true)
   {
     m_stamp = XbmcThreads::SystemClockMillis();
     m_pos   = pos;
+
+    if (bResetAll)
+    {
+      m_size  = 0;
+      m_time  = 0;
+    }
   }
 
   unsigned Rate(int64_t pos, unsigned int time_bias = 0)
   {
-    const unsigned ts = XbmcThreads::SystemClockMillis() + time_bias;
-    if (ts == m_stamp)
+    const unsigned ts = XbmcThreads::SystemClockMillis();
+
+    m_size += (pos - m_pos);
+    m_time += (ts - m_stamp);
+    m_pos = pos;
+    m_stamp = ts;
+
+    if (m_time == 0)
       return 0;
-    return (unsigned)(1000 * (pos - m_pos) / (ts - m_stamp));
+
+    return (unsigned)(1000 * (m_size / (m_time + time_bias)));
   }
 
   void Pause()
@@ -75,6 +90,8 @@ private:
   unsigned m_stamp;
   int64_t  m_pos;
   unsigned m_pause;
+  unsigned m_time;
+  int64_t  m_size;
 };
 
 
@@ -100,7 +117,7 @@ CFileCache::CFileCache(bool useDoubleCache) : CThread("FileCache")
    }
    if (useDoubleCache)
    {
-     m_pCache = new CSimpleDoubleCache(m_pCache);
+     m_pCache = new CDoubleCache(m_pCache);
    }
    m_seekPossible = 0;
    m_cacheFull = false;
@@ -219,7 +236,7 @@ void CFileCache::Process()
     {
       m_seekEvent.Reset();
       int64_t cacheMaxPos = m_pCache->CachedDataEndPosIfSeekTo(m_seekPos);
-      cacheReachEOF = cacheMaxPos == m_source.GetLength();
+      cacheReachEOF = (cacheMaxPos == m_source.GetLength());
       bool sourceSeekFailed = false;
       if (!cacheReachEOF)
       {
@@ -233,13 +250,13 @@ void CFileCache::Process()
       }
       if (!sourceSeekFailed)
       {
-        m_pCache->Reset(m_seekPos, false);
+        const bool bCompleteReset = m_pCache->Reset(m_seekPos, false);
         m_readPos = m_seekPos;
         m_writePos = m_pCache->CachedDataEndPos();
         assert(m_writePos == cacheMaxPos);
-        average.Reset(m_writePos);
+        average.Reset(m_writePos, bCompleteReset); // Can only recalculate new average from scratch after a full reset (empty cache)
         limiter.Reset(m_writePos);
-        m_cacheFull = false;
+        m_cacheFull = (m_pCache->GetMaxWriteSize(m_chunkSize) == 0);
         m_nSeekResult = m_seekPos;
       }
 
@@ -264,9 +281,23 @@ void CFileCache::Process()
       }
     }
 
+    size_t maxWrite = m_pCache->GetMaxWriteSize(m_chunkSize);
+    m_cacheFull = (maxWrite == 0);
+
+    /* Only read from source if there's enough write space in the cache
+     * else we may keep disposing data and seeking back on (slow) source
+     */
+    if (m_cacheFull && !cacheReachEOF)
+    {
+      average.Pause();
+      m_pCache->m_space.WaitMSec(5);
+      average.Resume();
+      continue;
+    }
+
     ssize_t iRead = 0;
     if (!cacheReachEOF)
-      iRead = m_source.Read(buffer.get(), m_chunkSize);
+      iRead = m_source.Read(buffer.get(), maxWrite);
     if (iRead == 0)
     {
       CLog::Log(LOGINFO, "CFileCache::Process - Hit eof.");
@@ -300,13 +331,10 @@ void CFileCache::Process()
       }
       else if (iWrite == 0)
       {
-        m_cacheFull = true;
         average.Pause();
         m_pCache->m_space.WaitMSec(5);
         average.Resume();
       }
-      else
-        m_cacheFull = false;
 
       iTotalWrite += iWrite;
 

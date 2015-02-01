@@ -308,7 +308,8 @@ bool URIUtils::GetParentPath(const std::string& strPath, std::string& strParent)
   {
     CStackDirectory dir;
     CFileItemList items;
-    dir.GetDirectory(url, items);
+    if (!dir.GetDirectory(url, items))
+      return false;
     items[0]->m_strDVDLabel = GetDirectory(items[0]->GetPath());
     if (IsProtocol(items[0]->m_strDVDLabel, "rar") || IsProtocol(items[0]->m_strDVDLabel, "zip"))
       GetParentPath(items[0]->m_strDVDLabel, strParent);
@@ -497,9 +498,17 @@ bool URIUtils::PathStarts(const std::string& url, const char *start)
   return StringUtils::StartsWith(url, start);
 }
 
-bool URIUtils::PathEquals(const std::string& url, const std::string &start)
+bool URIUtils::PathEquals(const std::string& url, const std::string &start, bool ignoreTrailingSlash /* = false */)
 {
-  return url == start;
+  std::string path1 = url;
+  std::string path2 = start;
+  if (ignoreTrailingSlash)
+  {
+    RemoveSlashAtEnd(path1);
+    RemoveSlashAtEnd(path2);
+  }
+
+  return path1 == path2;
 }
 
 bool URIUtils::IsRemote(const CStdString& strFile)

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.graphics.PixelFormat;
 
 public class Main extends NativeActivity 
 {
@@ -30,6 +31,13 @@ public class Main extends NativeActivity
     } catch (UnsatisfiedLinkError e) {
       Log.e("Main", "Native not registered");
     }
+  }
+
+  @Override
+  public void onStart()
+  {
+    super.onStart();
+    getWindow().setFormat(PixelFormat.TRANSPARENT);
   }
 
   @Override

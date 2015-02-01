@@ -91,7 +91,7 @@ bool CGUIWindowPVRBase::OnAction(const CAction &action)
     case ACTION_PREVIOUS_CHANNELGROUP:
     case ACTION_NEXT_CHANNELGROUP:
       // switch to next or previous group
-      SetGroup(ACTION_NEXT_CHANNELGROUP ? m_group->GetNextGroup() : m_group->GetPreviousGroup());
+      SetGroup(action.GetID() == ACTION_NEXT_CHANNELGROUP ? m_group->GetNextGroup() : m_group->GetPreviousGroup());
       return true;
   }
 
@@ -611,39 +611,6 @@ bool CGUIWindowPVRBase::ActionDeleteChannel(CFileItem *item)
   return true;
 }
 
-bool CGUIWindowPVRBase::ActionDeleteRecording(CFileItem *item)
-{
-  bool bReturn = false;
-
-  if (!item->IsPVRRecording() && !item->m_bIsFolder)
-    return bReturn;
-
-  /* show a confirmation dialog */
-  CGUIDialogYesNo* pDialog = (CGUIDialogYesNo*)g_windowManager.GetWindow(WINDOW_DIALOG_YES_NO);
-  if (!pDialog)
-    return bReturn;
-
-  pDialog->SetHeading(122); // Confirm delete
-  pDialog->SetLine(0, item->m_bIsFolder ? 19113 : 19112); // Are you sure?
-  pDialog->SetLine(1, "");
-  pDialog->SetLine(2, item->GetLabel());
-  pDialog->SetChoice(1, 117); // Delete
-
-  /* prompt for the user's confirmation */
-  pDialog->DoModal();
-  if (!pDialog->IsConfirmed())
-    return bReturn;
-
-  /* delete the recording */
-  if (g_PVRRecordings->Delete(*item))
-  {
-    g_PVRManager.TriggerRecordingsUpdate();
-    bReturn = true;
-  }
-
-  return bReturn;
-}
-
 bool CGUIWindowPVRBase::ActionRecord(CFileItem *item)
 {
   bool bReturn = false;
@@ -702,12 +669,6 @@ bool CGUIWindowPVRBase::UpdateEpgForChannel(CFileItem *item)
 
   epg->ForceUpdate();
   return true;
-}
-
-bool CGUIWindowPVRBase::Update(const std::string &strDirectory, bool updateFilterPath /* = true */)
-{
-  m_vecItems->SetPath(strDirectory);
-  return CGUIMediaWindow::Update(strDirectory, updateFilterPath);
 }
 
 void CGUIWindowPVRBase::UpdateButtons(void)

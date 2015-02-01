@@ -124,6 +124,46 @@ Default font lacks support for all characters
       <row>`~</row>
     </keyboard>
   </layout>
+  <layout name="Hungarian QWERTZ">
+    <keyboard>
+      <row>0123456789öüó</row>
+      <row>qwertzuiopőú</row>
+      <row>asdfghjkléáű</row>
+      <row>íyxcvbnm,.-</row>
+    </keyboard>
+    <keyboard modifiers="shift">
+      <row>0123456789ÖÜÓ</row>
+      <row>QWERTZUIOPŐÚ</row>
+      <row>ASDFGHJKLÉÁŰ</row>
+      <row>ÍYXCVBNM,.-</row>
+    </keyboard>
+    <keyboard modifiers="symbol,shift+symbol">
+      <row>§'"+!/=()~</row>
+      <row>^;\|Ä€Í÷×ä</row>
+      <row>đĐ[]íłŁ$ß¤</row>
+      <row>#@{}&lt;&gt;*?:_</row>
+    </keyboard>
+  </layout>
+  <layout name="Polish QWERTY">
+    <keyboard>
+      <row>`1234567890-</row>
+      <row>qwertyuiopąć</row>
+      <row>asdfghjklęłń</row>
+      <row>zxcvbnmóśżź</row>
+    </keyboard>
+    <keyboard modifiers="shift">
+      <row>~1234567890_</row>
+      <row>QWERTYUIOPĄĆ</row>
+      <row>ASDFGHJKLĘŁŃ</row>
+      <row>ZXCVBNMÓŚŻŹ</row>
+    </keyboard>
+    <keyboard modifiers="symbol,shift+symbol">
+      <row>!@#$%^&amp;*()=+</row>
+      <row>\|€£§[]{};',</row>
+      <row>./:"&lt;&gt;?</row>
+      <row></row>
+    </keyboard>
+  </layout>
   <layout name="Portuguese (Portugal) QWERTY">
     <keyboard>
       <row>\1234567890'</row>
@@ -342,6 +382,26 @@ Default font lacks support for all characters
       <row>[]{}-_=+;:</row>
       <row>'",.&lt;&gt;/?\|</row>
       <row>`~</row>
+    </keyboard>
+  </layout>
+  <layout name="Greek QWERTY">
+    <keyboard>
+      <row>1234567890</row>
+      <row>ςερτυθιοπ</row>
+      <row>ασδφγηξκλ</row>
+      <row>ζχψωβνμ</row>
+    </keyboard>
+    <keyboard modifiers="shift">
+      <row>1234567890</row>
+      <row>ΕΡΤΥΘΙΟΠ</row>
+      <row>ΑΣΔΦΓΗΞΚΛ</row>
+      <row>ΖΧΨΩΒΝΜ</row>
+    </keyboard>
+    <keyboard modifiers="symbol,shift+symbol">
+      <row>)!@#$%^&amp;*(€</row>
+      <row>[]{}-_=+;:~</row>
+      <row>'",.&lt;&gt;/?\|`</row>
+      <row>έύίόάήώϋϊΰΐ</row>
     </keyboard>
   </layout>
 </keyboardlayouts>

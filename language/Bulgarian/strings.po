@@ -2155,7 +2155,7 @@ msgstr "Режим \"Парти\""
 
 msgctxt "#590"
 msgid "Random"
-msgstr "Случаен"
+msgstr "Произволно"
 
 msgctxt "#591"
 msgid "Off"
@@ -2472,6 +2472,10 @@ msgstr "Подробно описване в дневника на UPnP комп
 msgctxt "#679"
 msgid "Verbose logging for CEC library"
 msgstr "Подробно описване в дневника на CEC библиотеката"
+
+msgctxt "#680"
+msgid "Verbose logging for VIDEO component"
+msgstr "Подробно описване в дневника на VIDEO компонента"
 
 msgctxt "#700"
 msgid "Cleaning up library"
@@ -2963,11 +2967,11 @@ msgstr "Въведете нов етикет"
 
 msgctxt "#1030"
 msgid "Browse for image"
-msgstr "Преглед за снимка"
+msgstr "Преглед за картина"
 
 msgctxt "#1031"
 msgid "Browse for image folder"
-msgstr "Преглед за папка със снимки"
+msgstr "Преглед за папка с картини"
 
 msgctxt "#1032"
 msgid "Add network location..."
@@ -3200,6 +3204,10 @@ msgstr "Zeroconf"
 msgctxt "#1260"
 msgid "Announce these services to other systems via Zeroconf"
 msgstr "Обяви тези услуги към други системи чрез Zeroconf"
+
+msgctxt "#1268"
+msgid "iOS 8 compatibility mode"
+msgstr "Режим на съвместимост с iOS 8"
 
 msgctxt "#1269"
 msgid "Allow volume control"
@@ -3487,7 +3495,7 @@ msgstr "Облачно"
 
 msgctxt "#1446"
 msgid "Unknown"
-msgstr "Непознат"
+msgstr "Неизвестно"
 
 msgctxt "#1447"
 msgid "Squals"
@@ -4687,7 +4695,7 @@ msgstr "Рекурсивно слайдшоу"
 
 msgctxt "#13319"
 msgid "Randomise"
-msgstr "В случаен ред"
+msgstr "В произволен ред"
 
 msgctxt "#13320"
 msgid "Stereo"
@@ -6149,6 +6157,22 @@ msgctxt "#16329"
 msgid "VAAPI Motion Compensated"
 msgstr "VAAPI Motion Compensated"
 
+msgctxt "#16330"
+msgid "MMAL - Advanced"
+msgstr "MMAL - Advanced"
+
+msgctxt "#16331"
+msgid "MMAL - Advanced (Half)"
+msgstr "MMAL - Advanced (Half)"
+
+msgctxt "#16332"
+msgid "MMAL - Bob"
+msgstr "MMAL - Bob"
+
+msgctxt "#16333"
+msgid "MMAL - Bob (Half)"
+msgstr "MMAL - Bob (Half)"
+
 msgctxt "#16400"
 msgid "Post-processing"
 msgstr "Пост обработка"
@@ -7221,6 +7245,10 @@ msgctxt "#19269"
 msgid "Do not show 'connection lost' warnings"
 msgstr "Без предупреждения за пропаднала връзка"
 
+msgctxt "#19270"
+msgid "Group Items"
+msgstr "Групиране"
+
 msgctxt "#19271"
 msgid "No PVR Add-ons could be found"
 msgstr "Няма открити ПВР добавки"
@@ -7234,8 +7262,8 @@ msgid "Add-on for the backend to be able to use PVR."
 msgstr "Добавка за сървъра, за да може да се ползва ПВР."
 
 msgctxt "#19274"
-msgid "Please visit kodi.tv/pvr to learn more."
-msgstr "За да научите повече посетете www.kodi.tv/pvr"
+msgid "Please visit http://kodi.wiki/view/PVR to learn more."
+msgstr "За да научите повече посетете http://kodi.wiki/view/PVR."
 
 msgctxt "#19275"
 msgid "Conflict warning"
@@ -9195,7 +9223,7 @@ msgstr "Налагай следния район за DVD плейъра"
 
 msgctxt "#21373"
 msgid "Video output"
-msgstr "Видео изxод"
+msgstr "Видео изход"
 
 msgctxt "#21374"
 msgid "Video aspect"
@@ -9719,7 +9747,7 @@ msgstr "Доп. местоположение"
 
 msgctxt "#21858"
 msgid "Image type"
-msgstr "Тип изображение"
+msgstr "Тип картина"
 
 msgctxt "#21859"
 msgid "Time created"
@@ -10557,6 +10585,18 @@ msgctxt "#24127"
 msgid "Automatically download first subtitle from the search result list"
 msgstr "Първите субтитри от списъка с резултати, от търсене, ще бъдат сваляни автоматично."
 
+msgctxt "#24128"
+msgid "Configuration has been moved"
+msgstr "Конфигурационните файлове са преместени"
+
+msgctxt "#24129"
+msgid "The configuration of XBMC has been moved to the new location for Kodi. Please refer to http://kodi.wiki/view/Migration - this message will not be shown again!"
+msgstr "Конфигурационните файлове от XBMC са преместени на ново място за версия Kodi. Моля, прочетете http://kodi.wiki/view/Migration - съобщението няма да бъде показано втори път!"
+
+msgctxt "#24999"
+msgid "Hide incompatible"
+msgstr "Без несъвместимите"
+
 msgctxt "#25000"
 msgid "Notifications"
 msgstr "Известия"
@@ -11095,11 +11135,11 @@ msgstr "Навигиране с жестове:"
 
 msgctxt "#34405"
 msgid "1 finger swipe left,right,up,down for cursors"
-msgstr "Замахване с 1 пръст <, >, ˄ и ˅ за курсори"
+msgstr "Плъзнете 1 пръст <, >, ˄ и ˅ за курсори"
 
 msgctxt "#34406"
 msgid "2 finger swipe left for backspace"
-msgstr "Замахване с 2 пръста наляво за backspace"
+msgstr "Плъзнете 2 пръста наляво за backspace"
 
 msgctxt "#34407"
 msgid "1 finger single tap for enter"
@@ -12159,15 +12199,15 @@ msgstr "Категорията съдържа всички настройки с
 
 msgctxt "#36312"
 msgid "Select the amount of time that each image is displayed in a slideshow."
-msgstr "Изберете колко време ще бъде показвано всяко изображение по време на слайдшоу."
+msgstr "Изберете колко време ще бъде показвано всяка картина по време на слайдшоу."
 
 msgctxt "#36313"
 msgid "Images in a slideshow will pan and zoom while displayed."
-msgstr "Към изображенията в слайдшоуто ще се приложат панорамни и увеличаващи ефекти, докато те се показват."
+msgstr "Към картините в слайдшоуто ще се приложат панорамни и увеличаващи ефекти, докато те се показват."
 
 msgctxt "#36314"
 msgid "View slideshow images in a random order."
-msgstr "Преглед на изображенията от слайдшоуто в случаен ред."
+msgstr "Преглед на изображенията от слайдшоуто в произволен ред."
 
 msgctxt "#36315"
 msgid "Section that contains weather related settings."
@@ -12547,7 +12587,7 @@ msgstr "Включва кеширането при възпроизвеждан�
 
 msgctxt "#36409"
 msgid "Enable cache of unknown types from Internet."
-msgstr "Включете кеширането на неизвестните видове от интернет."
+msgstr "Включете кеширането на неизвестните типове от интернет."
 
 msgctxt "#36410"
 msgid "No info available yet."
@@ -12788,6 +12828,10 @@ msgstr "Ползвай висококачествени текстури за о
 msgctxt "#36548"
 msgid "Limits resolution of GUI to save memory. Does not affect video playback. Requires restart."
 msgstr "Ограничава резолюцията на интерфейса, с цел пестене на памет. Не засяга възпроизвеждането на видео. Изисква се рестарт."
+
+msgctxt "#36549"
+msgid "Use iOS8 compatible AirPlay support. If you have trouble with older iOS devices detecting Kodi as a valid target try switching this off. This option takes effect on the next restart of Kodi only!"
+msgstr "Специален режим за AirPlay, който може да изключите ако устройства които работят под стара версия на iOS не засичат Kodi. Опцията изисква рестартиране на Коди!"
 
 msgctxt "#36600"
 msgid "Category containing the settings for how the music library is handled."

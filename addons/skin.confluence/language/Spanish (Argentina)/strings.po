@@ -548,6 +548,10 @@ msgctxt "#31903"
 msgid "Weekend Forecast"
 msgstr "Pronóstico semanal"
 
+msgctxt "#31904"
+msgid "Daily Forecast"
+msgstr "Pronóstico diario"
+
 msgctxt "#31905"
 msgid "Forecast"
 msgstr "Pronóstico"
@@ -582,7 +586,7 @@ msgstr "VIDEOS"
 
 msgctxt "#31954"
 msgid "MOVIES"
-msgstr "PELICULAS"
+msgstr "PELÍCULAS"
 
 msgctxt "#31955"
 msgid "TV SHOWS"
@@ -590,7 +594,7 @@ msgstr "SERIES DE TV"
 
 msgctxt "#31956"
 msgid "MUSIC"
-msgstr "MUSICA"
+msgstr "MÚSICA"
 
 msgctxt "#31957"
 msgid "PROGRAMS"
@@ -603,3 +607,7 @@ msgstr "REPRODUCCIÓN DE DISCOS"
 msgctxt "#31959"
 msgid "SYSTEM"
 msgstr "SISTEMA"
+
+msgctxt "#31960"
+msgid "RADIO"
+msgstr "RADIO"

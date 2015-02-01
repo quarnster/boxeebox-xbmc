@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <addon
   id="screensaver.rsxs.solarwinds"
-  version="1.0.24"
+  version="1.0.26"
   name="Solarwinds"
   provider-name="mogumbo, Team-Kodi">
   <requires>
@@ -29,7 +29,6 @@
     <summary lang="es">Un salvapantallas con unos efectos de partículas hipnotizantes</summary>
     <summary lang="es_AR">Un protector de pantalla con unos efectos de partículas hipnotizantes</summary>
     <summary lang="es_MX">Un sorprendente protector de pantalla de partículas</summary>
-    <summary lang="es_VE">Un protector de pantalla con efectos de partículas bastante hipnotizante</summary>
     <summary lang="et">Hüpnotiseeriv osakeste efektiga ekraanisäästja</summary>
     <summary lang="fi">Lumoava partikkelitehostenäytönsäästäjä</summary>
     <summary lang="fr">Un économiseur envoûtant à effets de particules</summary>
@@ -42,7 +41,7 @@
     <summary lang="is">Dáleiðandi skjáhvíla með brellum með agnir</summary>
     <summary lang="it">Un salvaschermo con effetti particellari ipnotizzanti</summary>
     <summary lang="ja">幻想的な粒子エフェクトのスクリーンセーバー</summary>
-    <summary lang="ko">매혹적인 파티클 이펙트 화면보호기</summary>
+    <summary lang="ko">매혹적인 파티클 이펙트 화면 보호기</summary>
     <summary lang="lt">Įtaigaus dalelių poveikio ekrano užsklanda</summary>
     <summary lang="lv">Hipnotizējošs daļiņu efekta ekrānsaudzētājs</summary>
     <summary lang="mk">Заштита на екран со смирувачки честички</summary>
@@ -58,7 +57,6 @@
     <summary lang="sk">Fascinujúci šetrič s efektom častíc</summary>
     <summary lang="sl">Ohranjevalnik zaslona z dih jemajočimi delčki</summary>
     <summary lang="sv">En hypnotiserande partikeleffektskärmsläckare</summary>
-    <summary lang="ta_IN">மயக்கவைக்கும் துகள் விளைவுகள் திரைகாப்பான்</summary>
     <summary lang="tg">Пардаи экрани аҷоиб бо таъсири зарраҳо</summary>
     <summary lang="tr">Büyüleyici bir parçacık efektli ekran koruyucu</summary>
     <summary lang="uk">Заставка із частинок, що має гіпнотизуючий ефект</summary>
@@ -82,13 +80,12 @@
     <description lang="es">Este es un salvapantallas con unos efectos de partículas hipnotizantes. Descubrirás que puedes obtener un número increíble de patrones diferentes.</description>
     <description lang="es_AR">Este es un protector de pantalla con unos efectos de partículas hipnotizantes. Descubrirás que puedes obtener un número increíble de patrones diferentes.</description>
     <description lang="es_MX">Éste es un sorprendente protector de pantalla de partículas.  Encontrará que puede obtener un gran número de patrones diferentes.</description>
-    <description lang="es_VE">Este es un protector de pantalla con efectos de partículas bastante hipnotizante. Te darás cuenta que podrás lograr un gran número de patrones diferentes.</description>
     <description lang="et">See on väga hüpnotiseeriv osakeste efektiga ekraanisäästja. Võimalik on koostada tohutul hulgal erinevaid mustreid.</description>
     <description lang="fi">Erittäin lumoava partikkelitehostenäytönsäästäjä. Tulet huomaamaan uskomattoman määrän erilaisia kuvioita.</description>
     <description lang="fr">Voici un économiseur d'écran à effets de particules particulièrement envoûtant. Vous trouverez qu'il permet d'obtenir un nombre incroyable de modèles et d'effets différents.</description>
     <description lang="fr_CA">C'est un économiseur d'écran à effets de particules particulièrement hypnotisant. Il vous permettra d'obtenir un nombre incroyable de modèles différents.</description>
     <description lang="gl">Este é un protector de pantalla con efectos de partículas moi hipnotizante. Atopará que pode acadar un incrible número de patróns diferentes.</description>
-    <description lang="he">זהו שומר מסך עם אפקט חלקיקים מהפנט ביותר. אתה תמצא עצמך מקבל מס' מפתיע של צורות שונות ומרהיבות.</description>
+    <description lang="he">זהו שומר מסך עם אפקט חלקיקים מהפנט ביותר. מספר מפתיע של צורות שונות ומרהיבות יתקבלו.</description>
     <description lang="hr">Ovo je zaista očaravajuči čuvar zaslona. Moguće je ostvariti zapanjujući broj različitih uzoraka.</description>
     <description lang="hu">Ez egy lebilincselő hatású részecske-effektus képernyővédő. Hihetetlen mennyiségű különböző minta képes benne kialakulni.</description>
     <description lang="id">Ini adalah penyelamat layar dengan efek partikel yang sangat mencuri perhatian. Anda akan lihat bahwa Anda bisa mendapat sejumlah yang mengagumkan dari pola yang berbeda.</description>
@@ -111,7 +108,6 @@
     <description lang="sk">Toto je veľmi fascinujúci šetrič s efektom častíc. Zistíte, že môžete dosiahnuť neskutočné číslo rôznych vzorov.</description>
     <description lang="sl">To je ohranjevalnik zaslona z dih jemajočimi delčki. Odkrili boste, da lahko dosežejo neverjetno število različnih vzorcev.</description>
     <description lang="sv">Detta är en väldigt hypnotiserande partikeleffektskärmsläckare. Du kommer att upptäcka att du kan åstadkomma ett häpnadsväckande antal olika mönster.</description>
-    <description lang="ta_IN">இது ஒருவிதமான மயக்கவைக்கும் துகள் விளைவுகள் திரைகாப்பான். நீங்கள் எண்ணற்ற அற்புதமான வெவ்வேறு வகைகளின் வடிவங்களை பார்க்கலாம்.</description>
     <description lang="tg">Ин пардаи экран бо таъсири зарраҳо аҷоиб мебошад. Барои ин парда шумо бисёр таъсирҳои аҷиби нотакрорро пайдо мекунед.</description>
     <description lang="tr">Son derece büyüleyici bir parçacık efektli ekran koruyucu. Birçok değişik şekle ulaşabildiğinizi farkedeceksiniz.</description>
     <description lang="uk">Це дуже гіпнотизуюча заставка із різноманітних ефектів частинок. Ви побачите надзвичайно велику кількість різноманітних візерунків.</description>

@@ -7220,10 +7220,6 @@ msgctxt "#19273"
 msgid "Add-on for the backend to be able to use PVR."
 msgstr "PVRを有効にする、バックエンド対応アドオン"
 
-msgctxt "#19274"
-msgid "Please visit kodi.tv/pvr to learn more."
-msgstr "kodi.tv/pvr に詳しい情報があります"
-
 msgctxt "#19275"
 msgid "Conflict warning"
 msgstr "コンフリクト警告"
@@ -9954,7 +9950,7 @@ msgstr "ガイド"
 
 msgctxt "#22021"
 msgid "Allowed error in aspect ratio to minimise black bars"
-msgstr "黒いバーを小さくする目的での縦横比エラーを許可しました"
+msgstr "黒帯を最小限にするためのアスペクト比の許容誤差"
 
 msgctxt "#22022"
 msgid "Show video files in listings"

@@ -71,12 +71,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "@COMPANY_NAME@"
             VALUE "FileDescription", "@APP_NAME@"
-            VALUE "FileVersion", "@APP_VERSION_MAJOR@.@APP_VERSION_MINOR@-@APP_VERSION_TAG@"
+            VALUE "FileVersion", "@APP_VERSION@"
             VALUE "InternalName", "@APP_NAME@.exe"
             VALUE "LegalCopyright", "Copyright (c) @COMPANY_NAME@.  All rights reserved."
             VALUE "OriginalFilename", "@APP_NAME@.exe"
             VALUE "ProductName", "@APP_NAME@ for Windows"
-            VALUE "ProductVersion", "@APP_VERSION_MAJOR@.@APP_VERSION_MINOR@-@APP_VERSION_TAG@"
+            VALUE "ProductVersion", "@APP_VERSION@"
         END
     END
     BLOCK "VarFileInfo"
@@ -96,7 +96,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_MAIN_ICON           ICON                    "xbmc.ico"
+IDI_MAIN_ICON           ICON                    "application.ico"
 
 
 

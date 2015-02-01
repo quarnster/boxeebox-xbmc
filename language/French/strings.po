@@ -2473,6 +2473,10 @@ msgctxt "#679"
 msgid "Verbose logging for CEC library"
 msgstr "Journalisation détaillée pour la librairie CEC"
 
+msgctxt "#680"
+msgid "Verbose logging for VIDEO component"
+msgstr "Journalisation détaillée pour le composant VIDÉO"
+
 msgctxt "#700"
 msgid "Cleaning up library"
 msgstr "Nettoyage de la médiathèque"
@@ -6193,6 +6197,22 @@ msgctxt "#16329"
 msgid "VAAPI Motion Compensated"
 msgstr "Compensation de mouvement VAAPI"
 
+msgctxt "#16330"
+msgid "MMAL - Advanced"
+msgstr "MMAL - Avancé"
+
+msgctxt "#16331"
+msgid "MMAL - Advanced (Half)"
+msgstr "MMAL - Avancé (demi)"
+
+msgctxt "#16332"
+msgid "MMAL - Bob"
+msgstr "MMAL - Plomb"
+
+msgctxt "#16333"
+msgid "MMAL - Bob (Half)"
+msgstr "MMAL - Plomb (demi)"
+
 msgctxt "#16400"
 msgid "Post-processing"
 msgstr "Après traitement Vidéo"
@@ -7286,8 +7306,8 @@ msgid "Add-on for the backend to be able to use PVR."
 msgstr "extension pour le serveur pour utiliser l'Enregistreur Vidéo."
 
 msgctxt "#19274"
-msgid "Please visit kodi.tv/pvr to learn more."
-msgstr "Visitez kodi.tv/pvr pour en savoir plus"
+msgid "Please visit http://kodi.wiki/view/PVR to learn more."
+msgstr "Visitez http://kodi.wiki/view/PVR pour en savoir plus."
 
 msgctxt "#19275"
 msgid "Conflict warning"
@@ -10617,6 +10637,14 @@ msgctxt "#24128"
 msgid "Configuration has been moved"
 msgstr "La configuration a été mis à niveau"
 
+msgctxt "#24129"
+msgid "The configuration of XBMC has been moved to the new location for Kodi. Please refer to http://kodi.wiki/view/Migration - this message will not be shown again!"
+msgstr "La configuration de XBMC a été déplacée vers un nouvel emplacement pour Kodi. Veuillez consulter http://kodi.wiki/view/Migration - ce message ne s'affichera plus!"
+
+msgctxt "#24999"
+msgid "Hide incompatible"
+msgstr "Masquer les éléments incompatibles"
+
 msgctxt "#25000"
 msgid "Notifications"
 msgstr "Notifications"
@@ -12851,7 +12879,7 @@ msgstr "Limite la résolution de l'interface pour économiser de la mémoire. Ce
 
 msgctxt "#36549"
 msgid "Use iOS8 compatible AirPlay support. If you have trouble with older iOS devices detecting Kodi as a valid target try switching this off. This option takes effect on the next restart of Kodi only!"
-msgstr "Utiliser le support AirPLay compatible iOS8. Si vous avez des soucis avec des périphériques tournant sur des versions plus anciennes d'iOS pour détecter Kodi comme une cible valide, essayez de désactiver cette option. Cette option prend effect au prochain redémarrage de Kodi seulement !"
+msgstr "Utiliser le support AirPlay compatible iOS8. Si vous avez des périphériques tournant sur des versions plus anciennes d'iOS qui ne détectent pas Kodi comme une cible valide, essayez de désactiver cette option. Cette option ne prendra effet qu'au prochain redémarrage de Kodi !"
 
 msgctxt "#36600"
 msgid "Category containing the settings for how the music library is handled."

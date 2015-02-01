@@ -2473,6 +2473,10 @@ msgctxt "#679"
 msgid "Verbose logging for CEC library"
 msgstr "Registro detallado para librería CEC"
 
+msgctxt "#680"
+msgid "Verbose logging for VIDEO component"
+msgstr "Registro detallado para el módulo de VÍDEO"
+
 msgctxt "#700"
 msgid "Cleaning up library"
 msgstr "Limpiar la colección"
@@ -3253,6 +3257,22 @@ msgctxt "#1376"
 msgid "Pressure"
 msgstr "Presión atmosférica"
 
+msgctxt "#1377"
+msgid "Proximity"
+msgstr "Proximidad"
+
+msgctxt "#1378"
+msgid "Intensity"
+msgstr "Intensidad"
+
+msgctxt "#1379"
+msgid "Ragged"
+msgstr "Irregular"
+
+msgctxt "#1380"
+msgid "Very"
+msgstr "Muy"
+
 msgctxt "#1381"
 msgid "Extreme"
 msgstr "Extremo"
@@ -3261,9 +3281,29 @@ msgctxt "#1382"
 msgid "Whirls"
 msgstr "Torbellino"
 
+msgctxt "#1383"
+msgid "Sky Is Clear"
+msgstr "Cielo despejado"
+
 msgctxt "#1384"
 msgid "Broken"
 msgstr "Roto"
+
+msgctxt "#1385"
+msgid "Tornado"
+msgstr "Tornado"
+
+msgctxt "#1386"
+msgid "Tropical"
+msgstr "Tropical"
+
+msgctxt "#1387"
+msgid "Hurricane"
+msgstr "Huracán"
+
+msgctxt "#1388"
+msgid "Cold"
+msgstr "Frío"
 
 msgctxt "#1389"
 msgid "Windy"
@@ -3272,6 +3312,26 @@ msgstr "Viento"
 msgctxt "#1390"
 msgid "Settings"
 msgstr "Ajustes de caché"
+
+msgctxt "#1391"
+msgid "Breeze"
+msgstr "Brisa"
+
+msgctxt "#1392"
+msgid "Gentle"
+msgstr "Agradable"
+
+msgctxt "#1393"
+msgid "High wind, near gale"
+msgstr "Viento fuerte, casi vendaval"
+
+msgctxt "#1394"
+msgid "Severe"
+msgstr "Severo"
+
+msgctxt "#1395"
+msgid "Violent"
+msgstr "Violento"
 
 msgctxt "#1396"
 msgid "Drifting"
@@ -6137,6 +6197,22 @@ msgctxt "#16329"
 msgid "VAAPI Motion Compensated"
 msgstr "Movimiento Compensado VAAPI"
 
+msgctxt "#16330"
+msgid "MMAL - Advanced"
+msgstr "MMAL - Avanzado"
+
+msgctxt "#16331"
+msgid "MMAL - Advanced (Half)"
+msgstr "MMAL - Avanzado (Medio)"
+
+msgctxt "#16332"
+msgid "MMAL - Bob"
+msgstr "MMAL - Bob"
+
+msgctxt "#16333"
+msgid "MMAL - Bob (Half)"
+msgstr "MMAL - Bob (Medio)"
+
 msgctxt "#16400"
 msgid "Post-processing"
 msgstr "Post-procesamiento de vídeo"
@@ -7230,8 +7306,8 @@ msgid "Add-on for the backend to be able to use PVR."
 msgstr "add-on para el backend para usar el PVR."
 
 msgctxt "#19274"
-msgid "Please visit kodi.tv/pvr to learn more."
-msgstr "Por favor, visite kodi.tv/pvr para saber cómo."
+msgid "Please visit http://kodi.wiki/view/PVR to learn more."
+msgstr "Por favor, visite http://kodi.wiki/view/PVR para saber más."
 
 msgctxt "#19275"
 msgid "Conflict warning"
@@ -8452,6 +8528,10 @@ msgstr "Secure Shell (SSH/SFTP)"
 msgctxt "#20261"
 msgid "Apple Filing Protocol (AFP)"
 msgstr "Apple File Protocol (AFP)"
+
+msgctxt "#20262"
+msgid "Zeroconf Browser"
+msgstr "Explorador Zeroconf"
 
 msgctxt "#20300"
 msgid "Web server directory (HTTP)"
@@ -10556,6 +10636,14 @@ msgstr "Descargar primer subtítulo del listado de la búsqueda de forma automá
 msgctxt "#24128"
 msgid "Configuration has been moved"
 msgstr "Configuración movida"
+
+msgctxt "#24129"
+msgid "The configuration of XBMC has been moved to the new location for Kodi. Please refer to http://kodi.wiki/view/Migration - this message will not be shown again!"
+msgstr "La configuración de XBMC se ha movido a una nueva ubicación para Kodi. Por favor, revisa http://kodi.wiki/view/Migration - ¡Este mensaje no se volverá a mostrar!"
+
+msgctxt "#24999"
+msgid "Hide incompatible"
+msgstr "Ocultar incompatibles"
 
 msgctxt "#25000"
 msgid "Notifications"

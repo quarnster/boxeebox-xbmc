@@ -2473,6 +2473,10 @@ msgctxt "#679"
 msgid "Verbose logging for CEC library"
 msgstr "CEC kitaplığı için ayrıntılı günlük"
 
+msgctxt "#680"
+msgid "Verbose logging for VIDEO component"
+msgstr "VIDEO bileşeni için ayrıntılı günlük"
+
 msgctxt "#700"
 msgid "Cleaning up library"
 msgstr "Kitaplık temizleniyor"
@@ -3253,9 +3257,25 @@ msgctxt "#1376"
 msgid "Pressure"
 msgstr "Basınç"
 
+msgctxt "#1377"
+msgid "Proximity"
+msgstr "Yakınlık"
+
+msgctxt "#1378"
+msgid "Intensity"
+msgstr "Yoğunluk"
+
+msgctxt "#1379"
+msgid "Ragged"
+msgstr "Parçalı"
+
+msgctxt "#1380"
+msgid "Very"
+msgstr "Çok"
+
 msgctxt "#1381"
 msgid "Extreme"
-msgstr "Extreme"
+msgstr "Aşırı"
 
 msgctxt "#1382"
 msgid "Whirls"
@@ -3983,7 +4003,7 @@ msgstr "veya çıkmak için C'ye basın"
 
 msgctxt "#12330"
 msgid "Enter gamepad button combo and"
-msgstr "Gamepad tuş kombinasyonunu girin ve"
+msgstr "Oyun kumandası tuş kombinasyonunu girin ve"
 
 msgctxt "#12331"
 msgid "press OK, or Back to cancel"
@@ -4011,7 +4031,7 @@ msgstr "Sayısal parola"
 
 msgctxt "#12338"
 msgid "Gamepad button combo"
-msgstr "Gamepad tuş kombinasyonu"
+msgstr "Oyun kumandası tuş kombinasyonu"
 
 msgctxt "#12339"
 msgid "Full-text password"
@@ -5503,7 +5523,7 @@ msgstr "%i ms"
 
 msgctxt "#14047"
 msgid "%i %%"
-msgstr "%i %%"
+msgstr "%% %i"
 
 msgctxt "#14048"
 msgid "%i kbps"
@@ -6176,6 +6196,22 @@ msgstr "VAAPI Motion Adaptive"
 msgctxt "#16329"
 msgid "VAAPI Motion Compensated"
 msgstr "VAAPI Motion Compensated"
+
+msgctxt "#16330"
+msgid "MMAL - Advanced"
+msgstr "MMAL - Gelişmiş"
+
+msgctxt "#16331"
+msgid "MMAL - Advanced (Half)"
+msgstr "MMAL - Gelişmiş (Yarım)"
+
+msgctxt "#16332"
+msgid "MMAL - Bob"
+msgstr "MMAL - Bob"
+
+msgctxt "#16333"
+msgid "MMAL - Bob (Half)"
+msgstr "MMAL - Bob (Yarım)"
 
 msgctxt "#16400"
 msgid "Post-processing"
@@ -7270,8 +7306,8 @@ msgid "Add-on for the backend to be able to use PVR."
 msgstr "ve arka uç için eklentiye ihtiyacınınız var."
 
 msgctxt "#19274"
-msgid "Please visit kodi.tv/pvr to learn more."
-msgstr "Daha fazla bilgi için kodi.tv/pvr sitesini ziyaret ediniz."
+msgid "Please visit http://kodi.wiki/view/PVR to learn more."
+msgstr "Daha fazla bilgi için http://kodi.wiki/view/PVR sitesini ziyaret ediniz."
 
 msgctxt "#19275"
 msgid "Conflict warning"
@@ -7299,7 +7335,7 @@ msgstr "İstemciye özel ayarlar"
 
 msgctxt "#19281"
 msgid "Confirm channel switches by pressing OK"
-msgstr "Kanal değiştirmeyi OK'e basarak onaylayın"
+msgstr "Kanal değiştirmeyi Tamam'a basarak onaylayın"
 
 msgctxt "#19282"
 msgid "Current icon"
@@ -9535,7 +9571,7 @@ msgstr "Altyazı dili"
 
 msgctxt "#21449"
 msgid "Remote control sends keyboard presses"
-msgstr "Remote control sends keyboard presses"
+msgstr "Uzaktan kontrol, klavye tuşları gönderir"
 
 msgctxt "#21450"
 msgid "Edit"
@@ -10191,7 +10227,7 @@ msgstr "Altyazılar"
 
 msgctxt "#24013"
 msgid "Lyrics"
-msgstr "Şakı Sözleri"
+msgstr "Şarkı Sözleri"
 
 msgctxt "#24014"
 msgid "TV information"
@@ -10299,7 +10335,7 @@ msgstr "Zip dosyasından yükle"
 
 msgctxt "#24042"
 msgid "Downloading %i%%"
-msgstr "Karşıdan yükleniyor %i%%"
+msgstr "Karşıdan yükleniyor %%%i"
 
 msgctxt "#24043"
 msgid "Available Updates"
@@ -10600,6 +10636,14 @@ msgstr "Arama sonuçlarındaki ilk altyazıyı otomatık olarak indir"
 msgctxt "#24128"
 msgid "Configuration has been moved"
 msgstr "Yapılandırma taşındı"
+
+msgctxt "#24129"
+msgid "The configuration of XBMC has been moved to the new location for Kodi. Please refer to http://kodi.wiki/view/Migration - this message will not be shown again!"
+msgstr "XBMC yapılandırması Kodi için yeni bir konuma taşındı. Lütfen http://kodi.wiki/view/Migration adresine bakın - bu mesaj tekrar gösterilmeyecek!"
+
+msgctxt "#24999"
+msgid "Hide incompatible"
+msgstr "Uyumsuzları gizle"
 
 msgctxt "#25000"
 msgid "Notifications"
@@ -11195,7 +11239,7 @@ msgstr "Bu aygıt için özel keymap kullanma"
 
 msgctxt "#35100"
 msgid "Enable joystick and gamepad support"
-msgstr "Joystick ve gamepad desteğini etkinleştir"
+msgstr "Oyun çubuğu ve oyun kumandası desteğini etkinleştir"
 
 msgctxt "#35102"
 msgid "Disable joystick when this device is present"
@@ -11255,7 +11299,7 @@ msgstr "Kodi başlatılırken açılacak aygıtlar"
 
 msgctxt "#36008"
 msgid "Devices to power off when stopping Kodi"
-msgstr "Kodi durdurulunca kapatılacak aygıtlar"
+msgstr "Kodi durdurulurken kapatılacak aygıtlar"
 
 msgctxt "#36009"
 msgid "Put devices in standby mode when activating screensaver"
@@ -11263,7 +11307,7 @@ msgstr "Ekran koruyucu devreye girince aygıtı bekleme moduna geçir"
 
 msgctxt "#36010"
 msgid "Wake devices when deactivating screensaver"
-msgstr "Ekran koruyucuyu kapatır iken aygıtları uyanıdır"
+msgstr "Ekran koruyucuyu kapatırken aygıtları uyandır"
 
 msgctxt "#36011"
 msgid "Could not detect the CEC com port. Set it up manually."
@@ -11371,7 +11415,7 @@ msgstr "TV ve AVR aygıtı (kesin)"
 
 msgctxt "#36040"
 msgid "Unsupported libCEC interface version. %x is lower than the version Kodi supports (%x)"
-msgstr "Desteklenmeyen libCEC arabirim sürümü. %x sürümü Kodi'nin  desteklediği sürümden (%x) daha düşük."
+msgstr "Desteklenmeyen libCEC arabirim sürümü. %x sürümü Kodi'nin desteklediği sürümden (%x) daha düşük."
 
 msgctxt "#36041"
 msgid "* Item folder"
@@ -11627,7 +11671,7 @@ msgstr "Piksel arabelleği nesnelerini kullanarak video dosyalarının kod çöz
 
 msgctxt "#36164"
 msgid "Allow the refresh rate of the display to be changed so that it best matches the video frame rate. This may yield smoother video playback."
-msgstr "Ekranın yenileme hızını video kare hızı ile en iyi eşleşecek şekilde değiştirilmesine izin. Bu daha yumuşak video oynatımı sağlar."
+msgstr "Ekranın yenileme hızını video kare hızı ile en iyi eşleşecek şekilde değiştirilmesine izin ver. Bu daha yumuşak video oynatımı sağlar."
 
 msgctxt "#36165"
 msgid "Pause for a small amount of time during a refresh rate change."
@@ -12463,7 +12507,7 @@ msgstr "Etkinleştirildiğinde, klavye okları sanal klavye üzerindeki seçimi 
 
 msgctxt "#36377"
 msgid "Use a mouse or touch screen device to control Kodi. Note: disabling will cause you to lose control over Kodi when no keyboard or remote is present."
-msgstr "Kodi'yi kontrol etmek için bir fare veya dokunmatik ekran aygıtı kullanın. Not: devre dışı bırakmak klavye veya uzaktan kumanda mevcut değilse Kodi üzerindeki kontrolü kaybetmenize neden olacaktır."
+msgstr "Kodi'yi kontrol etmek için bir fare veya dokunmatik ekran aygıtı kullanın. Not: devre dışı bırakmak, klavye veya uzaktan kumanda mevcut değilse Kodi üzerindeki kontrolü kaybetmenize neden olacaktır."
 
 msgctxt "#36378"
 msgid "Use a joystick to control Kodi."
@@ -12987,7 +13031,7 @@ msgstr "Downmix yaparken orta kanalı artır."
 
 msgctxt "#37020"
 msgid "Enable higher colour depth artwork"
-msgstr "Daha yüksek artwork renk derinliğini etkinleştir"
+msgstr "Daha yüksek çizim renk derinliğini etkinleştir"
 
 msgctxt "#37021"
 msgid "Set GUI resolution limit"

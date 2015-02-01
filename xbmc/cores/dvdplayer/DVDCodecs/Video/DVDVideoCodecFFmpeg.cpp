@@ -128,7 +128,7 @@ enum PixelFormat CDVDVideoCodecFFmpeg::GetFormat( struct AVCodecContext * avctx
 #endif
 
 #ifdef TARGET_DARWIN_OSX
-    if (*cur == AV_PIX_FMT_VDA_VLD && CSettings::Get().GetBool("videoplayer.usevda"))
+    if (*cur == AV_PIX_FMT_VDA && CSettings::Get().GetBool("videoplayer.usevda") && g_advancedSettings.m_useFfmpegVda)
     {
       VDA::CDecoder* dec = new VDA::CDecoder();
       if(dec->Open(avctx, *cur, ctx->m_uSurfacesCount))
@@ -142,6 +142,16 @@ enum PixelFormat CDVDVideoCodecFFmpeg::GetFormat( struct AVCodecContext * avctx
 #endif
     cur++;
   }
+
+  // hardware decoder de-selected, restore standard ffmpeg
+  if (ctx->GetHardware())
+  {
+    ctx->SetHardware(NULL);
+    avctx->get_buffer2     = avcodec_default_get_buffer2;
+    avctx->slice_flags     = 0;
+    avctx->hwaccel_context = 0;
+  }
+
   return avcodec_default_get_format(avctx, fmt);
 }
 
@@ -174,6 +184,8 @@ CDVDVideoCodecFFmpeg::CDVDVideoCodecFFmpeg() : CDVDVideoCodec()
   m_dts = DVD_NOPTS_VALUE;
   m_started = false;
   m_decoderPts = DVD_NOPTS_VALUE;
+  m_codecControlFlags = 0;
+  m_requestSkipDeint = false;
 }
 
 CDVDVideoCodecFFmpeg::~CDVDVideoCodecFFmpeg()
@@ -335,6 +347,7 @@ void CDVDVideoCodecFFmpeg::Dispose()
     m_pCodecContext = NULL;
   }
   SAFE_RELEASE(m_pHardware);
+  DisposeHWDecoders();
 
   FilterClose();
 }
@@ -546,6 +559,8 @@ int CDVDVideoCodecFFmpeg::Decode(uint8_t* pData, int iSize, double dts, double p
 
   if(result & VC_FLUSHED)
     Reset();
+
+  DisposeHWDecoders();
 
   return result;
 }
@@ -877,4 +892,21 @@ bool CDVDVideoCodecFFmpeg::GetCodecStats(double &pts, int &droppedPics)
 void CDVDVideoCodecFFmpeg::SetCodecControl(int flags)
 {
   m_codecControlFlags = flags;
+}
+
+void CDVDVideoCodecFFmpeg::SetHardware(IHardwareDecoder* hardware)
+{
+  if (m_pHardware)
+    m_disposeDecoders.push_back(m_pHardware);
+  m_pHardware = hardware;
+  UpdateName();
+}
+
+void CDVDVideoCodecFFmpeg::DisposeHWDecoders()
+{
+  while (!m_disposeDecoders.empty())
+  {
+    m_disposeDecoders.back()->Release();
+    m_disposeDecoders.pop_back();
+  }
 }

@@ -5,6 +5,10 @@ set(TARGET_DIR ${SYSROOT}/usr/local)
 set(BASIC_CONF <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --enable-shared --disable-static --disable-nls)
 set(BASIC_CMAKE CFLAGS=-I${TARGET_DIR}/include CC=${TARGET}-gcc CXX=${TARGET}-g++ RANLIB=${TARGET}-ranlib cmake -DPKG_CONFIG_EXECUTABLE=${TARGET}-pkg-config -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_INSTALL_PREFIX=${TARGET_DIR} -DZLIB_ROOT=${SYSROOT}/usr -DZLIB_LIBRARIES=${SYSROOT}/usr/lib/libz.so -DZLIB_INCLUDE_DIRS=${SYSROOT}/usr/include <SOURCE_DIR>)
 set(ENABLE_MYSQL ON CACHE BOOL "Whether to build with mysql support or not")
+set(ENABLE_ICONV OFF CACHE BOOL "Whether to build with iconv support or not")
+set(ENABLE_GETTEXT OFF CACHE BOOL "Whether to build with gettext support or not")
+set(ENABLE_GLIB_LINUX ON CACHE BOOL "Whether to build with glib_linux support or not")
+set(ENABLE_GLIB_OSX OFF CACHE BOOL "Whether to build with glib_osx support or not")
 
 set(PYTHON_VERSION 2.7.2)
 
@@ -39,8 +43,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libgcrypt
-	URL 			ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.6.1.tar.gz
-	URL_MD5 		d155aa1b06fa879175922ba28f6a6509
+	URL 			ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.6.2.tar.gz
+	URL_MD5 		d19adc062edff0ebc7e887212733ef1f
 	CONFIGURE_COMMAND 	GPG_ERROR_CONFIG=${TARGET_DIR}/bin/gpg-error-config ${BASIC_CONF} --disable-asm
 	DEPENDS libgpg-error
 )
@@ -146,7 +150,6 @@ ExternalProject_Add(
     DEPENDS libxml2
 )
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 	ExternalProject_Add(
 		iconv
 		URL                  http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
@@ -159,18 +162,7 @@ else()
 	add_custom_target(iconv COMMENT "iconv isn't built on linux, because it isn't needed (???)")
 	set(ICONV_TYPE no)
 endif()
-
-ExternalProject_Add(
-	libenca
-	URL                 https://github.com/nijel/enca/archive/1.16.tar.gz
-	URL_MD5             4f39869a757e96deb372884e6f474a27
-	PATCH_COMMAND       sed -i -e "s,.(AM_V_CC).(COMPILE),cc," "tools/Makefile.in"
-	COMMAND             sed -i -e "s,.(AM_V_CCLD).(LINK),cc -o \$@," "tools/Makefile.in" VERBATIM
-	CONFIGURE_COMMAND   ac_cv_file__dev_random=yes ac_cv_file__dev_urandom=no ac_cv_file__dev_srandom=no ac_cv_file__dev_arandom=no ${BASIC_CONF} --disable-external --without-librecode --disable-rpath --with-gnu-ld
-	BUILD_COMMAND       make
-	BUILD_IN_SOURCE     1
-	DEPENDS             iconv
-)
+endif()
 
 ExternalProject_Add(
 	libusb
@@ -269,8 +261,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	sqlite
-	URL 		    http://www.sqlite.org/2014/sqlite-autoconf-3080701.tar.gz
-	URL_MD5 	    8ee4541ebb3e5739e7ef5e9046e30063
+	URL 		    http://www.sqlite.org/2014/sqlite-autoconf-3080704.tar.gz
+	URL_MD5 	    33bb8db0038317ce1b0480ca1185c7ba
 	CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET}  --disable-shared --enable-static --enable-threadsafe --disable-readline --enable-dynamic-extensions
 	BUILD_COMMAND       make CXXFLAGS+=-DSQLITE_ENABLE_COLUMN_METADATA=1 CFLAGS+=-DSQLITE_TEMP_STORE=3  CFLAGS+=-DSQLITE_ENABLE_STAT3 CFLAGS+=-DSQLITE_DEFAULT_MMAP_SIZE=268435456
 )
@@ -325,8 +317,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	freetype2
-	URL 			http://sourceforge.net/projects/freetype/files/freetype2/2.5.3/freetype-2.5.3.tar.gz/download
-	URL_MD5 		cafe9f210e45360279c730d27bf071e9
+	URL 			http://sourceforge.net/projects/freetype/files/freetype2/2.5.4/freetype-2.5.4.tar.gz/download
+	URL_MD5 		99c5ab378218218f25afcd5171898faf
 	CONFIGURE_COMMAND 	LIBPNG_CFLAGS=-I${SYSROOT}/usr/local/include LIBPNG_LDFLAGS=-L${SYSROOT}/usr/local/lib ${BASIC_CONF}
 	BUILD_COMMAND		make ${PARALLEL}
 	DEPENDS                 libpng
@@ -421,15 +413,6 @@ ExternalProject_Add(
 	BUILD_COMMAND 		make ${PARALLEL}
 )
 
-ExternalProject_Add(
-	libass
-	GIT_REPOSITORY   	https://github.com/libass/libass.git
-	GIT_TAG                 0.12.0
-	UPDATE_COMMAND           ""
-	PATCH_COMMAND           ./autogen.sh
-	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules --enable-asm --disable-test
-	DEPENDS libpng libenca fribidi freetype2 fontconfig yasm
-)
 # TODO:Fails due to libSDL
 ExternalProject_Add(
 	libmpeg2
@@ -462,10 +445,13 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	libssh
-	URL                     http://git.libssh.org/projects/libssh.git/snapshot/libssh-0.6.3.tar.gz
-	URL_MD5                 5b0fd1dbf2effef2322f6251f6c7ca11
-	PATCH_COMMAND 		sed -e "s,add_subdirectory\(examples\),,g" -i CMakeLists.txt
-	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DCMAKE_INSTALL_PREFIX=${TARGET_DIR} -DWITH_STATIC_LIB=1 -DWITH_SERVER=OFF  -DWITH_GCRYPT=OFF -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
+	URL                     http://git.libssh.org/projects/libssh.git/snapshot/libssh-a48711ae7ef890c94e2a824afb899df385c406ee.tar.gz
+	URL_MD5                 a31106e0060c6dce355b29bd5388b436
+	PATCH_COMMAND
+	COMMAND                 patch -p0 < ${CMAKE_SOURCE_DIR}/md5.patch
+	COMMAND                 sed -e "s,add_subdirectory\(examples\),,g" -i CMakeLists.txt
+	COMMAND                 sed -ie "s|-fstack-protector|-fnostack-protector|" "cmake/Modules/DefineCompilerFlags.cmake"
+	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DCMAKE_INSTALL_PREFIX=${TARGET_DIR} -DWITH_STATIC_LIB=1 -DWITH_SERVER=OFF  -DWITH_GCRYPT=OFF -DWITH_EXAMPLES=0 -DTHREADS_PTHREAD_ARG=0 -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND 	make install
 	DEPENDS                 openssl
@@ -494,7 +480,7 @@ ExternalProject_Add(
 ExternalProject_Add(
         nfs
         GIT_REPOSITORY          https://github.com/sahlberg/libnfs.git
-        GIT_TAG                 4a58e6145568fd21ef956ae6ac3d3c37ef209a57
+        GIT_TAG                 9c1d38488e3bf454ac13c526b5f3c9e1301ef7a7
         UPDATE_COMMAND          ""
         PATCH_COMMAND           ./bootstrap
         CONFIGURE_COMMAND       ${BASIC_CONF} --disable-examples --disable-tirpc
@@ -517,10 +503,10 @@ ExternalProject_Add(
 ExternalProject_Add(
 	curl
 	GIT_REPOSITORY          https://github.com/bagder/curl.git
-	GIT_TAG                 800094802e29935e2785fb9d33c3b3a6af0ad818
+	GIT_TAG                 curl-7_39_0
 	PATCH_COMMAND           ./buildconf
 	UPDATE_COMMAND          ""
-	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn --enable-threaded-resolver
+	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn --enable-threaded-resolver --without-gnutls
 	BUILD_COMMAND 		make
 	DEPENDS                 openssl zlib bzip2 rtmpdump
 )
@@ -595,7 +581,7 @@ ExternalProject_Add(
 	BUILD_COMMAND 		HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make ${PARALLEL}
 	INSTALL_COMMAND 	HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen CROSS_COMPILE_TARGET=yes HOSTARCH=${TARGET} BUILDARCH=${HOSTMACHINE} make install
 	BUILD_IN_SOURCE 	1
-	DEPENDS zlib expat bzip2 gdbm openssl sqlite libffi
+	DEPENDS zlib expat bzip2 gdbm openssl sqlite libffi libxml2
 )
 
 ExternalProject_Add(
@@ -606,21 +592,75 @@ ExternalProject_Add(
     BUILD_COMMAND         make
 )
 
-
+if(ENABLE_GETTEXT)
 ExternalProject_Add(
 	gettext
 	URL                  http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.3.tar.gz
 	URL_MD5              c365029ffc866fc4e485d9e5ca60b260
+	PATCH_COMMAND        patch -p1 -N < ${CMAKE_SOURCE_DIR}/gettext-dont_build_docs_and_examples.patch
 	CONFIGURE_COMMAND    ${BASIC_CONF}
 	BUILD_COMMAND        make
 	DEPENDS iconv
 )
+endif()
 
+if(ENABLE_GLIB_LINUX)
+
+file(WRITE ${CMAKE_BINARY_DIR}/pre_glib_configure_helper.sh
+"
+export CFLAGS=-march=i686
+export LIBS=\"-lpthread -lz -lffi\"
+${CMAKE_BINARY_DIR}/pre_glib-prefix/src/pre_glib/configure --prefix=${TARGET_DIR} --build=${TARGET} CFLAGS=-march=i686 CFLAGS=-I${TARGET_DIR}/include LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1 LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared --with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no 
+")
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/pre_glib_configure_helper.sh)
+
+ExternalProject_Add(
+    pre_glib
+    URL                   https://github.com/GNOME/glib/archive/2.40.0.tar.gz
+    URL_MD5               4e453a219faf86e51f47191a1f8cb910
+    PATCH_COMMAND         NOCONFIGURE=yes ./autogen.sh
+    CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/pre_glib_configure_helper.sh
+    BUILD_COMMAND         make
+    BUILD_IN_SOURCE       1
+    DEPENDS               libffi python pcre zlib libxml2 dbus libdaemon
+)
+
+file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
+"
+export CC=${TARGET}-gcc
+export CXX=${TARGET}-g++
+export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include -I${SYSROOT}/usr/include\"
+export LIBS=\"-lpthread -lrt -ldl -lresolv -lz -lffi\"
+export CPPFLAGS=\"-I${TARGET_DIR}/include -I${SYSROOT}/usr/include\"
+export LIBFFI_CFLAGS="-I${TARGET_DIR}/lib/libffi-3.1/include\"
+export LIBFFI_LIBS="-I${TARGET_DIR}/lib -lffi\"
+export ZLIB_CFLAGS="-I${SYSROOT}/usr/include\"
+export ZLIB_LIBS="-I${SYSROOT}/usr/lib -lz\"
+export PCRE_CFLAGS="-I${TARGET_DIR}/include\"
+export PCRE_LIBS="-I${TARGET_DIR}/lib -lpcre\"
+${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=no --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
+")
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
+
+ExternalProject_Add(
+    glib
+    URL                   https://github.com/GNOME/glib/archive/2.40.0.tar.gz
+    URL_MD5               4e453a219faf86e51f47191a1f8cb910
+	PATCH_COMMAND         patch -p1 -N < ${CMAKE_SOURCE_DIR}/glib-01-dont-build-tests.patch
+          COMMAND         NOCONFIGURE=yes ./autogen.sh
+    CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
+    BUILD_COMMAND         make
+    BUILD_IN_SOURCE       1
+    DEPENDS               libffi python pcre zlib libxml2 dbus libdaemon pre_glib
+)
+endif()
+
+if(ENABLE_GLIB_OSX)
 file(WRITE ${CMAKE_BINARY_DIR}/glib_configure_helper.sh
 "
 export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include\"
 export LIBS=\"-lpthread -lz -lffi\"
-${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=${ICONV_TYPE} --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
+${CMAKE_BINARY_DIR}/glib-prefix/src/glib/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib LIBFFI_CFLAGS=-I${TARGET_DIR}/lib/libffi-3.1/include LIBFFI_LIBS=-L${TARGET_DIR}/lib --enable-shared ZLIB_LIBS=${TARGET_DIR}/lib ZLIB_CFLAGS=${TARGET_DIR}/include glib_cv_uscore=yes ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes glib_cv_stack_grows=no glib_cv_rtldglobal_broken=no -with-libiconv=yes --enable-debug=no --disable-man --disable-dtrace --disable-systemtap --disable-rebuilds --enable-gtk-doc-html=no --disable-selinux --disable-fam --enable-xattr --enable-Bsymbolic --with-threads=posix --enable-gtk-doc=no
 ")
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/glib_configure_helper.sh)
 
@@ -634,6 +674,7 @@ ExternalProject_Add(
     BUILD_IN_SOURCE       1
     DEPENDS               libffi python pcre zlib libxml2 iconv gettext
 )
+endif()
 
 ExternalProject_Add(
     libplist
@@ -678,6 +719,28 @@ ExternalProject_Add(
     BUILD_COMMAND         make
     BUILD_IN_SOURCE       1
     DEPENDS               libdaemon libffi glib dbus expat
+)
+
+ExternalProject_Add(
+	libenca
+	URL                 https://github.com/nijel/enca/archive/1.16.tar.gz
+	URL_MD5             4f39869a757e96deb372884e6f474a27
+	PATCH_COMMAND       sed -i -e "s,.(AM_V_CC).(COMPILE),cc," "tools/Makefile.in"
+	COMMAND             sed -i -e "s,.(AM_V_CCLD).(LINK),cc -o \$@," "tools/Makefile.in" VERBATIM
+	CONFIGURE_COMMAND   ac_cv_file__dev_random=yes ac_cv_file__dev_urandom=no ac_cv_file__dev_srandom=no ac_cv_file__dev_arandom=no ${BASIC_CONF} --disable-external --without-librecode --disable-rpath --with-gnu-ld
+	BUILD_COMMAND       make
+	BUILD_IN_SOURCE     1
+	DEPENDS             avahi
+)
+
+ExternalProject_Add(
+	libass
+	GIT_REPOSITORY   	https://github.com/libass/libass.git
+	GIT_TAG                 0.12.0
+	UPDATE_COMMAND           ""
+	PATCH_COMMAND           ./autogen.sh
+	CONFIGURE_COMMAND 	${BASIC_CONF} --with-gnu-ld --enable-enca --enable-fontconfig --disable-harfbuzz --disable-silent-rules --enable-asm --disable-test
+	DEPENDS libpng libenca fribidi freetype2 fontconfig yasm
 )
 
 ExternalProject_Add(
@@ -733,12 +796,54 @@ add_custom_command(OUTPUT ${TARGET_DIR}/lib/libGLESv2.so
 add_custom_target(dummylibs ALL DEPENDS DEPENDS ${TARGET_DIR}/lib/libEGL.so ${TARGET_DIR}/lib/libGLESv2.so)
 
 ExternalProject_Add(
-	ffmpeg
-	GIT_REPOSITORY           https://github.com/xbmc/FFmpeg.git
-	GIT_TAG                  2.4.3-Helix-beta1
-	CONFIGURE_COMMAND        <SOURCE_DIR>/configure --cross-prefix=${TARGET}- --enable-cross-compile --sysroot=${SYSROOT} --target-os=linux --arch=i686 --cpu=i686 --prefix=${TARGET_DIR} --disable-shared --enable-static --disable-programs --enable-gpl --disable-devices --disable-doc --disable-ffplay --disable-ffmpeg --disable-ffprobe --disable-ffserver --enable-runtime-cpudetect --enable-postproc --enable-pthreads --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=ipod --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2 --enable-protocol=http --enable-zlib
-	UPDATE_COMMAND           ""
-	BUILD_COMMAND            make ${PARALLEL}
-	DEPENDS                  yasm
+	gmp
+	URL 				https://gmplib.org/download/gmp/gmp-6.0.0a.tar.bz2
+	URL_MD5				b7ff2d88cae7f8085bd5006096eed470
+	CONFIGURE_COMMAND 	<SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib --enable-shared --enable-cxx --enable-cxx ABI=32
+	BUILD_COMMAND 		make ${PARALLEL}
+	INSTALL_COMMAND     make install
 )
 
+file(WRITE ${CMAKE_BINARY_DIR}/nettle_configure_helper.sh
+"
+export CFLAGS=\"-march=i686 -I${TARGET_DIR}/include\"
+export CPPFLAGS=-I${TARGET_DIR}/include
+export LDFLAGS=-L${TARGET_DIR}/lib
+${CMAKE_BINARY_DIR}/nettle-prefix/src/nettle/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib --enable-shared --disable-openssl
+")
+execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/nettle_configure_helper.sh)
+
+ExternalProject_Add(
+    nettle
+    URL                   http://ftp.gnu.org/gnu/nettle/nettle-2.7.1.tar.gz
+    URL_MD5               003d5147911317931dd453520eb234a5
+    CONFIGURE_COMMAND     ${CMAKE_BINARY_DIR}/nettle_configure_helper.sh
+    BUILD_COMMAND         make
+    BUILD_IN_SOURCE       1
+    DEPENDS               openssl gmp
+)
+
+ExternalProject_Add(
+    gnutls
+    URL                   ftp://ftp.gnutls.org/gcrypt/gnutls/v3.3/gnutls-3.3.10.tar.xz
+    URL_MD5               c0a72b2c0553fe1c4992e30835808012
+	PATCH_COMMAND         patch -p0 < ${CMAKE_SOURCE_DIR}/size-max.patch   
+    CONFIGURE_COMMAND     <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --build=${HOSTMACHINE} --target=${TARGET} CROSS_COMPILE=${TARGET}- LDFLAGS=-L${TARGET_DIR}/lib --enable-shared --without-p11-kit --disable-nls --enable-local-libopts GMP_CFLAGS=${TARGET_DIR}/include
+    BUILD_COMMAND         make
+    BUILD_IN_SOURCE       1
+    DEPENDS               nettle
+)
+
+ExternalProject_Add(
+	ffmpeg
+	GIT_REPOSITORY           https://github.com/xbmc/FFmpeg.git
+	GIT_TAG                  2.4.6-Helix 
+	PATCH_COMMAND            sed -i".bak" -e "s%pkg_config_default=pkg-config%export PKG_CONFIG_LIBDIR=${TARGET_DIR}/lib/pkgconfig:${SYSROOT}/usr/lib/pkgconfig%" configure
+	CONFIGURE_COMMAND        <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --cross-prefix=${TARGET}- --enable-cross-compile --target-os=linux --sysroot=${SYSROOT} --extra-ldflags=-L${TARGET_DIR}/lib --extra-cflags=-L${TARGET_DIR}/include --arch=i686 --cpu=i686 --enable-shared --disable-static --sysinclude={TARGET_DIR}/include --disable-programs --enable-gpl --disable-devices --disable-doc --disable-ffplay --disable-ffmpeg --disable-ffprobe --disable-ffserver --enable-runtime-cpudetect --enable-postproc --enable-pthreads --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=mpegts --enable-muxer=ipod --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2 --enable-protocol=http --disable-vaapi --disable-vdpau --enable-nonfree --enable-asm --enable-libvorbis --enable-muxer=ogg --enable-encoder=libvorbis --enable-bzlib --enable-optimizations --enable-yasm --enable-gnutls --enable-zlib --extra-libs=-lrt --extra-libs=-lpthread --extra-libs=-lgnutls --extra-libs=-lnettle --extra-libs=-lhogweed --extra-libs=-lgmp --extra-libs=-lz --incdir=${TARGET}/include --libdir=${TARGET}/lib --pkg-config=pkg-config
+	UPDATE_COMMAND           ""
+	BUILD_COMMAND            make ${PARALLEL}
+	INSTALL_COMMAND          make install
+	COMMAND                  ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_BINARY_DIR}/ffmpeg-prefix/src/ffmpeg-build/i686-pc-linux-gnu/include ${TARGET_DIR}/include
+	COMMAND                  ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_BINARY_DIR}/ffmpeg-prefix/src/ffmpeg-build/i686-pc-linux-gnu/lib/pkgconfig ${TARGET_DIR}/lib/pkgconfig
+	DEPENDS                  yasm gnutls zlib bzip2 libvorbis nettle
+)
