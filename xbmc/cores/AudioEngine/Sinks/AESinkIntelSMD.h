@@ -21,8 +21,8 @@
 
 #ifdef HAS_INTEL_SMD
 
-#include "Interfaces/AESink.h"
-#include "Utils/AEDeviceInfo.h"
+#include "cores/AudioEngine/Interfaces/AESink.h"
+#include "cores/AudioEngine/Utils/AEDeviceInfo.h"
 #include <stdint.h>
 
 #include <ismd_audio.h>

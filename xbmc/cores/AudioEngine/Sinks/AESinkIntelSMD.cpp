@@ -23,8 +23,8 @@
 #include "AESinkIntelSMD.h"
 #include "utils/log.h"
 #include "../../IntelSMDGlobals.h"
-#include "Utils/AEDeviceInfo.h"
-#include "Utils/AEUtil.h"
+#include "cores/AudioEngine/Utils/AEDeviceInfo.h"
+#include "cores/AudioEngine/Utils/AEUtil.h"
 #include <sstream>
 extern "C"
 {
