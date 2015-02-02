@@ -151,7 +151,7 @@ void CDVDVideoCodecSMD::Dispose(void)
   }
 }
 
-int CDVDVideoCodecSMD::Decode(BYTE *pData, int iSize, double dts, double pts)
+int CDVDVideoCodecSMD::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {
   VERBOSE();
   int ret = 0;
