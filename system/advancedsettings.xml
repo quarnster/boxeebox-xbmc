@@ -1,3 +1,16 @@
 <advancedsettings>
     <cputempcommand>echo "$(/opt/local/bin/dtool 2|awk '{printf("%d\n",$1 + 0.5);}') C"</cputempcommand>
+	 <video>
+      <busydialogdelayms>750</busydialogdelayms>
+     </video>
+     <samba>
+      <clienttimeout>30</clienttimeout>
+     </samba>
+     <network>
+      <readbufferfactor>4.0</readbufferfactor>
+     </network>
+     <gui>
+      <algorithmdirtyregions>0</algorithmdirtyregions>
+      <nofliptimeout>0</nofliptimeout>
+     </gui>
 </advancedsettings>
