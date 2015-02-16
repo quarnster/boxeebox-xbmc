@@ -22,13 +22,13 @@ case $XBMC_PLATFORM_DIR in
     ;;
 
   osx32)
-    DEFAULT_SDK_VERSION=10.8
+    DEFAULT_SDK_VERSION=10.10
     DEFAULT_XBMC_DEPENDS_ROOT=$WORKSPACE/tools/depends/xbmc-depends
     DEFAULT_CONFIGURATION="Debug"
     ;;
 
   osx64)
-    DEFAULT_SDK_VERSION=10.8
+    DEFAULT_SDK_VERSION=10.10
     DEFAULT_XBMC_DEPENDS_ROOT=$WORKSPACE/tools/depends/xbmc-depends
     DEFAULT_CONFIGURATION="Debug"
     ;;
@@ -64,12 +64,6 @@ fi
 if [ "$Configuration" == "Default" ]
 then
   Configuration=$DEFAULT_CONFIGURATION
-fi
-
-#clamp release builds to 1 thread only
-if [ "$Configuration" == "Release" ]
-then
-  BUILDTHREADS=1
 fi
 
 #helper functions
