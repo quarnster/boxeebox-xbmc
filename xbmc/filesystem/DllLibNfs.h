@@ -85,6 +85,7 @@ public:
   virtual int nfs_pread(struct nfs_context *nfs,     struct nfsfh *nfsfh,  uint64_t offset, uint64_t count, char *buf)=0;
   virtual int nfs_pwrite(struct nfs_context *nfs,    struct nfsfh *nfsfh,  uint64_t offset, uint64_t count, char *buf)=0;
   virtual int nfs_lseek(struct nfs_context *nfs,     struct nfsfh *nfsfh,  uint64_t offset, int whence,   uint64_t *current_offset)=0;
+  virtual void nfs_set_streaming_mode(struct nfsfh *nfsfh, uint32_t v)=0;
 };
 
 class DllLibNfs : public DllDynamic, DllLibNfsInterface
@@ -131,6 +132,8 @@ class DllLibNfs : public DllDynamic, DllLibNfsInterface
   DEFINE_METHOD5(int, nfs_pread,     (struct nfs_context *p1, struct nfsfh *p2,  uint64_t p3,   uint64_t p4,  char *p5))
   DEFINE_METHOD5(int, nfs_pwrite,    (struct nfs_context *p1, struct nfsfh *p2,  uint64_t p3,   uint64_t p4,  char *p5))
   DEFINE_METHOD5(int, nfs_lseek,     (struct nfs_context *p1, struct nfsfh *p2,  uint64_t p3,   int p4,     uint64_t *p5))
+  DEFINE_METHOD2(void,nfs_set_streaming_mode, (struct nfsfh *p1, uint32_t p2))
+
 
 
 
@@ -175,7 +178,8 @@ class DllLibNfs : public DllDynamic, DllLibNfsInterface
     RESOLVE_METHOD_RENAME(nfs_access,    nfs_access)
     RESOLVE_METHOD_RENAME(nfs_symlink,   nfs_symlink)
     RESOLVE_METHOD_RENAME(nfs_rename,    nfs_rename)
-    RESOLVE_METHOD_RENAME(nfs_link,      nfs_link)      
+    RESOLVE_METHOD_RENAME(nfs_link,      nfs_link)
+	RESOLVE_METHOD_RENAME(nfs_set_streaming_mode, nfs_set_streaming_mode)
   END_METHOD_RESOLVE()
 };
 

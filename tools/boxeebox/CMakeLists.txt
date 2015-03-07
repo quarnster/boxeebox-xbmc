@@ -127,7 +127,7 @@ set(libs
 	liblzo2.so.2
 	libmodplug.so
 	libmpeg2.so.0
-	libnfs.so.4
+	libnfs.so.8
 	libogg.so
 	libpcre.so.1
 	libplist.so.3

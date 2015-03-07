@@ -472,11 +472,12 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
-        nfs
+        libnfs
         GIT_REPOSITORY          https://github.com/sahlberg/libnfs.git
-        GIT_TAG                 libnfs-1.9.7
+        GIT_TAG                 6da5bc1cc70bb0f786e1f1d595236007187d603a
         UPDATE_COMMAND          ""
-        PATCH_COMMAND           ./bootstrap
+        PATCH_COMMAND           patch -p1 < ${CMAKE_SOURCE_DIR}/libnfs-patches/0001-Sequential-Readahead-Mode.patch
+           COMMAND              ./bootstrap
         CONFIGURE_COMMAND       ${BASIC_CONF} --disable-examples --disable-tirpc
         BUILD_COMMAND           make
         INSTALL_COMMAND         make install

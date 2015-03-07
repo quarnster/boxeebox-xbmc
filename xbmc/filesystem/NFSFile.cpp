@@ -563,6 +563,8 @@ bool CNFSFile::Open(const CURL& url)
   CLog::Log(LOGDEBUG,"CNFSFile::Open - opened %s",url.GetFileName().c_str());
   m_url=url;
   
+  //gNfsConnection.GetImpl()->nfs_set_streaming_mode(m_pFileHandle, 5 * 1024 * 1024);
+  
   struct __stat64 tmpBuffer;
 
   if( Stat(&tmpBuffer) )
