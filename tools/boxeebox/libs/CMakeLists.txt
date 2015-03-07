@@ -485,11 +485,13 @@ ExternalProject_Add(
 
 ExternalProject_Add(
         rtmpdump
-        GIT_REPOSITORY          https://github.com/BurntSushi/rtmpdump-ksv.git
+        GIT_REPOSITORY          git://git.ffmpeg.org/rtmpdump
         CONFIGURE_COMMAND       ""
         UPDATE_COMMAND          ""
-        BUILD_COMMAND           make CRYPTO=OPENSSL DESTDIR=${SYSROOT} LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
-        INSTALL_COMMAND         make install DESTDIR=${SYSROOT}
+        PATCH_COMMAND           patch -p0 < ${CMAKE_SOURCE_DIR}/rtmpdump-patches/prefix.patch
+           COMMAND              patch -p0 < ${CMAKE_SOURCE_DIR}/rtmpdump-patches/Patch.diff
+        BUILD_COMMAND           cd ${CMAKE_BINARY_DIR}/rtmpdump-prefix/src/rtmpdump make SYS=posix prefix=${SYSROOT}/usr/local CRYPTO=OPENSSL DESTDIR=${SYSROOT} LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar XCFLAGS=-L${TARGET_DIR}/include XLDFLAGS=-L${TARGET_DIR}/lib LIBZ=-lm -lz LIBS_posix=-L${TARGET_DIR}/lib XLIBS=-ldl INC=-I${TARGET_DIR}/include CROSS_COMPILE=${TARGET}-
+        INSTALL_COMMAND         make install DESTDIR=${SYSROOT} 
         BUILD_IN_SOURCE         1
         DEPENDS                 zlib openssl
 )
