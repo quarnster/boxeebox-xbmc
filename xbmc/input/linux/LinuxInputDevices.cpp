@@ -250,6 +250,8 @@ KeyMap keyMap[] = {
   { KEY_PRINT         , XBMCK_PRINT       },
   { KEY_QUESTION      , XBMCK_HELP        },
   { KEY_BACK          , XBMCK_BACKSPACE   },
+  // Boxee Box (Netflix Button Edition)
+  { 185               , XBMCK_c           }, // Netflix button mapped to contextual menu
   // The Little Black Box Remote Additions
   { 384               , XBMCK_LEFT        }, // Red
   { 378               , XBMCK_RIGHT       }, // Green
