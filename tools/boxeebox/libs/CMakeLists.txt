@@ -137,9 +137,9 @@ ExternalProject_Add(
     libxslt
     URL               ftp://xmlsoft.org/libxslt/libxslt-1.1.28.tar.gz
     URL_MD5           9667bf6f9310b957254fdcf6596600b7
-    PATCH_COMMAND     sed -ie "s|runtest$$(EXEEXT)||" "libxslt/Makefile.in"
-	COMMAND        sed -ie "s|testrecurse$$(EXEEXT)||" "libxslt/Makefile.in"
-	COMMAND        sed -ie "s|xsltproc||" "libxslt/Makefile.in"
+    PATCH_COMMAND     sed -i bak -e "s|runtest$$(EXEEXT)||" "libxslt/Makefile.in"
+	COMMAND        sed -i bak -e "s|testrecurse$$(EXEEXT)||" "libxslt/Makefile.in"
+	COMMAND        sed -i bak -e "s|xsltproc||" "libxslt/Makefile.in"
     CONFIGURE_COMMAND ${BASIC_CONF} --without-python --with-debug --with-debugger --with-mem-debug --without-crypto --with-libxml-prefix=${TARGET_DIR}
     BUILD_COMMAND     make
     INSTALL_COMMAND   make install
@@ -164,8 +164,8 @@ ExternalProject_Add(
 	libenca
 	URL                 https://github.com/nijel/enca/archive/1.16.tar.gz
 	URL_MD5             4f39869a757e96deb372884e6f474a27
-	PATCH_COMMAND       sed -i -e "s,.(AM_V_CC).(COMPILE),cc," "tools/Makefile.in"
-	COMMAND             sed -i -e "s,.(AM_V_CCLD).(LINK),cc -o \$@," "tools/Makefile.in" VERBATIM
+	PATCH_COMMAND       sed -i bak -e "s,.(AM_V_CC).(COMPILE),cc," "tools/Makefile.in"
+	COMMAND             sed -i bak -e "s,.(AM_V_CCLD).(LINK),cc -o \$@," "tools/Makefile.in" VERBATIM
 	CONFIGURE_COMMAND   ac_cv_file__dev_random=yes ac_cv_file__dev_urandom=no ac_cv_file__dev_srandom=no ac_cv_file__dev_arandom=no ${BASIC_CONF} --disable-external --without-librecode --disable-rpath --with-gnu-ld
 	BUILD_COMMAND       make
 	BUILD_IN_SOURCE     1
@@ -186,7 +186,7 @@ ExternalProject_Add(
 	bzip2
 	URL                 http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
 	URL_MD5             00b516f4704d4a7cb50a1d97e6e8e15b
-	PATCH_COMMAND       sed -e "s,CC=gcc,CC=${TARGET}-gcc," -e "s,RANLIB=ranlib,RANLIB=${TARGET}-ranlib," -e "s,PREFIX=/usr/local,PREFIX=${TARGET_DIR},g" -i Makefile
+	PATCH_COMMAND       sed -e "s,CC=gcc,CC=${TARGET}-gcc," -e "s,RANLIB=ranlib,RANLIB=${TARGET}-ranlib," -e "s,PREFIX=/usr/local,PREFIX=${TARGET_DIR},g" -i bak Makefile
 	CONFIGURE_COMMAND   ""
 	BUILD_COMMAND       ""
 	INSTALL_COMMAND     make install
@@ -234,7 +234,7 @@ ExternalProject_Add(
 	flex
 	URL			http://sourceforge.net/projects/flex/files/flex-2.5.39.tar.bz2/download
 	URL_MD5			77d44c6bb8c0705e0017ab9a84a1502b
-	PATCH_COMMAND 		sed -e "s/AR\ =\ ar/AR\ =\ ${TARGET}-ar/g" -i Makefile.in
+	PATCH_COMMAND 		sed -e "s/AR\ =\ ar/AR\ =\ ${TARGET}-ar/g" -i bak Makefile.in
 	CONFIGURE_COMMAND	ac_cv_func_realloc_0_nonnull=yes ac_cv_func_malloc_0_nonnull=yes ${BASIC_CONF}
 	BUILD_COMMAND 		make ${PARALLEL}
 )
@@ -294,7 +294,7 @@ ExternalProject_Add(
 	taglib
 	URL 			http://taglib.github.io/releases/taglib-1.8.tar.gz
 	URL_MD5 		dcb8bd1b756f2843e18b1fdf3aaeee15
-	PATCH_COMMAND 		sed -e "54,61d" -i taglib/toolkit/taglib.h
+	PATCH_COMMAND 		sed -e "54,61d" -i bak taglib/toolkit/taglib.h
 	CONFIGURE_COMMAND	${BASIC_CMAKE}
 )
 
@@ -318,7 +318,7 @@ ExternalProject_Add(
 	libmicrohttpd
 	URL 			ftp://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.34.tar.gz
 	URL_MD5 		2947eee13c2c8affb95023a0cb6fda0c
-	PATCH_COMMAND 		sed -e "s,#ifdef LINUX,#ifdef LINUX\\n#define SOCK_NONBLOCK	O_NONBLOCK\\n#define EPOLL_CLOEXEC O_CLOEXEC," -e "s,epoll_create1,epoll_create,g" -i src/microhttpd/daemon.c
+	PATCH_COMMAND 		sed -e "s,#ifdef LINUX,#ifdef LINUX\\n#define SOCK_NONBLOCK	O_NONBLOCK\\n#define EPOLL_CLOEXEC O_CLOEXEC," -e "s,epoll_create1,epoll_create,g" -i bak src/microhttpd/daemon.c
 	CONFIGURE_COMMAND 	CFLAGS=-I{TARGET_DIR}/include LDFLAGS=-lc ac_cv_path_LIBGCRYPT_CONFIG=${SYSROOT}/usr/local/bin/ <SOURCE_DIR>/configure --prefix=${TARGET_DIR} --host=${TARGET} --disable-shared --enable-static --disable-curl --disable-https
 	DEPENDS 		libgcrypt
 )
@@ -336,8 +336,8 @@ ExternalProject_Add(
 	gdbm
 	URL 			ftp://ftp.gnu.org/gnu/gdbm/gdbm-1.11.tar.gz
 	URL_MD5 		72c832680cf0999caedbe5b265c8c1bd
-	PATCH_COMMAND		sed -e "s,finish_cmds=.*,,g" -i configure
-	   COMMAND 	        sed -e "s,-o .(BINOWN) -g .(BINGRP),,g" -i Makefile.in
+	PATCH_COMMAND		sed -e "s,finish_cmds=.*,,g" -i bak configure
+	   COMMAND 	        sed -e "s,-o .(BINOWN) -g .(BINGRP),,g" -i bak Makefile.in
 	CONFIGURE_COMMAND 	${BASIC_CONF}
 )
 
@@ -464,7 +464,7 @@ ExternalProject_Add(
 	libssh
 	URL                     http://git.libssh.org/projects/libssh.git/snapshot/libssh-0.6.3.tar.gz
 	URL_MD5                 5b0fd1dbf2effef2322f6251f6c7ca11
-	PATCH_COMMAND 		sed -e "s,add_subdirectory\(examples\),,g" -i CMakeLists.txt
+	PATCH_COMMAND 		sed -e "s,add_subdirectory\(examples\),,g" -i bak CMakeLists.txt
 	CONFIGURE_COMMAND 	${BASIC_CMAKE} -DCMAKE_INSTALL_PREFIX=${TARGET_DIR} -DWITH_STATIC_LIB=1 -DWITH_SERVER=OFF  -DWITH_GCRYPT=OFF -DCMAKE_SHARED_LINKER_FLAGS=-ldl -DCMAKE_EXE_LINKER_FLAGS=-ldl
 	BUILD_COMMAND 		""
 	INSTALL_COMMAND 	make install
@@ -520,9 +520,9 @@ ExternalProject_Add(
 	GIT_TAG                 800094802e29935e2785fb9d33c3b3a6af0ad818
 	PATCH_COMMAND           ./buildconf
 	UPDATE_COMMAND          ""
-	CONFIGURE_COMMAND 	LDFLAGS=-ldl ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn --enable-threaded-resolver
+	CONFIGURE_COMMAND 	LDFLAGS=-L${SYSROOT}/usr/local/lib LIBS=-ldl CFLAGS=-I${SYSROOT}/usr/local/include ${BASIC_CONF} --prefix=${SYSROOT}/usr/local --with-ssl --with-librtmp --disable-debug --enable-optimize --enable-warnings --disable-manual --disable-curldebug --disable-ares --enable-largefile --enable-http --enable-https --enable-file--disable-ldap --disable-ldaps --disable-rtsp --enable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gophper --enable-ipv6 --enable-versioned-symbols --enable-nonblocking --enable-verbose --disable-sspi --enable-crypto-auth --enable-cookies --enable-hidden-symbols --disable-soname-bump --with-gnu-ld --without-krb4 --without-spnego --without-gssapi --with-zlib --without-egd-socket --without-polarssl --without-nss --without-ca-path --without-libssh2 --without-libidn --with-gnutls --enable-threaded-resolver
 	BUILD_COMMAND 		make
-	DEPENDS                 openssl zlib bzip2 rtmpdump
+	DEPENDS                 openssl zlib bzip2 rtmpdump libgcrypt
 )
 
 file(WRITE ${CMAKE_BINARY_DIR}/dbus_configure_helper.sh
@@ -585,9 +585,9 @@ ExternalProject_Add(
 		COMMAND make distclean
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/Python-2.7.2-xcompile.patch
 		COMMAND patch -p1 -N < ${CMAKE_SOURCE_DIR}/Python-2.7.2-default-is-optimized.patch
-		COMMAND sed -e "13735,13738d" -i configure
-		COMMAND sed -e "185d" -i Makefile.pre.in
-		COMMAND sed -e "954,959d" -i Makefile.pre.in
+		COMMAND sed -e "13735,13738d" -i bak configure
+		COMMAND sed -e "185d" -i bak Makefile.pre.in
+		COMMAND sed -e "954,959d" -i bak Makefile.pre.in
 	CONFIGURE_COMMAND   ${CMAKE_BINARY_DIR}/python_configure_helper.sh
 		COMMAND rm -f Include/graminit.h
 		COMMAND rm -f Python/graminit.c
