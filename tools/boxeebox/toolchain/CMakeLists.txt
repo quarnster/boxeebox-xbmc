@@ -30,7 +30,7 @@ ExternalProject_Add(
 	PREFIX 				${CMAKE_BINARY_DIR}/binutils
 	URL 				http://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.bz2
 	URL_MD5 			ccd264a5fa9ed992a21427c69cba91d3
-	PATCH_COMMAND 		sed -e "6128,6135d" -i bak configure # prevents binutls from failing due to newer makeinfo
+	PATCH_COMMAND 		sed -e "6128,6135d" -i.bak configure # prevents binutls from failing due to newer makeinfo
 	CONFIGURE_COMMAND	 <SOURCE_DIR>/configure --with-sysroot=${SYSROOT} --with-lib-path=${TARGET_DIR}/lib --prefix=${TARGET_DIR} --target ${TARGET} --disable-nls --disable-werror --program-prefix=${TARGET}-
 	BUILD_COMMAND		make ${PARALLEL}
 	DEPENDS 			kernel

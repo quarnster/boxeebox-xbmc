@@ -66,7 +66,7 @@ file(WRITE ${CMAKE_BINARY_DIR}/kodi_configure_helper.sh
 "
 #!/bin/sh
 PF=`${SYSROOT}/usr/bin/${TARGET}-pkg-config --libs python`
-export LDFLAGS=\"-L${local}/lib -lgcc -lm -ltinyxml -lgdl -lismd_core -lismd_viddec -lismd_vidpproc -lismd_audio -lismd_vidrend -lismd_demux -lismd_bufmon -losal -lplatform_config -Wl,-rpath=${SYSROOT}/usr/local/lib -Wl,-rpath=${SYSROOT}/lib -Wl,-rpath=${SYSROOT}/usr/lib\"
+export LDFLAGS=\"-L${local}/lib -lgcc -lm -ltinyxml -lgdl -liconv -lismd_core -lismd_viddec -lismd_vidpproc -lismd_audio -lismd_vidrend -lismd_demux -lismd_bufmon -losal -lplatform_config -Wl,-rpath=${SYSROOT}/usr/local/lib -Wl,-rpath=${SYSROOT}/lib -Wl,-rpath=${SYSROOT}/usr/lib\"
 export CFLAGS=\"-DTARGET_BOXEE=1 -DTIXML_USE_STL -mmmx -msse -msse2 -msse3 -I${local}/include -DHAS_INTEL_SMD -march=i686 -m32\"
 export CXXFLAGS=\"$CFLAGS\"
 export FREETYPE2_CFLAGS=\"-I${local}/include/freetype2\"
@@ -75,7 +75,8 @@ export PYTHON_NOVERSIONCHECK=\"y\"
 export PYTHON=\"${local}/bin/python\"
 export PYTHON_CPPFLAGS=\"-I${local}/include/python2.7\"
 export PYTHON_LDFLAGS=\"\$PF -ldl -lpthread -lutil\"
-${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --build=i686-linux --with-ffmpeg --disable-gl --disable-pulse --disable-sdl ${MYSQL_CONF_PARAM} --disable-x11 --with-platform=linux32 --enable-gles --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=no --enable-libusb --with-lirc-device=/var/run/lirc/lircd --disable-sdl --enable-airplay
+export MYSQL_CONFIG=\"${local}/bin/mysql_config\"
+${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/../../ ./configure --prefix=${local} --host=${TARGET} --build=i686-linux --with-ffmpeg=shared --disable-gl --disable-pulse --disable-sdl ${MYSQL_CONF_PARAM} --disable-x11 --with-platform=linux32 --enable-gles --disable-joystick --enable-debug --enable-texturepacker --enable-nfs --enable-rtmp --enable-libcec=no --enable-libusb --with-lirc-device=/var/run/lirc/lircd --disable-sdl --enable-airplay --enable-debug=no
 "
 )
 execute_process(COMMAND chmod +x ${CMAKE_BINARY_DIR}/kodi_configure_helper.sh)
@@ -103,7 +104,7 @@ set(libs
 	airport.key
 	libafpclient.so.0
 	libao.so
-	libass.so.5
+	libass.so.4
 	libavahi-client.so.3
 	libavahi-common.so.3
 	libavahi-core.so.7
@@ -113,7 +114,6 @@ set(libs
 	libcrypto.so.1.0.0
 	libcurl.so.4
 	libdbus-1.so
-	libenca.so.0
 	libexpat.so
 	libffi.so.6
 	libFLAC.so
@@ -129,7 +129,6 @@ set(libs
 	libmpeg2.so.0
 	libnfs.so.4
 	libogg.so
-	libpcre.so.1
 	libplist.so.3
 	libpng15.so.15
 	libpython2.7.so.1.0
@@ -139,7 +138,6 @@ set(libs
 	libsmbclient.so.0
 	libssh.so.4
 	libssl.so.1.0.0
-	libtag.so.1
 	libtalloc.so.2
 	libtdb.so.1
 	libtevent.so.0
@@ -150,6 +148,20 @@ set(libs
 	libxml2.so
 	libxslt.so
 	libyajl.so.2
+	libavcodec.so.56
+	libavdevice.so.56
+	libavfilter.so.5
+	libavformat.so.56
+	libpostproc.so.53
+	libavutil.so.54
+	libswresample.so.1
+	libswscale.so.3
+	libgmp.so.10
+	libgnutls.so.28
+	libgnutls-openssl.so.27
+	libhogweed.so.2
+	libnettle.so.4
+	libiconv.so.2
 )
 
 foreach(lib ${libs})
@@ -270,7 +282,7 @@ add_custom_target(
 pvr
 cd ${CMAKE_SOURCE_DIR}
 COMMAND rm -rf ${CMAKE_SOURCE_DIR}/../../pvr-addons
-COMMAND git clone https://github.com/opdenkamp/xbmc-pvr-addons.git
+COMMAND git clone https://github.com/opdenkamp/xbmc-pvr-addons.git -b helix
 COMMAND  ${CMAKE_COMMAND} -E copy  ${CMAKE_SOURCE_DIR}/pvr-addons.patch ${CMAKE_SOURCE_DIR}/build/xbmc-pvr-addons
 COMMAND patch -p1 < ${CMAKE_SOURCE_DIR}/build/xbmc-pvr-addons/pvr-addons.patch
 COMMAND mv  ${CMAKE_SOURCE_DIR}/build/xbmc-pvr-addons ${CMAKE_SOURCE_DIR}/../../pvr-addons
