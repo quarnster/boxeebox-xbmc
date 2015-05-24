@@ -148,6 +148,19 @@ set(libs
 	libxml2.so
 	libxslt.so
 	libyajl.so.2
+	libavcodec.so.56
+	libavdevice.so.56
+	libavfilter.so.5
+	libavformat.so.56
+	libpostproc.so.53
+	libavutil.so.54
+	libswresample.so.1
+	libswscale.so.3
+	libgmp.so.10
+	libgnutls.so.28
+	libgnutls-openssl.so.27
+	libhogweed.so.2
+	libnettle.so.4
 	libiconv.so.2
 )
 
